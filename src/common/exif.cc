@@ -1030,9 +1030,10 @@ static bool _exif_decode_exif_data(dt_image_t *img, Exiv2::ExifData &exifData)
 
     /* Read lens name */
     if((FIND_EXIF_TAG("Exif.CanonCs.LensType")
-        && pos->print(&exifData) != "(0)"
-        && pos->print(&exifData) != "(65535)")
-       || FIND_EXIF_TAG("Exif.Canon.0x0095"))
+        && pos->toLong() != 61182   // prefer the other tag for RF lenses
+        && pos->toLong() != 0
+        && pos->toLong() != 65535)
+       || FIND_EXIF_TAG("Exif.Canon.LensModel"))
     {
       dt_strlcpy_to_utf8(img->exif_lens, sizeof(img->exif_lens), pos, exifData);
     }
@@ -1080,6 +1081,14 @@ static bool _exif_decode_exif_data(dt_image_t *img, Exiv2::ExifData &exifData)
     else if((pos = Exiv2::lensName(exifData)) != exifData.end() && pos->size())
     {
       dt_strlcpy_to_utf8(img->exif_lens, sizeof(img->exif_lens), pos, exifData);
+    }
+
+    /* Use pretty name for Canon RF lenses (as exiftool/exiv2/lensfun) */
+    if(g_str_has_prefix(img->exif_lens, "RF"))
+    {
+      char *pretty = g_strconcat("Canon RF ", &img->exif_lens[2], (char *)NULL);
+      g_strlcpy(img->exif_lens, pretty, sizeof(img->exif_lens));
+      g_free(pretty);
     }
 
     /* Capitalize Nikon Z-mount lenses properly for UI presentation */
@@ -1938,7 +1947,6 @@ int dt_exif_read_blob(uint8_t **buf, const char *path, const int imgid, const in
       {
         const int rating = GPOINTER_TO_INT(res->data) + 1;
         exifData["Exif.Image.Rating"] = rating;
-        exifData["Exif.Image.RatingPercent"] = int(rating / 5. * 100.);
         g_list_free(res);
       }
 

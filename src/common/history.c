@@ -806,7 +806,7 @@ int dt_history_copy_and_paste_on_image(const int32_t imgid, const int32_t dest_i
   dt_image_update_final_size(imgid);
 
   /* update the aspect ratio. recompute only if really needed for performance reasons */
-  if(darktable.collection->params.sort == DT_COLLECTION_SORT_ASPECT_RATIO)
+  if(darktable.collection->params.sorts[DT_COLLECTION_SORT_ASPECT_RATIO])
     dt_image_set_aspect_ratio(dest_imgid, FALSE);
   else
     dt_image_reset_aspect_ratio(dest_imgid, FALSE);
@@ -911,18 +911,6 @@ char *dt_history_get_items_as_string(const int32_t imgid)
   char *result = dt_util_glist_to_str("\n", items);
   g_list_free_full(items, g_free);
   return result;
-}
-
-void dt_history_set_compress_problem(const int32_t imgid, const gboolean set)
-{
-  guint tagid = 0;
-  char tagname[64];
-  snprintf(tagname, sizeof(tagname), "darktable|problem|history-compress");
-  dt_tag_new(tagname, &tagid);
-  if (set)
-    dt_tag_attach(tagid, imgid, FALSE, FALSE);
-  else
-    dt_tag_detach(tagid, imgid, FALSE, FALSE);
 }
 
 static int dt_history_end_attop(const int32_t imgid)
@@ -1170,9 +1158,8 @@ int dt_history_compress_on_list(const GList *imgs)
     const int imgid = GPOINTER_TO_INT(l->data);
     dt_lock_image(imgid);
     const int test = dt_history_end_attop(imgid);
-    if (test == 1) // we do a compression and we know for sure history_end is at the top!
+    if(test == 1) // we do a compression and we know for sure history_end is at the top!
     {
-      dt_history_set_compress_problem(imgid, FALSE);
       dt_history_compress_on_image(imgid);
 
       // now the modules are in right order but need renumbering to remove leaks
@@ -1234,13 +1221,8 @@ int dt_history_compress_on_list(const GList *imgs)
 
       dt_image_write_sidecar_file(imgid);
     }
-    if (test == 0) // no compression as history_end is right in the middle of history
-    {
+    if(test == 0) // no compression as history_end is right in the middle of history
       uncompressed++;
-      dt_history_set_compress_problem(imgid, TRUE);
-    }
-    if (test == -1)
-      dt_history_set_compress_problem(imgid, FALSE);
 
     dt_unlock_image(imgid);
     dt_history_hash_write_from_history(imgid, DT_HISTORY_HASH_CURRENT);
@@ -1812,7 +1794,7 @@ gboolean dt_history_delete_on_list(const GList *list, gboolean undo)
 
     /* update the aspect ratio if the current sorting is based on aspect ratio, otherwise the aspect ratio will be
        recalculated when the mimpap will be recreated */
-    if(darktable.collection->params.sort == DT_COLLECTION_SORT_ASPECT_RATIO)
+    if(darktable.collection->params.sorts[DT_COLLECTION_SORT_ASPECT_RATIO])
       dt_image_set_aspect_ratio(imgid, FALSE);
   }
 

@@ -158,7 +158,7 @@ static int32_t _generic_dt_control_fileop_images_job_run(dt_job_t *job,
   {
     char collect[1024];
     snprintf(collect, sizeof(collect), "1:0:0:%s$", new_film.dirname);
-    dt_collection_deserialize(collect);
+    dt_collection_deserialize(collect, FALSE);
   }
   dt_film_remove_empty();
   DT_DEBUG_CONTROL_SIGNAL_RAISE(darktable.signals, DT_SIGNAL_FILMROLLS_CHANGED);
@@ -1800,7 +1800,7 @@ void dt_control_reset_local_copy_images()
 void dt_control_refresh_exif()
 {
   dt_control_add_job(darktable.control, DT_JOB_QUEUE_USER_FG,
-                     dt_control_generic_images_job_create(&dt_control_refresh_exif_run, N_("refresh exif"), 0,
+                     dt_control_generic_images_job_create(&dt_control_refresh_exif_run, N_("refresh EXIF"), 0,
                                                           NULL, PROGRESS_CANCELLABLE, FALSE));
 }
 

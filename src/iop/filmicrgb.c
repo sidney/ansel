@@ -346,7 +346,7 @@ const char *aliases()
   return _("tone mapping|curve|view transform|contrast|saturation|highlights");
 }
 
-const char *description(struct dt_iop_module_t *self)
+const char **description(struct dt_iop_module_t *self)
 {
   return dt_iop_set_description(self, _("apply a view transform to prepare the scene-referred pipeline\n"
                                         "for display on SDR screens and paper prints\n"
@@ -1758,11 +1758,15 @@ static inline void filmic_chroma_v4(const float *const restrict in, float *const
 
   const int use_output_profile = filmic_v4_prepare_matrices(input_matrix, output_matrix, export_input_matrix,
                                                             export_output_matrix, work_profile, export_profile);
+
+  const float norm_min = exp_tonemapping_v2(0.f, data->grey_source, data->black_source, data->dynamic_range);
+  const float norm_max = exp_tonemapping_v2(1.f, data->grey_source, data->black_source, data->dynamic_range);
+
 #ifdef _OPENMP
 #pragma omp parallel for default(none)                                                                       \
     dt_omp_firstprivate(width, height, ch, data, in, out, work_profile, input_matrix, output_matrix, \
     variant, spline, display_white, display_black, export_input_matrix, export_output_matrix, \
-    use_output_profile)    \
+    use_output_profile, norm_min, norm_max)    \
     schedule(simd :static)
 #endif
   for(size_t k = 0; k < height * width * ch; k += ch)
@@ -1770,7 +1774,11 @@ static inline void filmic_chroma_v4(const float *const restrict in, float *const
     const float *const restrict pix_in = in + k;
     float *const restrict pix_out = out + k;
 
-    float norm = fmaxf(get_pixel_norm(pix_in, variant, work_profile), NORM_MIN);
+    // Norm must be clamped early to the valid input range, otherwise it will be clamped
+    // later in log_tonemapping_v2 and the ratios will be then incorrect.
+    // This would result in colorful patches darker than their surrounding in places
+    // where the raw data is clipped.
+    float norm = CLAMPF(get_pixel_norm(pix_in, variant, work_profile), norm_min, norm_max);
 
     // Save the ratios
     dt_aligned_pixel_t ratios = { 0.0f };
@@ -2154,15 +2162,18 @@ static inline cl_int reconstruct_highlights_cl(cl_mem in, cl_mem mask, cl_mem re
     if(err != CL_SUCCESS) goto error;
 
     // Compute wavelets high-frequency scales and backup the maximum of texture over the RGB channels
-    // Note : HF_RGB = detail - LF, HF_grey = HF_RGB
+    // Note : HF_RGB = detail - LF
     dt_opencl_set_kernel_arg(devid, gd->kernel_filmic_wavelets_detail, 0, sizeof(cl_mem), (void *)&detail);
     dt_opencl_set_kernel_arg(devid, gd->kernel_filmic_wavelets_detail, 1, sizeof(cl_mem), (void *)&LF);
     dt_opencl_set_kernel_arg(devid, gd->kernel_filmic_wavelets_detail, 2, sizeof(cl_mem), (void *)&HF_RGB);
-    dt_opencl_set_kernel_arg(devid, gd->kernel_filmic_wavelets_detail, 3, sizeof(cl_mem), (void *)&HF_grey);
-    dt_opencl_set_kernel_arg(devid, gd->kernel_filmic_wavelets_detail, 4, sizeof(int), (void *)&width);
-    dt_opencl_set_kernel_arg(devid, gd->kernel_filmic_wavelets_detail, 5, sizeof(int), (void *)&height);
-    dt_opencl_set_kernel_arg(devid, gd->kernel_filmic_wavelets_detail, 6, sizeof(int), (void *)&variant);
+    dt_opencl_set_kernel_arg(devid, gd->kernel_filmic_wavelets_detail, 3, sizeof(int), (void *)&width);
+    dt_opencl_set_kernel_arg(devid, gd->kernel_filmic_wavelets_detail, 4, sizeof(int), (void *)&height);
     err = dt_opencl_enqueue_kernel_2d(devid, gd->kernel_filmic_wavelets_detail, sizes);
+    if(err != CL_SUCCESS) goto error;
+
+    // Take a backup copy of HF_RGB in HF_grey - only HF_RGB will be blurred
+    size_t origin[] = { 0, 0, 0 };
+    err = dt_opencl_enqueue_copy_image(devid, HF_RGB, HF_grey, origin, origin, sizes);
     if(err != CL_SUCCESS) goto error;
 
     // interpolate/blur/inpaint (same thing) the RGB high-frequency to fill holes
@@ -2254,6 +2265,9 @@ int process_cl(struct dt_iop_module_t *self, dt_dev_pixelpipe_iop_t *piece, cl_m
 
   const int use_output_profile = filmic_v4_prepare_matrices(input_matrix, output_matrix, export_input_matrix,
                                                             export_output_matrix, work_profile, export_profile);
+
+  const float norm_min = exp_tonemapping_v2(0.f, d->grey_source, d->black_source, d->dynamic_range);
+  const float norm_max = exp_tonemapping_v2(1.f, d->grey_source, d->black_source, d->dynamic_range);
 
   cl_mem input_matrix_cl = dt_opencl_copy_host_to_device_constant(devid, 12 * sizeof(float), input_matrix);
   cl_mem output_matrix_cl = dt_opencl_copy_host_to_device_constant(devid, 12 * sizeof(float), output_matrix);
@@ -2464,6 +2478,8 @@ int process_cl(struct dt_iop_module_t *self, dt_dev_pixelpipe_iop_t *piece, cl_m
     dt_opencl_set_kernel_arg(devid, gd->kernel_filmic_rgb_chroma, 29, sizeof(int), (void *)&use_output_profile);
     dt_opencl_set_kernel_arg(devid, gd->kernel_filmic_rgb_chroma, 30, sizeof(cl_mem), (void *)&export_input_matrix_cl);
     dt_opencl_set_kernel_arg(devid, gd->kernel_filmic_rgb_chroma, 31, sizeof(cl_mem), (void *)&export_output_matrix_cl);
+    dt_opencl_set_kernel_arg(devid, gd->kernel_filmic_rgb_chroma, 32, sizeof(float), (void *)&norm_min);
+    dt_opencl_set_kernel_arg(devid, gd->kernel_filmic_rgb_chroma, 33, sizeof(float), (void *)&norm_max);
 
     err = dt_opencl_enqueue_kernel_2d(devid, gd->kernel_filmic_rgb_chroma, sizes);
     if(err != CL_SUCCESS) goto error;
@@ -2632,18 +2648,16 @@ void color_picker_apply(dt_iop_module_t *self, GtkWidget *picker, dt_dev_pixelpi
     apply_autotune(self);
 }
 
-static void show_mask_callback(GtkWidget *slider, gpointer user_data)
+static void show_mask_callback(GtkToggleButton *button, GdkEventButton *event, gpointer user_data)
 {
   dt_iop_module_t *self = (dt_iop_module_t *)user_data;
   if(darktable.gui->reset) return;
   gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(self->off), TRUE);
   dt_iop_filmicrgb_gui_data_t *g = (dt_iop_filmicrgb_gui_data_t *)self->gui_data;
   g->show_mask = !(g->show_mask);
-  dt_bauhaus_widget_set_quad_active(g->show_highlight_mask, g->show_mask);
-  dt_bauhaus_widget_set_quad_toggle(g->show_highlight_mask, g->show_mask);
+  gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(g->show_highlight_mask), !g->show_mask);
   dt_dev_reprocess_center(self->dev);
 }
-
 
 #define ORDER_4 5
 #define ORDER_3 4
@@ -3030,8 +3044,7 @@ void gui_focus(struct dt_iop_module_t *self, gboolean in)
     // lost focus - hide the mask
     gint mask_was_shown = g->show_mask;
     g->show_mask = FALSE;
-    dt_bauhaus_widget_set_quad_toggle(g->show_highlight_mask, FALSE);
-    dt_bauhaus_widget_set_quad_active(g->show_highlight_mask, FALSE);
+    gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(g->show_highlight_mask), FALSE);
     if(mask_was_shown) dt_dev_reprocess_center(self->dev);
   }
 }
@@ -3109,13 +3122,15 @@ void init_global(dt_iop_module_so_t *module)
   gd->kernel_filmic_mask = dt_opencl_create_kernel(program, "filmic_mask_clipped_pixels");
   gd->kernel_filmic_show_mask = dt_opencl_create_kernel(program, "filmic_show_mask");
   gd->kernel_filmic_inpaint_noise = dt_opencl_create_kernel(program, "filmic_inpaint_noise");
-  gd->kernel_filmic_bspline_vertical = dt_opencl_create_kernel(program, "blur_2D_Bspline_vertical");
-  gd->kernel_filmic_bspline_horizontal = dt_opencl_create_kernel(program, "blur_2D_Bspline_horizontal");
   gd->kernel_filmic_init_reconstruct = dt_opencl_create_kernel(program, "init_reconstruct");
-  gd->kernel_filmic_wavelets_detail = dt_opencl_create_kernel(program, "wavelets_detail_level");
   gd->kernel_filmic_wavelets_reconstruct = dt_opencl_create_kernel(program, "wavelets_reconstruct");
   gd->kernel_filmic_compute_ratios = dt_opencl_create_kernel(program, "compute_ratios");
   gd->kernel_filmic_restore_ratios = dt_opencl_create_kernel(program, "restore_ratios");
+
+  const int wavelets = 35; // bspline.cl, from programs.conf
+  gd->kernel_filmic_bspline_horizontal = dt_opencl_create_kernel(wavelets, "blur_2D_Bspline_horizontal");
+  gd->kernel_filmic_bspline_vertical = dt_opencl_create_kernel(wavelets, "blur_2D_Bspline_vertical");
+  gd->kernel_filmic_wavelets_detail = dt_opencl_create_kernel(wavelets, "wavelets_detail_level");
 }
 
 void cleanup_global(dt_iop_module_so_t *module)
@@ -3207,8 +3222,7 @@ void filmic_gui_draw_icon(cairo_t *cr, struct dt_iop_filmicrgb_gui_button_data_t
 
   const float scale = 0.85;
   cairo_scale(cr, scale, scale);
-  button->icon(cr, -scale * button->w / 2., -scale * button->h / 2., scale * button->w, scale * button->h,
-               CPF_STYLE_FLAT | CPF_DO_NOT_USE_BORDER, NULL);
+  button->icon(cr, -scale * button->w / 2., -scale * button->h / 2., scale * button->w, scale * button->h, 0, NULL);
   cairo_restore(cr);
 }
 
@@ -4338,22 +4352,24 @@ void gui_init(dt_iop_module_t *self)
                                                     "useful to give a safety margin to extreme luminances."));
 
   // Auto tune slider
-  g->auto_button = dt_color_picker_new(self, DT_COLOR_PICKER_AREA, dt_bauhaus_combobox_new(self));
-  dt_bauhaus_widget_set_label(g->auto_button, NULL, N_("auto tune levels"));
+  GtkWidget *hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
+  gtk_box_pack_start(GTK_BOX(hbox), dt_ui_label_new(_("auto tune levels")), TRUE, TRUE, 0);
+  g->auto_button = dt_color_picker_new(self, DT_COLOR_PICKER_AREA, NULL);
+  gtk_box_pack_start(GTK_BOX(hbox), g->auto_button, FALSE, FALSE, 0);
+  dt_action_define_iop(self, NULL, N_("auto tune levels"), GTK_WIDGET(g->auto_button), &dt_action_def_button);
+  dt_gui_add_class(g->auto_button, "dt_bauhaus_alignment");
   gtk_widget_set_tooltip_text(g->auto_button, _("try to optimize the settings with some statistical assumptions.\n"
                                                 "this will fit the luminance range inside the histogram bounds.\n"
                                                 "works better for landscapes and evenly-lit pictures\n"
                                                 "but fails for high-keys, low-keys and high-ISO pictures.\n"
                                                 "this is not an artificial intelligence, but a simple guess.\n"
                                                 "ensure you understand its assumptions before using it."));
-  gtk_box_pack_start(GTK_BOX(self->widget), g->auto_button, FALSE, FALSE, 0);
+  gtk_box_pack_start(GTK_BOX(self->widget), hbox, FALSE, FALSE, 0);
 
   // Page RECONSTRUCT
   self->widget = dt_ui_notebook_page(g->notebook, N_("reconstruct"), NULL);
 
   GtkWidget *label = dt_ui_section_label_new(_("highlights clipping"));
-  GtkStyleContext *context = gtk_widget_get_style_context(GTK_WIDGET(label));
-  gtk_style_context_add_class(context, "section_label_top");
   gtk_box_pack_start(GTK_BOX(self->widget), label, FALSE, FALSE, 0);
 
   g->reconstruct_threshold = dt_bauhaus_slider_from_params(self, "reconstruct_threshold");
@@ -4374,13 +4390,14 @@ void gui_init(dt_iop_module_t *self)
                                 "increase to make the transition softer and blurrier."));
 
   // Highlight Reconstruction Mask
-  g->show_highlight_mask = dt_bauhaus_combobox_new(self);
-  dt_bauhaus_widget_set_label(g->show_highlight_mask, NULL, N_("display highlight reconstruction mask"));
-  dt_bauhaus_widget_set_quad_paint(g->show_highlight_mask, dtgtk_cairo_paint_showmask,
-                                   CPF_STYLE_FLAT | CPF_DO_NOT_USE_BORDER, NULL);
-  dt_bauhaus_widget_set_quad_toggle(g->show_highlight_mask, TRUE);
-  g_signal_connect(G_OBJECT(g->show_highlight_mask), "quad-pressed", G_CALLBACK(show_mask_callback), self);
-  gtk_box_pack_start(GTK_BOX(self->widget), g->show_highlight_mask, FALSE, FALSE, 0);
+  hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
+  gtk_box_pack_start(GTK_BOX(hbox), dt_ui_label_new(_("display highlight reconstruction mask")), TRUE, TRUE, 0);
+  g->show_highlight_mask = dt_iop_togglebutton_new(self, NULL, N_("display highlight reconstruction mask"), NULL, G_CALLBACK(show_mask_callback),
+                                           FALSE, 0, 0, dtgtk_cairo_paint_showmask, hbox);
+  dtgtk_togglebutton_set_paint(DTGTK_TOGGLEBUTTON(g->show_highlight_mask), dtgtk_cairo_paint_showmask, 0, NULL);
+  dt_gui_add_class(g->show_highlight_mask, "dt_bauhaus_alignment");
+  dt_gui_add_class(g->show_highlight_mask, "dt_transparent_background");
+  gtk_box_pack_start(GTK_BOX(self->widget), hbox, FALSE, FALSE, 0);
 
   label = dt_ui_section_label_new(_("balance"));
   gtk_box_pack_start(GTK_BOX(self->widget), label, FALSE, FALSE, 0);

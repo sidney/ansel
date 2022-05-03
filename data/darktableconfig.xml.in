@@ -232,20 +232,6 @@
     <longdescription>if enabled, cached thumbnails will be color managed so that lighttable and filmstrip can show correct colors. otherwise the results may look wrong once the display profile gets changed.</longdescription>
   </dtconfig>
   <dtconfig>
-    <name>opencl_number_event_handles</name>
-    <type>int</type>
-    <default>25</default>
-    <shortdescription>the number of OpenCL event handles darktable can use</shortdescription>
-    <longdescription>a positive non-zero integer defines the number of event handles that darktable may have opened on a device. a value of -1 does not pose any restrictions, bearing the risk of hitting the device's resource limits. a value of zero completely prevents the use of event handles.</longdescription>
-  </dtconfig>
-  <dtconfig>
-    <name>opencl_async_pixelpipe</name>
-    <type>bool</type>
-    <default>false</default>
-    <shortdescription>run OpenCL pixelpipe asynchronously</shortdescription>
-    <longdescription>if set to TRUE OpenCL pixelpipe will not be synchronized on a per-module basis. this can improve pixelpipe latency. however, potential OpenCL errors would be detected late; in such a case the complete pixelpipe needs to be reprocessed instead of only a single module. export pixelpipe will always be run synchronously.</longdescription>
-  </dtconfig>
-  <dtconfig>
     <name>opencl_device_priority</name>
     <type>string</type>
     <default>*/!0,*/*/*/!0,*</default>
@@ -258,20 +244,6 @@
     <default>400</default>
     <shortdescription>timeout period for locking mandatory opencl device</shortdescription>
     <longdescription>time period (in units of 5ms) after which we give up try-locking an opencl device for mandatory use. defaults to 400 (2 seconds).</longdescription>
-  </dtconfig>
-  <dtconfig>
-    <name>opencl_use_cpu_devices</name>
-    <type>bool</type>
-    <default>false</default>
-    <shortdescription>whether to make use of CPU OpenCL devices</shortdescription>
-    <longdescription>typically darktable's hand-optimized CPU code is much faster than any OpenCL-on-CPU code; therefore CPUs are excluded from being used as OpenCL devices by default. can be changed by setting this configuration option to TRUE (needs a restart).</longdescription>
-  </dtconfig>
-  <dtconfig>
-    <name>opencl_disable_drivers_blacklist</name>
-    <type>bool</type>
-    <default>false</default>
-    <shortdescription>whether to allow some partial opencl implementations to be used or not</shortdescription>
-    <longdescription>not all opencl implementations are fully-functional, there are at least two, which are not production-quality yet: pocl and beignet; therefore at this point in time, it is better to explicitly blacklist them by default. can be changed by setting this configuration option to TRUE (needs a restart).</longdescription>
   </dtconfig>
   <dtconfig>
     <name>opencl_checksum</name>
@@ -360,11 +332,18 @@
     <longdescription>defines how preview and full pixelpipe tasks are scheduled on OpenCL enabled systems. default - GPU processes full and CPU processes preview pipe (adaptable by config parameters); multiple GPUs - process both pixelpipes in parallel on two different GPUs; very fast GPU - process both pixelpipes sequentially on the GPU.</longdescription>
   </dtconfig>
   <dtconfig prefs="processing" section="cpugpu" capability="opencl">
-    <name>tuneopencl</name>
-    <type>bool</type>
-    <default>false</default>
+    <name>opencl_tuning_mode</name>
+    <type>
+      <enum>
+        <option>nothing</option>
+        <option>memory size</option>
+        <option>memory transfer</option>
+        <option>memory size and transfer</option>
+      </enum>
+    </type>
+    <default>nothing</default>
     <shortdescription>tune OpenCL performance</shortdescription>
-    <longdescription>if switched on, darktable tunes OpenCL for best performance, overrides static settings</longdescription>
+    <longdescription>allows runtime tuning of OpenCL devices. 'memory size' tests for available graphics ram, 'memory transfer' tries a faster memory access mode (pinned memory) used for tiling.</longdescription>
   </dtconfig>
   <dtconfig>
     <name>opencl_synch_cache</name>
@@ -386,26 +365,12 @@
     <shortdescription>system library with OpenCL runtime</shortdescription>
     <longdescription>OpenCL runtime library is normally detected automatically by darktable. if your OpenCL runtime is at an unusual place and cannot be detected, enter the full pathname here. leave empty for default behavior.</longdescription>
   </dtconfig>
-  <dtconfig>
-    <name>opencl_memory_requirement</name>
-    <type>int</type>
-    <default>768</default>
-    <shortdescription>minimum amount of GPU memory (MB) required to activate OpenCL</shortdescription>
-    <longdescription>OpenCL will only be activated if your graphics card has at least this amount of memory. reducing the value will allow cards with less GPU memory to be used - but at the risk of lower system stability and occasional crashes. values below 200 will be treated as 200.</longdescription>
-  </dtconfig>
-  <dtconfig>
-    <name>opencl_size_roundup</name>
-    <type>int</type>
-    <default>16</default>
-    <shortdescription>round OpenCL work group sizes to a multiple of</shortdescription>
-    <longdescription>in OpenCL processing round width/height of global work groups to a multiple of this value. reasonable values are powers of 2. this parameter can have high impact on OpenCL performance.</longdescription>
-  </dtconfig>
   <dtconfig prefs="security" section="general">
     <name>ask_before_remove</name>
     <type>bool</type>
     <default>true</default>
     <shortdescription>ask before removing images from the library</shortdescription>
-    <longdescription>always ask the user before any image is removed from the library</longdescription>
+    <longdescription>always ask the user before removing image information from the library</longdescription>
   </dtconfig>
   <dtconfig prefs="security" section="general">
     <name>ask_before_delete</name>
@@ -449,12 +414,152 @@
     <shortdescription>ask before removing empty folders</shortdescription>
     <longdescription>always ask the user before removing any empty folder. this can happen after moving or deleting images.</longdescription>
   </dtconfig>
-  <dtconfig dialog="recentcollect">
-    <name>plugins/lighttable/recentcollect/max_items</name>
+  <dtconfig dialog="collect">
+    <name>plugins/lighttable/collect/history_max</name>
     <type min="1" max="50">int</type>
     <default>10</default>
     <shortdescription>number of collections to be stored</shortdescription>
     <longdescription>the number of recent collections to store and show in this list</longdescription>
+  </dtconfig>
+  <dtconfig>
+    <name>plugins/lighttable/filtering/history_max</name>
+    <type min="1" max="50">int</type>
+    <default>10</default>
+    <shortdescription>number of filters to be stored</shortdescription>
+    <longdescription>the number of recent filters to store and show in history list</longdescription>
+  </dtconfig>
+  <dtconfig>
+    <name>plugins/lighttable/filtering/sort_history_max</name>
+    <type min="1" max="50">int</type>
+    <default>10</default>
+    <shortdescription>number of sort orders to be stored</shortdescription>
+    <longdescription>the number of recent sort orders to store and show in history list</longdescription>
+  </dtconfig>
+  <dtconfig>
+    <name>plugins/lighttable/filtering/num_sort</name>
+    <type>int</type>
+    <default>1</default>
+    <shortdescription>nb of sort orders by default</shortdescription>
+    <longdescription></longdescription>
+  </dtconfig>
+  <dtconfig>
+    <name>plugins/lighttable/filtering/sort0</name>
+    <type>int</type>
+    <default>0</default>
+    <shortdescription>first sort orders</shortdescription>
+    <longdescription></longdescription>
+  </dtconfig>
+  <dtconfig>
+    <name>plugins/lighttable/filtering/num_rules</name>
+    <type>int</type>
+    <default>3</default>
+    <shortdescription>nb of rules by default</shortdescription>
+    <longdescription></longdescription>
+  </dtconfig>
+  <dtconfig>
+    <name>plugins/lighttable/filtering/item0</name>
+    <type>int</type>
+    <default>32</default>
+    <shortdescription>first filter</shortdescription>
+    <longdescription></longdescription>
+  </dtconfig>
+  <dtconfig>
+    <name>plugins/lighttable/filtering/mode0</name>
+    <type>int</type>
+    <default>0</default>
+    <shortdescription>first filter</shortdescription>
+    <longdescription></longdescription>
+  </dtconfig>
+  <dtconfig>
+    <name>plugins/lighttable/filtering/off0</name>
+    <type>int</type>
+    <default>0</default>
+    <shortdescription>first filter</shortdescription>
+    <longdescription></longdescription>
+  </dtconfig>
+  <dtconfig>
+    <name>plugins/lighttable/filtering/top0</name>
+    <type>int</type>
+    <default>1</default>
+    <shortdescription>first filter</shortdescription>
+    <longdescription></longdescription>
+  </dtconfig>
+  <dtconfig>
+    <name>plugins/lighttable/filtering/string0</name>
+    <type>string</type>
+    <default>%</default>
+    <shortdescription>first filter</shortdescription>
+    <longdescription></longdescription>
+  </dtconfig>
+  <dtconfig>
+    <name>plugins/lighttable/filtering/item1</name>
+    <type>int</type>
+    <default>18</default>
+    <shortdescription>second filter</shortdescription>
+    <longdescription></longdescription>
+  </dtconfig>
+  <dtconfig>
+    <name>plugins/lighttable/filtering/mode1</name>
+    <type>int</type>
+    <default>0</default>
+    <shortdescription>second filter</shortdescription>
+    <longdescription></longdescription>
+  </dtconfig>
+  <dtconfig>
+    <name>plugins/lighttable/filtering/off1</name>
+    <type>int</type>
+    <default>0</default>
+    <shortdescription>second filter</shortdescription>
+    <longdescription></longdescription>
+  </dtconfig>
+  <dtconfig>
+    <name>plugins/lighttable/filtering/top1</name>
+    <type>int</type>
+    <default>1</default>
+    <shortdescription>second filter</shortdescription>
+    <longdescription></longdescription>
+  </dtconfig>
+  <dtconfig>
+    <name>plugins/lighttable/filtering/string1</name>
+    <type>string</type>
+    <default></default>
+    <shortdescription>second filter</shortdescription>
+    <longdescription></longdescription>
+  </dtconfig>
+  <dtconfig>
+    <name>plugins/lighttable/filtering/item2</name>
+    <type>int</type>
+    <default>33</default>
+    <shortdescription>third filter</shortdescription>
+    <longdescription></longdescription>
+  </dtconfig>
+  <dtconfig>
+    <name>plugins/lighttable/filtering/mode2</name>
+    <type>int</type>
+    <default>0</default>
+    <shortdescription>third filter</shortdescription>
+    <longdescription></longdescription>
+  </dtconfig>
+  <dtconfig>
+    <name>plugins/lighttable/filtering/off2</name>
+    <type>int</type>
+    <default>0</default>
+    <shortdescription>third filter</shortdescription>
+    <longdescription></longdescription>
+  </dtconfig>
+  <dtconfig>
+    <name>plugins/lighttable/filtering/top2</name>
+    <type>int</type>
+    <default>1</default>
+    <shortdescription>third filter</shortdescription>
+    <longdescription></longdescription>
+  </dtconfig>
+  <dtconfig>
+    <name>plugins/lighttable/filtering/string2</name>
+    <type>string</type>
+    <default>%%</default>
+    <shortdescription>third filter</shortdescription>
+    <longdescription></longdescription>
   </dtconfig>
   <dtconfig dialog="collect">
     <name>show_folder_levels</name>
@@ -914,8 +1019,8 @@
     <name>ui_last/ignore_exif_rating</name>
     <type>bool</type>
     <default>false</default>
-    <shortdescription>ignore exif rating</shortdescription>
-    <longdescription>ignore exif rating. if not set and exif rating is found, it overrides 'initial rating'</longdescription>
+    <shortdescription>ignore EXIF rating</shortdescription>
+    <longdescription>ignore EXIF rating. if not set and EXIF rating is found, it overrides 'initial rating'</longdescription>
   </dtconfig>
   <dtconfig ui="yes">
     <name>ui_last/import_jobcode</name>
@@ -1941,7 +2046,7 @@
     <name>lighttable/ui/scroll_to_module</name>
     <type>bool</type>
     <default>false</default>
-    <shortdescription>scroll to utility modules when expanded/collapsed</shortdescription>
+    <shortdescription>scroll utility modules to the top when expanded</shortdescription>
     <longdescription>when this option is enabled then darktable will try to scroll the module to the top of the visible list</longdescription>
   </dtconfig>
   <dtconfig>
@@ -2018,7 +2123,7 @@
     <name>darkroom/ui/scroll_to_module</name>
     <type>bool</type>
     <default>true</default>
-    <shortdescription>scroll to processing modules when expanded/collapsed</shortdescription>
+    <shortdescription>scroll processing modules to the top when expanded</shortdescription>
     <longdescription>when this option is enabled then darktable will try to scroll the module to the top of the visible list</longdescription>
   </dtconfig>
   <dtconfig prefs="misc" section="interface">
@@ -3007,6 +3112,19 @@
     <longdescription/>
   </dtconfig>
   <dtconfig>
+    <name>plugins/print/print/unit</name>
+    <type>
+      <enum>
+	<option>mm</option>
+	<option>cm</option>
+	<option>inch</option>
+      </enum>
+    </type>
+    <default>mm</default>
+    <shortdescription>measurement units</shortdescription>
+    <longdescription/>
+  </dtconfig>
+  <dtconfig>
     <name>plugins/print/print/top_margin</name>
     <type min="-50" max="500">float</type>
     <default>17</default>
@@ -3119,7 +3237,7 @@
     <type>bool</type>
     <default>false</default>
     <shortdescription>detect monochrome previews</shortdescription>
-    <longdescription>many monochrome images can be identified via exif and preview data. beware: this slows down imports and reading exif data</longdescription>
+    <longdescription>many monochrome images can be identified via EXIF and preview data. beware: this slows down imports and reading of EXIF data</longdescription>
  </dtconfig>
  <dtconfig prefs="processing" section="general">
     <name>plugins/darkroom/show_warnings</name>
@@ -3294,7 +3412,7 @@
       </enum>
     </type>
     <default>list</default>
-    <shortdescription>colorbalance slider block layout</shortdescription>
+    <shortdescription>color balance slider block layout</shortdescription>
     <longdescription>choose how to organise the slider blocks for lift, gamma and gain:\nlist - all sliders are shown in one long list (with headers),\ntabs - use tabs to switch between the blocks of sliders,\ncolumns - the blocks of sliders are shown next to each other (in narrow columns)</longdescription>
   </dtconfig>
   <dtconfig prefs="darkroom" section="modules">
