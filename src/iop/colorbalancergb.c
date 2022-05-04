@@ -569,7 +569,6 @@ void process(struct dt_iop_module_t *self, dt_dev_pixelpipe_iop_t *piece, const 
   const float *const restrict in = __builtin_assume_aligned(((const float *const restrict)ivoid), 64);
   float *const restrict out = __builtin_assume_aligned(((float *const restrict)ovoid), 64);
   const float *const restrict gamut_LUT = __builtin_assume_aligned(((const float *const restrict)d->gamut_LUT), 64);
-  const float *const restrict chroma_LUT = __builtin_assume_aligned(((const float *const restrict)d->chroma_LUT), 64);
 
   const float *const restrict global = __builtin_assume_aligned((const float *const restrict)d->global, 16);
   const float *const restrict highlights = __builtin_assume_aligned((const float *const restrict)d->highlights, 16);
@@ -590,7 +589,7 @@ void process(struct dt_iop_module_t *self, dt_dev_pixelpipe_iop_t *piece, const 
 
 #ifdef _OPENMP
 #pragma omp parallel for default(none) \
-  dt_omp_firstprivate(in, out, roi_in, roi_out, d, g, mask_display, input_matrix, output_matrix, gamut_LUT, chroma_LUT, \
+  dt_omp_firstprivate(in, out, roi_in, roi_out, d, g, mask_display, input_matrix, output_matrix, gamut_LUT, \
     global, highlights, shadows, midtones, chroma, saturation, brilliance, checker_1, checker_2) \
     schedule(static) collapse(2)
 #endif
@@ -794,22 +793,29 @@ void process(struct dt_iop_module_t *self, dt_dev_pixelpipe_iop_t *piece, const 
       float P = HCB[1];
       float W = sin_T * HCB[1] + cos_T * HCB[2];
 
-      P *= d->saturation_global + scalar_product(opacities, saturation);
-      W *= 1.f + d->brilliance_global + scalar_product(opacities, brilliance);
+      const float a = 1.f + d->saturation_global + scalar_product(opacities, saturation);
+      const float b = 1.f + d->brilliance_global + scalar_product(opacities, brilliance);
 
-      HCB[1] = M_rot_inv[0][0] * P + M_rot_inv[0][1] * W;
-      HCB[2] = M_rot_inv[1][0] * P + M_rot_inv[1][1] * W;
+      float P_prime = (a - 1.f) * P;
+      float W_prime = sqrtf(fmaxf(0.f, sqf(P) * (1.f - sqf(a)) + sqf(W))) * b;
+
+      HCB[1] = M_rot_inv[0][0] * P_prime + M_rot_inv[0][1] * W_prime;
+      HCB[2] = M_rot_inv[1][0] * P_prime + M_rot_inv[1][1] * W_prime;
 
       dt_UCS_HCB_to_JCH(HCB, JCH);
 
       // Gamut mapping
-      const float cusp_chroma = lookup_gamut(chroma_LUT, JCH[2]);
-      const float cusp_lightness = lookup_gamut(gamut_LUT, JCH[2]);
-      const float cusp_saturation = cusp_chroma / cusp_lightness;
-      float sat = (JCH[0] > 0.f) ? JCH[1] / JCH[0] : 0.f;
-      sat = fmaxf(sat, cusp_saturation );
-      JCH[1] = sat * JCH[0];
+      const float max_colorfulness = lookup_gamut(gamut_LUT, JCH[2]); // WARNING : this is M²
+      const float max_chroma = 15.932993652962535f * powf(JCH[0] * L_white, 0.6523997524738018f) * powf(max_colorfulness, 0.6007557017508491f) / L_white;
+      const dt_aligned_pixel_t JCH_gamut_boundary = { JCH[0], max_chroma, JCH[2], 0.f };
+      dt_aligned_pixel_t HSB_gamut_boundary;
+      dt_UCS_JCH_to_HSB(JCH_gamut_boundary, HSB_gamut_boundary);
 
+      // Clip saturation at constant brightness
+      dt_aligned_pixel_t HSB = { HCB[0], (HCB[2] > 0.f) ? HCB[1] / HCB[2] : 0.f, HCB[2], 0.f };
+      HSB[1] = soft_clip(HSB[1], 0.8f * HSB_gamut_boundary[1], HSB_gamut_boundary[1]);
+
+      dt_UCS_HSB_to_JCH(HSB, JCH);
       dt_UCS_JCH_to_xyY(JCH, L_white, xyY);
       dt_xyY_to_XYZ(xyY, XYZ_D65);
     }
@@ -1015,6 +1021,18 @@ void cleanup_global(dt_iop_module_so_t *module)
 }
 #endif
 
+
+static inline float Delta_H(const float h_1, const float h_2)
+{
+  // Compute the difference between 2 angles
+  // and force the result in [-pi; pi] radians
+  float diff = h_1 - h_2;
+  diff += (diff < -M_PI_F) ? 2.f * M_PI_F : 0.f;
+  diff -= (diff > M_PI_F) ? 2.f * M_PI_F : 0.f;
+  return diff;
+}
+
+
 void commit_params(struct dt_iop_module_t *self, dt_iop_params_t *p1, dt_dev_pixelpipe_t *pipe,
                    dt_dev_pixelpipe_iop_t *piece)
 {
@@ -1115,15 +1133,10 @@ void commit_params(struct dt_iop_module_t *self, dt_iop_params_t *p1, dt_dev_pix
   // this will be used to prevent users to mess up their images by pushing chroma out of gamut
   if(!d->lut_inited)
   {
-    float *const restrict LUT_chroma = dt_alloc_align_float(LUT_ELEM);
     float *const restrict LUT_saturation = dt_alloc_align_float(LUT_ELEM);
 
     // init the LUT between -pi and pi by increments of 1°
-    for(size_t k = 0; k < LUT_ELEM; k++)
-    {
-      LUT_chroma[k] = 0.f;
-      LUT_saturation[k] = 0.f;
-    }
+    for(size_t k = 0; k < LUT_ELEM; k++) LUT_saturation[k] = 0.f;
 
     // Premultiply both matrices to go from D50 pipeline RGB to D65 XYZ in a single matrix dot product
     // instead of D50 pipeline to D50 XYZ (work_profile->matrix_in) and then D50 XYZ to D65 XYZ
@@ -1131,25 +1144,25 @@ void commit_params(struct dt_iop_module_t *self, dt_iop_params_t *p1, dt_dev_pix
     dt_colormatrix_mul(input_matrix, XYZ_D50_to_D65_CAT16, work_profile->matrix_in);
 
     // make RGB values vary between [0; 1] in working space, convert to Ych and get the max(c(h)))
-#ifdef _OPENMP
-#pragma omp parallel for default(none) \
-      dt_omp_firstprivate(input_matrix, p) schedule(static) dt_omp_sharedconst(LUT_chroma, LUT_saturation) \
-      collapse(3)
-#endif
-    for(size_t r = 0; r < STEPS; r++)
-      for(size_t g = 0; g < STEPS; g++)
-        for(size_t b = 0; b < STEPS; b++)
-        {
-          const dt_aligned_pixel_t rgb = { (float)r / (float)(STEPS - 1), (float)g / (float)(STEPS - 1),
-                                          (float)b / (float)(STEPS - 1), 0.f };
-          dt_aligned_pixel_t XYZ = { 0.f };
-          float saturation = 0.f;
-          float hue = 0.f;
-          float chroma = 0.f;
-
-          dot_product(rgb, input_matrix, XYZ); // Go to D50 pipeline RGB to D65 XYZ in one step
-          if(p->saturation_formula == DT_COLORBALANCE_SATURATION_JZAZBZ)
+    if(p->saturation_formula == DT_COLORBALANCE_SATURATION_JZAZBZ)
+    {
+      #ifdef _OPENMP
+      #pragma omp parallel for default(none) \
+            dt_omp_firstprivate(input_matrix, p) schedule(static) dt_omp_sharedconst(LUT_saturation) \
+            collapse(3)
+      #endif
+      for(size_t r = 0; r < STEPS; r++)
+        for(size_t g = 0; g < STEPS; g++)
+          for(size_t b = 0; b < STEPS; b++)
           {
+            const dt_aligned_pixel_t rgb = { (float)r / (float)(STEPS - 1), (float)g / (float)(STEPS - 1),
+                                            (float)b / (float)(STEPS - 1), 0.f };
+            dt_aligned_pixel_t XYZ = { 0.f };
+            float saturation = 0.f;
+            float hue = 0.f;
+
+            dot_product(rgb, input_matrix, XYZ); // Go from D50 pipeline RGB to D65 XYZ in one step
+
             dt_aligned_pixel_t Jab, Jch;
             dt_XYZ_2_JzAzBz(XYZ, Jab);           // this one expects D65 XYZ
 
@@ -1163,41 +1176,104 @@ void commit_params(struct dt_iop_module_t *self, dt_iop_params_t *p1, dt_dev_pix
             const size_t index = roundf((LUT_ELEM - 1) * (hue + M_PI_F) / (2.f * M_PI_F));
             LUT_saturation[index] = fmaxf(saturation, LUT_saturation[index]);
           }
-          else if(p->saturation_formula == DT_COLORBALANCE_SATURATION_DTUCS)
-          {
-            dt_aligned_pixel_t xyY = { 0.f };
-            dt_aligned_pixel_t JCH;
-            xyY_to_dt_UCS_JCH(xyY, 1.f, JCH);        // this one expects D65 XYZ
 
-            hue = JCH[2];
-            chroma = (JCH[0] > 0.f) ? JCH[1] : 0.f;
+      // anti-aliasing on the LUT (simple 5-taps 1D box average)
+      for(size_t k = 2; k < LUT_ELEM - 2; k++)
+        d->gamut_LUT[k] = (LUT_saturation[k - 2] + LUT_saturation[k - 1] + LUT_saturation[k] + LUT_saturation[k + 1] + LUT_saturation[k + 2]) / 5.f;
 
-            const size_t index = roundf((LUT_ELEM - 1) * (hue + M_PI_F) / (2.f * M_PI_F));
-            LUT_chroma[index] = fmaxf(chroma, LUT_chroma[index]);
-            if(LUT_chroma[index] == chroma) LUT_saturation[index] = JCH[0];
-          }
+      // handle bounds
+      d->gamut_LUT[0] = (LUT_saturation[LUT_ELEM - 2] + LUT_saturation[LUT_ELEM - 1] + LUT_saturation[0] + LUT_saturation[1] + LUT_saturation[2]) / 5.f;
+      d->gamut_LUT[1] = (LUT_saturation[LUT_ELEM - 1] + LUT_saturation[0] + LUT_saturation[1] + LUT_saturation[2] + LUT_saturation[3]) / 5.f;
+      d->gamut_LUT[LUT_ELEM - 1] = (LUT_saturation[LUT_ELEM - 3] + LUT_saturation[LUT_ELEM - 2] + LUT_saturation[LUT_ELEM - 1] + LUT_saturation[0] + LUT_saturation[1]) / 5.f;
+      d->gamut_LUT[LUT_ELEM - 2] = (LUT_saturation[LUT_ELEM - 4] + LUT_saturation[LUT_ELEM - 3] + LUT_saturation[LUT_ELEM - 2] + LUT_saturation[LUT_ELEM - 1] + LUT_saturation[0]) / 5.f;
+    }
+    else if(p->saturation_formula == DT_COLORBALANCE_SATURATION_DTUCS)
+    {
+      dt_aligned_pixel_t D65_xyY = { 0.31269999999999992f,  0.32899999999999996f ,  1.f, 0.f };
+
+      // Compute the RGB space primaries in xyY
+      dt_aligned_pixel_t RGB_red   = { 1.f, 0.f, 0.f, 0.f };
+      dt_aligned_pixel_t RGB_green = { 0.f, 1.f, 0.f, 0.f };
+      dt_aligned_pixel_t RGB_blue =  { 0.f, 0.f, 1.f, 0.f };
+
+      dt_aligned_pixel_t XYZ_red, XYZ_green, XYZ_blue;
+      dot_product(RGB_red, input_matrix, XYZ_red);
+      dot_product(RGB_green, input_matrix, XYZ_green);
+      dot_product(RGB_blue, input_matrix, XYZ_blue);
+
+      dt_aligned_pixel_t xyY_red, xyY_green, xyY_blue;
+      dt_XYZ_to_xyY(XYZ_red, xyY_red);
+      dt_XYZ_to_xyY(XYZ_green, xyY_green);
+      dt_XYZ_to_xyY(XYZ_blue, xyY_blue);
+
+      // Get the "hue" angles of the primaries in xy compared to D65
+      const float h_red   = atan2f(xyY_red[1] - D65_xyY[1], xyY_red[0] - D65_xyY[0]);
+      const float h_green = atan2f(xyY_green[1] - D65_xyY[1], xyY_green[0] - D65_xyY[0]);
+      const float h_blue  = atan2f(xyY_blue[1] - D65_xyY[1], xyY_blue[0] - D65_xyY[0]);
+
+      // March the gamut boundary in CIE xyY 1931 by angular steps of 0.02°
+      #ifdef _OPENMP
+        #pragma omp parallel for default(none) \
+              dt_omp_firstprivate(input_matrix, xyY_red, xyY_green, xyY_blue, h_red, h_green, h_blue, D65_xyY, stdout) \
+              schedule(static) dt_omp_sharedconst(d)
+      #endif
+      for(int i = 0; i < 50 * 360; i++)
+      {
+        const float angle = -M_PI_F + ((float)i) / (50.f * 360.f) * 2.f * M_PI_F;
+        const float tan_angle = tanf(angle);
+
+        const float t_1 = Delta_H(angle, h_blue)  / Delta_H(h_red, h_blue);
+        const float t_2 = Delta_H(angle, h_red)   / Delta_H(h_green, h_red);
+        const float t_3 = Delta_H(angle, h_green) / Delta_H(h_blue, h_green);
+
+        float x_t = 0;
+        float y_t = 0;
+
+        if(t_1 == CLAMP(t_1, 0, 1))
+        {
+          float t = (D65_xyY[1] - xyY_blue[1] + tan_angle * (xyY_blue[0] - D65_xyY[0]))
+                    / (xyY_red[1] - xyY_blue[1] + tan_angle * (xyY_blue[0] - xyY_red[0]));
+          x_t = xyY_blue[0] + t * (xyY_red[0] - xyY_blue[0]);
+          y_t = xyY_blue[1] + t * (xyY_red[1] - xyY_blue[1]);
+        }
+        else if(t_2 == CLAMP(t_2, 0, 1))
+        {
+          float t = (D65_xyY[1] - xyY_red[1] + tan_angle * (xyY_red[0] - D65_xyY[0]))
+                    / (xyY_green[1] - xyY_red[1] + tan_angle * (xyY_red[0] - xyY_green[0]));
+          x_t = xyY_red[0] + t * (xyY_green[0] - xyY_red[0]);
+          y_t = xyY_red[1] + t * (xyY_green[1] - xyY_red[1]);
+        }
+        else if(t_3 == CLAMP(t_3, 0, 1))
+        {
+          float t = (D65_xyY[1] - xyY_green[1] + tan_angle * (xyY_green[0] - D65_xyY[0]))
+                    / (xyY_blue[1] - xyY_green[1] + tan_angle * (xyY_green[0] - xyY_blue[0]));
+          x_t = xyY_green[0] + t * (xyY_blue[0] - xyY_green[0]);
+          y_t = xyY_green[1] + t * (xyY_blue[1] - xyY_green[1]);
         }
 
-    // anti-aliasing on the LUT (simple 5-taps 1D box average)
-    for(size_t k = 2; k < LUT_ELEM - 2; k++)
-    {
-      d->gamut_LUT[k] = (LUT_saturation[k - 2] + LUT_saturation[k - 1] + LUT_saturation[k] + LUT_saturation[k + 1] + LUT_saturation[k + 2]) / 5.f;
-      d->chroma_LUT[k] = (LUT_chroma[k - 2] + LUT_chroma[k - 1] + LUT_chroma[k] + LUT_chroma[k + 1] + LUT_chroma[k + 2]) / 5.f;
+        // Convert to darktable UCS
+        dt_aligned_pixel_t xyY = { x_t, y_t, 1.f, 0.f };
+        float UV_star_prime[2];
+        xyY_to_dt_UCS_UV(xyY, UV_star_prime);
+
+        // Get the hue angle in darktable UCS
+        const float H = atan2f(UV_star_prime[1], UV_star_prime[0]) * 180.f / M_PI_F;
+        const float H_round = roundf(H);
+        if(fabsf(H - H_round) < 0.02f)
+        {
+          int index = (int)(H_round + 180);
+          index += (index < 0) ? 360 : 0;
+          index -= (index > 359) ? 360 : 0;
+          // Warning: we store M², the square of the colorfulness
+          d->gamut_LUT[index] = UV_star_prime[0] * UV_star_prime[0] + UV_star_prime[1] * UV_star_prime[1];
+        }
+      }
+
+      // TODO: write darktable UCS OpenCL
+      piece->process_cl_ready = FALSE;
     }
 
-    // handle bounds
-    d->gamut_LUT[0] = (LUT_saturation[LUT_ELEM - 2] + LUT_saturation[LUT_ELEM - 1] + LUT_saturation[0] + LUT_saturation[1] + LUT_saturation[2]) / 5.f;
-    d->gamut_LUT[1] = (LUT_saturation[LUT_ELEM - 1] + LUT_saturation[0] + LUT_saturation[1] + LUT_saturation[2] + LUT_saturation[3]) / 5.f;
-    d->gamut_LUT[LUT_ELEM - 1] = (LUT_saturation[LUT_ELEM - 3] + LUT_saturation[LUT_ELEM - 2] + LUT_saturation[LUT_ELEM - 1] + LUT_saturation[0] + LUT_saturation[1]) / 5.f;
-    d->gamut_LUT[LUT_ELEM - 2] = (LUT_saturation[LUT_ELEM - 4] + LUT_saturation[LUT_ELEM - 3] + LUT_saturation[LUT_ELEM - 2] + LUT_saturation[LUT_ELEM - 1] + LUT_saturation[0]) / 5.f;
-
-    d->chroma_LUT[0] = (LUT_chroma[LUT_ELEM - 2] + LUT_chroma[LUT_ELEM - 1] + LUT_chroma[0] + LUT_chroma[1] + LUT_chroma[2]) / 5.f;
-    d->chroma_LUT[1] = (LUT_chroma[LUT_ELEM - 1] + LUT_chroma[0] + LUT_chroma[1] + LUT_chroma[2] + LUT_chroma[3]) / 5.f;
-    d->chroma_LUT[LUT_ELEM - 1] = (LUT_chroma[LUT_ELEM - 3] + LUT_chroma[LUT_ELEM - 2] + LUT_chroma[LUT_ELEM - 1] + LUT_chroma[0] + LUT_chroma[1]) / 5.f;
-    d->chroma_LUT[LUT_ELEM - 2] = (LUT_chroma[LUT_ELEM - 4] + LUT_chroma[LUT_ELEM - 3] + LUT_chroma[LUT_ELEM - 2] + LUT_chroma[LUT_ELEM - 1] + LUT_chroma[0]) / 5.f;
-
     dt_free_align(LUT_saturation);
-    dt_free_align(LUT_chroma);
     d->lut_inited = TRUE;
   }
 }
@@ -1207,7 +1283,6 @@ void init_pipe(dt_iop_module_t *self, dt_dev_pixelpipe_t *pipe, dt_dev_pixelpipe
   piece->data = calloc(1, sizeof(dt_iop_colorbalancergb_data_t));
   dt_iop_colorbalancergb_data_t *d = (dt_iop_colorbalancergb_data_t *)(piece->data);
   d->gamut_LUT = dt_alloc_align_float(LUT_ELEM);
-  d->chroma_LUT = dt_alloc_align_float(LUT_ELEM);
   d->lut_inited = FALSE;
   d->work_profile = NULL;
 }
@@ -1216,7 +1291,6 @@ void cleanup_pipe(dt_iop_module_t *self, dt_dev_pixelpipe_t *pipe, dt_dev_pixelp
 {
   dt_iop_colorbalancergb_data_t *d = (dt_iop_colorbalancergb_data_t *)(piece->data);
   if(d->gamut_LUT) dt_free_align(d->gamut_LUT);
-  if(d->chroma_LUT) dt_free_align(d->chroma_LUT);
   free(piece->data);
   piece->data = NULL;
 }
