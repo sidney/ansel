@@ -1268,14 +1268,14 @@ void commit_params(struct dt_iop_module_t *self, dt_iop_params_t *p1, dt_dev_pix
           d->gamut_LUT[index] = UV_star_prime[0] * UV_star_prime[0] + UV_star_prime[1] * UV_star_prime[1];
         }
       }
-
-      // TODO: write darktable UCS OpenCL
-      piece->process_cl_ready = FALSE;
     }
 
     dt_free_align(LUT_saturation);
     d->lut_inited = TRUE;
   }
+
+  // TODO: write darktable UCS OpenCL
+  piece->process_cl_ready = FALSE;
 }
 
 void init_pipe(dt_iop_module_t *self, dt_dev_pixelpipe_t *pipe, dt_dev_pixelpipe_iop_t *piece)
