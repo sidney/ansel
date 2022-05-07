@@ -411,9 +411,12 @@ int legacy_params(dt_iop_module_t *self, const void *const old_params, const int
     memcpy(new_params, old_params, sizeof(dt_iop_colorbalancergb_params_v4_t));
 
     dt_iop_colorbalancergb_params_t *n = (dt_iop_colorbalancergb_params_t *)new_params;
+<<<<<<< HEAD
     n->vibrance = 0.f;
     n->grey_fulcrum = 0.1845f;
     n->contrast = 0.f;
+=======
+>>>>>>> 4bbe998c88437ba3373879810295883487c7415b
     n->saturation_formula = DT_COLORBALANCE_SATURATION_JZAZBZ;
 
     return 0;
@@ -432,7 +435,11 @@ void init_presets(dt_iop_module_so_t *self)
   p.highlights_weight = 1.f;     // DEFAULT: 1.0 DESCRIPTION: "highlights fall-off"
   p.mask_grey_fulcrum = 0.1845f; // DEFAULT: 0.1845 DESCRIPTION: "mask middle-gray fulcrum"
   p.grey_fulcrum = 0.1845f;      // DEFAULT: 0.1845 DESCRIPTION: "contrast gray fulcrum"
+<<<<<<< HEAD
   p.saturation_formula = DT_COLORBALANCE_SATURATION_DTUCS;
+=======
+  p.saturation_formula = DT_COLORBALANCE_SATURATION_JZAZBZ;
+>>>>>>> 4bbe998c88437ba3373879810295883487c7415b
 
   // preset
   p.chroma_global = 0.2f;
@@ -440,7 +447,28 @@ void init_presets(dt_iop_module_so_t *self)
   p.saturation_midtones = 0.05f;
   p.saturation_highlights = -0.05f;
 
-  dt_gui_presets_add_generic(_("add basic colorfulness"), self->op, self->version(), &p, sizeof(p), 1, DEVELOP_BLEND_CS_RGB_SCENE);
+  dt_gui_presets_add_generic(_("add basic colorfulness (legacy)"), self->op, self->version(), &p, sizeof(p), 1, DEVELOP_BLEND_CS_RGB_SCENE);
+
+  p.saturation_formula = DT_COLORBALANCE_SATURATION_DTUCS;
+  p.chroma_global = 0.f;
+
+  p.saturation_global = 0.2f;
+  p.saturation_shadows = 0.30f;
+  p.saturation_midtones = 0.f;
+  p.saturation_highlights = -0.5f;
+  dt_gui_presets_add_generic(_("basic colorfulness: natural skin"), self->op, self->version(), &p, sizeof(p), 1, DEVELOP_BLEND_CS_RGB_SCENE);
+
+  p.saturation_global = 0.2f;
+  p.saturation_shadows = 0.5f;
+  p.saturation_midtones = 0.f;
+  p.saturation_highlights = -0.25f;
+  dt_gui_presets_add_generic(_("basic colorfulness: vibrant colors"), self->op, self->version(), &p, sizeof(p), 1, DEVELOP_BLEND_CS_RGB_SCENE);
+
+  p.saturation_global = 0.2f;
+  p.saturation_shadows = 0.25f;
+  p.saturation_midtones = 0.f;
+  p.saturation_highlights = -0.25f;
+  dt_gui_presets_add_generic(_("basic colorfulness: standard"), self->op, self->version(), &p, sizeof(p), 1, DEVELOP_BLEND_CS_RGB_SCENE);
 }
 
 
@@ -587,10 +615,12 @@ void process(struct dt_iop_module_t *self, dt_dev_pixelpipe_iop_t *piece, const 
   const size_t checker_1 = (mask_display) ? DT_PIXEL_APPLY_DPI(d->checker_size) : 0;
   const size_t checker_2 = 2 * checker_1;
 
+  const float L_white = Y_to_dt_UCS_L_star(d->white_fulcrum);
+
 #ifdef _OPENMP
 #pragma omp parallel for default(none) \
   dt_omp_firstprivate(in, out, roi_in, roi_out, d, g, mask_display, input_matrix, output_matrix, gamut_LUT, \
-    global, highlights, shadows, midtones, chroma, saturation, brilliance, checker_1, checker_2) \
+    global, highlights, shadows, midtones, chroma, saturation, brilliance, checker_1, checker_2, L_white) \
     schedule(static) collapse(2)
 #endif
   for(size_t i = 0; i < roi_out->height; i++)
@@ -777,7 +807,10 @@ void process(struct dt_iop_module_t *self, dt_dev_pixelpipe_iop_t *piece, const 
     }
     else
     {
+<<<<<<< HEAD
       const float L_white = Y_to_dt_UCS_L_star(d->white_fulcrum);
+=======
+>>>>>>> 4bbe998c88437ba3373879810295883487c7415b
       dt_aligned_pixel_t xyY, JCH, HCB;
       dt_XYZ_to_xyY(XYZ_D65, xyY);
       xyY_to_dt_UCS_JCH(xyY, L_white, JCH);
@@ -793,6 +826,7 @@ void process(struct dt_iop_module_t *self, dt_dev_pixelpipe_iop_t *piece, const 
       float P = HCB[1];
       float W = sin_T * HCB[1] + cos_T * HCB[2];
 
+<<<<<<< HEAD
       const float a = 1.f + d->saturation_global + scalar_product(opacities, saturation);
       const float b = 1.f + d->brilliance_global + scalar_product(opacities, brilliance);
 
@@ -801,6 +835,19 @@ void process(struct dt_iop_module_t *self, dt_dev_pixelpipe_iop_t *piece, const 
 
       HCB[1] = M_rot_inv[0][0] * P_prime + M_rot_inv[0][1] * W_prime;
       HCB[2] = M_rot_inv[1][0] * P_prime + M_rot_inv[1][1] * W_prime;
+=======
+      float a = fmaxf(1.f + d->saturation_global + scalar_product(opacities, saturation), 0.f);
+      const float b = fmaxf(1.f + d->brilliance_global + scalar_product(opacities, brilliance), 0.f);
+
+      const float max_a = hypotf(P, W) / P;
+      a = soft_clip(a, 0.5f * max_a, max_a);
+
+      const float P_prime = (a - 1.f) * P;
+      const float W_prime = sqrtf(sqf(P) * (1.f - sqf(a)) + sqf(W)) * b;
+
+      HCB[1] = fmaxf(M_rot_inv[0][0] * P_prime + M_rot_inv[0][1] * W_prime, 0.f);
+      HCB[2] = fmaxf(M_rot_inv[1][0] * P_prime + M_rot_inv[1][1] * W_prime, 0.f);
+>>>>>>> 4bbe998c88437ba3373879810295883487c7415b
 
       dt_UCS_HCB_to_JCH(HCB, JCH);
 
@@ -947,6 +994,8 @@ int process_cl(struct dt_iop_module_t *self, dt_dev_pixelpipe_iop_t *piece, cl_m
   const int checker_2 = 2 * checker_1;
   const int mask_type = (mask_display) ? g->mask_type : 0;
 
+  const float L_white = Y_to_dt_UCS_L_star(d->white_fulcrum);
+
   dt_opencl_set_kernel_arg(devid, gd->kernel_colorbalance_rgb, 0, sizeof(cl_mem), (void *)&dev_in);
   dt_opencl_set_kernel_arg(devid, gd->kernel_colorbalance_rgb, 1, sizeof(cl_mem), (void *)&dev_out);
   dt_opencl_set_kernel_arg(devid, gd->kernel_colorbalance_rgb, 2, sizeof(int), (void *)&width);
@@ -981,6 +1030,8 @@ int process_cl(struct dt_iop_module_t *self, dt_dev_pixelpipe_iop_t *piece, cl_m
   dt_opencl_set_kernel_arg(devid, gd->kernel_colorbalance_rgb, 31, sizeof(int), (void *)&checker_2);
   dt_opencl_set_kernel_arg(devid, gd->kernel_colorbalance_rgb, 32, 4 * sizeof(float), (void *)&d->checker_color_1);
   dt_opencl_set_kernel_arg(devid, gd->kernel_colorbalance_rgb, 33, 4 * sizeof(float), (void *)&d->checker_color_2);
+  dt_opencl_set_kernel_arg(devid, gd->kernel_colorbalance_rgb, 34, sizeof(float), (void *)&L_white);
+  dt_opencl_set_kernel_arg(devid, gd->kernel_colorbalance_rgb, 35, sizeof(dt_iop_colorbalancrgb_saturation_t), (void *)&d->saturation_formula);
 
   err = dt_opencl_enqueue_kernel_2d(devid, gd->kernel_colorbalance_rgb, sizes);
   if(err != CL_SUCCESS) goto error;
@@ -1231,22 +1282,35 @@ void commit_params(struct dt_iop_module_t *self, dt_iop_params_t *p1, dt_dev_pix
 
         if(t_1 == CLAMP(t_1, 0, 1))
         {
+<<<<<<< HEAD
           float t = (D65_xyY[1] - xyY_blue[1] + tan_angle * (xyY_blue[0] - D65_xyY[0]))
+=======
+          const float t = (D65_xyY[1] - xyY_blue[1] + tan_angle * (xyY_blue[0] - D65_xyY[0]))
+>>>>>>> 4bbe998c88437ba3373879810295883487c7415b
                     / (xyY_red[1] - xyY_blue[1] + tan_angle * (xyY_blue[0] - xyY_red[0]));
           x_t = xyY_blue[0] + t * (xyY_red[0] - xyY_blue[0]);
           y_t = xyY_blue[1] + t * (xyY_red[1] - xyY_blue[1]);
         }
         else if(t_2 == CLAMP(t_2, 0, 1))
         {
+<<<<<<< HEAD
           float t = (D65_xyY[1] - xyY_red[1] + tan_angle * (xyY_red[0] - D65_xyY[0]))
+=======
+          const float t = (D65_xyY[1] - xyY_red[1] + tan_angle * (xyY_red[0] - D65_xyY[0]))
+>>>>>>> 4bbe998c88437ba3373879810295883487c7415b
                     / (xyY_green[1] - xyY_red[1] + tan_angle * (xyY_red[0] - xyY_green[0]));
           x_t = xyY_red[0] + t * (xyY_green[0] - xyY_red[0]);
           y_t = xyY_red[1] + t * (xyY_green[1] - xyY_red[1]);
         }
         else if(t_3 == CLAMP(t_3, 0, 1))
         {
+<<<<<<< HEAD
           float t = (D65_xyY[1] - xyY_green[1] + tan_angle * (xyY_green[0] - D65_xyY[0]))
                     / (xyY_blue[1] - xyY_green[1] + tan_angle * (xyY_green[0] - xyY_blue[0]));
+=======
+          const float t = (D65_xyY[1] - xyY_green[1] + tan_angle * (xyY_green[0] - D65_xyY[0]))
+                        / (xyY_blue[1] - xyY_green[1] + tan_angle * (xyY_green[0] - xyY_blue[0]));
+>>>>>>> 4bbe998c88437ba3373879810295883487c7415b
           x_t = xyY_green[0] + t * (xyY_blue[0] - xyY_green[0]);
           y_t = xyY_green[1] + t * (xyY_blue[1] - xyY_green[1]);
         }
@@ -1824,25 +1888,21 @@ void gui_init(dt_iop_module_t *self)
   gtk_box_pack_start(GTK_BOX(self->widget), dt_ui_section_label_new(_("perceptual saturation grading")), FALSE, FALSE, 0);
 
   g->saturation_global = dt_bauhaus_slider_from_params(self, "saturation_global");
-  dt_bauhaus_slider_set_soft_range(g->saturation_global, -0.25, 0.25);
   dt_bauhaus_slider_set_digits(g->saturation_global, 4);
   dt_bauhaus_slider_set_format(g->saturation_global, "%");
   gtk_widget_set_tooltip_text(g->saturation_global, _("add or remove saturation by an absolute amount"));
 
   g->saturation_shadows = dt_bauhaus_slider_from_params(self, "saturation_shadows");
-  dt_bauhaus_slider_set_soft_range(g->saturation_shadows, -0.25, 0.25);
   dt_bauhaus_slider_set_digits(g->saturation_shadows, 4);
   dt_bauhaus_slider_set_format(g->saturation_shadows, "%");
   gtk_widget_set_tooltip_text(g->saturation_shadows, _("increase or decrease saturation proportionally to the original pixel saturation"));
 
   g->saturation_midtones= dt_bauhaus_slider_from_params(self, "saturation_midtones");
-  dt_bauhaus_slider_set_soft_range(g->saturation_midtones, -0.25, 0.25);
   dt_bauhaus_slider_set_digits(g->saturation_midtones, 4);
   dt_bauhaus_slider_set_format(g->saturation_midtones, "%");
   gtk_widget_set_tooltip_text(g->saturation_midtones, _("increase or decrease saturation proportionally to the original pixel saturation"));
 
   g->saturation_highlights = dt_bauhaus_slider_from_params(self, "saturation_highlights");
-  dt_bauhaus_slider_set_soft_range(g->saturation_highlights, -0.25, 0.25);
   dt_bauhaus_slider_set_digits(g->saturation_highlights, 4);
   dt_bauhaus_slider_set_format(g->saturation_highlights, "%");
   gtk_widget_set_tooltip_text(g->saturation_highlights, _("increase or decrease saturation proportionally to the original pixel saturation"));
@@ -1850,25 +1910,21 @@ void gui_init(dt_iop_module_t *self)
   gtk_box_pack_start(GTK_BOX(self->widget), dt_ui_section_label_new(_("perceptual brilliance grading")), FALSE, FALSE, 0);
 
   g->brilliance_global = dt_bauhaus_slider_from_params(self, "brilliance_global");
-  dt_bauhaus_slider_set_soft_range(g->brilliance_global, -0.25, 0.25);
   dt_bauhaus_slider_set_digits(g->brilliance_global, 4);
   dt_bauhaus_slider_set_format(g->brilliance_global, "%");
   gtk_widget_set_tooltip_text(g->brilliance_global, _("add or remove brilliance by an absolute amount"));
 
   g->brilliance_shadows = dt_bauhaus_slider_from_params(self, "brilliance_shadows");
-  dt_bauhaus_slider_set_soft_range(g->brilliance_shadows, -0.25, 0.25);
   dt_bauhaus_slider_set_digits(g->brilliance_shadows, 4);
   dt_bauhaus_slider_set_format(g->brilliance_shadows, "%");
   gtk_widget_set_tooltip_text(g->brilliance_shadows, _("increase or decrease brilliance proportionally to the original pixel brilliance"));
 
   g->brilliance_midtones= dt_bauhaus_slider_from_params(self, "brilliance_midtones");
-  dt_bauhaus_slider_set_soft_range(g->brilliance_midtones, -0.25, 0.25);
   dt_bauhaus_slider_set_digits(g->brilliance_midtones, 4);
   dt_bauhaus_slider_set_format(g->brilliance_midtones, "%");
   gtk_widget_set_tooltip_text(g->brilliance_midtones, _("increase or decrease brilliance proportionally to the original pixel brilliance"));
 
   g->brilliance_highlights = dt_bauhaus_slider_from_params(self, "brilliance_highlights");
-  dt_bauhaus_slider_set_soft_range(g->brilliance_highlights, -0.25, 0.25);
   dt_bauhaus_slider_set_digits(g->brilliance_highlights, 4);
   dt_bauhaus_slider_set_format(g->brilliance_highlights, "%");
   gtk_widget_set_tooltip_text(g->brilliance_highlights, _("increase or decrease brilliance proportionally to the original pixel brilliance"));

@@ -67,7 +67,7 @@ typedef enum dt_iop_highlights_mode_t
   DT_IOP_HIGHLIGHTS_CLIP = 0,    // $DESCRIPTION: "clip highlights"
   DT_IOP_HIGHLIGHTS_LCH = 1,     // $DESCRIPTION: "reconstruct in LCh"
   DT_IOP_HIGHLIGHTS_INPAINT = 2, // $DESCRIPTION: "reconstruct color"
-  DT_IOP_HIGHLIGHTS_LAPLACIAN = 3, //$DESCRIPTION: "guided laplacians (AI)"
+  DT_IOP_HIGHLIGHTS_LAPLACIAN = 3, //$DESCRIPTION: "guided laplacians"
 } dt_iop_highlights_mode_t;
 
 typedef enum dt_atrous_wavelets_scales_t
@@ -948,7 +948,8 @@ static void _interpolate_and_mask(const float *const restrict input,
   #ifdef _OPENMP
   #pragma omp parallel for default(none) \
     dt_omp_firstprivate(width, height, clips, filters)  \
-    dt_omp_sharedconst(input, interpolated, clipping_mask, wb) \
+    dt_omp_sharedconst(input, interpolated, clipping_mask) \
+    shared(wb) \
     schedule(static)
   #endif
   for(size_t i = 0; i < height; i++)
@@ -1069,8 +1070,9 @@ static void _interpolate_and_mask(const float *const restrict input,
 
       for_each_channel(k, aligned(RGB, interpolated, clipping_mask, clipped, wb))
       {
-        interpolated[(i * width + j) * 4 + k] = fmaxf(RGB[k] / wb[c], 0.f);
-        clipping_mask[(i * width + j) * 4 + k] = clipped[k];
+        const size_t idx = (i * width + j) * 4 + k;
+        interpolated[idx] = fmaxf(RGB[k] / wb[c], 0.f);
+        clipping_mask[idx] = clipped[k];
       }
     }
 }
@@ -1085,7 +1087,8 @@ static void _remosaic_and_replace(const float *const restrict interpolated,
   #ifdef _OPENMP
   #pragma omp parallel for default(none) \
     dt_omp_firstprivate(width, height, filters)  \
-    dt_omp_sharedconst(output, interpolated, wb) \
+    dt_omp_sharedconst(output, interpolated) \
+    shared(wb) \
     schedule(static)
   #endif
   for(size_t i = 0; i < height; i++)
@@ -1238,7 +1241,7 @@ static inline void guide_laplacians(const float *const restrict high_freq, const
         for(size_t ii = 0; ii < 3; ii++)
           for(size_t jj = 0; jj < 3; jj++)
           {
-            size_t neighbor = 4 * (i_neighbours[ii] + j_neighbours[jj]);
+            const size_t neighbor = 4 * (i_neighbours[ii] + j_neighbours[jj]);
             for_four_channels(c, aligned(neighbour_pixel_HF, HF: 64))
             {
               neighbour_pixel_HF[3 * ii + jj][c] = HF[neighbor + c];
@@ -1416,11 +1419,12 @@ static inline void heat_PDE_diffusion(const float *const restrict high_freq, con
         for(size_t ii = 0; ii < 3; ii++)
           for(size_t jj = 0; jj < 3; jj++)
           {
-            size_t neighbor = 4 * (i_neighbours[ii] + j_neighbours[jj]);
+            const size_t neighbor = 4 * (i_neighbours[ii] + j_neighbours[jj]);
+            const size_t nidx = 3 * ii + jj;
             for_four_channels(c, aligned(neighbour_pixel_HF, HF, neighbour_pixel_LF, LF : 64))
             {
-              neighbour_pixel_HF[3 * ii + jj][c] = HF[neighbor + c];
-              neighbour_pixel_LF[3 * ii + jj][c] = LF[neighbor + c];
+              neighbour_pixel_HF[nidx][c] = HF[neighbor + c];
+              neighbour_pixel_LF[nidx][c] = LF[neighbor + c];
             }
           }
 
@@ -1441,7 +1445,6 @@ static inline void heat_PDE_diffusion(const float *const restrict high_freq, con
         for_each_channel(c, aligned(high_frequency, multipliers_HF, laplacian_HF, alpha))
           high_frequency[c] += alpha[c] * multipliers_HF[c] * laplacian_HF[c];
       }
-
 
       if((scale & FIRST_SCALE))
       {

@@ -1153,10 +1153,13 @@ static inline void Yrg_to_LMS(const dt_aligned_pixel_t Yrg, dt_aligned_pixel_t L
 #endif
 static inline void Yrg_to_Ych(const dt_aligned_pixel_t Yrg, dt_aligned_pixel_t Ych)
 {
-  const dt_aligned_pixel_t D65 = { 0.21962576f, 0.54487092f, 0.23550333f, 0.f };
   const float Y = Yrg[0];
-  const float r = Yrg[1] - D65[0];
-  const float g = Yrg[2] - D65[1];
+  // Subtract white point. These are the r, g coordinates of
+  // sRGB (D50 adapted) (1, 1, 1) taken through
+  // XYZ D50 -> CAT16 D50->D65 adaptation -> LMS 2006
+  // -> grading RGB conversion.
+  const float r = Yrg[1] - 0.21902143f;
+  const float g = Yrg[2] - 0.54371398f;
   const float c = hypotf(g, r);
   const float h = atan2f(g, r);
   Ych[0] = Y;
@@ -1169,12 +1172,11 @@ static inline void Yrg_to_Ych(const dt_aligned_pixel_t Yrg, dt_aligned_pixel_t Y
 #endif
 static inline void Ych_to_Yrg(const dt_aligned_pixel_t Ych, dt_aligned_pixel_t Yrg)
 {
-  const dt_aligned_pixel_t D65 = { 0.21962576f, 0.54487092f, 0.23550333f, 0.f };
   const float Y = Ych[0];
   const float c = Ych[1];
   const float h = Ych[2];
-  const float r = c * cosf(h) + D65[0];
-  const float g = c * sinf(h) + D65[1];
+  const float r = c * cosf(h) + 0.21902143f;
+  const float g = c * sinf(h) + 0.54371398f;
   Yrg[0] = Y;
   Yrg[1] = r;
   Yrg[2] = g;
@@ -1250,7 +1252,8 @@ static inline void gamut_check_Yrg(dt_aligned_pixel_t Ych)
   // Gamut-clip chroma in Yrg at constant hue and luminance
   // e.g. find the max chroma value that fits in gamut at the current hue
   // taken from colorbalancergb.c
-  const dt_aligned_pixel_t D65 = { 0.21962576f, 0.54487092f, 0.23550333f, 0.f };
+  const float D65_r = 0.21902143f;
+  const float D65_g = 0.54371398f;
 
   float max_c = Ych[1];
   const float cos_h = cosf(Ych[2]);
@@ -1258,15 +1261,15 @@ static inline void gamut_check_Yrg(dt_aligned_pixel_t Ych)
 
   if(Yrg[1] < 0.f)
   {
-    max_c = fminf(-D65[0] / cos_h, max_c);
+    max_c = fminf(-D65_r / cos_h, max_c);
   }
   if(Yrg[2] < 0.f)
   {
-    max_c = fminf(-D65[1] / sin_h, max_c);
+    max_c = fminf(-D65_g / sin_h, max_c);
   }
   if(Yrg[1] + Yrg[2] > 1.f)
   {
-    max_c = fminf((1.f - D65[0] - D65[1]) / (cos_h + sin_h), max_c);
+    max_c = fminf((1.f - D65_r - D65_g) / (cos_h + sin_h), max_c);
   }
 
   // Overwrite chroma with the sanitized value
@@ -1368,7 +1371,11 @@ static inline void dt_UCS_JCH_to_xyY(const dt_aligned_pixel_t JCH, const float L
 
   // should be L_star = powf(JCH[0], 1.f / cz) * L_white but we treat only the case where cz = 1
   const float L_star = JCH[0] * L_white;
+<<<<<<< HEAD
   const float M = powf(JCH[1] * L_white / (15.932993652962535 * powf(L_star, 0.6523997524738018f)), 0.8322850678616855f);
+=======
+  const float M = powf(JCH[1] * L_white / (15.932993652962535f * powf(L_star, 0.6523997524738018f)), 0.8322850678616855f);
+>>>>>>> 4bbe998c88437ba3373879810295883487c7415b
 
   const float U_star_prime = M * cosf(JCH[2]);
   const float V_star_prime = M * sinf(JCH[2]);
