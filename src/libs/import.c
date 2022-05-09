@@ -1856,7 +1856,7 @@ static void _import_from_dialog_run(dt_lib_module_t* self)
   while(gtk_dialog_run(GTK_DIALOG(d->from.dialog)) == GTK_RESPONSE_ACCEPT)
   {
     // reset filter so that view isn't empty
-    dt_view_filtering_reset(darktable.view_manager, TRUE);
+    dt_view_filter_reset(darktable.view_manager, TRUE);
     GList *imgs = NULL;
     GtkTreeModel *model = GTK_TREE_MODEL(d->from.store);
     GtkTreeSelection *selection = gtk_tree_view_get_selection(d->from.treeview);
@@ -2282,4 +2282,3 @@ int set_params(dt_lib_module_t *self, const void *params, int size)
 // vim: shiftwidth=2 expandtab tabstop=2 cindent
 // kate: tab-indents: off; indent-width 2; replace-tabs on; indent-mode cstyle; remove-trailing-spaces modified;
 // clang-format on
-

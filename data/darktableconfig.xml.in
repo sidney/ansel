@@ -370,7 +370,7 @@
     <type>bool</type>
     <default>true</default>
     <shortdescription>ask before removing images from the library</shortdescription>
-    <longdescription>always ask the user before removing image information from the library</longdescription>
+    <longdescription>always ask the user before any image is removed from the library</longdescription>
   </dtconfig>
   <dtconfig prefs="security" section="general">
     <name>ask_before_delete</name>
@@ -420,146 +420,6 @@
     <default>10</default>
     <shortdescription>number of collections to be stored</shortdescription>
     <longdescription>the number of recent collections to store and show in this list</longdescription>
-  </dtconfig>
-  <dtconfig>
-    <name>plugins/lighttable/filtering/history_max</name>
-    <type min="1" max="50">int</type>
-    <default>10</default>
-    <shortdescription>number of filters to be stored</shortdescription>
-    <longdescription>the number of recent filters to store and show in history list</longdescription>
-  </dtconfig>
-  <dtconfig>
-    <name>plugins/lighttable/filtering/sort_history_max</name>
-    <type min="1" max="50">int</type>
-    <default>10</default>
-    <shortdescription>number of sort orders to be stored</shortdescription>
-    <longdescription>the number of recent sort orders to store and show in history list</longdescription>
-  </dtconfig>
-  <dtconfig>
-    <name>plugins/lighttable/filtering/num_sort</name>
-    <type>int</type>
-    <default>1</default>
-    <shortdescription>nb of sort orders by default</shortdescription>
-    <longdescription></longdescription>
-  </dtconfig>
-  <dtconfig>
-    <name>plugins/lighttable/filtering/sort0</name>
-    <type>int</type>
-    <default>0</default>
-    <shortdescription>first sort orders</shortdescription>
-    <longdescription></longdescription>
-  </dtconfig>
-  <dtconfig>
-    <name>plugins/lighttable/filtering/num_rules</name>
-    <type>int</type>
-    <default>3</default>
-    <shortdescription>nb of rules by default</shortdescription>
-    <longdescription></longdescription>
-  </dtconfig>
-  <dtconfig>
-    <name>plugins/lighttable/filtering/item0</name>
-    <type>int</type>
-    <default>32</default>
-    <shortdescription>first filter</shortdescription>
-    <longdescription></longdescription>
-  </dtconfig>
-  <dtconfig>
-    <name>plugins/lighttable/filtering/mode0</name>
-    <type>int</type>
-    <default>0</default>
-    <shortdescription>first filter</shortdescription>
-    <longdescription></longdescription>
-  </dtconfig>
-  <dtconfig>
-    <name>plugins/lighttable/filtering/off0</name>
-    <type>int</type>
-    <default>0</default>
-    <shortdescription>first filter</shortdescription>
-    <longdescription></longdescription>
-  </dtconfig>
-  <dtconfig>
-    <name>plugins/lighttable/filtering/top0</name>
-    <type>int</type>
-    <default>1</default>
-    <shortdescription>first filter</shortdescription>
-    <longdescription></longdescription>
-  </dtconfig>
-  <dtconfig>
-    <name>plugins/lighttable/filtering/string0</name>
-    <type>string</type>
-    <default>%</default>
-    <shortdescription>first filter</shortdescription>
-    <longdescription></longdescription>
-  </dtconfig>
-  <dtconfig>
-    <name>plugins/lighttable/filtering/item1</name>
-    <type>int</type>
-    <default>18</default>
-    <shortdescription>second filter</shortdescription>
-    <longdescription></longdescription>
-  </dtconfig>
-  <dtconfig>
-    <name>plugins/lighttable/filtering/mode1</name>
-    <type>int</type>
-    <default>0</default>
-    <shortdescription>second filter</shortdescription>
-    <longdescription></longdescription>
-  </dtconfig>
-  <dtconfig>
-    <name>plugins/lighttable/filtering/off1</name>
-    <type>int</type>
-    <default>0</default>
-    <shortdescription>second filter</shortdescription>
-    <longdescription></longdescription>
-  </dtconfig>
-  <dtconfig>
-    <name>plugins/lighttable/filtering/top1</name>
-    <type>int</type>
-    <default>1</default>
-    <shortdescription>second filter</shortdescription>
-    <longdescription></longdescription>
-  </dtconfig>
-  <dtconfig>
-    <name>plugins/lighttable/filtering/string1</name>
-    <type>string</type>
-    <default></default>
-    <shortdescription>second filter</shortdescription>
-    <longdescription></longdescription>
-  </dtconfig>
-  <dtconfig>
-    <name>plugins/lighttable/filtering/item2</name>
-    <type>int</type>
-    <default>33</default>
-    <shortdescription>third filter</shortdescription>
-    <longdescription></longdescription>
-  </dtconfig>
-  <dtconfig>
-    <name>plugins/lighttable/filtering/mode2</name>
-    <type>int</type>
-    <default>0</default>
-    <shortdescription>third filter</shortdescription>
-    <longdescription></longdescription>
-  </dtconfig>
-  <dtconfig>
-    <name>plugins/lighttable/filtering/off2</name>
-    <type>int</type>
-    <default>0</default>
-    <shortdescription>third filter</shortdescription>
-    <longdescription></longdescription>
-  </dtconfig>
-  <dtconfig>
-    <name>plugins/lighttable/filtering/top2</name>
-    <type>int</type>
-    <default>1</default>
-    <shortdescription>third filter</shortdescription>
-    <longdescription></longdescription>
-  </dtconfig>
-  <dtconfig>
-    <name>plugins/lighttable/filtering/string2</name>
-    <type>string</type>
-    <default>%%</default>
-    <shortdescription>third filter</shortdescription>
-    <longdescription></longdescription>
   </dtconfig>
   <dtconfig dialog="collect">
     <name>show_folder_levels</name>
@@ -683,7 +543,7 @@
     <type>bool</type>
     <default>true</default>
     <shortdescription>sort collection descending</shortdescription>
-    <longdescription>sort the following collections in descending order: 'film roll' by folder, 'folder', 'times' (e.g. 'capture date')</longdescription>
+    <longdescription>sort the following collections in descending order: 'film roll' by folder, 'folder', 'times' (e.g. 'date taken')</longdescription>
   </dtconfig>
   <dtconfig>
     <name>ui_last/colorpicker_model</name>
@@ -1019,8 +879,8 @@
     <name>ui_last/ignore_exif_rating</name>
     <type>bool</type>
     <default>false</default>
-    <shortdescription>ignore EXIF rating</shortdescription>
-    <longdescription>ignore EXIF rating. if not set and EXIF rating is found, it overrides 'initial rating'</longdescription>
+    <shortdescription>ignore exif rating</shortdescription>
+    <longdescription>ignore exif rating. if not set and exif rating is found, it overrides 'initial rating'</longdescription>
   </dtconfig>
   <dtconfig ui="yes">
     <name>ui_last/import_jobcode</name>
@@ -2046,7 +1906,7 @@
     <name>lighttable/ui/scroll_to_module</name>
     <type>bool</type>
     <default>false</default>
-    <shortdescription>scroll utility modules to the top when expanded</shortdescription>
+    <shortdescription>scroll to utility modules when expanded/collapsed</shortdescription>
     <longdescription>when this option is enabled then darktable will try to scroll the module to the top of the visible list</longdescription>
   </dtconfig>
   <dtconfig>
@@ -2123,7 +1983,7 @@
     <name>darkroom/ui/scroll_to_module</name>
     <type>bool</type>
     <default>true</default>
-    <shortdescription>scroll processing modules to the top when expanded</shortdescription>
+    <shortdescription>scroll to processing modules when expanded/collapsed</shortdescription>
     <longdescription>when this option is enabled then darktable will try to scroll the module to the top of the visible list</longdescription>
   </dtconfig>
   <dtconfig prefs="misc" section="interface">
@@ -3237,7 +3097,7 @@
     <type>bool</type>
     <default>false</default>
     <shortdescription>detect monochrome previews</shortdescription>
-    <longdescription>many monochrome images can be identified via EXIF and preview data. beware: this slows down imports and reading of EXIF data</longdescription>
+    <longdescription>many monochrome images can be identified via exif and preview data. beware: this slows down imports and reading exif data</longdescription>
  </dtconfig>
  <dtconfig prefs="processing" section="general">
     <name>plugins/darkroom/show_warnings</name>

@@ -255,8 +255,7 @@ typedef struct dt_view_manager_t
     struct
     {
       struct dt_lib_module_t *module;
-      GtkWidget *(*get_filter_box)(struct dt_lib_module_t *);
-      GtkWidget *(*get_sort_box)(struct dt_lib_module_t *);
+      void (*reset_filter)(struct dt_lib_module_t *, gboolean smart_filter);
     } filter;
 
     /* module collection proxy object */
@@ -265,15 +264,6 @@ typedef struct dt_view_manager_t
       struct dt_lib_module_t *module;
       void (*update)(struct dt_lib_module_t *);
     } module_collect;
-
-    /* module collection proxy object */
-    struct
-    {
-      struct dt_lib_module_t *module;
-      void (*update)(struct dt_lib_module_t *);
-      void (*set_sort)(struct dt_lib_module_t *, int sort, gboolean asc);
-      void (*reset_filter)(struct dt_lib_module_t *, gboolean smart_filter);
-    } module_filtering;
 
     /* filmstrip proxy object */
     struct
@@ -408,14 +398,11 @@ const char *dt_view_tethering_get_job_code(const dt_view_manager_t *vm);
 
 /** update the collection module */
 void dt_view_collection_update(const dt_view_manager_t *vm);
-void dt_view_filtering_set_sort(const dt_view_manager_t *vm, int sort, gboolean asc);
 
 /*
  * Filter dropdown proxy
  */
-void dt_view_filtering_reset(const dt_view_manager_t *vm, gboolean smart_filter);
-GtkWidget *dt_view_filter_get_filters_box(const dt_view_manager_t *vm);
-GtkWidget *dt_view_filter_get_sort_box(const dt_view_manager_t *vm);
+void dt_view_filter_reset(const dt_view_manager_t *vm, gboolean smart_filter);
 
 // active images functions
 void dt_view_active_images_reset(gboolean raise);

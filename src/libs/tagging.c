@@ -2108,10 +2108,10 @@ static void _pop_menu_dictionary_goto_tag_collection(GtkWidget *menuitem, dt_lib
     gtk_tree_model_get(model, &iter, DT_LIB_TAGGING_COL_PATH, &path, DT_LIB_TAGGING_COL_COUNT, &count, -1);
     if(count)
     {
-      if(!d->collection[0]) dt_collection_serialize(d->collection, 4096, FALSE);
+      if(!d->collection[0]) dt_collection_serialize(d->collection, 4096);
       gchar *tag_collection = g_strdup_printf("1:0:%d:%s$", DT_COLLECTION_PROP_TAG, path);
       dt_control_signal_block_by_func(darktable.signals, G_CALLBACK(_collection_updated_callback), self);
-      dt_collection_deserialize(tag_collection, FALSE);
+      dt_collection_deserialize(tag_collection);
       dt_control_signal_unblock_by_func(darktable.signals, G_CALLBACK(_collection_updated_callback), self);
       g_free(tag_collection);
     }
@@ -2125,7 +2125,7 @@ static void _pop_menu_dictionary_goto_collection_back(GtkWidget *menuitem, dt_li
   if(d->collection[0])
   {
     dt_control_signal_block_by_func(darktable.signals, G_CALLBACK(_collection_updated_callback), self);
-    dt_collection_deserialize(d->collection, FALSE);
+    dt_collection_deserialize(d->collection);
     dt_control_signal_unblock_by_func(darktable.signals, G_CALLBACK(_collection_updated_callback), self);
     d->collection[0] = '\0';
   }
@@ -2267,7 +2267,7 @@ static void _pop_menu_dictionary(GtkWidget *treeview, GdkEventButton *event, dt_
     if(d->collection[0])
     {
       char *collection = g_malloc(4096);
-      dt_collection_serialize(collection, 4096, FALSE);
+      dt_collection_serialize(collection, 4096);
       if(g_strcmp0(d->collection, collection) == 0) d->collection[0] = '\0';
       g_free(collection);
     }
@@ -3147,7 +3147,6 @@ void gui_init(dt_lib_module_t *self)
   gtk_box_pack_end(hbox, button, FALSE, TRUE, 0);
   g_signal_connect(G_OBJECT(button), "clicked", G_CALLBACK(_clear_entry_button_callback), (gpointer)self);
   gtk_box_pack_start(box, GTK_WIDGET(hbox), FALSE, TRUE, 0);
-  dt_gui_add_class(GTK_WIDGET(box), "dt_spacing_sw");
   d->clear_button = button;
   dt_action_define(DT_ACTION(self), NULL, N_("clear entry"), button, &dt_action_def_button);
 

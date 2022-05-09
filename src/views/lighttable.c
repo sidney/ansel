@@ -875,7 +875,7 @@ GSList *mouse_actions(const dt_view_t *self)
     lm = dt_mouse_action_create_simple(lm, DT_MOUSE_ACTION_SCROLL, GDK_CONTROL_MASK,
                                        _("change number of images per row"));
 
-    if(darktable.collection->params.sorts[DT_COLLECTION_SORT_CUSTOM_ORDER])
+    if(darktable.collection->params.sort == DT_COLLECTION_SORT_CUSTOM_ORDER)
     {
       lm = dt_mouse_action_create_simple(lm, DT_MOUSE_ACTION_DRAG_DROP, GDK_BUTTON1_MASK, _("change image order"));
     }
@@ -1274,4 +1274,3 @@ void gui_init(dt_view_t *self)
 // vim: shiftwidth=2 expandtab tabstop=2 cindent
 // kate: tab-indents: off; indent-width 2; replace-tabs on; indent-mode cstyle; remove-trailing-spaces modified;
 // clang-format on
-

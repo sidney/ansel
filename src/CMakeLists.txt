@@ -131,7 +131,6 @@ FILE(GLOB SOURCE_FILES
   "dtgtk/gradientslider.c"
   "dtgtk/icon.c"
   "dtgtk/paint.c"
-  "dtgtk/range.c"
   "dtgtk/resetlabel.c"
   "dtgtk/sidepanel.c"
   "dtgtk/thumbnail.c"
@@ -365,19 +364,11 @@ if (USE_AVIF)
 endif()
 
 if(USE_HEIF)
-  macro(find_libheif versions)
-    foreach(version ${versions})
-      find_package(libheif ${version} CONFIG)
-      if(libheif_FOUND)
-        break()
-      endif()
-    endforeach()
-  endmacro()
-  
-  find_libheif(1.12.0;1.11.0;1.10.0;1.9.0)
+  find_package(libheif 1.9.0 CONFIG)
   if(TARGET heif)
     list(APPEND LIBS heif)
   else()
+    find_package(libheif 1.9.0)
     if(TARGET libheif::libheif)
       list(APPEND LIBS libheif::libheif)
     endif()
@@ -528,6 +519,10 @@ if(USE_GRAPHICSMAGICK)
     set(DT_SUPPORTED_EXTENSIONS ${DT_SUPPORTED_EXTENSIONS} gif jpc jp2 bmp dcm jng miff mng pbm pnm ppm pgm CACHE INTERNAL "")
     include_directories(SYSTEM ${GraphicsMagick_INCLUDE_DIRS})
     list(APPEND LIBS ${GraphicsMagick_LIBRARIES})
+    # CPack ignores variables you define in your CMakeLists.txt file,
+    # and only variables ${CPACK_*} are correctly used.
+    # so this needs to be saved by adding another variable with a name beginning with CPACK
+    set(CPACK_NSIS_GRAPHICSMAGICK_VERSION ${GraphicsMagick_PKGCONF_VERSION} CACHE STRING "GM version string")
   endif(GraphicsMagick_FOUND)
 endif(USE_GRAPHICSMAGICK)
 
@@ -536,10 +531,10 @@ if(USE_IMAGEMAGICK AND NOT GraphicsMagick_FOUND)
   find_package(PkgConfig)
   pkg_check_modules(ImageMagick MagickWand QUIET)
   if(ImageMagick_FOUND)
-    if(NOT ImageMagick_VERSION VERSION_GREATER 7)
-      message(FATAL_ERROR "ImageMagick version must be >= 7")
-    endif(NOT ImageMagick_VERSION VERSION_GREATER 7)
     add_definitions(-DHAVE_IMAGEMAGICK ${ImageMagick_CFLAGS_OTHER})
+    if(NOT ImageMagick_VERSION VERSION_GREATER 7)
+      message(FATAL "ImageMagick version must be >= 7")
+    endif(NOT ImageMagick_VERSION VERSION_GREATER 7)
     include_directories(SYSTEM ${ImageMagick_INCLUDE_DIRS})
     find_library(ImageMagick_LIBRARY ${ImageMagick_LIBRARIES} HINTS ${ImageMagick_LIBDIR})
     list(APPEND LIBS ${ImageMagick_LIBRARY})
