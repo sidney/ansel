@@ -25,7 +25,6 @@ set(MODULES import export copy_history styles tagging image select collect recen
 # The tools
 set(MODULES ${MODULES} viewswitcher)
 set(MODULES ${MODULES} darktable_label)
-set(MODULES ${MODULES} ratings)
 set(MODULES ${MODULES} colorlabels)
 set(MODULES ${MODULES} filter)
 set(MODULES ${MODULES} lighttable_mode)
@@ -72,7 +71,6 @@ add_library(darktable_label MODULE "tools/darktable.c")
 add_dependencies(darktable_label generate_authors_h)
 
 add_library(colorlabels MODULE "tools/colorlabels.c")
-add_library(ratings MODULE "tools/ratings.c")
 add_library(filter MODULE "tools/filter.c")
 add_library(lighttable_mode MODULE "tools/lighttable.c")
 add_library(view_toolbox MODULE "tools/view_toolbox.c")
