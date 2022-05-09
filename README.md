@@ -35,7 +35,8 @@ be backported here.
 **I will keep posting and maintaining my image-processing modules** on both repositories, fix bugs, optimize pixel code, write documentation, blog posts, assist users, and make videos about darktable.
 
 I will not engage in large-scale refactorings or GUI changes as I'm tired of arguing with
-people who should probably edit more pictures to feel the pain.
+people who should probably edit more pictures to feel the pain. I do not endorse
+their approach of design and engineering.
 
 In any case, my opinion for a long time has been that darktable is approaching End Of Life.
 Its pixel pipeline has not been designed to be extended that far, and nobody understands
