@@ -134,7 +134,7 @@ const char **views(dt_lib_module_t *self)
            unloading/loading a module while switching views.
 
    */
-  static const char *v[] = {"*", NULL};
+  static const char *v[] = {"lighttable", NULL};
   return v;
 }
 
@@ -829,4 +829,3 @@ void init(struct dt_lib_module_t *self)
 // vim: shiftwidth=2 expandtab tabstop=2 cindent
 // kate: tab-indents: off; indent-width 2; replace-tabs on; indent-mode cstyle; remove-trailing-spaces modified;
 // clang-format on
-
