@@ -1,5 +1,69 @@
-[![icon](/data/pixmaps/idbutton.png?raw=true)](https://www.darktable.org/) darktable [![GitHub Workflow Status (branch)](https://img.shields.io/github/workflow/status/darktable-org/darktable/CI/master)](https://github.com/darktable-org/darktable/actions/workflows/ci.yml?query=branch%3Amaster+is%3Acompleted+event%3Apush) [![CII Best Practices](https://bestpractices.coreinfrastructure.org/projects/470/badge)](https://bestpractices.coreinfrastructure.org/projects/470)
-=========
+[![icon](/data/pixmaps/idbutton.png?raw=true)](https://www.darktable.org/) R&Darktable
+============
+
+## Foreword
+
+### Dr Rant got fed up
+
+**Rational & Darktable** is a fork of the official darktable software with
+GUI changes that essentially aim at removing clutter and options.
+
+I strongly disagree with
+the latest decisions of the dev team that has proven to favour
+over-engineered solutions to simple problems, leading to brittle code, regressions and less efficient usage.
+
+The trend in darktable development lately has been to add many
+options to avoid making design decisions instead of focusing on an
+unified, consistent and streamlined workflow, in an attempt to pretend that everyone can be right at the same time. This is slowly heading
+toward a mix between Microsoft and Dassault Systems software design.
+
+ART (Another RawTherapee) has successfully shown that stripping away an
+old project from its legacy of bloat indeed verifies the saying : less is more.
+
+### Interoperability with upstream darktable
+
+This fork is and will aim at staying compatible with upstream darktable
+regarding the pixel processing pipeline, modules, old histories and so on.
+Edits created with this fork or upstream darktable can be open in either
+of the apps.
+
+GUI changes introduced in upstream darktable may not and will probably not
+be backported here.
+
+### Will you keep working on upstream darktable ?
+
+**I will keep posting and maintaining my image-processing modules** on both repositories, fix bugs, optimize pixel code, write documentation, blog posts, assist users, and make videos about darktable.
+
+I will not engage in large-scale refactorings or GUI changes as I'm tired of arguing with
+people who should probably edit more pictures to feel the pain.
+
+In any case, my opinion for a long time has been that darktable is approaching End Of Life.
+Its pixel pipeline has not been designed to be extended that far, and nobody understands
+its internal circuitery anymore. Its performance can't be improved either, since images
+start their life on CPU, are copied on GPU to be processed by OpenCL kernels (controlled anyway from the CPU - aka host), then brought back to the CPU to be painted in the GUI by Qtk
+(single-threaded), then sent again to the GPU to be displayed on screen. No matter how much you optimize the pixel code, as long as
+you don't remove those back-and-forth copies between RAM and vRAM,
+the performance penalty will stay substantial.
+
+Not to mention, OpenCL can't process real-time user input, like drawing or extracting image content, because it is meant mostly for data-science and low-level computation.
+
+These shortcomings can be solved only by a full rewrite of the pipeline in Vulkan, but darktable's code intimately interleave pixel code with Gtk UI code.
+
+For this reason, @hanatos, the founder of darktable, has started over a complete rewrite of
+an image processing app for Vulkan: [vkdt](https://github.com/hanatos/vkdt). It is already
+used by non-programmers to edit real pictures, but needs love to be comfortably usable.
+
+I plan on joining effort with him in gradually during 2022, to port the scene-referred modules
+of darktable to the performance of Vulkan and bring my knowledge of
+picture editing to reboot a consistent workflow app from scratch.
+
+During this work, legacy darktable/R&Darktable should get you covered to do your daily edits. That's what I use anyway and darktable 4.0
+will be pretty much feature-complete as far as I'm concerned… The only
+things I miss are already available in vkdt and not
+realistic to implement in legacy dt for performance reasons.
+
+
+## Back to your usual program
 
 darktable is an open source photography workflow application and non-destructive raw developer - a virtual lighttable and darkroom for photographers. It manages your digital negatives in a database, lets you view them through a zoomable lighttable and enables you to develop raw images, enhance them and export them to local or remote storage.
 
