@@ -1,3 +1,4 @@
+[![CI](https://github.com/aurelienpierre/R-Darktable/actions/workflows/ci.yml/badge.svg)](https://github.com/aurelienpierre/R-Darktable/actions/workflows/ci.yml)
 [![icon](/data/pixmaps/idbutton.png?raw=true)](https://www.darktable.org/) R&Darktable
 ============
 
