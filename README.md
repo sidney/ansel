@@ -1,4 +1,5 @@
 [![CI](https://github.com/aurelienpierre/R-Darktable/actions/workflows/ci.yml/badge.svg)](https://github.com/aurelienpierre/R-Darktable/actions/workflows/ci.yml)
+
 [![icon](/data/pixmaps/idbutton.png?raw=true)](https://www.darktable.org/) R&Darktable
 ============
 
@@ -63,6 +64,21 @@ During this work, legacy darktable/R&Darktable should get you covered to do your
 will be pretty much feature-complete as far as I'm concerned… The only
 things I miss are already available in vkdt and not
 realistic to implement in legacy dt for performance reasons.
+
+## Test coverage and supported OS/Platforms/Compilers
+
+The build matrix tests the compilation on typical desktop computers (x86_64) over the following OS:
+
+* Ubuntu 22.04,
+* Ubuntu 20.04,
+* Windows/MingW64
+
+MacOS tests have been removed because they fail at init time (so the software does not even have the opportunity to build). Since Mac is such a closed OS, it's mostly impossible to debug anyway and there are many issues with OpenMP and Gtk anyway. Consider it unsupported.
+
+The following compilers are tested :
+
+* GCC 8 to 11,
+* Clang/LLVM 9 to 14.
 
 
 ## Back to your usual program
