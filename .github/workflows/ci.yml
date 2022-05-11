@@ -206,7 +206,7 @@ jobs:
           - RelWithDebInfo
           - Release
         target:
-          - build
+          - skiptest
           - nofeatures
           - nofeatures_nosse
         generator:
