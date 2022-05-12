@@ -180,7 +180,7 @@ jobs:
                  --conf plugins/lighttable/export/force_lcms2=FALSE \
                  --conf plugins/lighttable/export/iccintent=0
 
-  Linux Ubuntu 20 LTS:
+  Linux Ubuntu 20 Focal:
     name: Linux.${{ matrix.os.code }}.${{ matrix.compiler.compiler }}.${{ matrix.target }}.${{ matrix.btype }}.${{ matrix.generator }}
     needs: Linux-minimal
     runs-on: ${{ matrix.os.label }}
@@ -306,8 +306,8 @@ jobs:
         run: |
           cd "${SRC_DIR}/src/tests/integration/"
           ./run.sh --no-opencl --no-deltae --fast-fail
-          
-  Linux Ubuntu 22 LTS:
+
+  Linux Ubuntu Jammy:
     name: Linux.${{ matrix.os.code }}.${{ matrix.compiler.compiler }}.${{ matrix.target }}.${{ matrix.btype }}.${{ matrix.generator }}
     needs: Linux-minimal
     runs-on: ${{ matrix.os.label }}
@@ -444,6 +444,7 @@ jobs:
       fail-fast: true
       matrix:
         btype:
+          - Debug
           - RelWithDebInfo
           - Release
         compiler:
