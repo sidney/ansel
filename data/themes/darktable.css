@@ -1329,6 +1329,11 @@ filechooser row:hover .sidebar-icon
   padding: 0.2em;
 }
 
+#collect-header-box button
+{
+  margin-right: 0;
+}
+
 /*------------
   - Map view -
   ------------*/
