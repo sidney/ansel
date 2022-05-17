@@ -267,6 +267,79 @@ static gboolean _panel_is_visible(dt_ui_panel_t panel)
   return ret;
 }
 
+static void _panel_toggle(dt_ui_border_t border, dt_ui_t *ui)
+{
+  switch(border)
+  {
+    case DT_UI_BORDER_LEFT: // left border
+    {
+      dt_ui_panel_show(ui, DT_UI_PANEL_LEFT, !_panel_is_visible(DT_UI_PANEL_LEFT), TRUE);
+    }
+    break;
+
+    case DT_UI_BORDER_RIGHT: // right border
+    {
+      dt_ui_panel_show(ui, DT_UI_PANEL_RIGHT, !_panel_is_visible(DT_UI_PANEL_RIGHT), TRUE);
+    }
+    break;
+
+    case DT_UI_BORDER_TOP: // top border
+    {
+      const gboolean show_ct = _panel_is_visible(DT_UI_PANEL_CENTER_TOP);
+      const gboolean show_t = _panel_is_visible(DT_UI_PANEL_TOP);
+      // all visible => toolbar hidden => all hidden => toolbar visible => all visible
+      if(show_ct && show_t)
+        dt_ui_panel_show(ui, DT_UI_PANEL_CENTER_TOP, FALSE, TRUE);
+      else if(!show_ct && show_t)
+        dt_ui_panel_show(ui, DT_UI_PANEL_TOP, FALSE, TRUE);
+      else if(!show_ct && !show_t)
+        dt_ui_panel_show(ui, DT_UI_PANEL_CENTER_TOP, TRUE, TRUE);
+      else
+        dt_ui_panel_show(ui, DT_UI_PANEL_TOP, TRUE, TRUE);
+    }
+    break;
+
+    case DT_UI_BORDER_BOTTOM: // bottom border
+    default:
+    {
+      const gboolean show_cb = _panel_is_visible(DT_UI_PANEL_CENTER_BOTTOM);
+      const gboolean show_b = _panel_is_visible(DT_UI_PANEL_BOTTOM);
+      // all visible => toolbar hidden => all hidden => toolbar visible => all visible
+      if(show_cb && show_b)
+        dt_ui_panel_show(ui, DT_UI_PANEL_CENTER_BOTTOM, FALSE, TRUE);
+      else if(!show_cb && show_b)
+        dt_ui_panel_show(ui, DT_UI_PANEL_BOTTOM, FALSE, TRUE);
+      else if(!show_cb && !show_b)
+        dt_ui_panel_show(ui, DT_UI_PANEL_CENTER_BOTTOM, TRUE, TRUE);
+      else
+        dt_ui_panel_show(ui, DT_UI_PANEL_BOTTOM, TRUE, TRUE);
+    }
+    break;
+  }
+}
+
+static void _toggle_side_borders_accel_callback(dt_action_t *action)
+{
+  /* toggle panel viewstate */
+  dt_ui_toggle_panels_visibility(darktable.gui->ui);
+
+  /* trigger invalidation of centerview to reprocess pipe */
+  dt_dev_invalidate(darktable.develop);
+  gtk_widget_queue_draw(dt_ui_center(darktable.gui->ui));
+}
+
+static void _toggle_panel_accel_callback(dt_action_t *action)
+{
+  if(!strcmp(action->id, "left"))
+    _panel_toggle(DT_UI_BORDER_LEFT, darktable.gui->ui);
+  else if(!strcmp(action->id, "right"))
+    _panel_toggle(DT_UI_BORDER_RIGHT, darktable.gui->ui);
+  else if(!strcmp(action->id, "top"))
+    _panel_toggle(DT_UI_BORDER_TOP, darktable.gui->ui);
+  else
+    _panel_toggle(DT_UI_BORDER_BOTTOM, darktable.gui->ui);
+}
+
 static void _toggle_header_accel_callback(dt_action_t *action)
 {
   dt_ui_panel_show(darktable.gui->ui, DT_UI_PANEL_TOP, !_panel_is_visible(DT_UI_PANEL_TOP), TRUE);
@@ -920,6 +993,18 @@ int dt_gui_gtk_init(dt_gui_gtk_t *gui)
   dt_action_t *pnl = dt_action_section(&darktable.control->actions_global, N_("panels"));
   dt_action_t *ac;
 
+  ac = dt_action_define(pnl, NULL, N_("left"), NULL, NULL);
+  dt_action_register(ac, NULL, _toggle_panel_accel_callback, GDK_KEY_L, GDK_CONTROL_MASK | GDK_SHIFT_MASK);
+
+  ac = dt_action_define(pnl, NULL, N_("right"), NULL, NULL);
+  dt_action_register(ac, NULL, _toggle_panel_accel_callback, GDK_KEY_R, GDK_CONTROL_MASK | GDK_SHIFT_MASK);
+
+  ac = dt_action_define(pnl, NULL, N_("top"), NULL, NULL);
+  dt_action_register(ac, NULL, _toggle_panel_accel_callback, GDK_KEY_T, GDK_CONTROL_MASK | GDK_SHIFT_MASK);
+
+  ac = dt_action_define(pnl, NULL, N_("bottom"), NULL, NULL);
+  dt_action_register(ac, NULL, _toggle_panel_accel_callback, GDK_KEY_B, GDK_CONTROL_MASK | GDK_SHIFT_MASK);
+
   dt_gui_presets_init();
 
   widget = dt_ui_center(darktable.gui->ui);
@@ -959,6 +1044,7 @@ int dt_gui_gtk_init(dt_gui_gtk_t *gui)
   dt_action_register(&darktable.control->actions_global, N_("fullscreen"), _fullscreen_key_accel_callback, GDK_KEY_F11, 0);
 
   // specific top/bottom toggles
+  dt_action_register(pnl, N_("all"), _toggle_side_borders_accel_callback, GDK_KEY_Tab, 0);
   dt_action_register(pnl, N_("header"), _toggle_header_accel_callback, GDK_KEY_h, GDK_CONTROL_MASK);
   dt_action_register(pnl, N_("filmstrip"), _toggle_filmstrip_accel_callback, GDK_KEY_f, GDK_CONTROL_MASK);
   dt_action_register(pnl, N_("top toolbar"), _toggle_top_tool_accel_callback, 0, 0);
