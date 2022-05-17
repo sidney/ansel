@@ -1421,6 +1421,8 @@ static void tree_view(dt_lib_collect_rule_t *dr)
       {
         char sdt[DT_DATETIME_EXIF_LENGTH] = {0};
         dt_datetime_gtimespan_to_exif(sdt, sizeof(sdt), sqlite3_column_int64(stmt, 0));
+        if(property == DT_COLLECTION_PROP_DAY)
+          sdt[10] = '\0';
         name = g_strdup(sdt);
       }
       else
