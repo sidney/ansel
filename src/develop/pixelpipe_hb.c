@@ -79,12 +79,6 @@ static char *_pipe_type_to_str(int pipe_type)
       else
         r = "preview";
       break;
-    case DT_DEV_PIXELPIPE_PREVIEW2:
-      if(fast)
-        r = "preview2/fast";
-      else
-        r = "preview2";
-      break;
     case DT_DEV_PIXELPIPE_FULL:
       r = "full";
       break;
@@ -135,14 +129,6 @@ int dt_dev_pixelpipe_init_preview(dt_dev_pixelpipe_t *pipe)
   // don't know which buffer size we're going to need, set to 0 (will be alloced on demand)
   const int res = dt_dev_pixelpipe_init_cached(pipe, 0, 8);
   pipe->type = DT_DEV_PIXELPIPE_PREVIEW;
-  return res;
-}
-
-int dt_dev_pixelpipe_init_preview2(dt_dev_pixelpipe_t *pipe)
-{
-  // don't know which buffer size we're going to need, set to 0 (will be alloced on demand)
-  const int res = dt_dev_pixelpipe_init_cached(pipe, 0, 5);
-  pipe->type = DT_DEV_PIXELPIPE_PREVIEW2;
   return res;
 }
 
@@ -291,11 +277,9 @@ void dt_dev_pixelpipe_rebuild(dt_develop_t *dev)
 {
   dev->pipe->changed |= DT_DEV_PIPE_REMOVE;
   dev->preview_pipe->changed |= DT_DEV_PIPE_REMOVE;
-  dev->preview2_pipe->changed |= DT_DEV_PIPE_REMOVE;
 
   dev->pipe->cache_obsolete = 1;
   dev->preview_pipe->cache_obsolete = 1;
-  dev->preview2_pipe->cache_obsolete = 1;
 
   // invalidate buffers and force redraw of darkroom
   dt_dev_invalidate_all(dev);
@@ -990,7 +974,7 @@ static int pixelpipe_process_on_CPU(dt_dev_pixelpipe_t *pipe, dt_develop_t *dev,
   else
   {
     if(!fitting)
-      fprintf(stderr, "[pixelpipe_process_on_CPU] Warning: processes `%s' even if memory requirements are not met\n", module->op); 
+      fprintf(stderr, "[pixelpipe_process_on_CPU] Warning: processes `%s' even if memory requirements are not met\n", module->op);
 
     module->process(module, piece, input, *output, roi_in, roi_out);
     *pixelpipe_flow |= (PIXELPIPE_FLOW_PROCESSED_ON_CPU);
@@ -1139,7 +1123,6 @@ static int dt_dev_pixelpipe_process_rec(dt_dev_pixelpipe_t *pipe, dt_develop_t *
   // if image has changed, stop now.
   if(pipe == dev->pipe && dev->image_force_reload) return 1;
   if(pipe == dev->preview_pipe && dev->preview_loading) return 1;
-  if(pipe == dev->preview2_pipe && dev->preview2_loading) return 1;
   if(dev->gui_leaving) return 1;
 
   // 3) input -> output
@@ -2633,4 +2616,3 @@ float *dt_dev_distort_detail_mask(const dt_dev_pixelpipe_t *pipe, float *src, co
 // vim: shiftwidth=2 expandtab tabstop=2 cindent
 // kate: tab-indents: off; indent-width 2; replace-tabs on; indent-mode cstyle; remove-trailing-spaces modified;
 // clang-format on
-

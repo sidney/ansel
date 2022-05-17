@@ -1950,7 +1950,6 @@ void dt_masks_update_image(dt_develop_t *dev)
   // invalidate buffers and force redraw of darkroom
   dev->pipe->changed |= DT_DEV_PIPE_SYNCH;
   dev->preview_pipe->changed |= DT_DEV_PIPE_SYNCH;
-  dev->preview2_pipe->changed |= DT_DEV_PIPE_SYNCH;
   dt_dev_invalidate_all(dev);
 }
 
@@ -2398,4 +2397,3 @@ void dt_masks_calculate_source_pos_value(dt_masks_form_gui_t *gui, const int mas
 // vim: shiftwidth=2 expandtab tabstop=2 cindent
 // kate: tab-indents: off; indent-width 2; replace-tabs on; indent-mode cstyle; remove-trailing-spaces modified;
 // clang-format on
-

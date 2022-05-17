@@ -1838,8 +1838,7 @@ void dt_colorspaces_set_display_profile(const dt_colorspaces_color_profile_type_
   /* let's have a look at the xatom, just in case ... */
   if(use_xatom)
   {
-    GtkWidget *widget = (profile_type == DT_COLORSPACE_DISPLAY2) ? darktable.develop->second_window.second_wnd
-                                                                 : dt_ui_center(darktable.gui->ui);
+    GtkWidget *widget = dt_ui_center(darktable.gui->ui);
     GdkWindow *window = gtk_widget_get_window(widget);
     GdkScreen *screen = gtk_widget_get_screen(widget);
     if(screen == NULL) screen = gdk_screen_get_default();
@@ -1867,9 +1866,7 @@ void dt_colorspaces_set_display_profile(const dt_colorspaces_color_profile_type_
   if(use_colord)
   {
     CdWindow *window = cd_window_new();
-    GtkWidget *center_widget = (profile_type == DT_COLORSPACE_DISPLAY2)
-                                   ? darktable.develop->second_window.second_wnd
-                                   : dt_ui_center(darktable.gui->ui);
+    GtkWidget *center_widget = dt_ui_center(darktable.gui->ui);
     cd_window_get_profile(window, center_widget, NULL, dt_colorspaces_get_display_profile_colord_callback,
                           GINT_TO_POINTER(profile_type));
   }
@@ -2445,4 +2442,3 @@ void dt_colorspaces_rgb_to_cygm(float *out, int num, double RGB_to_CAM[4][3])
 // vim: shiftwidth=2 expandtab tabstop=2 cindent
 // kate: tab-indents: off; indent-width 2; replace-tabs on; indent-mode cstyle; remove-trailing-spaces modified;
 // clang-format on
-

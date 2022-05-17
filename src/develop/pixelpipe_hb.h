@@ -182,7 +182,6 @@ int dt_dev_pixelpipe_init(dt_dev_pixelpipe_t *pipe);
 // inits the preview pixelpipe with plain passthrough input/output and empty input and default caching
 // settings.
 int dt_dev_pixelpipe_init_preview(dt_dev_pixelpipe_t *pipe);
-int dt_dev_pixelpipe_init_preview2(dt_dev_pixelpipe_t *pipe);
 // inits the pixelpipe with settings optimized for full-image export (no history stack cache)
 int dt_dev_pixelpipe_init_export(dt_dev_pixelpipe_t *pipe, int32_t width, int32_t height, int levels,
                                  gboolean store_masks);
@@ -261,4 +260,3 @@ float *dt_dev_distort_detail_mask(const dt_dev_pixelpipe_t *pipe, float *src, co
 // vim: shiftwidth=2 expandtab tabstop=2 cindent
 // kate: tab-indents: off; indent-width 2; replace-tabs on; indent-mode cstyle; remove-trailing-spaces modified;
 // clang-format on
-

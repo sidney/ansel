@@ -116,23 +116,23 @@ const char *cl_errstr(cl_int error)
     case CL_INVALID_ARG_SIZE: return "CL_INVALID_ARG_SIZE";
     case CL_INVALID_KERNEL_ARGS: return "CL_INVALID_KERNEL_ARGS";
     case CL_INVALID_WORK_DIMENSION: return "CL_INVALID_WORK_DIMENSION";
-    case CL_INVALID_WORK_GROUP_SIZE: return"CL_INVALID_WORK_GROUP_SIZE";    
-    case CL_INVALID_WORK_ITEM_SIZE: return"CL_INVALID_WORK_ITEM_SIZE";    
-    case CL_INVALID_GLOBAL_OFFSET: return"CL_INVALID_GLOBAL_OFFSET";    
-    case CL_INVALID_EVENT_WAIT_LIST: return"CL_INVALID_EVENT_WAIT_LIST";    
-    case CL_INVALID_EVENT: return"CL_INVALID_EVENT";    
-    case CL_INVALID_OPERATION: return"CL_INVALID_OPERATION";    
-    case CL_INVALID_GL_OBJECT: return"CL_INVALID_GL_OBJECT";    
-    case CL_INVALID_BUFFER_SIZE: return"CL_INVALID_BUFFER_SIZE";    
-    case CL_INVALID_MIP_LEVEL: return"CL_INVALID_MIP_LEVEL";    
-    case CL_INVALID_GLOBAL_WORK_SIZE: return"CL_INVALID_GLOBAL_WORK_SIZE";    
-    case CL_INVALID_PROPERTY: return"CL_INVALID_PROPERTY";    
-    case CL_INVALID_IMAGE_DESCRIPTOR: return"CL_INVALID_IMAGE_DESCRIPTOR";    
-    case CL_INVALID_COMPILER_OPTIONS: return"CL_INVALID_COMPILER_OPTIONS";    
-    case CL_INVALID_LINKER_OPTIONS: return"CL_INVALID_LINKER_OPTIONS";    
+    case CL_INVALID_WORK_GROUP_SIZE: return"CL_INVALID_WORK_GROUP_SIZE";
+    case CL_INVALID_WORK_ITEM_SIZE: return"CL_INVALID_WORK_ITEM_SIZE";
+    case CL_INVALID_GLOBAL_OFFSET: return"CL_INVALID_GLOBAL_OFFSET";
+    case CL_INVALID_EVENT_WAIT_LIST: return"CL_INVALID_EVENT_WAIT_LIST";
+    case CL_INVALID_EVENT: return"CL_INVALID_EVENT";
+    case CL_INVALID_OPERATION: return"CL_INVALID_OPERATION";
+    case CL_INVALID_GL_OBJECT: return"CL_INVALID_GL_OBJECT";
+    case CL_INVALID_BUFFER_SIZE: return"CL_INVALID_BUFFER_SIZE";
+    case CL_INVALID_MIP_LEVEL: return"CL_INVALID_MIP_LEVEL";
+    case CL_INVALID_GLOBAL_WORK_SIZE: return"CL_INVALID_GLOBAL_WORK_SIZE";
+    case CL_INVALID_PROPERTY: return"CL_INVALID_PROPERTY";
+    case CL_INVALID_IMAGE_DESCRIPTOR: return"CL_INVALID_IMAGE_DESCRIPTOR";
+    case CL_INVALID_COMPILER_OPTIONS: return"CL_INVALID_COMPILER_OPTIONS";
+    case CL_INVALID_LINKER_OPTIONS: return"CL_INVALID_LINKER_OPTIONS";
     case CL_INVALID_DEVICE_PARTITION_COUNT: return"CL_INVALID_DEVICE_PARTITION_COUNT";
     case DT_OPENCL_DEFAULT_ERROR: return "DT_OPENCL_DEFAULT_ERROR";
-    case DT_OPENCL_SYSMEM_ALLOCATION: return "DT_OPENCL_SYSMEM_ALLOCATION";    
+    case DT_OPENCL_SYSMEM_ALLOCATION: return "DT_OPENCL_SYSMEM_ALLOCATION";
     default: return "Unknown OpenCL error";
   }
 }
@@ -242,7 +242,7 @@ gboolean dt_opencl_read_device_config(const int devid)
   dt_opencl_t *cl = darktable.opencl;
   gchar key[256] = { 0 };
   g_snprintf(key, 254, "%s%s", DT_CLDEVICE_HEAD, cl->dev[devid].cname);
-  
+
   const gboolean existing_device = dt_conf_key_not_empty(key);
   gboolean safety_ok = TRUE;
   if(existing_device)
@@ -256,7 +256,7 @@ gboolean dt_opencl_read_device_config(const int devid)
     int event_handles;
     int asyncmode;
     int disabled;
-    float benchmark; 
+    float benchmark;
     sscanf(dat, "%i %i %i %i %i %i %i %i %f",
       &avoid_atomics, &micro_nap, &pinned_memory, &wd, &ht, &event_handles, &asyncmode, &disabled, &benchmark);
 
@@ -308,8 +308,8 @@ float dt_opencl_device_perfgain(const int devid)
 
   const float tcpu = fmaxf(1e-8f, cl->cpubenchmark);
   const float tgpu = fmaxf(1e-8f, cl->dev[devid].benchmark);
-  return tcpu / fminf(tgpu, tcpu);  
-} 
+  return tcpu / fminf(tgpu, tcpu);
+}
 
 // returns 0 if all ok or an error if we failed to init this device
 static int dt_opencl_device_init(dt_opencl_t *cl, const int dev, cl_device_id *devices, const int k)
@@ -455,7 +455,7 @@ static int dt_opencl_device_init(dt_opencl_t *cl, const int dev, cl_device_id *d
   err = dt_opencl_get_device_info(cl, devid, CL_DRIVER_VERSION, (void **)&driverversion, &driverversion_size);
   if(err != CL_SUCCESS)
   {
-    dt_print_nts(DT_DEBUG_OPENCL, "   *** driver version not available *** %s\n", cl_errstr(err));   
+    dt_print_nts(DT_DEBUG_OPENCL, "   *** driver version not available *** %s\n", cl_errstr(err));
     res = -1;
     cl->dev[dev].disabled |= 1;
     goto end;
@@ -464,7 +464,7 @@ static int dt_opencl_device_init(dt_opencl_t *cl, const int dev, cl_device_id *d
   err = dt_opencl_get_device_info(cl, devid, CL_DEVICE_VERSION, (void **)&deviceversion, &deviceversion_size);
   if(err != CL_SUCCESS)
   {
-    dt_print_nts(DT_DEBUG_OPENCL, "   *** device version not available *** %s\n", cl_errstr(err));   
+    dt_print_nts(DT_DEBUG_OPENCL, "   *** device version not available *** %s\n", cl_errstr(err));
     res = -1;
     cl->dev[dev].disabled |= 1;
     goto end;
@@ -506,7 +506,7 @@ static int dt_opencl_device_init(dt_opencl_t *cl, const int dev, cl_device_id *d
 
   if(is_cpu_device && newdevice)
   {
-    dt_print_nts(DT_DEBUG_OPENCL, "   *** discarding new device as emulated by CPU ***\n");   
+    dt_print_nts(DT_DEBUG_OPENCL, "   *** discarding new device as emulated by CPU ***\n");
     cl->dev[dev].disabled |= 1;
     res = -1;
     goto end;
@@ -514,14 +514,14 @@ static int dt_opencl_device_init(dt_opencl_t *cl, const int dev, cl_device_id *d
 
   if(!device_available)
   {
-    dt_print_nts(DT_DEBUG_OPENCL, "   *** device is not available ***\n");   
+    dt_print_nts(DT_DEBUG_OPENCL, "   *** device is not available ***\n");
     res = -1;
     goto end;
   }
 
   if(!image_support)
   {
-    dt_print_nts(DT_DEBUG_OPENCL, "   *** The OpenCL driver doesn't provide image support. See also 'clinfo' output ***\n");   
+    dt_print_nts(DT_DEBUG_OPENCL, "   *** The OpenCL driver doesn't provide image support. See also 'clinfo' output ***\n");
     res = -1;
     cl->dev[dev].disabled |= 1;
     goto end;
@@ -529,7 +529,7 @@ static int dt_opencl_device_init(dt_opencl_t *cl, const int dev, cl_device_id *d
 
   if(!little_endian)
   {
-    dt_print_nts(DT_DEBUG_OPENCL, "   *** device is not little endian ***\n");   
+    dt_print_nts(DT_DEBUG_OPENCL, "   *** device is not little endian ***\n");
     res = -1;
     cl->dev[dev].disabled |= 1;
     goto end;
@@ -539,8 +539,8 @@ static int dt_opencl_device_init(dt_opencl_t *cl, const int dev, cl_device_id *d
                                            &(cl->dev[dev].max_global_mem), NULL);
   if(cl->dev[dev].max_global_mem < (uint64_t)512ul * 1024ul * 1024ul)
   {
-    dt_print_nts(DT_DEBUG_OPENCL, "   *** insufficient global memory (%" PRIu64 "MB) ***\n", 
-                                   cl->dev[dev].max_global_mem / 1024 / 1024);   
+    dt_print_nts(DT_DEBUG_OPENCL, "   *** insufficient global memory (%" PRIu64 "MB) ***\n",
+                                   cl->dev[dev].max_global_mem / 1024 / 1024);
     res = -1;
     cl->dev[dev].disabled |= 1;
     goto end;
@@ -557,7 +557,7 @@ static int dt_opencl_device_init(dt_opencl_t *cl, const int dev, cl_device_id *d
     const gboolean old_blacklist = dt_conf_get_bool("opencl_disable_drivers_blacklist");
     cl->dev[dev].disabled |= (old_blacklist) ? 0 : 1;
     if(cl->dev[dev].disabled)
-      dt_print_nts(DT_DEBUG_OPENCL, "   *** new device is blacklisted ***\n");   
+      dt_print_nts(DT_DEBUG_OPENCL, "   *** new device is blacklisted ***\n");
     res = -1;
     goto end;
   }
@@ -613,7 +613,7 @@ static int dt_opencl_device_init(dt_opencl_t *cl, const int dev, cl_device_id *d
   cl->dev[dev].context = (cl->dlocl->symbols->dt_clCreateContext)(0, 1, &devid, NULL, NULL, &err);
   if(err != CL_SUCCESS)
   {
-    dt_print_nts(DT_DEBUG_OPENCL, "   *** could not create context *** %s\n", cl_errstr(err));   
+    dt_print_nts(DT_DEBUG_OPENCL, "   *** could not create context *** %s\n", cl_errstr(err));
     res = -1;
     goto end;
   }
@@ -622,7 +622,7 @@ static int dt_opencl_device_init(dt_opencl_t *cl, const int dev, cl_device_id *d
       cl->dev[dev].context, devid, (darktable.unmuted & DT_DEBUG_PERF) ? CL_QUEUE_PROFILING_ENABLE : 0, &err);
   if(err != CL_SUCCESS)
   {
-    dt_print_nts(DT_DEBUG_OPENCL, "   *** could not create command queue *** %s\n", cl_errstr(err));   
+    dt_print_nts(DT_DEBUG_OPENCL, "   *** could not create command queue *** %s\n", cl_errstr(err));
     res = -1;
     goto end;
   }
@@ -645,7 +645,7 @@ static int dt_opencl_device_init(dt_opencl_t *cl, const int dev, cl_device_id *d
   snprintf(cachedir, PATH_MAX * sizeof(char), "%s" G_DIR_SEPARATOR_S "cached_kernels_for_%s_%s", dtcache, devname, drvversion);
   if(g_mkdir_with_parents(cachedir, 0700) == -1)
   {
-    dt_print_nts(DT_DEBUG_OPENCL, "   *** failed to create kernel directory `%s' ***\n", cachedir);   
+    dt_print_nts(DT_DEBUG_OPENCL, "   *** failed to create kernel directory `%s' ***\n", cachedir);
     res = -1;
     goto end;
   }
@@ -828,7 +828,6 @@ void dt_opencl_init(dt_opencl_t *cl, const gboolean exclude_opencl, const gboole
   cl->dlocl = NULL;
   cl->dev_priority_image = NULL;
   cl->dev_priority_preview = NULL;
-  cl->dev_priority_preview2 = NULL;
   cl->dev_priority_export = NULL;
   cl->dev_priority_thumbnail = NULL;
 
@@ -993,13 +992,12 @@ void dt_opencl_init(dt_opencl_t *cl, const gboolean exclude_opencl, const gboole
     memset(cl->mandatory, 0, sizeof(cl->mandatory));
     cl->dev_priority_image = (int *)malloc(sizeof(int) * (dev + 1));
     cl->dev_priority_preview = (int *)malloc(sizeof(int) * (dev + 1));
-    cl->dev_priority_preview2 = (int *)malloc(sizeof(int) * (dev + 1));
     cl->dev_priority_export = (int *)malloc(sizeof(int) * (dev + 1));
     cl->dev_priority_thumbnail = (int *)malloc(sizeof(int) * (dev + 1));
 
     // only check successful malloc in debug mode; darktable will crash anyhow sooner or later if mallocs that
     // small would fail
-    assert(cl->dev_priority_image != NULL && cl->dev_priority_preview != NULL && cl->dev_priority_preview2 != NULL
+    assert(cl->dev_priority_image != NULL && cl->dev_priority_preview != NULL
            && cl->dev_priority_export != NULL && cl->dev_priority_thumbnail != NULL);
 
     dt_print_nts(DT_DEBUG_OPENCL, "[opencl_init] OpenCL successfully initialized.\n");
@@ -1063,7 +1061,7 @@ finally:
           tgpumax = fminf(cl->dev[n].benchmark, tgpumax);
         }
       }
-      
+
       if(tcpu <= 1.5f * tgpumin)
       {
         // de-activate opencl for darktable in case of too slow GPU(s). user can always manually overrule this later.
@@ -1194,7 +1192,6 @@ void dt_opencl_cleanup(dt_opencl_t *cl)
     }
     free(cl->dev_priority_image);
     free(cl->dev_priority_preview);
-    free(cl->dev_priority_preview2);
     free(cl->dev_priority_export);
     free(cl->dev_priority_thumbnail);
   }
@@ -1234,7 +1231,7 @@ static const char *dt_opencl_get_vendor_by_id(unsigned int id)
 
 // FIXME this benchmark simply doesn't reflect the power of a cl device in a meaningful way resulting in
 // - the config setting for very-fast GPU often misses a proper setting
-// - at the moment we can't use a cpu vs gpu performance ratio to decide if tiled-gpu might be worse than untiled-cpu 
+// - at the moment we can't use a cpu vs gpu performance ratio to decide if tiled-gpu might be worse than untiled-cpu
 static float dt_opencl_benchmark_gpu(const int devid, const size_t width, const size_t height, const int count, const float sigma)
 {
   const int bpp = 4 * sizeof(float);
@@ -1639,9 +1636,6 @@ static void dt_opencl_priorities_parse(dt_opencl_t *cl, const char *configstr)
 
   prio = _strsep(&str, "/");
   dt_opencl_priority_parse(cl, prio, cl->dev_priority_thumbnail, &cl->mandatory[3]);
-
-  prio = _strsep(&str, "/");
-  dt_opencl_priority_parse(cl, prio, cl->dev_priority_preview2, &cl->mandatory[4]);
 }
 
 // set device priorities according to config string
@@ -1651,14 +1645,14 @@ static void dt_opencl_update_priorities(const char *configstr)
   dt_opencl_priorities_parse(cl, configstr);
 
   dt_print_nts(DT_DEBUG_OPENCL, "[dt_opencl_update_priorities] these are your device priorities:\n");
-  dt_print_nts(DT_DEBUG_OPENCL, "[dt_opencl_update_priorities] \t\timage\tpreview\texport\tthumbs\tpreview2\n");
+  dt_print_nts(DT_DEBUG_OPENCL, "[dt_opencl_update_priorities] \t\timage\tpreview\texport\tthumbs\n");
   for(int i = 0; i < cl->num_devs; i++)
-    dt_print_nts(DT_DEBUG_OPENCL, "[dt_opencl_update_priorities]\t\t%d\t%d\t%d\t%d\t%d\n", cl->dev_priority_image[i],
-             cl->dev_priority_preview[i], cl->dev_priority_export[i], cl->dev_priority_thumbnail[i], cl->dev_priority_preview2[i]);
+    dt_print_nts(DT_DEBUG_OPENCL, "[dt_opencl_update_priorities]\t\t%d\t%d\t%d\t%d\n", cl->dev_priority_image[i],
+             cl->dev_priority_preview[i], cl->dev_priority_export[i], cl->dev_priority_thumbnail[i]);
   dt_print_nts(DT_DEBUG_OPENCL, "[dt_opencl_update_priorities] show if opencl use is mandatory for a given pixelpipe:\n");
-  dt_print_nts(DT_DEBUG_OPENCL, "[dt_opencl_update_priorities] \t\timage\tpreview\texport\tthumbs\tpreview2\n");
-  dt_print_nts(DT_DEBUG_OPENCL, "[dt_opencl_update_priorities]\t\t%d\t%d\t%d\t%d\t%d\n", cl->mandatory[0],
-             cl->mandatory[1], cl->mandatory[2], cl->mandatory[3], cl->mandatory[4]);
+  dt_print_nts(DT_DEBUG_OPENCL, "[dt_opencl_update_priorities] \t\timage\tpreview\texport\tthumbs\n");
+  dt_print_nts(DT_DEBUG_OPENCL, "[dt_opencl_update_priorities]\t\t%d\t%d\t%d\t%d\n", cl->mandatory[0],
+             cl->mandatory[1], cl->mandatory[2], cl->mandatory[3]);
 }
 
 int dt_opencl_lock_device(const int pipetype)
@@ -1690,10 +1684,6 @@ int dt_opencl_lock_device(const int pipetype)
     case DT_DEV_PIXELPIPE_THUMBNAIL:
       memcpy(priority, cl->dev_priority_thumbnail, prio_size);
       mandatory = cl->mandatory[3];
-      break;
-    case DT_DEV_PIXELPIPE_PREVIEW2:
-      memcpy(priority, cl->dev_priority_preview2, prio_size);
-      mandatory = cl->mandatory[4];
       break;
     default:
       free(priority);
@@ -2262,7 +2252,7 @@ int dt_opencl_enqueue_kernel_2d_with_local(const int dev, const int kernel, cons
 
   if(err != CL_SUCCESS)
     dt_print(DT_DEBUG_OPENCL, "[dt_opencl_enqueue_kernel_2d_with_local] kernel %i on device %d: %s\n", kernel, dev, cl_errstr(err));
-    
+
   return err;
 }
 
@@ -2747,7 +2737,7 @@ void _opencl_get_unused_device_mem(const int devid)
   x_buff = maxmem - available; // check only what is left
   while((available <= (maxmem - low_limit)) && (checked < 128) && (x_buff >= low_limit))
   {
-    x_buff /= 2;      
+    x_buff /= 2;
     tbuf[checked] = (cl->dlocl->symbols->dt_clCreateBuffer)(cl->dev[devid].context, CL_MEM_READ_WRITE, x_buff, NULL, &err);
     if(err == CL_SUCCESS)
     {
@@ -2761,7 +2751,7 @@ void _opencl_get_unused_device_mem(const int devid)
         if(tbuf[checked]) (cl->dlocl->symbols->dt_clReleaseMemObject)(tbuf[checked]);
     }
   }
- 
+
   for(int i = 0; i < checked; i++)
     if(tbuf[i]) (cl->dlocl->symbols->dt_clReleaseMemObject)(tbuf[i]);
 
@@ -2779,7 +2769,7 @@ void _opencl_get_unused_device_mem(const int devid)
 /* amount of graphics memory declared as available depends on max_global_mem and "resourcelevel". We garantee
    - a headroom of 400MB in all cases not using tuned cl
    - 256MB to simulate a minimum system
-   - 2GB to simalate a reference system 
+   - 2GB to simalate a reference system
 */
 void dt_opencl_check_device_available(const int devid)
 {
@@ -2855,10 +2845,10 @@ gboolean dt_opencl_image_fits_device(const int devid, const size_t width, const 
   if(cl->dev[devid].max_image_width < width || cl->dev[devid].max_image_height < height)
     return FALSE;
 
-  if(_opencl_get_device_memalloc(devid) < required)      return FALSE; 
-  if(dt_opencl_get_device_available(devid) < total)      return FALSE;  
+  if(_opencl_get_device_memalloc(devid) < required)      return FALSE;
+  if(dt_opencl_get_device_available(devid) < total)      return FALSE;
   // We know here that total memory fits and if so the buffersize will also fit as there is a factor of >=2
-  return TRUE; 
+  return TRUE;
 }
 
 /** round size to a multiple of the value given in the device specifig config parameter clroundup_wd/ht */
@@ -2960,7 +2950,7 @@ int dt_opencl_get_tuning_mode(void)
     else if(!strcmp(pstr, "memory transfer"))          res = DT_OPENCL_TUNE_PINNED;
     else if(!strcmp(pstr, "memory size and transfer")) res = DT_OPENCL_TUNE_MEMSIZE | DT_OPENCL_TUNE_PINNED;
   }
-  return res;  
+  return res;
 }
 
 /** read config of when/if to synch to cache */
@@ -3429,4 +3419,3 @@ int dt_opencl_local_buffer_opt(const int devid, const int kernel, dt_opencl_loca
 // vim: shiftwidth=2 expandtab tabstop=2 cindent
 // kate: tab-indents: off; indent-width 2; replace-tabs on; indent-mode cstyle; remove-trailing-spaces modified;
 // clang-format on
-

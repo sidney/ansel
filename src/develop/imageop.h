@@ -454,7 +454,6 @@ dt_iop_module_t *dt_iop_get_module_accel_curr(dt_iop_module_so_t *module);
 /** the given module */
 void dt_iop_refresh_center(dt_iop_module_t *module);
 void dt_iop_refresh_preview(dt_iop_module_t *module);
-void dt_iop_refresh_preview2(dt_iop_module_t *module);
 void dt_iop_refresh_all(dt_iop_module_t *module);
 
 /** queue a delayed call to dt_dev_add_history_item to capture module parameters */
@@ -514,4 +513,3 @@ void dt_iop_gui_changed(dt_action_t *action, GtkWidget *widget, gpointer data);
 // vim: shiftwidth=2 expandtab tabstop=2 cindent
 // kate: tab-indents: off; indent-width 2; replace-tabs on; indent-mode cstyle; remove-trailing-spaces modified;
 // clang-format on
-

@@ -145,11 +145,6 @@ typedef enum dt_signal_t
     */
   DT_SIGNAL_DEVELOP_PREVIEW_PIPE_FINISHED,
 
-  /** \brief This signal is raised when develop preview2 pipe process is finished
-  no param, no returned value
-    */
-  DT_SIGNAL_DEVELOP_PREVIEW2_PIPE_FINISHED,
-
   /** \brief This signal is raised when pipe is finished and the gui is attached
   no param, no returned value
     */
@@ -321,4 +316,3 @@ void dt_control_signal_unblock_by_func(const struct dt_control_signal_t *ctlsig,
 // vim: shiftwidth=2 expandtab tabstop=2 cindent
 // kate: tab-indents: off; indent-width 2; replace-tabs on; indent-mode cstyle; remove-trailing-spaces modified;
 // clang-format on
-

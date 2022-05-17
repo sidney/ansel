@@ -147,8 +147,6 @@ static dt_signal_description _signal_description[DT_SIGNAL_COUNT] = {
     FALSE }, // DT_SIGNAL_DEVELOP_MIPMAP_UPDATED
   { "dt-develop-preview-pipe-finished", NULL, NULL, G_TYPE_NONE, g_cclosure_marshal_VOID__VOID, 0, NULL, NULL,
     FALSE }, // DT_SIGNAL_DEVELOP_PREVIEW_PIPE_FINISHED
-  { "dt-develop-preview2-pipe-finished", NULL, NULL, G_TYPE_NONE, g_cclosure_marshal_VOID__VOID, 0, NULL, NULL,
-    FALSE }, // DT_SIGNAL_DEVELOP_PREVIEW2_PIPE_FINISHED
   { "dt-develop-ui-pipe-finished", NULL, NULL, G_TYPE_NONE, g_cclosure_marshal_VOID__VOID, 0, NULL, NULL,
     FALSE }, // DT_SIGNAL_DEVELOP_UI_PIPE_FINISHED
   { "dt-develop-history-will-change", NULL, NULL, G_TYPE_NONE, g_cclosure_marshal_generic, 3,
@@ -419,4 +417,3 @@ void dt_control_signal_unblock_by_func(const struct dt_control_signal_t *ctlsig,
 // vim: shiftwidth=2 expandtab tabstop=2 cindent
 // kate: tab-indents: off; indent-width 2; replace-tabs on; indent-mode cstyle; remove-trailing-spaces modified;
 // clang-format on
-

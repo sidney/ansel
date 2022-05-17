@@ -165,12 +165,12 @@ typedef struct dt_opencl_device_t
   // this can often be avoided by using indirect transfers via pinned memory,
   // other devices have more efficient direct memory transfer implementations.
   // We can't predict on solid grounds if a device belongs to the first or second group,
-  // also pinned mem transfer requires slightly more ram. 
+  // also pinned mem transfer requires slightly more ram.
   // this holds a bitmask defined by dt_opencl_pinmode_t
   // the device specific conf key might hold
   // 0 -> disabled by default; might be switched on by tune for performance
   // 1 -> enabled by default
-  // 2 -> disabled under all circumstances. This could/should be used if we give away / ship specific keys for buggy systems 
+  // 2 -> disabled under all circumstances. This could/should be used if we give away / ship specific keys for buggy systems
   int pinned_memory;
 
   // in OpenCL processing round width/height of global work groups to a multiple of these values.
@@ -227,7 +227,6 @@ typedef struct dt_opencl_t
   int mandatory[5];
   int *dev_priority_image;
   int *dev_priority_preview;
-  int *dev_priority_preview2;
   int *dev_priority_export;
   int *dev_priority_thumbnail;
   dt_opencl_device_t *dev;
@@ -638,4 +637,3 @@ static inline void dt_opencl_events_profiling(const int devid, const int aggrega
 // vim: shiftwidth=2 expandtab tabstop=2 cindent
 // kate: tab-indents: off; indent-width 2; replace-tabs on; indent-mode cstyle; remove-trailing-spaces modified;
 // clang-format on
-

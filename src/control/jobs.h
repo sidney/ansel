@@ -27,7 +27,6 @@
 #define DT_CTL_WORKER_RESERVED 3
 #define DT_CTL_WORKER_ZOOM_1 0    // dev zoom 1
 #define DT_CTL_WORKER_ZOOM_FILL 1 // dev zoom fill
-#define DT_CTL_WORKER_ZOOM_2 2    // dev zoom for preview2
 
 typedef enum dt_job_state_t
 {
@@ -104,4 +103,3 @@ int32_t dt_control_get_threadid();
 // vim: shiftwidth=2 expandtab tabstop=2 cindent
 // kate: tab-indents: off; indent-width 2; replace-tabs on; indent-mode cstyle; remove-trailing-spaces modified;
 // clang-format on
-

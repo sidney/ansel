@@ -622,13 +622,6 @@ void commit_params(struct dt_iop_module_t *self, dt_iop_params_t *p1, dt_dev_pix
     out_filename = (out_type == DT_COLORSPACE_DISPLAY ? darktable.color_profiles->display_filename : "");
     out_intent = darktable.color_profiles->display_intent;
   }
-  else if((pipe->type & DT_DEV_PIXELPIPE_PREVIEW2) == DT_DEV_PIXELPIPE_PREVIEW2)
-  {
-    /* preview2 is only used in second darkroom window, using display2 profile as output */
-    out_type = darktable.color_profiles->display2_type;
-    out_filename = darktable.color_profiles->display2_filename;
-    out_intent = darktable.color_profiles->display2_intent;
-  }
   else
   {
     /* we are not exporting, using display profile as output */
@@ -917,4 +910,3 @@ void gui_cleanup(struct dt_iop_module_t *self)
 // vim: shiftwidth=2 expandtab tabstop=2 cindent
 // kate: tab-indents: off; indent-width 2; replace-tabs on; indent-mode cstyle; remove-trailing-spaces modified;
 // clang-format on
-

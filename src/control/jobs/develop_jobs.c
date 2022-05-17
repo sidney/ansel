@@ -26,24 +26,9 @@ static int32_t dt_dev_process_preview_job_run(dt_job_t *job)
   return 0;
 }
 
-static int32_t dt_dev_process_preview2_job_run(dt_job_t *job)
-{
-  dt_develop_t *dev = dt_control_job_get_params(job);
-  dt_dev_process_preview2_job(dev);
-  return 0;
-}
-
 dt_job_t *dt_dev_process_preview_job_create(dt_develop_t *dev)
 {
   dt_job_t *job = dt_control_job_create(&dt_dev_process_preview_job_run, "develop process preview");
-  if(!job) return NULL;
-  dt_control_job_set_params(job, dev, NULL);
-  return job;
-}
-
-dt_job_t *dt_dev_process_preview2_job_create(dt_develop_t *dev)
-{
-  dt_job_t *job = dt_control_job_create(&dt_dev_process_preview2_job_run, "develop process preview");
   if(!job) return NULL;
   dt_control_job_set_params(job, dev, NULL);
   return job;
@@ -69,4 +54,3 @@ dt_job_t *dt_dev_process_image_job_create(dt_develop_t *dev)
 // vim: shiftwidth=2 expandtab tabstop=2 cindent
 // kate: tab-indents: off; indent-width 2; replace-tabs on; indent-mode cstyle; remove-trailing-spaces modified;
 // clang-format on
-

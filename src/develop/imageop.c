@@ -2575,8 +2575,8 @@ GtkWidget *dt_iop_gui_get_pluginui(dt_iop_module_t *module)
 
 int dt_iop_breakpoint(struct dt_develop_t *dev, struct dt_dev_pixelpipe_t *pipe)
 {
-  if(pipe != dev->preview_pipe && pipe != dev->preview2_pipe) sched_yield();
-  if(pipe != dev->preview_pipe && pipe != dev->preview2_pipe && pipe->changed == DT_DEV_PIPE_ZOOMED) return 1;
+  if(pipe != dev->preview_pipe) sched_yield();
+  if(pipe != dev->preview_pipe && pipe->changed == DT_DEV_PIPE_ZOOMED) return 1;
   if((pipe->changed != DT_DEV_PIPE_UNCHANGED && pipe->changed != DT_DEV_PIPE_ZOOMED) || dev->gui_leaving)
     return 1;
   return 0;
@@ -3023,26 +3023,10 @@ void dt_iop_refresh_preview(dt_iop_module_t *module)
   }
 }
 
-void dt_iop_refresh_preview2(dt_iop_module_t *module)
-{
-  if(darktable.gui->reset) return;
-  dt_develop_t *dev = module->dev;
-  if (dev && dev->gui_attached)
-  {
-    // invalidate the pixelpipe cache except for the output of the prior module
-    const uint64_t hash = dt_dev_pixelpipe_cache_basichash_prior(dev->pipe->image.id, dev->preview2_pipe, module);
-    dt_dev_pixelpipe_cache_flush_all_but(&dev->preview2_pipe->cache, hash);
-    dev->pipe->changed |= DT_DEV_PIPE_SYNCH; //ensure that commit_params gets called to pick up any GUI changes
-    dt_dev_invalidate_all(dev);
-    dt_control_queue_redraw();
-  }
-}
-
 void dt_iop_refresh_all(dt_iop_module_t *module)
 {
   dt_iop_refresh_preview(module);
   dt_iop_refresh_center(module);
-  dt_iop_refresh_preview2(module);
 }
 
 static gboolean _postponed_history_update(gpointer data)
