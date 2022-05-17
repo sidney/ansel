@@ -21,12 +21,6 @@ if(USE_MAP)
     set(MODULES ${MODULES} map)
 endif(USE_MAP)
 
-
-if(Gphoto2_FOUND)
-    add_library(tethering MODULE "tethering.c")
-    set(MODULES ${MODULES} tethering)
-endif(Gphoto2_FOUND)
-
 if(CUPS_FOUND)
     add_library(print MODULE "print.c")
     set(MODULES ${MODULES} print)
