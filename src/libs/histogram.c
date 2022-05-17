@@ -55,13 +55,6 @@
 
 DT_MODULE(1)
 
-typedef enum dt_lib_histogram_highlight_t
-{
-  DT_LIB_HISTOGRAM_HIGHLIGHT_NONE = 0,
-  DT_LIB_HISTOGRAM_HIGHLIGHT_BLACK_POINT,
-  DT_LIB_HISTOGRAM_HIGHLIGHT_EXPOSURE
-} dt_lib_histogram_highlight_t;
-
 typedef enum dt_lib_histogram_scope_type_t
 {
   DT_LIB_HISTOGRAM_SCOPE_HISTOGRAM = 0,
@@ -128,12 +121,8 @@ typedef struct dt_lib_histogram_t
   GtkWidget *green_channel_button;     // GtkToggleButton -- enable/disable processing G channel
   GtkWidget *blue_channel_button;      // GtkToggleButton -- enable/disable processing B channel
   GtkWidget *colorspace_button;        // GtkButton -- vectorscope colorspace
-  // drag to change parameters
-  gboolean dragging;
   int32_t button_down_x, button_down_y;
   float button_down_value;
-  // depends on mouse position
-  dt_lib_histogram_highlight_t highlight;
   // state set by buttons
   dt_lib_histogram_scope_type_t scope_type;
   dt_lib_histogram_scale_t histogram_scale;
@@ -1166,34 +1155,6 @@ static gboolean _drawable_draw_callback(GtkWidget *widget, cairo_t *crf, gpointe
     cairo_restore(cr);
   }
 
-  // exposure change regions
-  if(d->highlight == DT_LIB_HISTOGRAM_HIGHLIGHT_BLACK_POINT)
-  {
-    set_color(cr, darktable.bauhaus->graph_overlay);
-    if(d->scope_type == DT_LIB_HISTOGRAM_SCOPE_HISTOGRAM)
-      cairo_rectangle(cr, 0., 0., 0.2 * width, height);
-    else if(d->scope_orient == DT_LIB_HISTOGRAM_ORIENT_HORI)
-      cairo_rectangle(cr, 0., 7.0/9.0 * height, width, height);
-    else if(d->scope_orient == DT_LIB_HISTOGRAM_ORIENT_VERT)
-      cairo_rectangle(cr, 0., 0., 2.0/9.0 * width, height);
-    else
-      dt_unreachable_codepath();
-    cairo_fill(cr);
-  }
-  else if(d->highlight == DT_LIB_HISTOGRAM_HIGHLIGHT_EXPOSURE)
-  {
-    set_color(cr, darktable.bauhaus->graph_overlay);
-    if(d->scope_type == DT_LIB_HISTOGRAM_SCOPE_HISTOGRAM)
-      cairo_rectangle(cr, 0.2 * width, 0., width, height);
-    else if(d->scope_orient == DT_LIB_HISTOGRAM_ORIENT_HORI)
-      cairo_rectangle(cr, 0., 0., width, 7.0/9.0 * height);
-    else if(d->scope_orient == DT_LIB_HISTOGRAM_ORIENT_VERT)
-      cairo_rectangle(cr, 2.0/9.0 * width, 0., width, height);
-    else
-      dt_unreachable_codepath();
-    cairo_fill(cr);
-  }
-
   // draw grid
   set_color(cr, darktable.bauhaus->graph_grid);
   switch(d->scope_type)
@@ -1258,54 +1219,6 @@ static gboolean _drawable_draw_callback(GtkWidget *widget, cairo_t *crf, gpointe
 
   dt_show_times_f(&start, "[histogram]", "scope draw");
   return TRUE;
-}
-
-static gboolean _drawable_button_press_callback(GtkWidget *widget, GdkEventButton *event, gpointer user_data)
-{
-  dt_lib_histogram_t *d = (dt_lib_histogram_t *)user_data;
-  dt_develop_t *dev = darktable.develop;
-
-  if(d->highlight != DT_LIB_HISTOGRAM_HIGHLIGHT_NONE)
-  {
-    if(event->type == GDK_2BUTTON_PRESS)
-    {
-      dt_dev_exposure_reset_defaults(dev);
-    }
-    else
-    {
-      // FIXME: should change cursor from "grab" to "grabbing", but this would mean rewriting dt_control_change_cursor() to use gdk_cursor_new_from_name()
-      if(d->highlight == DT_LIB_HISTOGRAM_HIGHLIGHT_EXPOSURE)
-      {
-        d->button_down_value = dt_dev_exposure_get_exposure(dev);
-      }
-      else if(d->highlight == DT_LIB_HISTOGRAM_HIGHLIGHT_BLACK_POINT)
-      {
-        d->button_down_value = dt_dev_exposure_get_black(dev);
-      }
-      d->dragging = TRUE;
-      d->button_down_x = event->x;
-      d->button_down_y = event->y;
-    }
-  }
-
-  return TRUE;
-}
-
-static gboolean _drawable_leave_notify_callback(GtkWidget *widget, GdkEventCrossing *event,
-                                                gpointer user_data)
-{
-  dt_lib_histogram_t *d = (dt_lib_histogram_t *)user_data;
-  // if dragging, gtk keeps up motion notifications until mouse button
-  // is released, at which point we'll get another leave event for
-  // drawable if pointer is still outside of the widget
-  if(!d->dragging && d->highlight != DT_LIB_HISTOGRAM_HIGHLIGHT_NONE)
-  {
-    d->highlight = DT_LIB_HISTOGRAM_HIGHLIGHT_NONE;
-    dt_control_change_cursor(GDK_LEFT_PTR);
-    dt_control_queue_redraw_widget(widget);
-  }
-  // event should bubble up to the eventbox
-  return FALSE;
 }
 
 static void _histogram_scale_update(const dt_lib_histogram_t *d)
@@ -1544,18 +1457,6 @@ static gboolean _eventbox_enter_notify_callback(GtkWidget *widget, GdkEventCross
   return TRUE;
 }
 
-static gboolean _eventbox_motion_notify_callback(GtkWidget *widget, GdkEventCrossing *event,
-                                                 gpointer user_data)
-{
-  //This is required in order to correctly display the button tooltips
-  dt_lib_histogram_t *d = (dt_lib_histogram_t *)user_data;
-  gtk_widget_set_tooltip_text(d->green_channel_button, d->green ? _("click to hide green channel") : _("click to show green channel"));
-  gtk_widget_set_tooltip_text(d->blue_channel_button, d->blue ? _("click to hide blue channel") : _("click to show blue channel"));
-  gtk_widget_set_tooltip_text(d->red_channel_button, d->red ? _("click to hide red channel") : _("click to show red channel"));
-  _scope_type_update(d);
-  return TRUE;
-}
-
 static gboolean _eventbox_leave_notify_callback(GtkWidget *widget, GdkEventCrossing *event,
                                                  gpointer user_data)
 {
@@ -1600,9 +1501,6 @@ static void _lib_histogram_cycle_mode_callback(dt_action_t *action)
   dt_lib_module_t *self = darktable.lib->proxy.histogram.module;
   dt_lib_histogram_t *d = (dt_lib_histogram_t *)self->data;
 
-  // FIXME: When switch modes, this hack turns off the highlight and turn the cursor back to pointer, as we don't know what/if the new highlight is going to be. Right solution would be to have a highlight update function which takes cursor x,y and is called either here or on pointer motion. Really right solution is probably separate widgets for the drag areas which generate enter/leave events.
-  d->dragging = FALSE;
-  d->highlight = DT_LIB_HISTOGRAM_HIGHLIGHT_NONE;
   dt_control_change_cursor(GDK_LEFT_PTR);
 
   // The cycle order is Hist log -> lin -> waveform hori -> vert -> parade hori -> vert ->
@@ -1680,8 +1578,6 @@ static void _lib_histogram_change_mode_callback(dt_action_t *action)
 {
   dt_lib_module_t *self = darktable.lib->proxy.histogram.module;
   dt_lib_histogram_t *d = (dt_lib_histogram_t *)self->data;
-  d->dragging = FALSE;
-  d->highlight = DT_LIB_HISTOGRAM_HIGHLIGHT_NONE;
   dt_control_change_cursor(GDK_LEFT_PTR);
   _scope_type_clicked(d->scope_type_button, d);
 }
@@ -1948,21 +1844,14 @@ void gui_init(dt_lib_module_t *self)
   g_signal_connect(G_OBJECT(d->green_channel_button), "toggled", G_CALLBACK(_green_channel_toggle), d);
   g_signal_connect(G_OBJECT(d->blue_channel_button), "toggled", G_CALLBACK(_blue_channel_toggle), d);
 
-  gtk_widget_add_events(d->scope_draw, GDK_LEAVE_NOTIFY_MASK | GDK_BUTTON_PRESS_MASK);
   // FIXME: why does cursor motion over buttons trigger multiple draw callbacks?
   g_signal_connect(G_OBJECT(d->scope_draw), "draw", G_CALLBACK(_drawable_draw_callback), d);
-  g_signal_connect(G_OBJECT(d->scope_draw), "leave-notify-event",
-                   G_CALLBACK(_drawable_leave_notify_callback), d);
-  g_signal_connect(G_OBJECT(d->scope_draw), "button-press-event",
-                   G_CALLBACK(_drawable_button_press_callback), d);
 
-  gtk_widget_add_events(eventbox, GDK_LEAVE_NOTIFY_MASK | GDK_ENTER_NOTIFY_MASK | GDK_POINTER_MOTION_MASK);
+  gtk_widget_add_events(eventbox, GDK_LEAVE_NOTIFY_MASK | GDK_ENTER_NOTIFY_MASK);
   g_signal_connect(G_OBJECT(eventbox), "enter-notify-event",
                    G_CALLBACK(_eventbox_enter_notify_callback), d);
   g_signal_connect(G_OBJECT(eventbox), "leave-notify-event",
                    G_CALLBACK(_eventbox_leave_notify_callback), d);
-  g_signal_connect(G_OBJECT(eventbox), "motion-notify-event",
-                   G_CALLBACK(_eventbox_motion_notify_callback), d);
 
   // handles scroll-to-resize behavior
   gtk_widget_add_events(self->widget, darktable.gui->scroll_mask);
