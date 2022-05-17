@@ -139,9 +139,7 @@ typedef enum dt_clipping_preview_mode_t
 typedef struct dt_dev_proxy_exposure_t
 {
   struct dt_iop_module_t *module;
-  void (*set_exposure)(struct dt_iop_module_t *exp, const float exposure);
   float (*get_exposure)(struct dt_iop_module_t *exp);
-  void (*set_black)(struct dt_iop_module_t *exp, const float black);
   float (*get_black)(struct dt_iop_module_t *exp);
 } dt_dev_proxy_exposure_t;
 
@@ -403,12 +401,8 @@ void dt_dev_invalidate_from_gui(dt_develop_t *dev);
 gboolean dt_dev_exposure_hooks_available(dt_develop_t *dev);
 /** reset exposure to defaults */
 void dt_dev_exposure_reset_defaults(dt_develop_t *dev);
-/** set exposure */
-void dt_dev_exposure_set_exposure(dt_develop_t *dev, const float exposure);
 /** get exposure */
 float dt_dev_exposure_get_exposure(dt_develop_t *dev);
-/** set exposure black level */
-void dt_dev_exposure_set_black(dt_develop_t *dev, const float black);
 /** get exposure black level */
 float dt_dev_exposure_get_black(dt_develop_t *dev);
 
@@ -544,4 +538,3 @@ void dt_dev_undo_end_record(dt_develop_t *dev);
 // vim: shiftwidth=2 expandtab tabstop=2 cindent
 // kate: tab-indents: off; indent-width 2; replace-tabs on; indent-mode cstyle; remove-trailing-spaces modified;
 // clang-format on
-
