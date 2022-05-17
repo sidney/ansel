@@ -304,13 +304,6 @@ typedef struct dt_view_manager_t
       int32_t (*get_selected_imgid)(const dt_view_t *view);
     } tethering;
 
-    /* timeline module proxy */
-    struct
-    {
-      struct dt_lib_module_t *module;
-    } timeline;
-
-
 /* map view proxy object */
 #ifdef HAVE_MAP
     struct
@@ -466,4 +459,3 @@ void dt_view_print_settings(const dt_view_manager_t *vm, dt_print_info_t *pinfo,
 // vim: shiftwidth=2 expandtab tabstop=2 cindent
 // kate: tab-indents: off; indent-width 2; replace-tabs on; indent-mode cstyle; remove-trailing-spaces modified;
 // clang-format on
-

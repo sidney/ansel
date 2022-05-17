@@ -107,7 +107,7 @@ static void _preview_quit(dt_view_t *self)
   // restore panels
   dt_ui_restore_panels(darktable.gui->ui);
 
-  // show/hide filmstrip & timeline when entering the view
+  // show/hide filmstrip when entering the view
   if(lib->current_layout == DT_LIGHTTABLE_LAYOUT_CULLING
      || lib->current_layout == DT_LIGHTTABLE_LAYOUT_CULLING_DYNAMIC)
   {
@@ -115,7 +115,6 @@ static void _preview_quit(dt_view_t *self)
     // this is needed as collection change is handle there
     dt_ui_thumbtable(darktable.gui->ui)->navigate_inside_selection = lib->culling->navigate_inside_selection;
 
-    dt_lib_set_visible(darktable.view_manager->proxy.timeline.module, FALSE); // not available in this layouts
     dt_lib_set_visible(darktable.view_manager->proxy.filmstrip.module,
                        TRUE); // always on, visibility is driven by panel state
 
@@ -125,8 +124,6 @@ static void _preview_quit(dt_view_t *self)
   {
     dt_ui_thumbtable(darktable.gui->ui)->navigate_inside_selection = FALSE;
     dt_lib_set_visible(darktable.view_manager->proxy.filmstrip.module, FALSE); // not available in this layouts
-    dt_lib_set_visible(darktable.view_manager->proxy.timeline.module,
-                       TRUE); // always on, visibility is driven by panel state
 
     // set offset back
     dt_thumbtable_set_offset(dt_ui_thumbtable(darktable.gui->ui), lib->thumbtable_offset, TRUE);
@@ -229,7 +226,6 @@ static void _lighttable_check_layout(dt_view_t *self)
   {
     dt_thumbtable_set_parent(dt_ui_thumbtable(darktable.gui->ui), dt_ui_center_base(darktable.gui->ui),
                              DT_THUMBTABLE_MODE_NONE);
-    dt_lib_set_visible(darktable.view_manager->proxy.timeline.module, FALSE); // not available in this layouts
     dt_lib_set_visible(darktable.view_manager->proxy.filmstrip.module,
                        TRUE); // always on, visibility is driven by panel state
     dt_ui_scrollbars_show(darktable.gui->ui, FALSE);
@@ -239,8 +235,6 @@ static void _lighttable_check_layout(dt_view_t *self)
   else
   {
     dt_lib_set_visible(darktable.view_manager->proxy.filmstrip.module, FALSE); // not available in this layouts
-    dt_lib_set_visible(darktable.view_manager->proxy.timeline.module,
-                       TRUE); // always on, visibility is driven by panel state
   }
 }
 
@@ -404,7 +398,7 @@ void expose(dt_view_t *self, cairo_t *cr, int32_t width, int32_t height, int32_t
       case DT_LIGHTTABLE_LAYOUT_ZOOMABLE:
       case DT_LIGHTTABLE_LAYOUT_FILEMANAGER:
         if(!gtk_widget_get_visible(dt_ui_thumbtable(darktable.gui->ui)->widget))
-          gtk_widget_show(dt_ui_thumbtable(darktable.gui->ui)->widget);
+          gtk_widget_hide(dt_ui_thumbtable(darktable.gui->ui)->widget);
         break;
       case DT_LIGHTTABLE_LAYOUT_CULLING:
       case DT_LIGHTTABLE_LAYOUT_CULLING_DYNAMIC:
@@ -456,10 +450,9 @@ void enter(dt_view_t *self)
 
   dt_collection_hint_message(darktable.collection);
 
-  // show/hide filmstrip & timeline when entering the view
+  // show/hide filmstrip when entering the view
   if(layout == DT_LIGHTTABLE_LAYOUT_CULLING || layout == DT_LIGHTTABLE_LAYOUT_CULLING_DYNAMIC || lib->preview_state)
   {
-    dt_lib_set_visible(darktable.view_manager->proxy.timeline.module, FALSE); // not available in this layouts
     dt_lib_set_visible(darktable.view_manager->proxy.filmstrip.module,
                        TRUE); // always on, visibility is driven by panel state
 
@@ -471,8 +464,6 @@ void enter(dt_view_t *self)
   else
   {
     dt_lib_set_visible(darktable.view_manager->proxy.filmstrip.module, FALSE); // not available in this layouts
-    dt_lib_set_visible(darktable.view_manager->proxy.timeline.module,
-                       TRUE); // always on, visibility is driven by panel state
   }
 
   // restore panels
@@ -497,10 +488,9 @@ static void _preview_enter(dt_view_t *self, gboolean sticky, gboolean focus)
 
   dt_ui_thumbtable(darktable.gui->ui)->navigate_inside_selection = lib->preview->navigate_inside_selection;
 
-  // show/hide filmstrip & timeline when entering the view
+  // show/hide filmstrip when entering the view
   dt_thumbtable_set_parent(dt_ui_thumbtable(darktable.gui->ui), dt_ui_center_base(darktable.gui->ui),
                            DT_THUMBTABLE_MODE_NONE);
-  dt_lib_set_visible(darktable.view_manager->proxy.timeline.module, FALSE); // not available in this layouts
   dt_lib_set_visible(darktable.view_manager->proxy.filmstrip.module,
                      TRUE); // always on, visibility is driven by panel state
   dt_thumbtable_set_offset_image(dt_ui_thumbtable(darktable.gui->ui), lib->preview->offset_imgid, TRUE);

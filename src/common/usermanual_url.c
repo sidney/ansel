@@ -38,7 +38,6 @@ dt_help_url urls_db[] =
   {"image",                      "module-reference/utility-modules/lighttable/selected-image/"},
   {"copy_history",               "module-reference/utility-modules/lighttable/history-stack/"},
   {"styles",                     "module-reference/utility-modules/lighttable/styles/#module-controls"},
-  {"timeline",                   "module-reference/utility-modules/lighttable/timeline/"},
   {"metadata",                   "module-reference/utility-modules/shared/metadata-editor/"},
   {"tagging",                    "module-reference/utility-modules/shared/tagging/"},
   {"geotagging",                 "module-reference/utility-modules/shared/geotagging/"},
@@ -187,4 +186,3 @@ char *dt_get_help_url(char *name)
 // vim: shiftwidth=2 expandtab tabstop=2 cindent
 // kate: tab-indents: off; indent-width 2; replace-tabs on; indent-mode cstyle; remove-trailing-spaces modified;
 // clang-format on
-

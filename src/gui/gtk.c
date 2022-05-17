@@ -1193,7 +1193,7 @@ int dt_gui_gtk_init(dt_gui_gtk_t *gui)
   dt_action_register(pnl, N_("collapsing controls"), _panels_controls_accel_callback, GDK_KEY_b, 0);
   // specific top/bottom toggles
   dt_action_register(pnl, N_("header"), _toggle_header_accel_callback, GDK_KEY_h, GDK_CONTROL_MASK);
-  dt_action_register(pnl, N_("filmstrip and timeline"), _toggle_filmstrip_accel_callback, GDK_KEY_f, GDK_CONTROL_MASK);
+  dt_action_register(pnl, N_("filmstrip"), _toggle_filmstrip_accel_callback, GDK_KEY_f, GDK_CONTROL_MASK);
   dt_action_register(pnl, N_("top toolbar"), _toggle_top_tool_accel_callback, 0, 0);
   dt_action_register(pnl, N_("bottom toolbar"), _toggle_bottom_tool_accel_callback, 0, 0);
   dt_action_register(pnl, N_("all top"), _toggle_top_all_accel_callback, 0, 0);

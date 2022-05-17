@@ -33,7 +33,6 @@ set(MODULES ${MODULES} module_toolbox)
 set(MODULES ${MODULES} filmstrip)
 set(MODULES ${MODULES} hinter)
 set(MODULES ${MODULES} global_toolbox)
-set(MODULES ${MODULES} timeline)
 set(MODULES ${MODULES} image_infos)
 
 if(BUILD_BATTERY_INDICATOR)
@@ -78,7 +77,6 @@ add_library(module_toolbox MODULE "tools/module_toolbox.c")
 add_library(filmstrip MODULE "tools/filmstrip.c")
 add_library(hinter MODULE "tools/hinter.c")
 add_library(global_toolbox MODULE "tools/global_toolbox.c")
-add_library(timeline MODULE "tools/timeline.c")
 add_library(image_infos MODULE "tools/image_infos.c")
 
 find_path(PORTMIDI_INCLUDE_DIR NAMES portmidi.h
