@@ -1260,78 +1260,6 @@ static gboolean _drawable_draw_callback(GtkWidget *widget, cairo_t *crf, gpointe
   return TRUE;
 }
 
-static gboolean _drawable_motion_notify_callback(GtkWidget *widget, GdkEventMotion *event,
-                                                 gpointer user_data)
-{
-  dt_lib_histogram_t *d = (dt_lib_histogram_t *)user_data;
-  dt_develop_t *dev = darktable.develop;
-  GtkAllocation allocation;
-  gtk_widget_get_allocation(widget, &allocation);
-
-  if(d->dragging)
-  {
-    // FIXME: dragging the vectorscope could change white balance
-    const gboolean width_wise = (d->scope_type == DT_LIB_HISTOGRAM_SCOPE_HISTOGRAM ||
-                                 d->scope_orient == DT_LIB_HISTOGRAM_ORIENT_VERT);
-    const float diff = width_wise ? event->x - d->button_down_x : d->button_down_y - event->y;
-    const int range = width_wise ? allocation.width : allocation.height;
-    // FIXME: see dt_bauhaus_slider_postponed_value_change(): delay processing until the pixelpipe can update based on dev->preview_average_delay for smoother interaction
-    if(d->highlight == DT_LIB_HISTOGRAM_HIGHLIGHT_EXPOSURE)
-    {
-      const float exposure = d->button_down_value + diff * 4.0f / (float)range;
-      dt_dev_exposure_set_exposure(dev, exposure);
-    }
-    else if(d->highlight == DT_LIB_HISTOGRAM_HIGHLIGHT_BLACK_POINT)
-    {
-      const float black = d->button_down_value - diff * .1f / (float)range;
-      dt_dev_exposure_set_black(dev, black);
-    }
-  }
-  else
-  {
-    const float x = event->x;
-    const float y = event->y;
-    const float posx = x / (float)(allocation.width);
-    const float posy = y / (float)(allocation.height);
-    const dt_lib_histogram_highlight_t prior_highlight = d->highlight;
-    const dt_view_t *cv = dt_view_manager_get_current_view(darktable.view_manager);
-    const gboolean hooks_available = (cv->view(cv) == DT_VIEW_DARKROOM) && dt_dev_exposure_hooks_available(dev);
-
-    // FIXME: make just one tooltip for the widget depending on whether it is draggable or not, and set it when enter the view
-    if(!hooks_available || d->scope_type == DT_LIB_HISTOGRAM_SCOPE_VECTORSCOPE)
-    {
-      d->highlight = DT_LIB_HISTOGRAM_HIGHLIGHT_NONE;
-      gtk_widget_set_tooltip_text(widget, _("ctrl+scroll to change display height"));
-    }
-    // FIXME: could a GtkRange be used to do this work?
-    else if((posx < 0.2f && d->scope_type == DT_LIB_HISTOGRAM_SCOPE_HISTOGRAM) ||
-            (d->scope_type == DT_LIB_HISTOGRAM_SCOPE_WAVEFORM &&
-             ((posy > 7.0f/9.0f && d->scope_orient == DT_LIB_HISTOGRAM_ORIENT_HORI) ||
-              (posx < 2.0f/9.0f && d->scope_orient == DT_LIB_HISTOGRAM_ORIENT_VERT))))
-    {
-      d->highlight = DT_LIB_HISTOGRAM_HIGHLIGHT_BLACK_POINT;
-      gtk_widget_set_tooltip_text(widget, _("drag to change black point,\ndoubleclick resets\nctrl+scroll to change display height"));
-    }
-    else
-    {
-      d->highlight = DT_LIB_HISTOGRAM_HIGHLIGHT_EXPOSURE;
-      gtk_widget_set_tooltip_text(widget, _("drag to change exposure,\ndoubleclick resets\nctrl+scroll to change display height"));
-    }
-    if(prior_highlight != d->highlight)
-    {
-      dt_control_queue_redraw_widget(widget);
-      if(d->highlight != DT_LIB_HISTOGRAM_HIGHLIGHT_NONE)
-      {
-        // FIXME: should really use named cursors, and differentiate between "grab" and "grabbing"
-        dt_control_change_cursor(GDK_HAND1);
-      }
-    }
-  }
-
-  //bubble event to eventbox to update the button tooltip
-  return FALSE;
-}
-
 static gboolean _drawable_button_press_callback(GtkWidget *widget, GdkEventButton *event, gpointer user_data)
 {
   dt_lib_histogram_t *d = (dt_lib_histogram_t *)user_data;
@@ -1360,49 +1288,6 @@ static gboolean _drawable_button_press_callback(GtkWidget *widget, GdkEventButto
     }
   }
 
-  return TRUE;
-}
-
-static gboolean _drawable_scroll_callback(GtkWidget *widget, GdkEventScroll *event, gpointer user_data)
-{
-  if(dt_modifier_is(event->state, GDK_CONTROL_MASK))
-  {
-    // bubble to adjusting the overall widget size
-    return FALSE;
-  }
-  const dt_lib_histogram_t *d = (dt_lib_histogram_t *)user_data;
-  int delta_y;
-  // note are using unit rather than smooth scroll events, as
-  // exposure changes can get laggy if handling a multitude of smooth
-  // scroll events
-  if(dt_gui_get_scroll_unit_deltas(event, NULL, &delta_y) &&
-     d->highlight != DT_LIB_HISTOGRAM_HIGHLIGHT_NONE)
-  {
-    dt_develop_t *dev = darktable.develop;
-    // FIXME: see dt_bauhaus_slider_postponed_value_change(): delay processing until the pixelpipe can update based on dev->preview_average_delay for smoother interaction
-    if(d->highlight == DT_LIB_HISTOGRAM_HIGHLIGHT_EXPOSURE)
-    {
-      const float ce = dt_dev_exposure_get_exposure(dev);
-      dt_dev_exposure_set_exposure(dev, ce - 0.15f * delta_y);
-    }
-    else if(d->highlight == DT_LIB_HISTOGRAM_HIGHLIGHT_BLACK_POINT)
-    {
-      const float cb = dt_dev_exposure_get_black(dev);
-      dt_dev_exposure_set_black(dev, cb + 0.001f * delta_y);
-    }
-  }
-
-  return TRUE;
-}
-
-static gboolean _drawable_button_release_callback(GtkWidget *widget, GdkEventButton *event,
-                                                  gpointer user_data)
-{
-  dt_lib_histogram_t *d = (dt_lib_histogram_t *)user_data;
-  d->dragging = FALSE;
-  // hack to recalculate the highlight as mouse may be over a different part of the widget
-  // FIXME: generate an event instead?
-  _drawable_motion_notify_callback(widget, (GdkEventMotion *)event, user_data);
   return TRUE;
 }
 
@@ -2063,20 +1948,13 @@ void gui_init(dt_lib_module_t *self)
   g_signal_connect(G_OBJECT(d->green_channel_button), "toggled", G_CALLBACK(_green_channel_toggle), d);
   g_signal_connect(G_OBJECT(d->blue_channel_button), "toggled", G_CALLBACK(_blue_channel_toggle), d);
 
-  gtk_widget_add_events(d->scope_draw, GDK_LEAVE_NOTIFY_MASK | GDK_POINTER_MOTION_MASK | GDK_BUTTON_PRESS_MASK |
-                                       GDK_BUTTON_RELEASE_MASK | darktable.gui->scroll_mask);
+  gtk_widget_add_events(d->scope_draw, GDK_LEAVE_NOTIFY_MASK | GDK_BUTTON_PRESS_MASK);
   // FIXME: why does cursor motion over buttons trigger multiple draw callbacks?
   g_signal_connect(G_OBJECT(d->scope_draw), "draw", G_CALLBACK(_drawable_draw_callback), d);
   g_signal_connect(G_OBJECT(d->scope_draw), "leave-notify-event",
                    G_CALLBACK(_drawable_leave_notify_callback), d);
   g_signal_connect(G_OBJECT(d->scope_draw), "button-press-event",
                    G_CALLBACK(_drawable_button_press_callback), d);
-  g_signal_connect(G_OBJECT(d->scope_draw), "button-release-event",
-                   G_CALLBACK(_drawable_button_release_callback), d);
-  g_signal_connect(G_OBJECT(d->scope_draw), "motion-notify-event",
-                   G_CALLBACK(_drawable_motion_notify_callback), d);
-  g_signal_connect(G_OBJECT(d->scope_draw), "scroll-event",
-                   G_CALLBACK(_drawable_scroll_callback), d);
 
   gtk_widget_add_events(eventbox, GDK_LEAVE_NOTIFY_MASK | GDK_ENTER_NOTIFY_MASK | GDK_POINTER_MOTION_MASK);
   g_signal_connect(G_OBJECT(eventbox), "enter-notify-event",
@@ -2121,4 +1999,3 @@ void gui_cleanup(dt_lib_module_t *self)
 // vim: shiftwidth=2 expandtab tabstop=2 cindent
 // kate: tab-indents: off; indent-width 2; replace-tabs on; indent-mode cstyle; remove-trailing-spaces modified;
 // clang-format on
-
