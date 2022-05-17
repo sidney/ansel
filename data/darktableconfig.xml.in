@@ -1952,24 +1952,10 @@
     <longdescription/>
   </dtconfig>
   <dtconfig>
-    <name>lighttable/ui/preview/panels_collapse_controls</name>
-    <type>bool</type>
-    <default>false</default>
-    <shortdescription>show borders arrows in preview mode</shortdescription>
-    <longdescription/>
-  </dtconfig>
-  <dtconfig>
     <name>lighttable/ui/preview/panel_collaps_state</name>
     <type>int</type>
     <default>1</default>
     <shortdescription>panels collapsing state in preview mode</shortdescription>
-    <longdescription/>
-  </dtconfig>
-  <dtconfig>
-    <name>slideshow/ui/panels_collapse_controls</name>
-    <type>bool</type>
-    <default>false</default>
-    <shortdescription>show borders arrows in slideshow</shortdescription>
     <longdescription/>
   </dtconfig>
   <dtconfig>

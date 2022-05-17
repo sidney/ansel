@@ -34,13 +34,6 @@
 
 typedef struct dt_gui_widgets_t
 {
-
-  // Borders
-  GtkWidget *left_border;
-  GtkWidget *right_border;
-  GtkWidget *bottom_border;
-  GtkWidget *top_border;
-
   /* left panel */
   GtkGrid *panel_left; // panel grid 3 rows, top,center,bottom and file on center
   GtkGrid *panel_right;
@@ -470,4 +463,3 @@ void dt_gui_hide_collapsible_section(dt_gui_collapsible_section_t *cs);
 // vim: shiftwidth=2 expandtab tabstop=2 cindent
 // kate: tab-indents: off; indent-width 2; replace-tabs on; indent-mode cstyle; remove-trailing-spaces modified;
 // clang-format on
-
