@@ -523,7 +523,6 @@ void dt_gui_preferences_show()
 
   //setup tabs
   init_tab_general(_preferences_dialog, stack, tweak_widgets);
-  init_tab_import(_preferences_dialog, stack);
   init_tab_lighttable(_preferences_dialog, stack);
   init_tab_darkroom(_preferences_dialog, stack);
   init_tab_processing(_preferences_dialog, stack);
@@ -1385,4 +1384,3 @@ GtkWidget *dt_gui_preferences_string(GtkGrid *grid, const char *key, const guint
 // vim: shiftwidth=2 expandtab tabstop=2 cindent
 // kate: tab-indents: off; indent-width 2; replace-tabs on; indent-mode cstyle; remove-trailing-spaces modified;
 // clang-format on
-
