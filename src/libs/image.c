@@ -69,7 +69,7 @@ typedef enum dt_lib_metadata_id
 
 const char *name(dt_lib_module_t *self)
 {
-  return _("selected image[s]");
+  return _("act on selection");
 }
 
 const char **views(dt_lib_module_t *self)
@@ -462,7 +462,7 @@ void gui_init(dt_lib_module_t *self)
   dt_action_define(DT_ACTION(self), NULL, N_("page"), GTK_WIDGET(self->widget), &notebook_def);
   dt_gui_add_help_link(self->widget, dt_get_help_url("image"));
 
-  GtkWidget *page1 = dt_ui_notebook_page(GTK_NOTEBOOK(self->widget), N_("images"), NULL);
+  GtkWidget *page1 = dt_ui_notebook_page(GTK_NOTEBOOK(self->widget), N_("files"), NULL);
   GtkWidget *page2 = dt_ui_notebook_page(GTK_NOTEBOOK(self->widget), N_("metadata"), NULL);
 
   // images operations

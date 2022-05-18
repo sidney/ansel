@@ -57,7 +57,7 @@ typedef struct dt_lib_metadata_t
 
 const char *name(dt_lib_module_t *self)
 {
-  return _("metadata editor");
+  return _("edit metadata");
 }
 
 const char **views(dt_lib_module_t *self)
@@ -962,4 +962,3 @@ int set_params(dt_lib_module_t *self, const void *params, int size)
 // vim: shiftwidth=2 expandtab tabstop=2 cindent
 // kate: tab-indents: off; indent-width 2; replace-tabs on; indent-mode cstyle; remove-trailing-spaces modified;
 // clang-format on
-

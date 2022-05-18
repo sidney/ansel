@@ -64,7 +64,7 @@ typedef struct dt_lib_recentcollect_t
 
 const char *name(dt_lib_module_t *self)
 {
-  return _("recently used collections");
+  return _("recent collections");
 }
 
 const char **views(dt_lib_module_t *self)
@@ -434,4 +434,3 @@ void gui_cleanup(dt_lib_module_t *self)
 // vim: shiftwidth=2 expandtab tabstop=2 cindent
 // kate: tab-indents: off; indent-width 2; replace-tabs on; indent-mode cstyle; remove-trailing-spaces modified;
 // clang-format on
-
