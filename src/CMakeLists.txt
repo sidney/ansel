@@ -581,16 +581,6 @@ if(USE_OPENCL)
   add_definitions("-DHAVE_OPENCL")
 endif(USE_OPENCL)
 
-
-if(Gphoto2_FOUND)
-  set(SOURCES ${SOURCES} "common/camera_control.c" "control/jobs/camera_jobs.c" )
-  add_definitions("-DHAVE_GPHOTO2")
-  # CPack ignores variables you define in your CMakeLists.txt file,
-  # and only variables ${CPACK_*} are correctly used.
-  # so this needs to be saved by adding another variable with a name beginning with CPACK
-  set(CPACK_NSIS_GPHOTO2_VERSION ${Gphoto2_VERSION_STRING} CACHE STRING "Gphoto2 version string")
-endif(Gphoto2_FOUND)
-
 # Check for __builtin_cpu_supports here due to a bug in clang/llvm. LLVM uses
 # libgcc to provide the symbols, so if clang wasn't compiled with libgcc, the
 # compiler will say it's available; however the linker cannot find the symbols.

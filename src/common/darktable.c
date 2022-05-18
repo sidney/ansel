@@ -36,9 +36,6 @@
 #include "common/pwstorage/pwstorage.h"
 #include "common/selection.h"
 #include "common/system_signal_handling.h"
-#ifdef HAVE_GPHOTO2
-#include "common/camera_control.h"
-#endif
 #include "bauhaus/bauhaus.h"
 #include "common/action.h"
 #include "common/cpuid.h"
