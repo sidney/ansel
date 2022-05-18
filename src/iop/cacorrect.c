@@ -99,7 +99,7 @@ int default_group()
 
 int flags()
 {
-  return IOP_FLAGS_ONE_INSTANCE;
+  return IOP_FLAGS_ONE_INSTANCE | IOP_FLAGS_DEPRECATED;
 }
 
 int default_colorspace(dt_iop_module_t *self, dt_dev_pixelpipe_t *pipe, dt_dev_pixelpipe_iop_t *piece)
@@ -1472,4 +1472,3 @@ void gui_init(dt_iop_module_t *self)
 // vim: shiftwidth=2 expandtab tabstop=2 cindent
 // kate: tab-indents: off; indent-width 2; replace-tabs on; indent-mode cstyle; remove-trailing-spaces modified;
 // clang-format on
-
