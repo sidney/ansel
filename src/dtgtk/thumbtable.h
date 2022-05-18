@@ -50,7 +50,6 @@ typedef struct dt_thumbtable_t
 {
   dt_thumbtable_mode_t mode;
   dt_thumbnail_overlay_t overlays;
-  int overlays_block_timeout;
   gboolean show_tooltips;
 
   GtkWidget *widget; // GtkLayout -- main widget
@@ -139,12 +138,9 @@ void dt_thumbtable_scrollbar_changed(dt_thumbtable_t *table, float x, float y);
 
 // change the type of overlays that should be shown (over or under the image)
 void dt_thumbtable_set_overlays_mode(dt_thumbtable_t *table, dt_thumbnail_overlay_t over);
-// change the timeout of the overlays block
-void dt_thumbtable_set_overlays_block_timeout(dt_thumbtable_t *table, const int timeout);
 
 // clang-format off
 // modelines: These editor modelines have been set for all relevant files by tools/update_modelines.py
 // vim: shiftwidth=2 expandtab tabstop=2 cindent
 // kate: tab-indents: off; indent-width 2; replace-tabs on; indent-mode cstyle; remove-trailing-spaces modified;
 // clang-format on
-

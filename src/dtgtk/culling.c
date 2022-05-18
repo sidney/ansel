@@ -717,7 +717,6 @@ static void _dt_pref_change_callback(gpointer instance, gpointer user_data)
   for(GList *l = table->list; l; l = g_list_next(l))
   {
     dt_thumbnail_t *th = (dt_thumbnail_t *)l->data;
-    th->overlay_timeout_duration = dt_conf_get_int("plugins/lighttable/overlay_timeout");
     dt_thumbnail_reload_infos(th);
     const float zoom_ratio = th->zoom_100 > 1 ? th->zoom / th->zoom_100 : table->zoom_ratio;
     dt_thumbnail_resize(th, th->width, th->height, TRUE, zoom_ratio);
@@ -818,8 +817,6 @@ static gchar *_thumbs_get_overlays_class(dt_thumbnail_overlay_t over)
       return g_strdup("dt_overlays_always_extended");
     case DT_THUMBNAIL_OVERLAYS_MIXED:
       return g_strdup("dt_overlays_mixed");
-    case DT_THUMBNAIL_OVERLAYS_HOVER_BLOCK:
-      return g_strdup("dt_overlays_hover_block");
     default:
       return g_strdup("dt_overlays_hover");
   }
@@ -851,14 +848,6 @@ dt_culling_t *dt_culling_new(dt_culling_mode_t mode)
   gchar *cl0 = _thumbs_get_overlays_class(table->overlays);
   dt_gui_add_class(table->widget, cl0);
   free(cl0);
-
-  otxt = g_strdup_printf("plugins/lighttable/overlays/culling_block_timeout/%d", table->mode);
-  table->overlays_block_timeout = 2;
-  if(!dt_conf_key_exists(otxt))
-    table->overlays_block_timeout = dt_conf_get_int("plugins/lighttable/overlay_timeout");
-  else
-    table->overlays_block_timeout = dt_conf_get_int(otxt);
-  g_free(otxt);
 
   otxt = g_strdup_printf("plugins/lighttable/tooltips/culling/%d", table->mode);
   table->show_tooltips = dt_conf_get_bool(otxt);
@@ -1597,8 +1586,6 @@ void dt_culling_full_redraw(dt_culling_t *table, gboolean force)
   for(GList *l = table->list; l; l = g_list_next(l))
   {
     dt_thumbnail_t *thumb = (dt_thumbnail_t *)l->data;
-    // we set the overlays timeout
-    thumb->overlay_timeout_duration = table->overlays_block_timeout;
     // we add or move the thumb at the right position
     if(!gtk_widget_get_parent(thumb->w_main))
     {
@@ -1750,24 +1737,12 @@ void dt_culling_set_overlays_mode(dt_culling_t *table, dt_thumbnail_overlay_t ov
   dt_gui_remove_class(table->widget, cl0);
   dt_gui_add_class(table->widget, cl1);
 
-  txt = g_strdup_printf("plugins/lighttable/overlays/culling_block_timeout/%d", table->mode);
-  int timeout = 2;
-  if(!dt_conf_key_exists(txt))
-    timeout = dt_conf_get_int("plugins/lighttable/overlay_timeout");
-  else
-    timeout = dt_conf_get_int(txt);
-  g_free(txt);
-
-  txt = g_strdup_printf("plugins/lighttable/tooltips/culling/%d", table->mode);
-  table->show_tooltips = dt_conf_get_bool(txt);
-  g_free(txt);
-
   // we need to change the overlay content if we pass from normal to extended overlays
   // this is not done on the fly with css to avoid computing extended msg for nothing and to reserve space if needed
   for(GList *l = table->list; l; l = g_list_next(l))
   {
     dt_thumbnail_t *th = (dt_thumbnail_t *)l->data;
-    dt_thumbnail_set_overlay(th, over, timeout);
+    dt_thumbnail_set_overlay(th, over);
     th->tooltip = table->show_tooltips;
     // and we resize the bottom area
     const float zoom_ratio = th->zoom_100 > 1 ? th->zoom / th->zoom_100 : table->zoom_ratio;
@@ -1784,4 +1759,3 @@ void dt_culling_set_overlays_mode(dt_culling_t *table, dt_thumbnail_overlay_t ov
 // vim: shiftwidth=2 expandtab tabstop=2 cindent
 // kate: tab-indents: off; indent-width 2; replace-tabs on; indent-mode cstyle; remove-trailing-spaces modified;
 // clang-format on
-

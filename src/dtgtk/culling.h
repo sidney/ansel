@@ -72,7 +72,6 @@ typedef struct dt_culling_t
   gboolean focus; // do we show focus rectangles on images ?
 
   dt_thumbnail_overlay_t overlays; // overlays type
-  int overlays_block_timeout;      // overlay block visibility duration
   gboolean show_tooltips;          // are tooltips visible ?
 } dt_culling_t;
 
@@ -103,4 +102,3 @@ void dt_culling_update_active_images_list(dt_culling_t *table);
 // vim: shiftwidth=2 expandtab tabstop=2 cindent
 // kate: tab-indents: off; indent-width 2; replace-tabs on; indent-mode cstyle; remove-trailing-spaces modified;
 // clang-format on
-

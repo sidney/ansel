@@ -42,8 +42,7 @@ typedef enum dt_thumbnail_overlay_t
   DT_THUMBNAIL_OVERLAYS_HOVER_EXTENDED,
   DT_THUMBNAIL_OVERLAYS_ALWAYS_NORMAL,
   DT_THUMBNAIL_OVERLAYS_ALWAYS_EXTENDED,
-  DT_THUMBNAIL_OVERLAYS_MIXED,
-  DT_THUMBNAIL_OVERLAYS_HOVER_BLOCK
+  DT_THUMBNAIL_OVERLAYS_MIXED
 } dt_thumbnail_overlay_t;
 
 typedef enum dt_thumbnail_container_t
@@ -122,8 +121,6 @@ typedef struct
   gboolean disable_actions;               // do we allow to change rating/etc...
 
   dt_thumbnail_overlay_t over;  // type of overlays
-  int overlay_timeout_duration; // for hover_block overlay, we hide the it after a delay
-  int overlay_timeout_id;       // id of the g_source timeout fct
   gboolean tooltip;             // should we show the tooltip ?
 
   int expose_again_timeout_id;  // source id of the expose_again timeout
@@ -166,7 +163,7 @@ void dt_thumbnail_update_selection(dt_thumbnail_t *thumb);
 void dt_thumbnail_image_refresh(dt_thumbnail_t *thumb);
 
 // do we need to display simple overlays or extended ?
-void dt_thumbnail_set_overlay(dt_thumbnail_t *thumb, dt_thumbnail_overlay_t over, int timeout);
+void dt_thumbnail_set_overlay(dt_thumbnail_t *thumb, dt_thumbnail_overlay_t over);
 
 // force reloading image infos
 void dt_thumbnail_reload_infos(dt_thumbnail_t *thumb);
@@ -184,4 +181,3 @@ float dt_thumbnail_get_zoom_ratio(dt_thumbnail_t *thumb);
 // vim: shiftwidth=2 expandtab tabstop=2 cindent
 // kate: tab-indents: off; indent-width 2; replace-tabs on; indent-mode cstyle; remove-trailing-spaces modified;
 // clang-format on
-

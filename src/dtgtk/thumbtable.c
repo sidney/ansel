@@ -66,8 +66,6 @@ static gchar *_thumbs_get_overlays_class(dt_thumbnail_overlay_t over)
       return g_strdup("dt_overlays_always_extended");
     case DT_THUMBNAIL_OVERLAYS_MIXED:
       return g_strdup("dt_overlays_mixed");
-    case DT_THUMBNAIL_OVERLAYS_HOVER_BLOCK:
-      return g_strdup("dt_overlays_hover_block");
     default:
       return g_strdup("dt_overlays_hover");
   }
@@ -142,46 +140,19 @@ void dt_thumbtable_set_overlays_mode(dt_thumbtable_t *table, dt_thumbnail_overla
   dt_gui_remove_class(table->widget, cl0);
   dt_gui_add_class(table->widget, cl1);
 
-  txt = g_strdup_printf("plugins/lighttable/overlays_block_timeout/%d/%d", table->mode, table->prefs_size);
-  int timeout = 2;
-  if(!dt_conf_key_exists(txt))
-    timeout = dt_conf_get_int("plugins/lighttable/overlay_timeout");
-  else
-    timeout = dt_conf_get_int(txt);
-  g_free(txt);
-
   // we need to change the overlay content if we pass from normal to extended overlays
   // this is not done on the fly with css to avoid computing extended msg for nothing and to reserve space if needed
   for(const GList *l = table->list; l; l = g_list_next(l))
   {
     dt_thumbnail_t *th = (dt_thumbnail_t *)l->data;
-    dt_thumbnail_set_overlay(th, over, timeout);
+    dt_thumbnail_set_overlay(th, over);
     // and we resize the bottom area
     dt_thumbnail_resize(th, th->width, th->height, TRUE, IMG_TO_FIT);
   }
 
   table->overlays = over;
-  table->overlays_block_timeout = timeout;
   g_free(cl0);
   g_free(cl1);
-}
-
-// change the type of overlays that should be shown
-void dt_thumbtable_set_overlays_block_timeout(dt_thumbtable_t *table, const int timeout)
-{
-  if(!table) return;
-  gchar *txt = g_strdup_printf("plugins/lighttable/overlays_block_timeout/%d/%d", table->mode, table->prefs_size);
-  dt_conf_set_int(txt, timeout);
-  g_free(txt);
-
-  table->overlays_block_timeout = timeout;
-
-  // we need to change the overlay timeout for each thumbnails
-  for(const GList *l = table->list; l; l = g_list_next(l))
-  {
-    dt_thumbnail_t *th = (dt_thumbnail_t *)l->data;
-    th->overlay_timeout_duration = timeout;
-  }
 }
 
 // get the thumb at specific position
