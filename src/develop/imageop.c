@@ -983,8 +983,6 @@ static void _gui_off_callback(GtkToggleButton *togglebutton, gpointer user_data)
 {
   dt_iop_module_t *module = (dt_iop_module_t *)user_data;
 
-  const gboolean basics = (dt_dev_modulegroups_get_activated(module->dev) == DT_MODULEGROUP_BASICS);
-
   if(!darktable.gui->reset)
   {
     if(gtk_toggle_button_get_active(togglebutton))
@@ -993,9 +991,6 @@ static void _gui_off_callback(GtkToggleButton *togglebutton, gpointer user_data)
 
       if(dt_conf_get_bool("darkroom/ui/scroll_to_module"))
         darktable.gui->scroll_to[1] = module->expander;
-
-      if(!basics && dt_conf_get_bool("darkroom/ui/activate_expand") && !module->expanded)
-        dt_iop_gui_set_expanded(module, TRUE, dt_conf_get_bool("darkroom/ui/single_module"));
 
       dt_dev_add_history_item(module->dev, module, FALSE);
     }
@@ -1008,9 +1003,6 @@ static void _gui_off_callback(GtkToggleButton *togglebutton, gpointer user_data)
         module->dev->proxy.chroma_adaptation = NULL;
 
       dt_dev_add_history_item(module->dev, module, FALSE);
-
-      if(!basics && dt_conf_get_bool("darkroom/ui/activate_expand") && module->expanded)
-        dt_iop_gui_set_expanded(module, FALSE, FALSE);
     }
 
     const gboolean raster = module->blend_params->mask_mode & DEVELOP_MASK_RASTER;
