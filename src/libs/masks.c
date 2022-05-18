@@ -68,7 +68,7 @@ uint32_t container(dt_lib_module_t *self)
 
 int position()
 {
-  return 10;
+  return 999;
 }
 
 typedef enum dt_masks_tree_cols_t
@@ -1759,4 +1759,3 @@ void gui_cleanup(dt_lib_module_t *self)
 // vim: shiftwidth=2 expandtab tabstop=2 cindent
 // kate: tab-indents: off; indent-width 2; replace-tabs on; indent-mode cstyle; remove-trailing-spaces modified;
 // clang-format on
-

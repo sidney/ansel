@@ -156,13 +156,8 @@ const char *name(dt_lib_module_t *self)
 
 const char **views(dt_lib_module_t *self)
 {
-  static const char *v1[] = {"lighttable", "darkroom", NULL};
-  static const char *v2[] = {"lighttable", NULL};
-
-  if(dt_conf_get_bool("plugins/darkroom/export/visible"))
-    return v1;
-  else
-    return v2;
+  static const char *v[] = {"lighttable", "darkroom", NULL};
+  return v;
 }
 
 uint32_t container(dt_lib_module_t *self)
@@ -171,7 +166,7 @@ uint32_t container(dt_lib_module_t *self)
   if(cv->view((dt_view_t *)cv) == DT_VIEW_DARKROOM)
     return DT_UI_CONTAINER_PANEL_LEFT_CENTER;
   else
-    return DT_UI_CONTAINER_PANEL_RIGHT_CENTER;
+    return DT_UI_CONTAINER_PANEL_LEFT_CENTER;
 }
 
 static void _update(dt_lib_module_t *self)
@@ -980,7 +975,7 @@ static void _style_changed(GtkWidget *widget, dt_lib_export_t *d)
 
 int position()
 {
-  return 0;
+  return 99;
 }
 
 static void _update_formats_combobox(dt_lib_export_t *d)
@@ -2045,4 +2040,3 @@ int set_params(dt_lib_module_t *self, const void *params, int size)
 // vim: shiftwidth=2 expandtab tabstop=2 cindent
 // kate: tab-indents: off; indent-width 2; replace-tabs on; indent-mode cstyle; remove-trailing-spaces modified;
 // clang-format on
-

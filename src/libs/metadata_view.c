@@ -167,7 +167,7 @@ static gboolean _dndactive = FALSE;
 
 const char *name(dt_lib_module_t *self)
 {
-  return _("image metadata");
+  return _("display metadata");
 }
 
 const char **views(dt_lib_module_t *self)
@@ -183,7 +183,7 @@ uint32_t container(dt_lib_module_t *self)
 
 int position()
 {
-  return 299;
+  return 0;
 }
 
 static gboolean _is_metadata_ui(const int i)
