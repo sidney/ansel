@@ -754,12 +754,6 @@ dt_iop_module_t *dt_iop_gui_duplicate(dt_iop_module_t *base, gboolean copy_param
     dt_iop_gui_update_blending(module);
   }
 
-  if(dt_conf_get_bool("darkroom/ui/single_module"))
-  {
-    dt_iop_gui_set_expanded(base, FALSE, TRUE);
-    dt_iop_gui_set_expanded(module, TRUE, TRUE);
-  }
-
   // we update show params for multi-instances for each other instances
   dt_dev_modules_update_multishow(module->dev);
 
@@ -1964,14 +1958,13 @@ void dt_iop_gui_set_expanded(dt_iop_module_t *module, gboolean expanded, gboolea
   if(collapse_others)
   {
     const int current_group = dt_dev_modulegroups_get_activated(module->dev);
-    const gboolean group_only = dt_conf_get_bool("darkroom/ui/single_module_group_only");
 
     GList *iop = module->dev->iop;
     gboolean all_other_closed = TRUE;
     while(iop)
     {
       dt_iop_module_t *m = (dt_iop_module_t *)iop->data;
-      if(m != module && (dt_iop_shown_in_group(m, current_group) || !group_only))
+      if(m != module && dt_iop_shown_in_group(m, current_group))
       {
         all_other_closed = all_other_closed && !m->expanded;
         _gui_set_single_expanded(m, FALSE);
@@ -2041,8 +2034,7 @@ static gboolean _iop_plugin_header_button_press(GtkWidget *w, GdkEventButton *e,
       // make gtk scroll to the module once it updated its allocation size
       darktable.gui->scroll_to[1] = module->expander;
 
-      const gboolean collapse_others = !dt_conf_get_bool("darkroom/ui/single_module") != (!dt_modifier_is(e->state, GDK_SHIFT_MASK));
-      dt_iop_gui_set_expanded(module, !module->expanded, collapse_others);
+      dt_iop_gui_set_expanded(module, !module->expanded, dt_modifier_is(e->state, GDK_SHIFT_MASK));
 
       // rebuild the accelerators
       dt_iop_connect_accels_multi(module->so);
@@ -2640,7 +2632,7 @@ static void _show_module_callback(dt_iop_module_t *module)
     dt_dev_modulegroups_set(darktable.develop, current_group);
   }
 
-  dt_iop_gui_set_expanded(module, !module->expanded, dt_conf_get_bool("darkroom/ui/single_module"));
+  dt_iop_gui_set_expanded(module, !module->expanded, FALSE);
   if(module->expanded)
   {
     dt_iop_request_focus(module);
