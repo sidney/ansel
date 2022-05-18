@@ -843,9 +843,7 @@ void dt_lib_gui_set_expanded(dt_lib_module_t *module, gboolean expanded)
   {
     /* register to receive draw events */
     darktable.lib->gui_module = module;
-
-    if(dt_conf_get_bool("darkroom/ui/scroll_to_module"))
-      darktable.gui->scroll_to[1] = module->expander;
+    darktable.gui->scroll_to[1] = module->expander;
   }
   else
   {
