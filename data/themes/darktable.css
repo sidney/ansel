@@ -1257,81 +1257,31 @@ filechooser row:hover .sidebar-icon
 /*--------------------------------------------------
   - Collect module and quick filters on header bar -
 --------------------------------------------------*/
-/* set main settings and module part */
-#range-select #dt-range-band
-{
-  border: 0.07em solid alpha(@range_bg_color, 0.9);
-  border-radius: 0.21em;
-  min-height: 1.6em;    /* band height */
-  min-width: 9em;
-  margin: 0.1em 0;      /* be sure it's set same margin as bauhaus-combobox to have same height in quick filters box with sortby combobox */
-  padding: 0.07em;
-}
-
-#module-filtering #collect-rule-widget   /* set filter widget box */
-{
-  background-color: @collapsible_bg_color;
-  margin: 0.3em 0 0.5em 0;
-  padding: 0.07em 0.28em;
-  border-radius: 0.21em;
-}
-
-#module-filtering #filter-sort-box
-{
-  padding: 0.28em 0;
-}
-
-/* set spacing around date bottom popup when right-clicking dates widgets */
-#dt-range-date-popup box:last-child
-{
-  margin-top: 0.35em;
-}
-
-#dt-range-date-popup treeview,
-#dt-range-date-popup box:last-child button
-{
-  margin-left: 0.35em;
-}
-
-#dt-range-date-popup .text-button,
-#dt-range-date-popup entry,
-#dt-range-date-popup treeview
-{
-  background-color: alpha(@fg_color, 0.14);
-  border-color: alpha(@fg_color, 0.09);
-}
-
-/* set range parts and quick filter box in header toolbar */
-.search,
-#range-select #dt-range-band,
-#header-toolbar #bauhaus-combobox
-{
-  background-color: @range_bg_color;
-}
 
 /* and adjust label and color buttons, especially in header bar */
-.dt_quick_filter,
-#filter-sort-box label,
-#header-rule-box label,
-#header-sort-box label
+.quick_filter_box label
 {
-  margin-right: 0.56em;
+  margin-right: 1.5em;
 }
 
-#filter-colors-box .dt_module_btn
+#quickfilter-search-box,
+#lib-label-colors
 {
-  padding: 2px 0;
-  margin: 0;
+  margin-left: 1em;
+  margin-right: 1em;
 }
 
-#range-current
+#lib-label-colors .dt_module_btn
 {
-  padding: 0.2em;
+  padding: 0;
+  margin: 0 2px;
 }
 
-#collect-header-box button
-{
-  margin-right: 0;
+.quickfilter-label {
+  color: @section_label;
+  font-family: sans-serif;
+  font-weight: 500;
+  margin-right: 1em;
 }
 
 /*------------
