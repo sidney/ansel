@@ -128,7 +128,7 @@ int last_state = 0;
 
 const char *name(dt_lib_module_t *self)
 {
-  return _("collections");
+  return _("collect");
 }
 
 void *legacy_params(struct dt_lib_module_t *self,
@@ -3360,4 +3360,3 @@ void init(struct dt_lib_module_t *self)
 // vim: shiftwidth=2 expandtab tabstop=2 cindent
 // kate: tab-indents: off; indent-width 2; replace-tabs on; indent-mode cstyle; remove-trailing-spaces modified;
 // clang-format on
-
