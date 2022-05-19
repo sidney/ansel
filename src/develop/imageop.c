@@ -2285,12 +2285,11 @@ static gboolean _mask_indicator_tooltip(GtkWidget *treeview, gint x, gint y, gbo
 
 void add_remove_mask_indicator(dt_iop_module_t *module, gboolean add)
 {
-  const gboolean show = add && dt_conf_get_bool("darkroom/ui/show_mask_indicator");
   const gboolean raster = module->blend_params->mask_mode & DEVELOP_MASK_RASTER;
 
   if(module->mask_indicator)
   {
-    if(!show)
+    if(!add)
     {
       gtk_widget_destroy(module->mask_indicator);
       module->mask_indicator = NULL;
@@ -2299,7 +2298,7 @@ void add_remove_mask_indicator(dt_iop_module_t *module, gboolean add)
     else
       gtk_widget_set_sensitive(module->mask_indicator, !raster && module->enabled);
   }
-  else if(show)
+  else if(add)
   {
     module->mask_indicator = dtgtk_togglebutton_new(dtgtk_cairo_paint_showmask, 0, NULL);
     dt_gui_add_class(module->mask_indicator, "dt_transparent_background");
