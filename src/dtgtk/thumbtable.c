@@ -1158,23 +1158,6 @@ static gboolean _event_button_release(GtkWidget *widget, GdkEventButton *event, 
   return TRUE;
 }
 
-// set scrollbars visibility
-static void _thumbtable_restore_scrollbars(dt_thumbtable_t *table)
-{
-  table->scrollbars = FALSE;
-
-  if(table->mode == DT_THUMBTABLE_MODE_FILMSTRIP)
-  {
-    table->scrollbars = dt_conf_get_bool("darkroom/ui/scrollbars");
-  }
-
-  if(table->mode == DT_THUMBTABLE_MODE_FILEMANAGER)
-  {
-    table->scrollbars = dt_conf_get_bool("lighttable/ui/scrollbars");
-  }
-
-  dt_ui_scrollbars_show(darktable.gui->ui, table->scrollbars);
-}
 
 // propose to discard cache in case of thumb generation setting change
 static void _thumbs_ask_for_discard(dt_thumbtable_t *table)
@@ -2153,7 +2136,8 @@ void dt_thumbtable_set_parent(dt_thumbtable_t *table, GtkWidget *new_parent, dt_
 
   // do we show scrollbars ?
   table->code_scrolling = TRUE;
-  _thumbtable_restore_scrollbars(table);
+  table->scrollbars = TRUE;
+  dt_ui_scrollbars_show(darktable.gui->ui, TRUE);
 
   // we reparent the table
   if(!parent || parent != new_parent)

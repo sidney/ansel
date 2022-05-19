@@ -3030,8 +3030,6 @@ void enter(dt_view_t *self)
 
   dt_collection_hint_message(darktable.collection);
 
-  dt_ui_scrollbars_show(darktable.gui->ui, dt_conf_get_bool("darkroom/ui/scrollbars"));
-
   _register_modules_drag_n_drop(self);
 
   // just make sure at this stage we have only history info into the undo, all automatic
@@ -3199,8 +3197,6 @@ void leave(dt_view_t *self)
   gtk_widget_hide(dev->overexposed.floating_window);
   gtk_widget_hide(dev->rawoverexposed.floating_window);
   gtk_widget_hide(dev->profile.floating_window);
-
-  dt_ui_scrollbars_show(darktable.gui->ui, FALSE);
 
   // darkroom development could have changed a collection, so update that before being back in lighttable
   dt_collection_update_query(darktable.collection, DT_COLLECTION_CHANGE_RELOAD, DT_COLLECTION_PROP_UNDEF,
