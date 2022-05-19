@@ -206,14 +206,11 @@ static int process_image(dt_slideshow_t *d, dt_slideshow_slot_t slot)
   if(sqlite3_step(stmt) == SQLITE_ROW) id = sqlite3_column_int(stmt, 0);
   sqlite3_finalize(stmt);
 
-  // this is a little slow, might be worth to do an option:
-  const gboolean high_quality = !dt_conf_get_bool("ui/performance");
-
   if(id)
   {
     // the flags are: ignore exif, display byteorder, high quality, upscale, thumbnail
     dt_imageio_export_with_flags(id, "unused", &buf, (dt_imageio_module_data_t *)&dat, TRUE, TRUE,
-                                 high_quality, TRUE, FALSE, FALSE, NULL, FALSE, FALSE, DT_COLORSPACE_DISPLAY,
+                                 FALSE, TRUE, FALSE, FALSE, NULL, FALSE, FALSE, DT_COLORSPACE_DISPLAY,
                                  NULL, DT_INTENT_LAST, NULL, NULL, 1, 1, NULL);
 
     // lock to copy back into the slot the rendered buffer, not that this is done only if
@@ -635,4 +632,3 @@ GSList *mouse_actions(const dt_view_t *self)
 // vim: shiftwidth=2 expandtab tabstop=2 cindent
 // kate: tab-indents: off; indent-width 2; replace-tabs on; indent-mode cstyle; remove-trailing-spaces modified;
 // clang-format on
-
