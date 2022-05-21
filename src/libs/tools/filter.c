@@ -38,7 +38,6 @@ typedef struct dt_lib_tool_filter_t
   GtkWidget *reverse;
   GtkWidget *text;
   GtkWidget *colors[6];
-  GtkWidget *colors_op;
   int time_out;
   double last_key_time;
 } dt_lib_tool_filter_t;
@@ -305,9 +304,6 @@ static void _update_colors_filter(dt_lib_module_t *self)
     mask |= CL_AND_MASK;
     dt_collection_set_colors_filter(darktable.collection, mask);
   }
-  dtgtk_button_set_paint(DTGTK_BUTTON(d->colors_op),
-                         (mask & CL_AND_MASK) ? dtgtk_cairo_paint_and : dtgtk_cairo_paint_or, 0, NULL);
-  gtk_widget_set_sensitive(GTK_WIDGET(d->colors_op), nb > 1);
 }
 
 static void _reset_colors_filter(dt_lib_module_t *self)
