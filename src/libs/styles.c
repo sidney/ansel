@@ -437,7 +437,7 @@ static void export_clicked(GtkWidget *w, gpointer user_data)
             // disable check button and skip button when only one style is selected
             if(g_list_is_singleton(style_names))
             {
-              gtk_widget_set_sensitive(overwrite_dialog_check_button, FALSE);
+              gtk_widget_set_sensitive(GTK_WIDGET(overwrite_dialog_check_button), FALSE);
               gtk_dialog_set_response_sensitive(GTK_DIALOG(dialog_overwrite_export), GTK_RESPONSE_NONE, FALSE);
             }
 
@@ -620,7 +620,7 @@ static void import_clicked(GtkWidget *w, gpointer user_data)
             // disable check button and skip button when dealing with one style
             if(g_slist_length(filenames) == 1)
             {
-              gtk_widget_set_sensitive(overwrite_dialog_check_button, FALSE);
+              gtk_widget_set_sensitive(GTK_WIDGET(overwrite_dialog_check_button), FALSE);
               gtk_dialog_set_response_sensitive(GTK_DIALOG(dialog_overwrite_import), GTK_RESPONSE_NONE, FALSE);
             }
 

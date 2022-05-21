@@ -1000,7 +1000,7 @@ static void _gui_off_callback(GtkToggleButton *togglebutton, gpointer user_data)
     const gboolean raster = module->blend_params->mask_mode & DEVELOP_MASK_RASTER;
     // set mask indicator sensitive according to module activation and raster mask
     if(module->mask_indicator)
-      gtk_widget_set_sensitive(module->mask_indicator, !raster && module->enabled);
+      gtk_widget_set_sensitive(GTK_WIDGET(module->mask_indicator), !raster && module->enabled);
   }
 
   char tooltip[512];
@@ -2296,7 +2296,7 @@ void add_remove_mask_indicator(dt_iop_module_t *module, gboolean add)
       dt_iop_show_hide_header_buttons(module, NULL, FALSE, FALSE);
     }
     else
-      gtk_widget_set_sensitive(module->mask_indicator, !raster && module->enabled);
+      gtk_widget_set_sensitive(GTK_WIDGET(module->mask_indicator), !raster && module->enabled);
   }
   else if(add)
   {
@@ -2307,7 +2307,7 @@ void add_remove_mask_indicator(dt_iop_module_t *module, gboolean add)
     g_signal_connect(G_OBJECT(module->mask_indicator), "query-tooltip",
                      G_CALLBACK(_mask_indicator_tooltip), module);
     gtk_widget_set_has_tooltip(module->mask_indicator, TRUE);
-    gtk_widget_set_sensitive(module->mask_indicator, !raster && module->enabled);
+    gtk_widget_set_sensitive(GTK_WIDGET(module->mask_indicator), !raster && module->enabled);
     gtk_box_pack_end(GTK_BOX(module->header), module->mask_indicator, FALSE, FALSE, 0);
 
     // in dynamic modes, we need to put the mask indicator after the drawing area

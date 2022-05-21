@@ -624,7 +624,7 @@ void gui_init(dt_lib_module_t *self)
 
   data->add_sample_button = dtgtk_button_new(dtgtk_cairo_paint_square_plus, 0, NULL);
   ;
-  gtk_widget_set_sensitive(data->add_sample_button, FALSE);
+  gtk_widget_set_sensitive(GTK_WIDGET(data->add_sample_button), FALSE);
   g_signal_connect(G_OBJECT(data->add_sample_button), "clicked", G_CALLBACK(_add_sample), self);
   dt_action_define(DT_ACTION(self), NULL, N_("add sample"), data->add_sample_button, &dt_action_def_button);
   gtk_box_pack_end(GTK_BOX(sample_row), data->add_sample_button, FALSE, FALSE, 0);

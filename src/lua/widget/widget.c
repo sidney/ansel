@@ -264,7 +264,7 @@ static int sensitive_member(lua_State *L)
   luaA_to(L, lua_widget, &widget, 1);
   if(lua_gettop(L) > 2) {
     gboolean value = lua_toboolean(L, 3);
-    gtk_widget_set_sensitive(widget->widget, value);
+    gtk_widget_set_sensitive(GTK_WIDGET(widget->widget), value);
     return 0;
   }
   gboolean result = gtk_widget_get_sensitive(widget->widget);
@@ -404,4 +404,3 @@ int dt_lua_init_widget(lua_State* L)
 // vim: shiftwidth=2 expandtab tabstop=2 cindent
 // kate: tab-indents: off; indent-width 2; replace-tabs on; indent-mode cstyle; remove-trailing-spaces modified;
 // clang-format on
-

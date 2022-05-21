@@ -645,7 +645,7 @@ static void set_format_by_name(dt_lib_export_t *d, const char *name)
   {
     // combobox was disabled and shall be enabled. we want to restore the old setting.
     const gboolean export_masks = dt_conf_get_bool(CONFIG_PREFIX "export_masks");
-    gtk_widget_set_sensitive(d->export_masks, TRUE);
+    gtk_widget_set_sensitive(GTK_WIDGET(d->export_masks), TRUE);
     dt_bauhaus_combobox_set(d->export_masks, export_masks ? 1 : 0);
   }
   else if(!support_layers && is_enabled)
@@ -654,7 +654,7 @@ static void set_format_by_name(dt_lib_export_t *d, const char *name)
     const int export_masks = dt_bauhaus_combobox_get(d->export_masks);
     dt_bauhaus_combobox_set(d->export_masks, 0);
     dt_conf_set_bool(CONFIG_PREFIX "export_masks", export_masks == 1);
-    gtk_widget_set_sensitive(d->export_masks, FALSE);
+    gtk_widget_set_sensitive(GTK_WIDGET(d->export_masks), FALSE);
   }
 }
 
@@ -999,7 +999,7 @@ static void _update_formats_combobox(dt_lib_export_t *d)
     }
   }
 
-  gtk_widget_set_sensitive(d->format, !empty);
+  gtk_widget_set_sensitive(GTK_WIDGET(d->format), !empty);
 }
 
 static void _on_storage_list_changed(gpointer instance, dt_lib_module_t *self)

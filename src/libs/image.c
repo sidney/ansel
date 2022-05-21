@@ -797,7 +797,7 @@ static int lua_set_action_sensitive(lua_State *L)
   {
     if(GTK_IS_BUTTON(widget) && strcmp(gtk_widget_get_name(widget), name) == 0)
     {
-      gtk_widget_set_sensitive(widget, sensitive);
+      gtk_widget_set_sensitive(GTK_WIDGET(widget), sensitive);
       break;
     }
   }

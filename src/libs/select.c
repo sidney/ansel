@@ -327,7 +327,7 @@ static int lua_set_selection_sensitive(lua_State *L)
   {
     if(GTK_IS_BUTTON(widget) && strcmp(gtk_widget_get_name(widget), name) == 0)
     {
-      gtk_widget_set_sensitive(widget, sensitive);
+      gtk_widget_set_sensitive(GTK_WIDGET(widget), sensitive);
       break;
     }
   }
@@ -376,4 +376,3 @@ void init(struct dt_lib_module_t *self)
 // vim: shiftwidth=2 expandtab tabstop=2 cindent
 // kate: tab-indents: off; indent-width 2; replace-tabs on; indent-mode cstyle; remove-trailing-spaces modified;
 // clang-format on
-

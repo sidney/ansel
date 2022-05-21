@@ -307,7 +307,7 @@ static void _update_colors_filter(dt_lib_module_t *self)
   }
   dtgtk_button_set_paint(DTGTK_BUTTON(d->colors_op),
                          (mask & CL_AND_MASK) ? dtgtk_cairo_paint_and : dtgtk_cairo_paint_or, 0, NULL);
-  gtk_widget_set_sensitive(d->colors_op, nb > 1);
+  gtk_widget_set_sensitive(GTK_WIDGET(d->colors_op), nb > 1);
 }
 
 static void _reset_colors_filter(dt_lib_module_t *self)
@@ -521,7 +521,7 @@ static gboolean _lib_filter_sync_combobox_and_comparator(dt_lib_module_t *self)
   // 7 rejected only
   // 8 all except rejected
 
-  gtk_widget_set_sensitive(d->comparator, filter > 1 && filter < 7);
+  gtk_widget_set_visible(d->comparator, filter > 1 && filter < 7);
 
   return FALSE;
 }

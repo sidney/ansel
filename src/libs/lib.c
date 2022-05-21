@@ -543,7 +543,7 @@ static void dt_lib_presets_popup_menu_show(dt_lib_module_info_t *minfo)
     mi = gtk_menu_item_new_with_label(_("store new preset.."));
     if(minfo->params_size == 0)
     {
-      gtk_widget_set_sensitive(mi, FALSE);
+      gtk_widget_set_sensitive(GTK_WIDGET(mi), FALSE);
       gtk_widget_set_tooltip_text(mi, _("nothing to save"));
     }
     else
@@ -555,7 +555,7 @@ static void dt_lib_presets_popup_menu_show(dt_lib_module_info_t *minfo)
       char *markup = g_markup_printf_escaped("%s <span weight=\"bold\">%s</span>", _("update preset"),
                                              darktable.gui->last_preset);
       mi = gtk_menu_item_new_with_label("");
-      gtk_widget_set_sensitive(mi, minfo->params_size > 0);
+      gtk_widget_set_sensitive(GTK_WIDGET(mi), minfo->params_size > 0);
       gtk_label_set_markup(GTK_LABEL(gtk_bin_get_child(GTK_BIN(mi))), markup);
       g_object_set_data_full(G_OBJECT(mi), "dt-preset-name", g_strdup(darktable.gui->last_preset), g_free);
       g_signal_connect(G_OBJECT(mi), "activate", G_CALLBACK(menuitem_update_preset), minfo);
@@ -1051,7 +1051,7 @@ GtkWidget *dt_lib_gui_get_expander(dt_lib_module_t *module)
   g_signal_connect(G_OBJECT(module->reset_button), "clicked", G_CALLBACK(dt_lib_gui_reset_callback), module);
   g_signal_connect(G_OBJECT(module->reset_button), "enter-notify-event", G_CALLBACK(_header_enter_notify_callback),
                    GINT_TO_POINTER(DT_ACTION_ELEMENT_RESET));
-  if(!module->gui_reset) gtk_widget_set_sensitive(module->reset_button, FALSE);
+  if(!module->gui_reset) gtk_widget_set_sensitive(GTK_WIDGET(module->reset_button), FALSE);
   dt_action_define(&module->actions, NULL, NULL, module->reset_button, NULL);
   gtk_box_pack_end(GTK_BOX(header), module->reset_button, FALSE, FALSE, 0);
 
