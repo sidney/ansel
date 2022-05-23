@@ -675,34 +675,6 @@ void dt_control_queue_redraw_widget(GtkWidget *widget)
 
 int dt_control_key_pressed_override(guint key, guint state)
 {
-#ifdef HAVE_GAME
-  // ↑ ↑ ↓ ↓ ← → ← → b a
-  static int konami_state = 0;
-  static guint konami_sequence[] = {
-    GDK_KEY_Up,
-    GDK_KEY_Up,
-    GDK_KEY_Down,
-    GDK_KEY_Down,
-    GDK_KEY_Left,
-    GDK_KEY_Right,
-    GDK_KEY_Left,
-    GDK_KEY_Right,
-    GDK_KEY_b,
-    GDK_KEY_a
-  };
-  if(key == konami_sequence[konami_state])
-  {
-    konami_state++;
-    if(konami_state == G_N_ELEMENTS(konami_sequence))
-    {
-      dt_ctl_switch_mode_to("knight");
-      konami_state = 0;
-    }
-  }
-  else
-    konami_state = 0;
-#endif
-
   // TODO: if darkroom mode
   // did a : vim-style command start?
   static GList *autocomplete = NULL;
@@ -909,4 +881,3 @@ void dt_control_set_dev_zoom(dt_dev_zoom_t value)
 // vim: shiftwidth=2 expandtab tabstop=2 cindent
 // kate: tab-indents: off; indent-width 2; replace-tabs on; indent-mode cstyle; remove-trailing-spaces modified;
 // clang-format on
-
