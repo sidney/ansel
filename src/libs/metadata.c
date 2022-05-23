@@ -466,15 +466,6 @@ void gui_reset(dt_lib_module_t *self)
   _write_metadata(NULL, self);
 }
 
-static void _mouse_over_image_callback(gpointer instance, dt_lib_module_t *self)
-{
-  dt_lib_metadata_t *d = (dt_lib_metadata_t *)self->data;
-  // if editing don't lose the current entry
-  if (d->editing) return;
-
-  dt_lib_queue_postponed_update(self, _update);
-}
-
 static void _toggled_callback(gchar *path_str, gpointer user_data, const int column)
 {
   GtkListStore *store = (GtkListStore *)user_data;
@@ -762,10 +753,6 @@ void gui_init(dt_lib_module_t *self)
 
   gtk_grid_attach(GTK_GRID(self->widget), GTK_WIDGET(d->apply_button), 0, DT_METADATA_NUMBER, 2, 1);
 
-  /* lets signup for mouse over image change signals */
-  DT_DEBUG_CONTROL_SIGNAL_CONNECT(darktable.signals, DT_SIGNAL_MOUSE_OVER_IMAGE_CHANGE,
-                            G_CALLBACK(_mouse_over_image_callback), self);
-
   // and 2 other interesting signals:
   DT_DEBUG_CONTROL_SIGNAL_CONNECT(darktable.signals, DT_SIGNAL_SELECTION_CHANGED,
                             G_CALLBACK(_image_selection_changed_callback), self);
@@ -783,7 +770,6 @@ void gui_cleanup(dt_lib_module_t *self)
 {
   dt_lib_cancel_postponed_update(self);
   const dt_lib_metadata_t *d = (dt_lib_metadata_t *)self->data;
-  DT_DEBUG_CONTROL_SIGNAL_DISCONNECT(darktable.signals, G_CALLBACK(_mouse_over_image_callback), self);
   DT_DEBUG_CONTROL_SIGNAL_DISCONNECT(darktable.signals, G_CALLBACK(_image_selection_changed_callback), self);
   DT_DEBUG_CONTROL_SIGNAL_DISCONNECT(darktable.signals, G_CALLBACK(_collection_updated_callback), self);
 
