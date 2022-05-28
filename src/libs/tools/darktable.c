@@ -230,7 +230,7 @@ static gboolean _lib_darktable_draw_callback(GtkWidget *widget, cairo_t *cr, gpo
   if(d->text)
   {
     cairo_set_source_surface(cr, d->text, d->image_width + (int)DT_PIXEL_APPLY_DPI(5),
-                             (int)DT_PIXEL_APPLY_DPI(12));
+                             (int)DT_PIXEL_APPLY_DPI(9));
     cairo_rectangle(cr, 0, 0, d->image_width + d->text_width + (int)DT_PIXEL_APPLY_DPI(11),
                     d->text_height + (int)DT_PIXEL_APPLY_DPI(13));
     cairo_fill(cr);
@@ -248,14 +248,6 @@ static gboolean _lib_darktable_draw_callback(GtkWidget *widget, cairo_t *cr, gpo
     cairo_move_to(cr, d->image_width + DT_PIXEL_APPLY_DPI(3.0), DT_PIXEL_APPLY_DPI(5.0));
     pango_cairo_show_layout(cr, layout);
   }
-
-  /* print version */
-  pango_font_description_set_absolute_size(font_desc, DT_PIXEL_APPLY_DPI(10) * PANGO_SCALE);
-  pango_layout_set_font_description(layout, font_desc);
-  pango_layout_set_text(layout, darktable_package_version, -1);
-  cairo_move_to(cr, d->image_width + DT_PIXEL_APPLY_DPI(4.0), DT_PIXEL_APPLY_DPI(32.0));
-  cairo_set_source_rgba(cr, tmpcolor->red, tmpcolor->green, tmpcolor->blue, 0.3);
-  pango_cairo_show_layout(cr, layout);
 
   /* cleanup */
   gdk_rgba_free(tmpcolor);
@@ -316,4 +308,3 @@ static void _lib_darktable_show_about_dialog()
 // vim: shiftwidth=2 expandtab tabstop=2 cindent
 // kate: tab-indents: off; indent-width 2; replace-tabs on; indent-mode cstyle; remove-trailing-spaces modified;
 // clang-format on
-

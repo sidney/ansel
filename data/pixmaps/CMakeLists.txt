@@ -12,14 +12,6 @@ foreach(pixmap_size ${FIXED_SIZES})
 	FILE(COPY ${PIXMAP_FILES} DESTINATION ${DARKTABLE_DATADIR}/icons/${THEME}/${pixmap_size}/apps)
 endforeach(pixmap_size)
 
-#
-# Install plugin pixmaps
-#
-FILE(GLOB DARKROOM_PLUGIN_PIXMAPS "plugins/darkroom/*.png" "plugins/darkroom/*.svg")
-install(FILES ${DARKROOM_PLUGIN_PIXMAPS} DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/darktable/pixmaps/plugins/darkroom COMPONENT DTApplication)
-# Need to copy to have themes, icons, etc all in one path like after installing
-file(COPY ${DARKROOM_PLUGIN_PIXMAPS} DESTINATION ${DARKTABLE_DATADIR}/pixmaps/plugins/darkroom)
-
 FILE(GLOB OTHER_PIXMAPS "*.png" "*.svg")
 install(FILES ${OTHER_PIXMAPS} DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/darktable/pixmaps COMPONENT DTApplication)
 # Need to copy to have themes, icons, etc all in one path like after installing
