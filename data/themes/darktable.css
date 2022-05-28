@@ -119,102 +119,99 @@ Why that? Just because it's a developer choice and most classes use underscore i
   --------------------------------------*/
 
 /* General */
-@define-color selected_bg_color @grey_35;       /* legacy stuff */
-@define-color border_color @grey_10;            /* border, when used */
-@define-color bg_color @grey_15;                /* general background */
-@define-color fg_color @grey_75;                /* general text */
+@define-color selected_bg_color @grey_55;       /* legacy stuff */
+@define-color border_color @grey_40;            /* border, when used */
+@define-color bg_color @grey_45;                /* general background */
+@define-color fg_color @grey_95;                /* general text */
 @define-color base_color @fg_color;             /* legacy stuff */
-@define-color text_color @grey_05;              /* same */
-@define-color placeholder_text_color @grey_50;  /* placeholder text color (text on search background fields) */
-@define-color disabled_fg_color @grey_45;       /* disabled controls */
+@define-color text_color @grey_35;              /* same */
+@define-color placeholder_text_color @grey_70;  /* placeholder text color (text on search background fields) */
+@define-color disabled_fg_color @grey_65;       /* disabled controls */
 
 /* Scroll bars (sliders) */
-@define-color scroll_bar_inactive @grey_40;
-@define-color scroll_bar_active @grey_50;
-@define-color scroll_bar_bg @grey_10;
+@define-color scroll_bar_inactive @grey_60;
+@define-color scroll_bar_active @grey_80;
+@define-color scroll_bar_bg @grey_40;
 
 /* Modules box (plugins) */
-@define-color plugin_bg_color @grey_20;
+@define-color plugin_bg_color @grey_50;
 @define-color section_label shade(@fg_color, 1.05);
-@define-color plugin_label_color @grey_60;
-@define-color collapsible_bg_color @grey_25;
+@define-color plugin_label_color @grey_80;
+@define-color collapsible_bg_color @grey_55;
 
 /* Modules controls (sliders and comboboxes) */
 @define-color bauhaus_bg alpha(@bg_color, 0.55);
-@define-color bauhaus_fg @fg_color;       /* needed to correctly display color pickers in all states, even if they inherit @fg_color by default */
+@define-color bauhaus_fg shade(@fg_color, 0.95);   /* needed to show color picker on bauhaus sliders */
 @define-color bauhaus_border shade(@plugin_bg_color, 0.5);
-@define-color bauhaus_indicator_border @grey_20;
-@define-color bauhaus_fill @grey_40;
-@define-color bauhaus_bg_hover @grey_60;
-@define-color bauhaus_fg_hover @grey_90;
-@define-color bauhaus_fg_selected @grey_80;
-@define-color bauhaus_fg_insensitive alpha(@fg_color, 0.4);
+@define-color bauhaus_indicator_border @grey_50;
+@define-color bauhaus_fill @grey_70;
+@define-color bauhaus_bg_hover @grey_80;
+@define-color bauhaus_fg_hover @grey_100;
+@define-color bauhaus_fg_selected @grey_75;
+@define-color bauhaus_fg_insensitive alpha(@bauhaus_fg, 0.5);
 
 /* GTK Buttons and tabs */
-@define-color button_bg @grey_25;
+@define-color button_bg @grey_55;
 @define-color button_border shade(@button_bg, 1.04);
-@define-color button_hover_bg @grey_50;
-@define-color button_hover_fg @grey_15;
+@define-color button_hover_bg @grey_70;
+@define-color button_hover_fg @grey_30;
 
 /* text fields */
-@define-color field_bg @grey_15;
+@define-color field_bg @grey_45;
 @define-color field_fg @fg_color;
-@define-color field_active_bg @grey_30;
-@define-color field_active_fg @grey_80;
-@define-color field_selected_bg @grey_45;
-@define-color field_selected_fg @grey_85;
-@define-color field_hover_bg @grey_55;
-@define-color field_hover_fg @grey_95;
+@define-color field_active_bg @grey_55;
+@define-color field_active_fg @grey_95;
+@define-color field_selected_bg @grey_65;
+@define-color field_selected_fg @grey_100;
+@define-color field_hover_bg @grey_75;
+@define-color field_hover_fg @grey_35;
 
 /* Tooltips and contextual helpers */
-@define-color tooltip_bg_color @grey_15;
-@define-color tooltip_fg_color @grey_65;
+@define-color tooltip_bg_color @grey_35;
+@define-color tooltip_fg_color @grey_80;
 @define-color really_dark_bg_color @grey_05;
-@define-color log_fg_color @grey_85;
+@define-color log_fg_color @grey_95;
 
 /* Views */
-@define-color darkroom_bg_color @grey_45;
-@define-color darkroom_preview_bg_color @grey_35;
+@define-color darkroom_bg_color @grey_50;
+@define-color darkroom_preview_bg_color @grey_50;
 @define-color print_bg_color @darkroom_bg_color;
 @define-color lighttable_bg_color @darkroom_bg_color;
 @define-color lighttable_preview_bg_color @darkroom_preview_bg_color;
-@define-color lighttable_bg_font_color @grey_75;
+@define-color lighttable_bg_font_color @grey_95;
 
 /* Lighttable and film-strip */
-@define-color thumbnail_font_color @grey_30;
+@define-color thumbnail_font_color @grey_35;
 @define-color thumbnail_bg_color @grey_50;
-@define-color thumbnail_star_bg_color @grey_35;
-@define-color thumbnail_star_hover_color @grey_80;
-@define-color thumbnail_fg_color @grey_55;
-@define-color thumbnail_bg50_color @grey_100;
-@define-color thumbnail_selected_bg_color @grey_70;
-@define-color thumbnail_hover_bg_color @grey_85;
-@define-color thumbnail_hover_fg_color @grey_90;
-@define-color filmstrip_bg_color @darkroom_bg_color;
-@define-color timeline_bg_color shade(@darkroom_bg_color, 0.9);
-@define-color timeline_fg_color @text_color;
-@define-color timeline_text_bg_color alpha(black, .8);
-@define-color timeline_text_fg_color alpha(white, .9);
+@define-color thumbnail_fg_color @thumbnail_font_color;
+@define-color thumbnail_selected_bg_color @grey_80;
+@define-color thumbnail_hover_bg_color @grey_65;
+@define-color thumbnail_star_bg_color @thumbnail_font_color;
+@define-color thumbnail_star_hover_color @thumbnail_font_color;
 
-@define-color range_graph_color alpha(@timeline_fg_color, 0.75);
-@define-color range_bg_color alpha(@fg_color, 0.12);
-@define-color range_cursor_color alpha(@fg_color, 0.75);
-@define-color range_sel_color alpha(@timeline_bg_color, 0.6);
-@define-color range_icon_color alpha(@thumbnail_hover_fg_color, 0.8);
+@define-color filmstrip_bg_color @darkroom_bg_color;
 
 /* Brushes */
 @define-color brush_cursor alpha(white, .9);
 @define-color brush_trace alpha(black, .8);
 
 /* Graphs : histogram, navigation thumbnail and some items on tone curve */
-@define-color graph_bg @grey_15;
+@define-color graph_bg @grey_40;
 @define-color graph_exterior shade(@graph_bg, 0.9);
-@define-color graph_border @grey_05;
-@define-color graph_fg @grey_75;
+@define-color graph_border @grey_15;
+@define-color graph_fg @grey_100;
 @define-color graph_fg_active @grey_95;
-@define-color graph_grid @grey_05;
+@define-color graph_grid @grey_30;
 @define-color graph_overlay @grey_50;
-@define-color inset_histogram alpha(@grey_65, 0.50);
+@define-color inset_histogram alpha(@grey_95, 0.50);
+
+/* Adjust middle grey picker on levels and rgb levels modules to make it visible */
+#picker-grey
+{
+  color: @grey_70;
+}
+
+
 /* Primaries selected for visual legibility across a variety of
    gamuts, and to combine to pleasing secondaries. The combination of
    all three must either to either the same number or >= 255 to
@@ -326,13 +323,6 @@ undershoot,
 {
   background-color: transparent;
   border: none;
-}
-
-/* Sets outer borders that could be hide or shown in darktable with 'b' shortcut */
-#outer-border
-{
-  background-color: @border_color;
-  min-width: 1.4em;
 }
 
 /* Allow to resize all windows */
@@ -496,14 +486,6 @@ separator
 {
   min-height: 1.7em;
   min-width: 1.7em;
-}
-
-/* Rating stars on left footer toolbar on lighttable view */
-#lib-rating-stars
-{
-  min-height: 1.1em;
-  min-width: 9em;
-  margin-right: 1em;
 }
 
 /* Set default button spacing  for specific buttons */
@@ -1243,8 +1225,7 @@ filechooser row:hover .sidebar-icon
 }
 
 #basics-box-labels #basics-header-box:first-child,
-#basics-box-labels .dt_section_label,
-#thumb-localcopy:active
+#basics-box-labels .dt_section_label
 {
   border: none;
 }
@@ -1677,20 +1658,20 @@ entry:active
 Hierarchy :
 
   #thumbtable-filemanager / #thumbtable-filmstrip / #thumbtable-zoom (GtkLayout -- main widget which contains all thumbs)
-    #thumb-main                                                      (GtkOverlay -- thumbnail widget)
-      #thumb-back                                                    (GtkEventBox -- thumbnail background)
-      #thumb-ext                                                     (GtkLabel -- thumbnail extension)
-      #thumb-image                                                   (GtkDrawingArea -- thumbnail image)
-      #thumb-cursor                                                  (GtkDrawingArea -- top triangle to show active images in filmstrip)
-      #thumb-bottom                                                  (GtkEventBox -- background of the bottom infos area)
-      #thumb-bottom-label                                            (GtkLabel -- text of the bottom infos area, just with .dt_extended_overlay)
-      #thumb-reject                                                  (GtkDarktableThumbnailBtn -- Reject icon)
-      #thumb-star                                                    (GtkDarktableThumbnailBtn -- Star icon, 5 occurrences of this)
-      #thumb-colorlabels                                             (GtkDarktableThumbnailBtn -- colorlabels icon, 1 icon with all labels)
-      #thumb-localcopy                                               (GtkDarktableThumbnailBtn -- local copy triangle icon)
-      #thumb-altered                                                 (GtkDarktableThumbnailBtn -- altered icon)
-      #thumb-group                                                   (GtkDarktableThumbnailBtn -- grouping icon)
-      #thumb-audio                                                   (GtkDarktableThumbnailBtn -- audio sidecar icon)
+    .thumb-main                                                      (GtkOverlay -- thumbnail widget)
+      .thumb-back                                                    (GtkEventBox -- thumbnail background)
+      .thumb-ext                                                     (GtkLabel -- thumbnail extension)
+      .thumb-image                                                   (GtkDrawingArea -- thumbnail image)
+      .thumb-cursor                                                  (GtkDrawingArea -- top triangle to show active images in filmstrip)
+      .thumb-bottom                                                  (GtkEventBox -- background of the bottom infos area)
+      .thumb-bottom-label                                            (GtkLabel -- text of the bottom infos area, just with .dt_extended_overlay)
+      .thumb-reject                                                  (GtkDarktableThumbnailBtn -- Reject icon)
+      .thumb-star                                                    (GtkDarktableThumbnailBtn -- Star icon, 5 occurrences of this)
+      .thumb-colorlabels                                             (GtkDarktableThumbnailBtn -- colorlabels icon, 1 icon with all labels)
+      .thumb-localcopy                                               (GtkDarktableThumbnailBtn -- local copy triangle icon)
+      .thumb-altered                                                 (GtkDarktableThumbnailBtn -- altered icon)
+      .thumb-group                                                   (GtkDarktableThumbnailBtn -- grouping icon)
+      .thumb-audio                                                   (GtkDarktableThumbnailBtn -- audio sidecar icon)
 
 Details :
 
@@ -1701,27 +1682,27 @@ Details :
     class = .dt_overlays_none / .dt_overlays_hover / .dt_overlays_hover_extended / .dt_overlays_always / .dt_overlays_always_extended / .dt_overlays_mixed / .dt_overlays_hover_block
     Classes to determine the category of size of the thumbnails (cat sizes limits are defined in dartablerc key=plugins/lighttable/thumbnail_sizes
     class = .dt_thumbnails_?? where ?? is the cat number
-  #thumb-main
+  .thumb-main
     state = :selected  if the thumb is in current selection
     state = :active    if the thumb correspond to one of the images worked on (filmstrip)
     state = :hover     if the mouse hover the widget
     class = .dt_group_left / .dt_group_right / .dt_group_top / .dt_group_bottom  if we need to draw group borders around thumb
     class = .dt_thumbnail_rating_[0-6]   rating value of the image (6==rejected)
-  #thumb-image
+  .thumb-image
     only the borders are drawn - background is ignored
     color transparency is used to draw the image
   all icons inside the widget
     class = .dt_thumb_btn
     state = :hover : the mouse is hovering the icon
     if color and background-color are transparent, the icon is not drawn and inactive
-  #thumb-reject :
+  .thumb-reject :
     state = :active   if the image is actually rejected
     state = :hover    the mouse is hover the icon (a circle is added around the cross)
-  #thumb-star :
+  .thumb-star :
     - color is the color of the star outline.
     - background-color is the inner part of the star
     state = :active : the rating of the image is >=
-  #thumb-group :
+  .thumb-group :
     state = :active : the image is the group leader
 ***/
 
@@ -1737,99 +1718,85 @@ Details :
   background-color: @lighttable_bg_color;
 }
 
-#thumb-back
+.thumb-back
 {
   background-color: @thumbnail_bg_color;
-  border: 1px solid @lighttable_bg_color;
-}
-
-/* Last active images animation */
-@keyframes lastactive
-{
-  0% {border-color: @lighttable_bg_color; border-width : 0.14em;}
-  50% {border-color: @thumbnail_bg50_color; border-width : 0.28em;}
-  100% {border-color: @lighttable_bg_color; border-width : 0.14em;}
-}
-
-.dt_last_active #thumb-back
-{
-  animation-name: lastactive;
-  animation-duration: 4s;
-  animation-timing-function: linear;
-  animation-iteration-count: 3;
-}
-
-/* set selected image and/or focus one */
-#thumb-main:active #thumb-back,
-#thumb-main:selected #thumb-back
-{
-  background-color: shade(@thumbnail_selected_bg_color, 1.05);
-  border-color: shade(@thumbnail_selected_bg_color, 1.15);
+  border: 2px solid @lighttable_bg_color;
 }
 
 /* set hover effect */
-#thumb-main:hover #thumb-back
+.thumb-main:hover .thumb-back
+{
+  background-color: @thumbnail_selected_bg_color;
+  border-color: @thumbnail_selected_bg_color;
+}
+
+/* set selected image and/or focus one */
+/* selection supersedes hover */
+.thumb-main:active .thumb-back,
+.thumb-main:selected .thumb-back
 {
   background-color: @thumbnail_hover_bg_color;
+  border-color: @thumbnail_hover_bg_color;
 }
 
 /*-----------------
   - Image options -
   -----------------*/
-#thumb-image
+.thumb-image
 {
   margin: 1.8em 1.2em; /* not real pixels. This is used as a per thousand of the thumb size and couldn't be scalable */
 }
 
-.dt_thumbnails_2 #thumb-image /* update consistently margins if big thumbnails (less images per row) are shown */
+.dt_thumbnails_2 .thumb-image /* update consistently margins if big thumbnails (less images per row) are shown */
 {
   margin: 1em 0.75em;
 }
 
 /* Set top margin on active image in filmstrip */
-#thumbtable-filmstrip #thumb-main:active #thumb-back
+#thumbtable-filmstrip .thumb-main:active .thumb-back
 {
   border-top: 0.105em solid @border_color;
 }
 
 /* Set top cursor and bottom-label */
-#thumb-bottom-label,
-#thumb-cursor
+.thumb-bottom-label,
+.thumb-cursor
 {
   color: transparent;
 }
 
-#thumbtable-filmstrip #thumb-main:active #thumb-cursor
+#thumbtable-filmstrip .thumb-main:active .thumb-cursor
 {
   color: @border_color;
 }
 
 /* Set border color around thumbnails */
-.dt_group_left #thumb-back,
-#thumb-main.dt_group_left:selected #thumb-back
+.dt_group_left .thumb-back,
+.thumb-main.dt_group_left:selected .thumb-back
 {
-  border-left: 0.07em solid rgb(255, 187, 0);
+  border-left: 0.1em solid rgb(255, 187, 0);
 }
 
-.dt_group_top #thumb-back,
-#thumb-main.dt_group_top:selected #thumb-back
+.dt_group_top .thumb-back,
+.thumb-main.dt_group_top:selected .thumb-back
 {
-  border-top: 0.07em solid rgb(255, 187, 0);
+  border-top: 0.1em solid rgb(255, 187, 0);
 }
 
-.dt_group_right #thumb-back,
-#thumb-main.dt_group_right:selected #thumb-back
+.dt_group_right .thumb-back,
+.thumb-main.dt_group_right:selected .thumb-back
 {
-  border-right: 0.07em solid rgb(255, 187, 0);
+  border-right: 0.1em solid rgb(255, 187, 0);
 }
 
-.dt_group_bottom #thumb-back,
-#thumb-main.dt_group_bottom:selected #thumb-back
+.dt_group_bottom .thumb-back,
+.thumb-main.dt_group_bottom:selected .thumb-back
 {
-  border-bottom: 0.07em solid rgb(255, 187, 0);
+  border-bottom: 0.1em solid rgb(255, 187, 0);
 }
 
-.dt_thumbtable_reorder #thumb-main:hover #thumb-back
+.dt_thumbtable_reorder .thumb-main:hover .thumb-back
 {
   border-left : 4px solid rgb(255, 187, 0);
 }
@@ -1857,35 +1824,22 @@ Details :
 /*---------------
   - Bottom area -
   ---------------*/
-#thumb-bottom
+.thumb-bottom
 {
-  border : 0.07em solid transparent; /* to not overlay thumb borders */
-}
-
-/* Set outside margins in thumbnails about bottom infos area */
-.dt_group_left #thumb-bottom
-{
-  border-left-width: 0.14em;
-}
-.dt_group_bottom #thumb-bottom
-{
-  border-bottom-width: 0.14em;
-}
-.dt_group_right #thumb-bottom
-{
-  border-right-width: 0.14em;
+  border: 0;
+  margin: 0;
 }
 
 /* Set background on thumbnails hover overlays */
-.dt_overlays_hover_extended #thumb-main:hover #thumb-bottom,
-.dt_overlays_mixed #thumb-main:hover #thumb-bottom,
-.dt_overlays_hover #thumb-main:hover #thumb-bottom
+.dt_overlays_hover_extended .thumb-main:hover .thumb-bottom,
+.dt_overlays_mixed .thumb-main:hover .thumb-bottom,
+.dt_overlays_hover .thumb-main:hover .thumb-bottom
 {
   background-image: linear-gradient(rgba(198, 198, 198, 0.7) 0%, rgba(198, 198, 198, 0.7) 90%,rgba(198, 198, 198, 0) 100%);  /* rgb color needs to be set to same color as #thumb-back hover background */
 }
 
 /* Set background on block infos in last overlay mode and culling/preview modes shown with mouse hover */
-.dt_overlays_hover_block #thumb-image:hover #thumb-bottom
+.dt_overlays_hover_block .thumb-image:hover .thumb-bottom
 {
   background-image: none;
   background-color: rgba(220, 220, 220, 0.8);
@@ -1895,20 +1849,19 @@ Details :
   - Thumbnails infos -
   --------------------*/
 /* set some padding for some icons */
-#thumb-star,
-#thumb-reject,
-#thumb-colorlabels
+.thumb-star,
+.thumb-reject,
+.thumb-colorlabels
 {
   padding : 12.5px; /* percent of the full size */
 }
 
 /* Reset color icons to be hidden in following modes, including culling/preview overlays hover block*/
 .dt_overlays_none .dt_thumb_btn,
-.dt_overlays_none #thumb-main:hover .dt_thumb_btn,
+.dt_overlays_none .thumb-main:hover .dt_thumb_btn,
 .dt_overlays_hover .dt_thumb_btn,
 .dt_overlays_hover_extended .dt_thumb_btn,
-.dt_overlays_hover_block #thumb-main .dt_thumb_btn,
-#thumb-ext  /* by default, the extension is hidden */
+.thumb-ext  /* by default, the extension is hidden */
 {
   color: transparent;
   background-color: transparent;
@@ -1916,166 +1869,159 @@ Details :
 
 /* Set default color icons, extension name and text infos on thumbnails and block infos */
 .dt_thumb_btn,
-.dt_overlays_always_extended #thumb-bottom-label,
-.dt_overlays_always #thumb-ext,
-.dt_overlays_always_extended #thumb-ext,
-.dt_overlays_mixed #thumb-ext
+.dt_overlays_always_extended .thumb-bottom-label,
+.dt_overlays_always .thumb-ext,
+.dt_overlays_always_extended .thumb-ext,
+.dt_overlays_mixed .thumb-ext
 {
-  color: shade(@thumbnail_font_color, 1.1);
+  color: @thumbnail_font_color;
 }
 
 /* Make inactive stars more discrete when not hovered */
-.dt_overlays_always #thumb-star,
-.dt_overlays_always_extended #thumb-star,
-.dt_overlays_mixed #thumb-star,
-.dt_overlays_hover_block #thumb-star
+.dt_overlays_always .thumb-star,
+.dt_overlays_always_extended .thumb-star,
+.dt_overlays_mixed .thumb-star,
+.dt_overlays_hover_block .thumb-star
 {
-  color: shade(@thumbnail_font_color, 1.4);
+  color: @thumbnail_font_color;
 }
 
 /* Set hover and selected color icons, extension name and text infos */
-.dt_overlays_always #thumb-main:hover #thumb-ext,
-.dt_overlays_always #thumb-main:selected #thumb-ext,
-.dt_overlays_always_extended #thumb-main:hover #thumb-ext,
-.dt_overlays_always_extended #thumb-main:selected #thumb-ext,
-.dt_overlays_mixed #thumb-main:hover #thumb-ext,
-.dt_overlays_mixed #thumb-main:selected #thumb-ext,
-.dt_overlays_hover #thumb-main:hover .dt_thumb_btn,
-.dt_overlays_hover_extended #thumb-main:hover .dt_thumb_btn,
-.dt_overlays_hover_extended #thumb-main:hover #thumb-bottom-label,
-.dt_overlays_hover #thumb-main:hover #thumb-group,
-.dt_overlays_hover #thumb-main:hover #thumb-altered,
-.dt_overlays_hover #thumb-main:hover #thumb-audio,
-.dt_overlays_hover_extended #thumb-main:hover #thumb-group,
-.dt_overlays_hover_extended #thumb-main:hover #thumb-altered,
-.dt_overlays_hover_extended #thumb-main:hover #thumb-audio,
-.dt_overlays_always #thumb-main:hover .dt_thumb_btn,
-.dt_overlays_always #thumb-main:selected .dt_thumb_btn,
-.dt_overlays_always_extended #thumb-main:hover .dt_thumb_btn,
-.dt_overlays_always_extended #thumb-main:selected .dt_thumb_btn,
-.dt_overlays_always_extended #thumb-main:hover #thumb-bottom-label,
-.dt_overlays_always_extended #thumb-main:selected #thumb-bottom-label,
-.dt_overlays_mixed #thumb-main:hover .dt_thumb_btn,
-.dt_overlays_mixed #thumb-main:selected .dt_thumb_btn,
-.dt_overlays_mixed #thumb-main:hover #thumb-bottom-label,
-.dt_overlays_hover_block #thumb-main:hover .dt_thumb_btn,
-.dt_overlays_hover_block #thumb-main:hover .dt_thumb_btn:active,
-.dt_overlays_hover_block #thumb-main:hover #thumb-audio,
-.dt_overlays_hover_block #thumb-main:hover #thumb-altered,
-.dt_overlays_hover_block #thumb-main:hover #thumb-localcopy,
-.dt_overlays_hover_block #thumb-main:hover #thumb-bottom-label
+.dt_overlays_always .thumb-main:hover .thumb-ext,
+.dt_overlays_always .thumb-main:selected .thumb-ext,
+.dt_overlays_always_extended .thumb-main:hover .thumb-ext,
+.dt_overlays_always_extended .thumb-main:selected .thumb-ext,
+.dt_overlays_mixed .thumb-main:hover .thumb-ext,
+.dt_overlays_mixed .thumb-main:selected .thumb-ext,
+.dt_overlays_hover .thumb-main:hover .dt_thumb_btn,
+.dt_overlays_hover_extended .thumb-main:hover .dt_thumb_btn,
+.dt_overlays_hover_extended .thumb-main:hover .thumb-bottom-label,
+.dt_overlays_hover .thumb-main:hover .thumb-group,
+.dt_overlays_hover .thumb-main:hover .thumb-altered,
+.dt_overlays_hover .thumb-main:hover #thumb-audio,
+.dt_overlays_hover .thumb-main:hover .thumb-ext,
+.dt_overlays_hover_extended .thumb-main:hover .thumb-group,
+.dt_overlays_hover_extended .thumb-main:hover .thumb-altered,
+.dt_overlays_hover_extended .thumb-main:hover #thumb-audio,
+.dt_overlays_hover_extended .thumb-main:hover .thumb-ext,
+.dt_overlays_always .thumb-main:hover .dt_thumb_btn,
+.dt_overlays_always .thumb-main:selected .dt_thumb_btn,
+.dt_overlays_always_extended .thumb-main:hover .dt_thumb_btn,
+.dt_overlays_always_extended .thumb-main:selected .dt_thumb_btn,
+.dt_overlays_always_extended .thumb-main:hover .thumb-bottom-label,
+.dt_overlays_always_extended .thumb-main:selected .thumb-bottom-label,
+.dt_overlays_mixed .thumb-main:hover .dt_thumb_btn,
+.dt_overlays_mixed .thumb-main:selected .dt_thumb_btn,
+.dt_overlays_mixed .thumb-main:hover .thumb-bottom-label
 {
   color: @thumbnail_font_color;
 }
 
 /* Set red reject icon when visible */
-.dt_overlays_hover #thumb-main:hover #thumb-reject:active,
-.dt_overlays_hover #thumb-main:hover #thumb-reject:hover,
-.dt_overlays_hover_extended #thumb-main:hover #thumb-reject:active,
-.dt_overlays_hover_extended #thumb-main:hover #thumb-reject:hover,
-.dt_overlays_always #thumb-reject:active,
-.dt_overlays_always #thumb-main:hover #thumb-reject:active,
-.dt_overlays_always #thumb-main:selected #thumb-reject:active,
-.dt_overlays_always #thumb-reject:hover,
-.dt_overlays_always #thumb-main:hover #thumb-reject:hover,
-.dt_overlays_always_extended #thumb-reject:active,
-.dt_overlays_always_extended #thumb-main:hover #thumb-reject:active,
-.dt_overlays_always_extended #thumb-main:selected #thumb-reject:active,
-.dt_overlays_always_extended #thumb-reject:hover,
-.dt_overlays_always_extended #thumb-main:hover #thumb-reject:hover,
-.dt_overlays_mixed #thumb-reject:active,
-.dt_overlays_mixed #thumb-main:hover #thumb-reject:active,
-.dt_overlays_mixed #thumb-main:selected #thumb-reject:active,
-.dt_overlays_mixed #thumb-reject:hover,
-.dt_overlays_mixed #thumb-main:hover #thumb-reject:hover,
-.dt_overlays_hover_block #thumb-image:hover #thumb-reject:active,  /* for overlay hover block, set it on #thumb-image and not #thumb-main here to avoid some glitches when block disappear */
-.dt_overlays_hover_block #thumb-image:hover #thumb-reject:hover
+.dt_overlays_hover .thumb-main:hover .thumb-reject:active,
+.dt_overlays_hover .thumb-main:hover .thumb-reject:hover,
+.dt_overlays_hover_extended .thumb-main:hover .thumb-reject:active,
+.dt_overlays_hover_extended .thumb-main:hover .thumb-reject:hover,
+.dt_overlays_always .thumb-reject:active,
+.dt_overlays_always .thumb-main:hover .thumb-reject:active,
+.dt_overlays_always .thumb-main:selected .thumb-reject:active,
+.dt_overlays_always .thumb-reject:hover,
+.dt_overlays_always .thumb-main:hover .thumb-reject:hover,
+.dt_overlays_always_extended .thumb-reject:active,
+.dt_overlays_always_extended .thumb-main:hover .thumb-reject:active,
+.dt_overlays_always_extended .thumb-main:selected .thumb-reject:active,
+.dt_overlays_always_extended .thumb-reject:hover,
+.dt_overlays_always_extended .thumb-main:hover .thumb-reject:hover,
+.dt_overlays_mixed .thumb-reject:active,
+.dt_overlays_mixed .thumb-main:hover .thumb-reject:active,
+.dt_overlays_mixed .thumb-main:selected .thumb-reject:active,
+.dt_overlays_mixed .thumb-reject:hover,
+.dt_overlays_mixed .thumb-main:hover .thumb-reject:hover
 {
   color: red;
 }
 
 /* Set stars icon when active */
-.dt_overlays_hover #thumb-main:hover #thumb-star:active,
-.dt_overlays_hover_extended #thumb-main:hover #thumb-star:active,
-.dt_overlays_always #thumb-star:active,
-.dt_overlays_always_extended #thumb-star:active,
-.dt_overlays_mixed #thumb-star:active,
-.dt_overlays_hover_block #thumb-image:hover #thumb-star:active
+.dt_overlays_hover .thumb-main:hover .thumb-star:active,
+.dt_overlays_hover_extended .thumb-main:hover .thumb-star:active,
+.dt_overlays_always .thumb-star:active,
+.dt_overlays_always_extended .thumb-star:active,
+.dt_overlays_mixed .thumb-star:active
 {
   color: @thumbnail_font_color;
   background-color: @thumbnail_font_color;
 }
 
 /* Set stars icon hover effect */
-.dt_overlays_hover #thumb-main:hover #thumb-star:hover,
-.dt_overlays_hover_extended #thumb-main:hover #thumb-star:hover,
-.dt_overlays_always #thumb-main:hover #thumb-star:hover,
-.dt_overlays_always_extended #thumb-main:hover #thumb-star:hover,
-.dt_overlays_mixed #thumb-main:hover #thumb-star:hover,
-.dt_overlays_hover_block #thumb-main:hover #thumb-star:hover
+.dt_overlays_hover .thumb-main:hover .thumb-star:hover,
+.dt_overlays_hover_extended .thumb-main:hover .thumb-star:hover,
+.dt_overlays_always .thumb-main:hover .thumb-star:hover,
+.dt_overlays_always_extended .thumb-main:hover .thumb-star:hover,
+.dt_overlays_mixed .thumb-main:hover .thumb-star:hover,
+.dt_overlays_hover_block .thumb-main:hover .thumb-star:hover
 {
   color: @thumbnail_star_hover_color;
   background-color: @thumbnail_star_bg_color;
 }
 
 /* Set hover group and audio effect */
-.dt_overlays_always #thumb-main:hover #thumb-group:hover,
-.dt_overlays_always #thumb-main:hover #thumb-audio:hover,
-.dt_overlays_always_extended #thumb-main:hover #thumb-group:hover,
-.dt_overlays_always_extended #thumb-main:hover #thumb-audio:hover,
-.dt_overlays_mixed #thumb-main:hover #thumb-group:hover,
-.dt_overlays_mixed #thumb-main:hover #thumb-audio:hover,
-.dt_overlays_hover_block #thumb-main:hover #thumb-group:hover,
-.dt_overlays_hover_block #thumb-main:hover #thumb-audio:hover
+.dt_overlays_always .thumb-main:hover .thumb-group:hover,
+.dt_overlays_always .thumb-main:hover #thumb-audio:hover,
+.dt_overlays_always_extended .thumb-main:hover .thumb-group:hover,
+.dt_overlays_always_extended .thumb-main:hover #thumb-audio:hover,
+.dt_overlays_mixed .thumb-main:hover .thumb-group:hover,
+.dt_overlays_mixed .thumb-main:hover #thumb-audio:hover,
+.dt_overlays_hover_block .thumb-main:hover .thumb-group:hover,
+.dt_overlays_hover_block .thumb-main:hover #thumb-audio:hover
 {
   color: @thumbnail_fg_color;
 }
 
 /* Set rejected images */
-.dt_thumbnail_rating_6 #thumb-image
+.dt_thumbnail_rating_6 .thumb-image
 {
   color: rgba(0,0,0,0.35); /* only the transparency is used to fade the image drawing */
 }
 
-.dt_thumbnail_rating_6#thumb-main:hover #thumb-image
+.dt_thumbnail_rating_6.thumb-main:hover .thumb-image
 {
   color: rgba(0,0,0,1); /* take back image to normal state by removing transparency when hovering the image */
 }
 
-.dt_thumbnail_rating_6 #thumb-back
+.dt_thumbnail_rating_6 .thumb-back
 {
   background-color: shade(@thumbnail_bg_color,0.75); /* also fade the thumb background */
   border: 1px solid shade(@lighttable_bg_color, 0.75); /* this is needed to have appropriate border colors and avoid visible differences in border regardless of not rejected images */
 }
 
-.dt_overlays_always .dt_thumbnail_rating_6 #thumb-ext,
-.dt_overlays_always .dt_thumbnail_rating_6 #thumb-altered,
-.dt_overlays_always_extended .dt_thumbnail_rating_6 #thumb-ext,
-.dt_overlays_always_extended .dt_thumbnail_rating_6 #thumb-altered,
-.dt_overlays_always_extended .dt_thumbnail_rating_6 #thumb-bottom-label,
-.dt_overlays_mixed .dt_thumbnail_rating_6 #thumb-ext,
-.dt_overlays_mixed .dt_thumbnail_rating_6 #thumb-altered
+.dt_overlays_always .dt_thumbnail_rating_6 .thumb-ext,
+.dt_overlays_always .dt_thumbnail_rating_6 .thumb-altered,
+.dt_overlays_always_extended .dt_thumbnail_rating_6 .thumb-ext,
+.dt_overlays_always_extended .dt_thumbnail_rating_6 .thumb-altered,
+.dt_overlays_always_extended .dt_thumbnail_rating_6 .thumb-bottom-label,
+.dt_overlays_mixed .dt_thumbnail_rating_6 .thumb-ext,
+.dt_overlays_mixed .dt_thumbnail_rating_6 .thumb-altered
 {
   color: rgba(0,0,0,0.15); /* add some transparency to infos items in thumbnail */
 }
 
-.dt_thumbnail_rating_6 #thumb-star
+.dt_thumbnail_rating_6 .thumb-star
 {
   color: transparent; /* needed to hide completely stars in rejected images as they are not needed, except in hover mode if we want to un-reject images */
 }
 
 /* Set local copy mark */
-#thumb-localcopy
+.thumb-localcopy
 {
   border-top : 0.07em solid @lighttable_bg_color;
   border-right : 0.07em solid @lighttable_bg_color;
 }
 
-.dt_group_right #thumb-localcopy
+.dt_group_right .thumb-localcopy
 {
   border-right: 0.14em solid rgb(255, 187, 0); /* to not overlay thumb borders */
 }
-.dt_group_top #thumb-localcopy
+.dt_group_top .thumb-localcopy
 {
   border-top: 0.14em solid rgb(255, 187, 0); /* to not overlay thumb borders */
 }
@@ -2083,44 +2029,44 @@ Details :
 /*---------------------------------------------------------
   - Hide icons on all lighttable modes and duplicate ones -
   ---------------------------------------------------------*/
-.dt_overlays_hover #thumb-main #thumb-group,
-.dt_overlays_hover #thumb-main #thumb-altered,
-.dt_overlays_hover #thumb-main #thumb-audio,
-.dt_overlays_hover_extended #thumb-main #thumb-group,
-.dt_overlays_hover_extended #thumb-main #thumb-altered,
-.dt_overlays_hover_extended #thumb-main #thumb-audio,
-.dt_culling #thumb-ext,
-.dt_culling #thumb-main #thumb-ext,
-.dt_overlays_always #culling #thumb-altered,
+.dt_overlays_hover .thumb-main .thumb-group,
+.dt_overlays_hover .thumb-main .thumb-altered,
+.dt_overlays_hover .thumb-main #thumb-audio,
+.dt_overlays_hover_extended .thumb-main .thumb-group,
+.dt_overlays_hover_extended .thumb-main .thumb-altered,
+.dt_overlays_hover_extended .thumb-main #thumb-audio,
+.dt_culling .thumb-ext,
+.dt_culling .thumb-main .thumb-ext,
+.dt_overlays_always #culling .thumb-altered,
 .dt_overlays_always #culling #thumb-audio,
-.dt_overlays_always #culling #thumb-group,
-.dt_overlays_always_extended #culling #thumb-altered,
+.dt_overlays_always #culling .thumb-group,
+.dt_overlays_always_extended #culling .thumb-altered,
 .dt_overlays_always_extended #culling #thumb-audio,
-.dt_overlays_always_extended #culling #thumb-group,
-.dt_preview #thumb-ext,
-.dt_overlays_always #preview #thumb-altered,
+.dt_overlays_always_extended #culling .thumb-group,
+.dt_preview .thumb-ext,
+.dt_overlays_always #preview .thumb-altered,
 .dt_overlays_always #preview #thumb-audio,
-.dt_overlays_always #preview #thumb-group,
-.dt_overlays_always_extended #preview #thumb-altered,
+.dt_overlays_always #preview .thumb-group,
+.dt_overlays_always_extended #preview .thumb-altered,
 .dt_overlays_always_extended #preview #thumb-audio,
-.dt_overlays_always_extended #preview #thumb-group,
-.dt_duplicate_ui #thumb-main #thumb-group,
-.dt_duplicate_ui #thumb-main #thumb-altered,
-.dt_duplicate_ui #thumb-main #thumb-audio,
-.dt_duplicate_ui #thumb-altered,
+.dt_overlays_always_extended #preview .thumb-group,
+.dt_duplicate_ui .thumb-main .thumb-group,
+.dt_duplicate_ui .thumb-main .thumb-altered,
+.dt_duplicate_ui .thumb-main #thumb-audio,
+.dt_duplicate_ui .thumb-altered,
 .dt_duplicate_ui #thumb-audio,
-.dt_duplicate_ui #thumb-group
+.dt_duplicate_ui .thumb-group
 {
   color: transparent;
 }
 
-.dt_overlays_always#preview #thumb-bottom > *
+.dt_overlays_always#preview .thumb-bottom > *
 {
   padding-top: 0.21em;
 }
 
 /* Padding of overlays block hover on thumbnail overlay mode */
-.dt_overlays_hover_block #thumb-image:hover #thumb-bottom-label
+.dt_overlays_hover_block .thumb-image:hover .thumb-bottom-label
 {
   padding-left: 0.28em;
   padding-right: 0.28em;
@@ -2130,57 +2076,39 @@ Details :
   - Culling and preview modes -
   -----------------------------*/
 /* Hide not wanted things on these modes: ext name and thumb_main border */
-.dt_culling #thumb-back,
-.dt_culling #thumb-main:selected #thumb-back,
-.dt_culling #thumb-main:hover #thumb-back,
-.dt_culling #thumb-main:active #thumb-back,
-.dt_preview #thumb-back,
-.dt_preview #thumb-main:selected #thumb-back,
-.dt_preview #thumb-main:hover #thumb-back,
-.dt_preview #thumb-main:active #thumb-back
+.dt_culling .thumb-back,
+.dt_culling .thumb-main:selected .thumb-back,
+.dt_culling .thumb-main:hover .thumb-back,
+.dt_culling .thumb-main:active .thumb-back,
+.dt_preview .thumb-back,
+.dt_preview .thumb-main:selected .thumb-back,
+.dt_preview .thumb-main:hover .thumb-back,
+.dt_preview .thumb-main:active .thumb-back
 {
   background-color: transparent;
   border: 0;
 }
 
-/* Set image borders */
-.dt_preview #thumb-image, .dt_preview_thumb_image#thumb-image
-{
-  margin : 0.7em;
-}
-.dt_culling #thumb-main:selected #thumb-image,
-.dt_preview #thumb-main:selected #thumb-image
-{
-  border: 0.14em solid @plugin_bg_color;
-}
-
-.dt_culling #thumb-main:hover #thumb-image,
-.dt_preview #thumb-main:hover #thumb-image
-{
-  border: 0.14em solid @thumbnail_hover_bg_color;
-}
-
 /* Set how bottom infos are rendered on always and always extended overlays modes in culling and preview modes */
-.dt_overlays_always#culling #thumb-bottom,
-.dt_overlays_always_extended#culling #thumb-bottom,
-.dt_overlays_always#preview #thumb-bottom,
-.dt_overlays_always_extended#preview #thumb-bottom
+.dt_overlays_always #culling .thumb-bottom,
+.dt_overlays_always_extended #culling .thumb-bottom,
+.dt_overlays_always #preview .thumb-bottom,
+.dt_overlays_always_extended #preview .thumb-bottom
 {
   border-radius: 0.21em;
-  border-top: 0.07em solid @lighttable_bg_color;
   background-image: linear-gradient(rgba(171, 171, 171, 0.2) 0%, rgba(171, 171, 171, 0.1) 5%, rgba(171, 171, 171, 0) 100%);
 }
 
-.dt_overlays_always#culling #thumb-main:hover #thumb-bottom,
-.dt_overlays_always_extended#culling #thumb-main:hover #thumb-bottom,
-.dt_overlays_always#preview #thumb-main:hover #thumb-bottom,
-.dt_overlays_always_extended#preview #thumb-main:hover #thumb-bottom
+.dt_overlays_always #culling .thumb-main:hover .thumb-bottom,
+.dt_overlays_always_extended #culling .thumb-main:hover .thumb-bottom,
+.dt_overlays_always #preview .thumb-main:hover .thumb-bottom,
+.dt_overlays_always_extended #preview .thumb-main:hover .thumb-bottom
 {
   background-image: linear-gradient(rgba(191, 191, 191, 0.4) 0%, rgba(191, 191, 191, 0.2) 5%, rgba(171, 171, 171, 0) 100%);
 }
 
 /* Set zoom info */
-#thumb-zoom-label
+.thumb-zoom-label
 {
   color: transparent;
   background-color: transparent;
@@ -2189,17 +2117,10 @@ Details :
 }
 
 /* Set where overlays block infos start on the image */
-.dt_overlays_hover_block #thumb-bottom
+.dt_overlays_hover_block .thumb-bottom
 {
   margin-top: 30px;  /* not real pixels. This is used as a per thousand of the image size and couldn't be scalable */
   margin-left: 0;  /* not real pixels. This is used as a per thousand of the image size and couldn't be scalable */
-}
-
-/* Set background color of overlays block infos */
-.dt_overlays_hover_block #thumb-image:hover #thumb-zoom-label
-{
-  color: @bauhaus_fg_hover;
-  background-color: rgba(20, 20, 20, 0.5);
 }
 
 /* Lighttable toolbox */
