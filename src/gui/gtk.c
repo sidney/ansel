@@ -19,6 +19,7 @@
 #include "common/collection.h"
 #include "common/colorspaces.h"
 #include "common/file_location.h"
+#include "common/ratings.h"
 #include "common/image.h"
 #include "common/image_cache.h"
 #include "gui/guides.h"
@@ -1047,6 +1048,16 @@ int dt_gui_gtk_init(dt_gui_gtk_t *gui)
 
   dt_action_register(&darktable.control->actions_global, N_("toggle tooltip visibility"), _toggle_tooltip_visibility, GDK_KEY_T, GDK_SHIFT_MASK);
   dt_action_register(&darktable.control->actions_global, N_("reinitialise input devices"), dt_shortcuts_reinitialise, GDK_KEY_I, GDK_CONTROL_MASK | GDK_SHIFT_MASK | GDK_MOD1_MASK);
+
+  // Register global rating shortcut
+  ac = dt_action_define(&darktable.control->actions_thumb, NULL, N_("rating"), NULL, &dt_action_def_rating);
+  dt_shortcut_register(ac, 0, 0, GDK_KEY_0, 0);
+  dt_shortcut_register(ac, 1, 0, GDK_KEY_1, 0);
+  dt_shortcut_register(ac, 2, 0, GDK_KEY_2, 0);
+  dt_shortcut_register(ac, 3, 0, GDK_KEY_3, 0);
+  dt_shortcut_register(ac, 4, 0, GDK_KEY_4, 0);
+  dt_shortcut_register(ac, 5, 0, GDK_KEY_5, 0);
+  dt_shortcut_register(ac, 6, 0, GDK_KEY_r, 0);
 
   darktable.gui->reset = 0;
 
