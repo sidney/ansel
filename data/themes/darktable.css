@@ -1833,7 +1833,10 @@ Details :
 /* Set background on thumbnails hover overlays */
 .dt_overlays_hover_extended .thumb-main:hover .thumb-bottom,
 .dt_overlays_mixed .thumb-main:hover .thumb-bottom,
-.dt_overlays_hover .thumb-main:hover .thumb-bottom
+.dt_overlays_hover .thumb-main:hover .thumb-bottom,
+.dt_overlays_hover_extended .thumb-main:selected .thumb-bottom,
+.dt_overlays_mixed .thumb-main:selected .thumb-bottom,
+.dt_overlays_hover .thumb-main:selected .thumb-bottom
 {
   background-image: linear-gradient(rgba(198, 198, 198, 0.7) 0%, rgba(198, 198, 198, 0.7) 90%,rgba(198, 198, 198, 0) 100%);  /* rgb color needs to be set to same color as #thumb-back hover background */
 }
@@ -1894,16 +1897,27 @@ Details :
 .dt_overlays_mixed .thumb-main:hover .thumb-ext,
 .dt_overlays_mixed .thumb-main:selected .thumb-ext,
 .dt_overlays_hover .thumb-main:hover .dt_thumb_btn,
-.dt_overlays_hover_extended .thumb-main:hover .dt_thumb_btn,
-.dt_overlays_hover_extended .thumb-main:hover .thumb-bottom-label,
 .dt_overlays_hover .thumb-main:hover .thumb-group,
 .dt_overlays_hover .thumb-main:hover .thumb-altered,
 .dt_overlays_hover .thumb-main:hover #thumb-audio,
 .dt_overlays_hover .thumb-main:hover .thumb-ext,
+.dt_overlays_hover .thumb-main:selected .dt_thumb_btn,
+.dt_overlays_hover .thumb-main:selected .thumb-group,
+.dt_overlays_hover .thumb-main:selected .thumb-altered,
+.dt_overlays_hover .thumb-main:selected #thumb-audio,
+.dt_overlays_hover .thumb-main:selected .thumb-ext,
 .dt_overlays_hover_extended .thumb-main:hover .thumb-group,
 .dt_overlays_hover_extended .thumb-main:hover .thumb-altered,
 .dt_overlays_hover_extended .thumb-main:hover #thumb-audio,
 .dt_overlays_hover_extended .thumb-main:hover .thumb-ext,
+.dt_overlays_hover_extended .thumb-main:hover .dt_thumb_btn,
+.dt_overlays_hover_extended .thumb-main:hover .thumb-bottom-label,
+.dt_overlays_hover_extended .thumb-main:selected .thumb-group,
+.dt_overlays_hover_extended .thumb-main:selected .thumb-altered,
+.dt_overlays_hover_extended .thumb-main:selected #thumb-audio,
+.dt_overlays_hover_extended .thumb-main:selected .thumb-ext,
+.dt_overlays_hover_extended .thumb-main:selected .dt_thumb_btn,
+.dt_overlays_hover_extended .thumb-main:selected .thumb-bottom-label,
 .dt_overlays_always .thumb-main:hover .dt_thumb_btn,
 .dt_overlays_always .thumb-main:selected .dt_thumb_btn,
 .dt_overlays_always_extended .thumb-main:hover .dt_thumb_btn,
@@ -1920,8 +1934,12 @@ Details :
 /* Set red reject icon when visible */
 .dt_overlays_hover .thumb-main:hover .thumb-reject:active,
 .dt_overlays_hover .thumb-main:hover .thumb-reject:hover,
+.dt_overlays_hover .thumb-main:selected .thumb-reject:active,
+.dt_overlays_hover .thumb-main:selected .thumb-reject:hover,
 .dt_overlays_hover_extended .thumb-main:hover .thumb-reject:active,
 .dt_overlays_hover_extended .thumb-main:hover .thumb-reject:hover,
+.dt_overlays_hover_extended .thumb-main:selected .thumb-reject:active,
+.dt_overlays_hover_extended .thumb-main:selected .thumb-reject:hover,
 .dt_overlays_always .thumb-reject:active,
 .dt_overlays_always .thumb-main:hover .thumb-reject:active,
 .dt_overlays_always .thumb-main:selected .thumb-reject:active,
@@ -1943,7 +1961,9 @@ Details :
 
 /* Set stars icon when active */
 .dt_overlays_hover .thumb-main:hover .thumb-star:active,
+.dt_overlays_hover .thumb-main:selected .thumb-star:active,
 .dt_overlays_hover_extended .thumb-main:hover .thumb-star:active,
+.dt_overlays_hover_extended .thumb-main:selected .thumb-star:active,
 .dt_overlays_always .thumb-star:active,
 .dt_overlays_always_extended .thumb-star:active,
 .dt_overlays_mixed .thumb-star:active
@@ -1970,9 +1990,7 @@ Details :
 .dt_overlays_always_extended .thumb-main:hover .thumb-group:hover,
 .dt_overlays_always_extended .thumb-main:hover #thumb-audio:hover,
 .dt_overlays_mixed .thumb-main:hover .thumb-group:hover,
-.dt_overlays_mixed .thumb-main:hover #thumb-audio:hover,
-.dt_overlays_hover_block .thumb-main:hover .thumb-group:hover,
-.dt_overlays_hover_block .thumb-main:hover #thumb-audio:hover
+.dt_overlays_mixed .thumb-main:hover #thumb-audio:hover
 {
   color: @thumbnail_fg_color;
 }
