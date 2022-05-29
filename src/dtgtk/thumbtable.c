@@ -58,14 +58,9 @@ static gchar *_thumbs_get_overlays_class(dt_thumbnail_overlay_t over)
   {
     case DT_THUMBNAIL_OVERLAYS_NONE:
       return g_strdup("dt_overlays_none");
-    case DT_THUMBNAIL_OVERLAYS_HOVER_EXTENDED:
-      return g_strdup("dt_overlays_hover_extended");
     case DT_THUMBNAIL_OVERLAYS_ALWAYS_NORMAL:
       return g_strdup("dt_overlays_always");
-    case DT_THUMBNAIL_OVERLAYS_ALWAYS_EXTENDED:
-      return g_strdup("dt_overlays_always_extended");
-    case DT_THUMBNAIL_OVERLAYS_MIXED:
-      return g_strdup("dt_overlays_mixed");
+    case DT_THUMBNAIL_OVERLAYS_HOVER_NORMAL:
     default:
       return g_strdup("dt_overlays_hover");
   }

@@ -46,32 +46,6 @@ static void _set_flag(GtkWidget *w, GtkStateFlags flag, gboolean activate)
     gtk_widget_unset_state_flags(w, flag);
 }
 
-// create a new extended infos line from strach
-static void _thumb_update_extended_infos_line(dt_thumbnail_t *thumb)
-{
-  gchar *pattern = dt_conf_get_string("plugins/lighttable/extended_pattern");
-  // we compute the info line (we reuse the function used in export to disk)
-  char input_dir[1024] = { 0 };
-  gboolean from_cache = TRUE;
-  dt_image_full_path(thumb->imgid, input_dir, sizeof(input_dir), &from_cache);
-
-  dt_variables_params_t *vp;
-  dt_variables_params_init(&vp);
-
-  vp->filename = input_dir;
-  vp->jobcode = "infos";
-  vp->imgid = thumb->imgid;
-  vp->sequence = 0;
-  vp->escape_markup = TRUE;
-
-  if(thumb->info_line) g_free(thumb->info_line);
-  thumb->info_line = dt_variables_expand(vp, pattern, TRUE);
-
-  dt_variables_params_destroy(vp);
-
-  g_free(pattern);
-}
-
 static void _image_update_group_tooltip(dt_thumbnail_t *thumb)
 {
   if(!thumb->w_group) return;
@@ -429,8 +403,7 @@ static void _thumb_set_image_area(dt_thumbnail_t *thumb, float zoom_ratio)
 
   int image_w, image_h;
   int posy = 0;
-  if(thumb->over == DT_THUMBNAIL_OVERLAYS_ALWAYS_NORMAL
-     || thumb->over == DT_THUMBNAIL_OVERLAYS_ALWAYS_EXTENDED)
+  if(thumb->over == DT_THUMBNAIL_OVERLAYS_ALWAYS_NORMAL)
   {
     image_w = thumb->width - thumb->img_margin->left - thumb->img_margin->right;
     int w = 0;
@@ -446,19 +419,6 @@ static void _thumb_set_image_area(dt_thumbnail_t *thumb, float zoom_ratio)
     else
       image_h -= thumb->img_margin->bottom;
     image_h -= thumb->img_margin->top;
-    posy += thumb->img_margin->top;
-  }
-  else if(thumb->over == DT_THUMBNAIL_OVERLAYS_MIXED)
-  {
-    image_w = thumb->width - thumb->img_margin->left - thumb->img_margin->right;
-    int w = 0;
-    int h = 0;
-    gtk_widget_get_size_request(thumb->w_reject, &w, &h);
-    image_h = thumb->height - (h + gtk_widget_get_margin_bottom(thumb->w_reject));
-    gtk_widget_get_size_request(thumb->w_altered, &w, &h);
-    posy = h + gtk_widget_get_margin_top(thumb->w_altered);
-    image_h -= posy;
-    image_h -= thumb->img_margin->top + thumb->img_margin->bottom;
     posy += thumb->img_margin->top;
   }
   else
@@ -1260,20 +1220,9 @@ GtkWidget *dt_thumbnail_create_widget(dt_thumbnail_t *thumb, float zoom_ratio)
     gtk_widget_set_valign(thumb->w_bottom_eb, GTK_ALIGN_END);
     gtk_widget_set_halign(thumb->w_bottom_eb, GTK_ALIGN_CENTER);
     gtk_widget_show(thumb->w_bottom_eb);
-    if(thumb->over == DT_THUMBNAIL_OVERLAYS_ALWAYS_EXTENDED
-       || thumb->over == DT_THUMBNAIL_OVERLAYS_HOVER_EXTENDED
-       || thumb->over == DT_THUMBNAIL_OVERLAYS_MIXED)
-    {
-      gchar *lb = g_strdup(thumb->info_line);
-      thumb->w_bottom = gtk_label_new(NULL);
-      gtk_label_set_markup(GTK_LABEL(thumb->w_bottom), lb);
-      g_free(lb);
-    }
-    else
-    {
-      thumb->w_bottom = gtk_label_new(NULL);
-      gtk_label_set_markup(GTK_LABEL(thumb->w_bottom), "");
-    }
+
+    thumb->w_bottom = gtk_label_new(NULL);
+    gtk_label_set_markup(GTK_LABEL(thumb->w_bottom), "");
     dt_gui_add_class(thumb->w_bottom, "thumb-bottom-label");
     gtk_widget_show(thumb->w_bottom);
     gtk_label_set_yalign(GTK_LABEL(thumb->w_bottom), 0.05);
@@ -1417,10 +1366,6 @@ dt_thumbnail_t *dt_thumbnail_new(int width, int height, float zoom_ratio, int im
     }
     dt_image_cache_read_release(darktable.image_cache, img);
   }
-  if(thumb->over == DT_THUMBNAIL_OVERLAYS_ALWAYS_EXTENDED
-     || thumb->over == DT_THUMBNAIL_OVERLAYS_HOVER_EXTENDED
-     || over == DT_THUMBNAIL_OVERLAYS_MIXED)
-    _thumb_update_extended_infos_line(thumb);
 
   // we read all other infos
   _image_get_infos(thumb);
@@ -1486,8 +1431,6 @@ void dt_thumbnail_update_infos(dt_thumbnail_t *thumb)
 
 static void _thumb_resize_overlays(dt_thumbnail_t *thumb)
 {
-  PangoAttrList *attrlist;
-  PangoAttribute *attr;
   int width = 0;
   int height = 0;
 
@@ -1513,22 +1456,7 @@ static void _thumb_resize_overlays(dt_thumbnail_t *thumb)
   // bottom background
   gtk_widget_set_margin_start(thumb->w_bottom, thumb->img_margin->left);
   gtk_widget_set_margin_end(thumb->w_bottom, thumb->img_margin->right);
-  if(thumb->over == DT_THUMBNAIL_OVERLAYS_ALWAYS_EXTENDED
-      || thumb->over == DT_THUMBNAIL_OVERLAYS_HOVER_EXTENDED
-      || thumb->over == DT_THUMBNAIL_OVERLAYS_MIXED)
-  {
-    attrlist = pango_attr_list_new();
-    attr = pango_attr_size_new_absolute(1.5 * r1 * PANGO_SCALE);
-    pango_attr_list_insert(attrlist, attr);
-    gtk_label_set_attributes(GTK_LABEL(thumb->w_bottom), attrlist);
-    pango_attr_list_unref(attrlist);
-    int w = 0;
-    int h = 0;
-    pango_layout_get_pixel_size(gtk_label_get_layout(GTK_LABEL(thumb->w_bottom)), &w, &h);
-    gtk_widget_set_size_request(thumb->w_bottom_eb, width, icon_size * 0.75 + h + 3 * thumb->img_margin->bottom);
-  }
-  else
-    gtk_widget_set_size_request(thumb->w_bottom_eb, width, icon_size * 0.75 + 2 * thumb->img_margin->bottom);
+  gtk_widget_set_size_request(thumb->w_bottom_eb, width, icon_size * 0.75 + 2 * thumb->img_margin->bottom);
 
   gtk_label_set_xalign(GTK_LABEL(thumb->w_bottom), 0.5);
   gtk_label_set_yalign(GTK_LABEL(thumb->w_bottom), 0);
@@ -1807,10 +1735,6 @@ void dt_thumbnail_reload_infos(dt_thumbnail_t *thumb)
 
     dt_image_cache_read_release(darktable.image_cache, img);
   }
-  if(thumb->over == DT_THUMBNAIL_OVERLAYS_ALWAYS_EXTENDED
-     || thumb->over == DT_THUMBNAIL_OVERLAYS_HOVER_EXTENDED
-     || thumb->over == DT_THUMBNAIL_OVERLAYS_MIXED)
-    _thumb_update_extended_infos_line(thumb);
 
   // we read all other infos
   if(thumb->over != DT_THUMBNAIL_OVERLAYS_NONE)
@@ -1820,17 +1744,6 @@ void dt_thumbnail_reload_infos(dt_thumbnail_t *thumb)
   }
 
   _thumb_write_extension(thumb);
-
-  // extended overlay text
-  gchar *lb = NULL;
-  if(thumb->over == DT_THUMBNAIL_OVERLAYS_ALWAYS_EXTENDED
-     || thumb->over == DT_THUMBNAIL_OVERLAYS_HOVER_EXTENDED
-     || thumb->over == DT_THUMBNAIL_OVERLAYS_MIXED)
-    lb = g_strdup(thumb->info_line);
-
-  // we set the text
-  gtk_label_set_markup(GTK_LABEL(thumb->w_bottom), lb);
-  g_free(lb);
 }
 // clang-format off
 // modelines: These editor modelines have been set for all relevant files by tools/update_modelines.py

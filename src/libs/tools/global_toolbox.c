@@ -39,8 +39,8 @@ typedef struct dt_lib_tool_preferences_t
 {
   GtkWidget *preferences_button, *grouping_button, *overlays_button, *help_button, *keymap_button;
   GtkWidget *over_popup, *thumbnails_box, *culling_box;
-  GtkWidget *over_label, *over_r0, *over_r1, *over_r2, *over_r3, *over_r4, *over_r5, *over_tt;
-  GtkWidget *over_culling_label, *over_culling_r0, *over_culling_r3, *over_culling_r4, *over_culling_tt;
+  GtkWidget *over_label, *over_r0, *over_r1, *over_r2, *over_tt;
+  GtkWidget *over_culling_label, *over_culling_r0, *over_culling_r1, *over_culling_r2, *over_culling_tt;
   gboolean disable_over_events;
 } dt_lib_tool_preferences_t;
 
@@ -90,20 +90,17 @@ static void _overlays_toggle_button(GtkWidget *w, gpointer user_data)
   dt_thumbnail_overlay_t over = DT_THUMBNAIL_OVERLAYS_HOVER_NORMAL;
   if(gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(d->over_r0)))
     over = DT_THUMBNAIL_OVERLAYS_NONE;
+  else if(gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(d->over_r1)))
+    over = DT_THUMBNAIL_OVERLAYS_HOVER_NORMAL;
   else if(gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(d->over_r2)))
-    over = DT_THUMBNAIL_OVERLAYS_HOVER_EXTENDED;
-  else if(gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(d->over_r3)))
     over = DT_THUMBNAIL_OVERLAYS_ALWAYS_NORMAL;
-  else if(gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(d->over_r4)))
-    over = DT_THUMBNAIL_OVERLAYS_ALWAYS_EXTENDED;
-  else if(gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(d->over_r5)))
-    over = DT_THUMBNAIL_OVERLAYS_MIXED;
+
 
   dt_ui_thumbtable(darktable.gui->ui)->show_tooltips = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(d->over_tt));
   dt_thumbtable_set_overlays_mode(dt_ui_thumbtable(darktable.gui->ui), over);
 
 #ifdef USE_LUA
-  gboolean show = (over == DT_THUMBNAIL_OVERLAYS_ALWAYS_NORMAL || over == DT_THUMBNAIL_OVERLAYS_ALWAYS_EXTENDED);
+  gboolean show = (over == DT_THUMBNAIL_OVERLAYS_ALWAYS_NORMAL);
   dt_lua_async_call_alien(dt_lua_event_trigger_wrapper, 0, NULL, NULL, LUA_ASYNC_TYPENAME, "const char*",
                           "global_toolbox-overlay_toggle", LUA_ASYNC_TYPENAME, "bool", show, LUA_ASYNC_DONE);
 #endif // USE_LUA
@@ -116,13 +113,13 @@ static void _overlays_toggle_culling_button(GtkWidget *w, gpointer user_data)
 
   if(d->disable_over_events) return;
 
-  dt_thumbnail_overlay_t over = DT_THUMBNAIL_OVERLAYS_NONE;
-  if(gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(d->over_culling_r0)))
+  dt_thumbnail_overlay_t over = DT_THUMBNAIL_OVERLAYS_HOVER_NORMAL;
+  if(gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(d->over_r0)))
     over = DT_THUMBNAIL_OVERLAYS_NONE;
-  else if(gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(d->over_culling_r3)))
+  else if(gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(d->over_r1)))
+    over = DT_THUMBNAIL_OVERLAYS_HOVER_NORMAL;
+  else if(gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(d->over_r2)))
     over = DT_THUMBNAIL_OVERLAYS_ALWAYS_NORMAL;
-  else if(gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(d->over_culling_r4)))
-    over = DT_THUMBNAIL_OVERLAYS_ALWAYS_EXTENDED;
 
   dt_culling_mode_t cmode = DT_CULLING_MODE_CULLING;
   if(dt_view_lighttable_preview_state(darktable.view_manager)) cmode = DT_CULLING_MODE_PREVIEW;
@@ -137,7 +134,7 @@ static void _overlays_toggle_culling_button(GtkWidget *w, gpointer user_data)
   gtk_widget_hide(d->over_popup);
 
 #ifdef USE_LUA
-  gboolean show = (over == DT_THUMBNAIL_OVERLAYS_ALWAYS_NORMAL || over == DT_THUMBNAIL_OVERLAYS_ALWAYS_EXTENDED);
+  gboolean show = (over == DT_THUMBNAIL_OVERLAYS_ALWAYS_NORMAL);
   dt_lua_async_call_alien(dt_lua_event_trigger_wrapper, 0, NULL, NULL, LUA_ASYNC_TYPENAME, "const char*",
                           "global_toolbox-overlay_toggle", LUA_ASYNC_TYPENAME, "bool", show, LUA_ASYNC_DONE);
 #endif // USE_LUA
@@ -188,20 +185,12 @@ static void _overlays_show_popup(GtkWidget *button, dt_lib_module_t *self)
 
     // we get and set the current value
     dt_thumbnail_overlay_t mode = dt_ui_thumbtable(darktable.gui->ui)->overlays;
-
-
     if(mode == DT_THUMBNAIL_OVERLAYS_NONE)
       gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(d->over_r0), TRUE);
-    else if(mode == DT_THUMBNAIL_OVERLAYS_HOVER_EXTENDED)
-      gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(d->over_r2), TRUE);
-    else if(mode == DT_THUMBNAIL_OVERLAYS_ALWAYS_NORMAL)
-      gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(d->over_r3), TRUE);
-    else if(mode == DT_THUMBNAIL_OVERLAYS_ALWAYS_EXTENDED)
-      gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(d->over_r4), TRUE);
-    else if(mode == DT_THUMBNAIL_OVERLAYS_MIXED)
-      gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(d->over_r5), TRUE);
-    else
+    else if(mode == DT_THUMBNAIL_OVERLAYS_HOVER_NORMAL)
       gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(d->over_r1), TRUE);
+    else if(mode == DT_THUMBNAIL_OVERLAYS_ALWAYS_NORMAL)
+      gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(d->over_r2), TRUE);
 
     gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(d->over_tt), dt_ui_thumbtable(darktable.gui->ui)->show_tooltips);
 
@@ -232,14 +221,12 @@ static void _overlays_show_popup(GtkWidget *button, dt_lib_module_t *self)
     dt_thumbnail_overlay_t mode = dt_conf_get_int(otxt);
     g_free(otxt);
 
-
-
     if(mode == DT_THUMBNAIL_OVERLAYS_NONE)
       gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(d->over_culling_r0), TRUE);
+    else if(mode == DT_THUMBNAIL_OVERLAYS_HOVER_NORMAL)
+      gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(d->over_culling_r1), TRUE);
     else if(mode == DT_THUMBNAIL_OVERLAYS_ALWAYS_NORMAL)
-      gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(d->over_culling_r3), TRUE);
-    else if(mode == DT_THUMBNAIL_OVERLAYS_ALWAYS_EXTENDED)
-      gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(d->over_culling_r4), TRUE);
+      gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(d->over_culling_r2), TRUE);
     else
     {
       dt_unreachable_codepath();
@@ -363,10 +350,7 @@ void gui_init(dt_lib_module_t *self)
   GtkWidget *rb = NULL;
   NEW_RADIO(d->over_r0, d->thumbnails_box, _overlays_toggle_button, N_("no overlays"));
   NEW_RADIO(d->over_r1, d->thumbnails_box, _overlays_toggle_button, N_("overlays on mouse hover"));
-  NEW_RADIO(d->over_r2, d->thumbnails_box, _overlays_toggle_button, N_("extended overlays on mouse hover"));
-  NEW_RADIO(d->over_r3, d->thumbnails_box, _overlays_toggle_button, N_("permanent overlays"));
-  NEW_RADIO(d->over_r4, d->thumbnails_box, _overlays_toggle_button, N_("permanent extended overlays"));
-  NEW_RADIO(d->over_r5, d->thumbnails_box, _overlays_toggle_button, N_("permanent overlays extended on mouse hover"));
+  NEW_RADIO(d->over_r2, d->thumbnails_box, _overlays_toggle_button, N_("permanent overlays"));
   d->over_tt = gtk_check_button_new_with_label(_("show tooltip"));
   g_signal_connect(G_OBJECT(d->over_tt), "toggled", G_CALLBACK(_overlays_toggle_button), self);
   gtk_widget_set_name(d->over_tt, "show-tooltip");
@@ -384,8 +368,8 @@ void gui_init(dt_lib_module_t *self)
   ac = dt_action_section(&darktable.control->actions_global, N_("culling overlays"));
   rb = NULL;
   NEW_RADIO(d->over_culling_r0, d->culling_box, _overlays_toggle_culling_button, N_("no overlays"));
-  NEW_RADIO(d->over_culling_r3, d->culling_box, _overlays_toggle_culling_button, N_("permanent overlays"));
-  NEW_RADIO(d->over_culling_r4, d->culling_box, _overlays_toggle_culling_button, N_("permanent extended overlays"));
+  NEW_RADIO(d->over_culling_r1, d->culling_box, _overlays_toggle_culling_button, N_("overlays on mouse hover"));
+  NEW_RADIO(d->over_culling_r2, d->culling_box, _overlays_toggle_culling_button, N_("permanent overlays"));
   d->over_culling_tt = gtk_check_button_new_with_label(_("show tooltip"));
   g_signal_connect(G_OBJECT(d->over_culling_tt), "toggled", G_CALLBACK(_overlays_toggle_culling_button), self);
   gtk_widget_set_name(d->over_culling_tt, "show-tooltip");
