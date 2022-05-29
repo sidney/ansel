@@ -67,7 +67,6 @@ typedef struct dt_thumbtable_t
   int thumbs_per_row; // number of image in a row (1 for filmstrip ; MAX_ZOOM for zoomable)
   int rows; // number of rows (the last one is not fully visible) for filmstrip it's the number of columns
   int thumb_size;              // demanded thumb size (real size can differ of 1 due to rounding)
-  int prefs_size;              // size value to determine overlays mode and css class
   int view_width, view_height; // last main widget size
   GdkRectangle thumbs_area;    // coordinate of all the currently loaded thumbs area
 

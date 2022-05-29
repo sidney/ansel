@@ -172,13 +172,6 @@ static void _overlays_show_popup(GtkWidget *button, dt_lib_module_t *self)
 
   if(thumbs_state)
   {
-    // we write the label with the size category
-    gchar *txt = g_strdup_printf("%s %d (%d %s)", _("thumbnails overlays for size"),
-                                 dt_ui_thumbtable(darktable.gui->ui)->prefs_size,
-                                 dt_ui_thumbtable(darktable.gui->ui)->thumb_size, _("px"));
-    gtk_label_set_text(GTK_LABEL(d->over_label), txt);
-    g_free(txt);
-
     // we get and set the current value
     dt_thumbnail_overlay_t mode = dt_ui_thumbtable(darktable.gui->ui)->overlays;
     if(mode == DT_THUMBNAIL_OVERLAYS_NONE)

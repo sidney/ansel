@@ -904,80 +904,10 @@
     <longdescription/>
   </dtconfig>
   <dtconfig>
-    <name>plugins/lighttable/overlays/0/0</name>
+    <name>plugins/lighttable/overlays/global</name>
     <type>int</type>
     <default>0</default>
-    <shortdescription>overlays for filemanager at size 0 = none</shortdescription>
-    <longdescription/>
-  </dtconfig>
-  <dtconfig>
-    <name>plugins/lighttable/overlays/0/1</name>
-    <type>int</type>
-    <default>1</default>
-    <shortdescription>overlays for filemanager at size 1 = on hover</shortdescription>
-    <longdescription/>
-  </dtconfig>
-    <dtconfig>
-    <name>plugins/lighttable/overlays/0/2</name>
-    <type>int</type>
-    <default>4</default>
-    <shortdescription>overlays for filemanager at size 2 = always extended</shortdescription>
-    <longdescription/>
-  </dtconfig>
-  <dtconfig>
-    <name>plugins/lighttable/overlays/1/0</name>
-    <type>int</type>
-    <default>0</default>
-    <shortdescription>overlays for filmstrip at size 0 = none</shortdescription>
-    <longdescription/>
-  </dtconfig>
-  <dtconfig>
-    <name>plugins/lighttable/overlays/1/1</name>
-    <type>int</type>
-    <default>1</default>
-    <shortdescription>overlays for filmstrip at size 1 = on hover</shortdescription>
-    <longdescription/>
-  </dtconfig>
-    <dtconfig>
-    <name>plugins/lighttable/overlays/1/2</name>
-    <type>int</type>
-    <default>1</default>
-    <shortdescription>overlays for filmstrip at size 2 = on hover</shortdescription>
-    <longdescription/>
-  </dtconfig>
-  <dtconfig>
-    <name>plugins/lighttable/overlays/2/0</name>
-    <type>int</type>
-    <default>0</default>
-    <shortdescription>overlays for zomable lighttable at size 0 = none</shortdescription>
-    <longdescription/>
-  </dtconfig>
-  <dtconfig>
-    <name>plugins/lighttable/overlays/2/1</name>
-    <type>int</type>
-    <default>1</default>
-    <shortdescription>overlays for zomable lighttable at size 1 = on hover</shortdescription>
-    <longdescription/>
-  </dtconfig>
-    <dtconfig>
-    <name>plugins/lighttable/overlays/2/2</name>
-    <type>int</type>
-    <default>4</default>
-    <shortdescription>overlays for zomable lighttable at size 2 = always extended</shortdescription>
-    <longdescription/>
-  </dtconfig>
-  <dtconfig>
-    <name>plugins/lighttable/overlays/culling/0</name>
-    <type>int</type>
-    <default>6</default>
-    <shortdescription>overlays for culling = block</shortdescription>
-    <longdescription/>
-  </dtconfig>
-  <dtconfig>
-    <name>plugins/lighttable/overlays/culling/1</name>
-    <type>int</type>
-    <default>6</default>
-    <shortdescription>overlays for full preview = block</shortdescription>
+    <shortdescription>overlays for thumbnails</shortdescription>
     <longdescription/>
   </dtconfig>
   <dtconfig>

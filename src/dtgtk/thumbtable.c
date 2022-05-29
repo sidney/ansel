@@ -66,41 +66,11 @@ static gchar *_thumbs_get_overlays_class(dt_thumbnail_overlay_t over)
   }
 }
 
-// get the size category, depending on the thumb size
-static int _thumbs_get_prefs_size(dt_thumbtable_t *table)
-{
-  // we get the size delimitations to differentiate sizes categories
-  // one we set as many categories as we want (this can be useful if
-  // we want to finetune css very precisely)
-  const char *txt = dt_conf_get_string_const("plugins/lighttable/thumbnail_sizes");
-  gchar **ts = g_strsplit(txt, "|", -1);
-  int i = 0;
-  while(ts[i])
-  {
-    const int s = g_ascii_strtoll(ts[i], NULL, 10);
-    if(table->thumb_size < s) break;
-    i++;
-  }
-  g_strfreev(ts);
-  return i;
-}
-
 // update thumbtable class and overlays mode, depending on size category
 static void _thumbs_update_overlays_mode(dt_thumbtable_t *table)
 {
-  int ns = _thumbs_get_prefs_size(table);
-
-  // we change the class that indicate the thumb size
-  gchar *c0 = g_strdup_printf("dt_thumbnails_%d", table->prefs_size);
-  gchar *c1 = g_strdup_printf("dt_thumbnails_%d", ns);
-  dt_gui_remove_class(table->widget, c0);
-  dt_gui_add_class(table->widget, c1);
-  g_free(c0);
-  g_free(c1);
-  table->prefs_size = ns;
-
   // we change the overlay mode
-  gchar *txt = g_strdup_printf("plugins/lighttable/overlays/%d/%d", table->mode, ns);
+  gchar *txt = g_strdup_printf("plugins/lighttable/overlays/global/%d", table->mode);
   dt_thumbnail_overlay_t over = dt_conf_get_int(txt);
   g_free(txt);
 
@@ -112,7 +82,7 @@ void dt_thumbtable_set_overlays_mode(dt_thumbtable_t *table, dt_thumbnail_overla
 {
   if(!table) return;
   if(over == table->overlays) return;
-  gchar *txt = g_strdup_printf("plugins/lighttable/overlays/%d/%d", table->mode, table->prefs_size);
+  gchar *txt = g_strdup_printf("plugins/lighttable/overlays/global/%d", table->mode);
   dt_conf_set_int(txt, over);
   g_free(txt);
   gchar *cl0 = _thumbs_get_overlays_class(table->overlays);
