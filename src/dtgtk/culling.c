@@ -836,17 +836,13 @@ dt_culling_t *dt_culling_new(dt_culling_mode_t mode)
     dt_gui_add_class(table->widget, "dt_culling");
 
   // overlays
-  gchar *otxt = g_strdup_printf("plugins/lighttable/overlays/culling/%d", table->mode);
+  gchar *otxt = g_strdup("plugins/lighttable/overlays/global");
   table->overlays = dt_conf_get_int(otxt);
   g_free(otxt);
 
   gchar *cl0 = _thumbs_get_overlays_class(table->overlays);
   dt_gui_add_class(table->widget, cl0);
   free(cl0);
-
-  otxt = g_strdup_printf("plugins/lighttable/tooltips/culling/%d", table->mode);
-  table->show_tooltips = dt_conf_get_bool(otxt);
-  g_free(otxt);
 
   // set widget signals
   gtk_widget_set_events(table->widget, GDK_EXPOSURE_MASK | GDK_POINTER_MOTION_MASK
@@ -1723,7 +1719,7 @@ void dt_culling_zoom_fit(dt_culling_t *table)
 void dt_culling_set_overlays_mode(dt_culling_t *table, dt_thumbnail_overlay_t over)
 {
   if(!table) return;
-  gchar *txt = g_strdup_printf("plugins/lighttable/overlays/culling/%d", table->mode);
+  gchar *txt = g_strdup("plugins/lighttable/overlays/global");
   dt_conf_set_int(txt, over);
   g_free(txt);
   gchar *cl0 = _thumbs_get_overlays_class(table->overlays);

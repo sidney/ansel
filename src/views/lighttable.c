@@ -268,12 +268,9 @@ static void _culling_preview_reload_overlays(dt_view_t *self)
   dt_library_t *lib = (dt_library_t *)self->data;
 
   // change overlays if needed for culling and preview
-  gchar *otxt = g_strdup_printf("plugins/lighttable/overlays/culling/%d", DT_CULLING_MODE_CULLING);
+  gchar *otxt = g_strdup("plugins/lighttable/overlays/global");
   dt_thumbnail_overlay_t over = dt_conf_get_int(otxt);
   dt_culling_set_overlays_mode(lib->culling, over);
-  g_free(otxt);
-  otxt = g_strdup_printf("plugins/lighttable/overlays/culling/%d", DT_CULLING_MODE_PREVIEW);
-  over = dt_conf_get_int(otxt);
   dt_culling_set_overlays_mode(lib->preview, over);
   g_free(otxt);
 }

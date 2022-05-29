@@ -70,7 +70,7 @@ static gchar *_thumbs_get_overlays_class(dt_thumbnail_overlay_t over)
 static void _thumbs_update_overlays_mode(dt_thumbtable_t *table)
 {
   // we change the overlay mode
-  gchar *txt = g_strdup_printf("plugins/lighttable/overlays/global/%d", table->mode);
+  gchar *txt = g_strdup("plugins/lighttable/overlays/global");
   dt_thumbnail_overlay_t over = dt_conf_get_int(txt);
   g_free(txt);
 
@@ -82,7 +82,7 @@ void dt_thumbtable_set_overlays_mode(dt_thumbtable_t *table, dt_thumbnail_overla
 {
   if(!table) return;
   if(over == table->overlays) return;
-  gchar *txt = g_strdup_printf("plugins/lighttable/overlays/global/%d", table->mode);
+  gchar *txt = g_strdup("plugins/lighttable/overlays/global");
   dt_conf_set_int(txt, over);
   g_free(txt);
   gchar *cl0 = _thumbs_get_overlays_class(table->overlays);
