@@ -50,7 +50,6 @@ typedef struct dt_thumbtable_t
 {
   dt_thumbtable_mode_t mode;
   dt_thumbnail_overlay_t overlays;
-  gboolean show_tooltips;
 
   GtkWidget *widget; // GtkLayout -- main widget
 

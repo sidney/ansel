@@ -1210,10 +1210,10 @@ static gboolean _thumbs_recreate_list_at(dt_culling_t *table, const int offset)
       dt_thumbnail_t *thumb;
       if(table->mode == DT_CULLING_MODE_PREVIEW)
         thumb = dt_thumbnail_new(nw, nh, table->zoom_ratio, nid, nrow, table->overlays,
-                                 DT_THUMBNAIL_CONTAINER_PREVIEW, table->show_tooltips);
+                                 DT_THUMBNAIL_CONTAINER_PREVIEW);
       else
         thumb = dt_thumbnail_new(nw, nh, table->zoom_ratio, nid, nrow, table->overlays,
-                                 DT_THUMBNAIL_CONTAINER_CULLING, table->show_tooltips);
+                                 DT_THUMBNAIL_CONTAINER_CULLING);
 
       thumb->display_focus = table->focus;
       thumb->sel_mode = DT_THUMBNAIL_SEL_MODE_DISABLED;
@@ -1288,10 +1288,10 @@ static gboolean _thumbs_recreate_list_at(dt_culling_t *table, const int offset)
           dt_thumbnail_t *thumb;
           if(table->mode == DT_CULLING_MODE_PREVIEW)
             thumb = dt_thumbnail_new(nw, nh, table->zoom_ratio, nid, nrow, table->overlays,
-                                     DT_THUMBNAIL_CONTAINER_PREVIEW, table->show_tooltips);
+                                     DT_THUMBNAIL_CONTAINER_PREVIEW);
           else
             thumb = dt_thumbnail_new(nw, nh, table->zoom_ratio, nid, nrow, table->overlays,
-                                     DT_THUMBNAIL_CONTAINER_CULLING, table->show_tooltips);
+                                     DT_THUMBNAIL_CONTAINER_CULLING);
 
           thumb->display_focus = table->focus;
           thumb->sel_mode = DT_THUMBNAIL_SEL_MODE_DISABLED;
@@ -1738,7 +1738,6 @@ void dt_culling_set_overlays_mode(dt_culling_t *table, dt_thumbnail_overlay_t ov
   {
     dt_thumbnail_t *th = (dt_thumbnail_t *)l->data;
     dt_thumbnail_set_overlay(th, over);
-    th->tooltip = table->show_tooltips;
     // and we resize the bottom area
     const float zoom_ratio = th->zoom_100 > 1 ? th->zoom / th->zoom_100 : table->zoom_ratio;
     dt_thumbnail_resize(th, th->width, th->height, TRUE, zoom_ratio);

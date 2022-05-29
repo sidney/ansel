@@ -686,39 +686,6 @@ static void _thumb_update_icons(dt_thumbnail_t *thumb)
 
   _set_flag(thumb->w_main, GTK_STATE_FLAG_SELECTED, thumb->selected);
 
-  // and the tooltip
-  gchar *pattern = dt_conf_get_string("plugins/lighttable/thumbnail_tooltip_pattern");
-  if(!thumb->tooltip || strcmp(pattern, "") == 0)
-  {
-    gtk_widget_set_has_tooltip(thumb->w_main, FALSE);
-  }
-  else
-  {
-    // we compute the tooltip (we reuse the function used in export to disk)
-    char input_dir[1024] = { 0 };
-    gboolean from_cache = TRUE;
-    dt_image_full_path(thumb->imgid, input_dir, sizeof(input_dir), &from_cache);
-
-    dt_variables_params_t *vp;
-    dt_variables_params_init(&vp);
-
-    vp->filename = input_dir;
-    vp->jobcode = "infos";
-    vp->imgid = thumb->imgid;
-    vp->sequence = 0;
-    vp->escape_markup = TRUE;
-
-    gchar *msg = dt_variables_expand(vp, pattern, TRUE);
-
-    dt_variables_params_destroy(vp);
-
-    // we change the label
-    gtk_widget_set_tooltip_markup(thumb->w_main, msg);
-
-    g_free(msg);
-  }
-  g_free(pattern);
-
   // we recompte the history tooltip if needed
   thumb->is_altered = dt_image_altered(thumb->imgid);
   gtk_widget_set_visible(thumb->w_altered, thumb->is_altered);
@@ -1339,7 +1306,7 @@ GtkWidget *dt_thumbnail_create_widget(dt_thumbnail_t *thumb, float zoom_ratio)
 }
 
 dt_thumbnail_t *dt_thumbnail_new(int width, int height, float zoom_ratio, int imgid, int rowid,
-                                 dt_thumbnail_overlay_t over, dt_thumbnail_container_t container, gboolean tooltip)
+                                 dt_thumbnail_overlay_t over, dt_thumbnail_container_t container)
 {
   dt_thumbnail_t *thumb = calloc(1, sizeof(dt_thumbnail_t));
   thumb->width = width;
@@ -1351,7 +1318,6 @@ dt_thumbnail_t *dt_thumbnail_new(int width, int height, float zoom_ratio, int im
   thumb->zoomable = (container == DT_THUMBNAIL_CONTAINER_CULLING
                      || container == DT_THUMBNAIL_CONTAINER_PREVIEW);
   thumb->zoom = 1.0f;
-  thumb->tooltip = tooltip;
   thumb->expose_again_timeout_id = 0;
 
   // we read and cache all the infos from dt_image_t that we need

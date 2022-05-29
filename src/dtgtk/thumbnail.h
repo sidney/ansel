@@ -118,7 +118,6 @@ typedef struct
   gboolean disable_actions;               // do we allow to change rating/etc...
 
   dt_thumbnail_overlay_t over;  // type of overlays
-  gboolean tooltip;             // should we show the tooltip ?
 
   int expose_again_timeout_id;  // source id of the expose_again timeout
 
@@ -139,7 +138,7 @@ typedef struct
 } dt_thumbnail_t;
 
 dt_thumbnail_t *dt_thumbnail_new(int width, int height, float zoom_ratio, int imgid, int rowid, dt_thumbnail_overlay_t over,
-                                 dt_thumbnail_container_t container, gboolean tooltip);
+                                 dt_thumbnail_container_t container);
 void dt_thumbnail_destroy(dt_thumbnail_t *thumb);
 GtkWidget *dt_thumbnail_create_widget(dt_thumbnail_t *thumb, float zoom_ratio);
 void dt_thumbnail_resize(dt_thumbnail_t *thumb, int width, int height, gboolean force, float zoom_ratio);

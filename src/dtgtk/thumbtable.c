@@ -103,9 +103,6 @@ static void _thumbs_update_overlays_mode(dt_thumbtable_t *table)
   gchar *txt = g_strdup_printf("plugins/lighttable/overlays/%d/%d", table->mode, ns);
   dt_thumbnail_overlay_t over = dt_conf_get_int(txt);
   g_free(txt);
-  txt = g_strdup_printf("plugins/lighttable/tooltips/%d/%d", table->mode, ns);
-  table->show_tooltips = dt_conf_get_bool(txt);
-  g_free(txt);
 
   dt_thumbtable_set_overlays_mode(table, over);
 }
@@ -114,19 +111,8 @@ static void _thumbs_update_overlays_mode(dt_thumbtable_t *table)
 void dt_thumbtable_set_overlays_mode(dt_thumbtable_t *table, dt_thumbnail_overlay_t over)
 {
   if(!table) return;
-  // we ensure the tooltips change in any cases
-  gchar *txt = g_strdup_printf("plugins/lighttable/tooltips/%d/%d", table->mode, table->prefs_size);
-  dt_conf_set_bool(txt, table->show_tooltips);
-  g_free(txt);
-  for(const GList *l = table->list; l; l = g_list_next(l))
-  {
-    dt_thumbnail_t *th = (dt_thumbnail_t *)l->data;
-    th->tooltip = table->show_tooltips;
-    dt_thumbnail_update_infos(th);
-  }
-
   if(over == table->overlays) return;
-  txt = g_strdup_printf("plugins/lighttable/overlays/%d/%d", table->mode, table->prefs_size);
+  gchar *txt = g_strdup_printf("plugins/lighttable/overlays/%d/%d", table->mode, table->prefs_size);
   dt_conf_set_int(txt, over);
   g_free(txt);
   gchar *cl0 = _thumbs_get_overlays_class(table->overlays);
@@ -482,7 +468,7 @@ static int _thumbs_load_needed(dt_thumbtable_t *table)
         dt_thumbnail_t *thumb = dt_thumbnail_new(
             table->thumb_size, table->thumb_size, IMG_TO_FIT, sqlite3_column_int(stmt, 1),
             sqlite3_column_int(stmt, 0), table->overlays,
-            DT_THUMBNAIL_CONTAINER_LIGHTTABLE, table->show_tooltips);
+            DT_THUMBNAIL_CONTAINER_LIGHTTABLE);
 
         if(table->mode == DT_THUMBTABLE_MODE_FILMSTRIP)
         {
@@ -540,7 +526,7 @@ static int _thumbs_load_needed(dt_thumbtable_t *table)
         dt_thumbnail_t *thumb = dt_thumbnail_new
           (table->thumb_size, table->thumb_size, IMG_TO_FIT, sqlite3_column_int(stmt, 1),
            sqlite3_column_int(stmt, 0), table->overlays,
-           DT_THUMBNAIL_CONTAINER_LIGHTTABLE, table->show_tooltips);
+           DT_THUMBNAIL_CONTAINER_LIGHTTABLE);
         if(table->mode == DT_THUMBTABLE_MODE_FILMSTRIP)
         {
           thumb->single_click = TRUE;
@@ -1988,7 +1974,7 @@ void dt_thumbtable_full_redraw(dt_thumbtable_t *table, gboolean force)
         // we create a completely new thumb
         dt_thumbnail_t *thumb
             = dt_thumbnail_new(table->thumb_size, table->thumb_size, IMG_TO_FIT, nid, nrow, table->overlays,
-                               DT_THUMBNAIL_CONTAINER_LIGHTTABLE, table->show_tooltips);
+                               DT_THUMBNAIL_CONTAINER_LIGHTTABLE);
         if(table->mode == DT_THUMBTABLE_MODE_FILMSTRIP)
         {
           thumb->single_click = TRUE;
