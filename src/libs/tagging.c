@@ -595,17 +595,6 @@ static void _tree_select_show(GtkTreeViewColumn *col, GtkCellRenderer *renderer,
   g_object_set(renderer, "active", active, "inconsistent", inconsistent, NULL);
 }
 
-static void _postponed_update(dt_lib_module_t *self)
-{
-  _init_treeview(self, 0);
-  _update_atdetach_buttons(self);
-}
-
-static void _lib_tagging_redraw_callback(gpointer instance, dt_lib_module_t *self)
-{
-  dt_lib_queue_postponed_update(self, _postponed_update);
-}
-
 static void _lib_tagging_tags_changed_callback(gpointer instance, dt_lib_module_t *self)
 {
   _init_treeview(self, 0);
@@ -3262,9 +3251,7 @@ void gui_init(dt_lib_module_t *self)
 
   gtk_box_pack_start(box, GTK_WIDGET(hbox), FALSE, TRUE, 0);
 
-  /* connect to mouse over id */
-  DT_DEBUG_CONTROL_SIGNAL_CONNECT(darktable.signals, DT_SIGNAL_MOUSE_OVER_IMAGE_CHANGE,
-                            G_CALLBACK(_lib_tagging_redraw_callback), self);
+  /* connect to mouse over id */;
   DT_DEBUG_CONTROL_SIGNAL_CONNECT(darktable.signals, DT_SIGNAL_TAG_CHANGED,
                             G_CALLBACK(_lib_tagging_tags_changed_callback), self);
   DT_DEBUG_CONTROL_SIGNAL_CONNECT(darktable.signals, DT_SIGNAL_SELECTION_CHANGED,
@@ -3288,7 +3275,6 @@ void gui_cleanup(dt_lib_module_t *self)
   dt_lib_cancel_postponed_update(self);
   dt_lib_tagging_t *d = (dt_lib_tagging_t *)self->data;
 
-  DT_DEBUG_CONTROL_SIGNAL_DISCONNECT(darktable.signals, G_CALLBACK(_lib_tagging_redraw_callback), self);
   DT_DEBUG_CONTROL_SIGNAL_DISCONNECT(darktable.signals, G_CALLBACK(_lib_tagging_tags_changed_callback), self);
   DT_DEBUG_CONTROL_SIGNAL_DISCONNECT(darktable.signals, G_CALLBACK(_lib_selection_changed_callback), self);
   DT_DEBUG_CONTROL_SIGNAL_DISCONNECT(darktable.signals, G_CALLBACK(_collection_updated_callback), self);
