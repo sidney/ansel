@@ -26,8 +26,7 @@ typedef enum dt_thumbtable_mode_t
 {
   DT_THUMBTABLE_MODE_NONE,
   DT_THUMBTABLE_MODE_FILEMANAGER,
-  DT_THUMBTABLE_MODE_FILMSTRIP,
-  DT_THUMBTABLE_MODE_ZOOM
+  DT_THUMBTABLE_MODE_FILMSTRIP
 } dt_thumbtable_mode_t;
 
 typedef enum dt_thumbtable_move_t

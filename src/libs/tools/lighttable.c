@@ -37,7 +37,6 @@ typedef struct dt_lib_tool_lighttable_t
   GtkWidget *zoom_entry;
   GtkWidget *layout_box;
   GtkWidget *layout_filemanager;
-  GtkWidget *layout_zoomable;
   GtkWidget *layout_culling_dynamic;
   GtkWidget *layout_culling_fix;
   GtkWidget *layout_preview;
@@ -101,8 +100,6 @@ static void _lib_lighttable_update_btn(dt_lib_module_t *self)
     active = d->layout_culling_dynamic;
   else if(d->layout == DT_LIGHTTABLE_LAYOUT_CULLING)
     active = d->layout_culling_fix;
-  else if(d->layout == DT_LIGHTTABLE_LAYOUT_ZOOMABLE)
-    active = d->layout_zoomable;
 
   GList *children = gtk_container_get_children(GTK_CONTAINER(d->layout_box));
   for(const GList *l = children; l; l = g_list_next(l))
@@ -173,7 +170,7 @@ static void _lib_lighttable_set_layout(dt_lib_module_t *self, dt_lighttable_layo
     gtk_range_set_value(GTK_RANGE(d->zoom), d->current_zoom);
 
     dt_conf_set_int("plugins/lighttable/layout", layout);
-    if(layout == DT_LIGHTTABLE_LAYOUT_FILEMANAGER || layout == DT_LIGHTTABLE_LAYOUT_ZOOMABLE)
+    if(layout == DT_LIGHTTABLE_LAYOUT_FILEMANAGER)
     {
       d->base_layout = layout;
       dt_conf_set_int("plugins/lighttable/base_layout", layout);
@@ -209,8 +206,6 @@ static gboolean _lib_lighttable_layout_btn_release(GtkWidget *w, GdkEventButton 
       new_layout = DT_LIGHTTABLE_LAYOUT_CULLING;
     else if(w == d->layout_culling_dynamic)
       new_layout = DT_LIGHTTABLE_LAYOUT_CULLING_DYNAMIC;
-    else if(w == d->layout_zoomable)
-      new_layout = DT_LIGHTTABLE_LAYOUT_ZOOMABLE;
   }
   else
   {
@@ -234,12 +229,6 @@ static void _lib_lighttable_key_accel_toggle_filemanager(dt_action_t *action)
 {
   dt_lib_module_t *self = darktable.view_manager->proxy.lighttable.module;
   _lib_lighttable_set_layout(self, DT_LIGHTTABLE_LAYOUT_FILEMANAGER);
-}
-
-static void _lib_lighttable_key_accel_toggle_zoomable(dt_action_t *action)
-{
-  dt_lib_module_t *self = darktable.view_manager->proxy.lighttable.module;
-  _lib_lighttable_set_layout(self, DT_LIGHTTABLE_LAYOUT_ZOOMABLE);
 }
 
 static void _lib_lighttable_key_accel_toggle_preview(dt_action_t *action)
@@ -357,15 +346,6 @@ void gui_init(dt_lib_module_t *self)
                    G_CALLBACK(_lib_lighttable_layout_btn_release), self);
   gtk_box_pack_start(GTK_BOX(d->layout_box), d->layout_filemanager, TRUE, TRUE, 0);
 
-  d->layout_zoomable = dtgtk_togglebutton_new(dtgtk_cairo_paint_lt_mode_zoom, 0, NULL);
-  ac = dt_action_define(ltv, NULL, N_("toggle zoomable lighttable layout"), d->layout_zoomable, NULL);
-  dt_action_register(ac, NULL, _lib_lighttable_key_accel_toggle_zoomable, 0, 0);
-  dt_gui_add_help_link(d->layout_zoomable, dt_get_help_url("layout_zoomable"));
-  gtk_widget_set_tooltip_text(d->layout_zoomable, _("click to enter zoomable lighttable layout."));
-  g_signal_connect(G_OBJECT(d->layout_zoomable), "button-release-event",
-                   G_CALLBACK(_lib_lighttable_layout_btn_release), self);
-  gtk_box_pack_start(GTK_BOX(d->layout_box), d->layout_zoomable, TRUE, TRUE, 0);
-
   d->layout_culling_fix = dtgtk_togglebutton_new(dtgtk_cairo_paint_lt_mode_culling_fixed, 0, NULL);
   ac = dt_action_define(ltv, NULL, N_("toggle culling mode"), d->layout_culling_fix, NULL);
   dt_action_register(ac, NULL, _lib_lighttable_key_accel_toggle_culling_mode, GDK_KEY_x, 0);
@@ -446,7 +426,7 @@ static void _set_zoom(dt_lib_module_t *self, int zoom)
     dt_conf_set_int("plugins/lighttable/culling_num_images", zoom);
     dt_control_queue_redraw_center();
   }
-  else if(d->layout == DT_LIGHTTABLE_LAYOUT_FILEMANAGER || d->layout == DT_LIGHTTABLE_LAYOUT_ZOOMABLE)
+  else if(d->layout == DT_LIGHTTABLE_LAYOUT_FILEMANAGER)
   {
     dt_conf_set_int("plugins/lighttable/images_in_row", zoom);
     dt_thumbtable_zoom_changed(dt_ui_thumbtable(darktable.gui->ui), d->current_zoom, zoom);
@@ -593,7 +573,6 @@ void init(struct dt_lib_module_t *self)
 
   luaA_enum(L,dt_lighttable_layout_t);
   luaA_enum_value(L, dt_lighttable_layout_t, DT_LIGHTTABLE_LAYOUT_FIRST);
-  luaA_enum_value(L, dt_lighttable_layout_t, DT_LIGHTTABLE_LAYOUT_ZOOMABLE);
   luaA_enum_value(L, dt_lighttable_layout_t, DT_LIGHTTABLE_LAYOUT_FILEMANAGER);
   luaA_enum_value(L, dt_lighttable_layout_t, DT_LIGHTTABLE_LAYOUT_CULLING);
   luaA_enum_value(L, dt_lighttable_layout_t, DT_LIGHTTABLE_LAYOUT_CULLING_DYNAMIC);
@@ -606,4 +585,3 @@ void init(struct dt_lib_module_t *self)
 // vim: shiftwidth=2 expandtab tabstop=2 cindent
 // kate: tab-indents: off; indent-width 2; replace-tabs on; indent-mode cstyle; remove-trailing-spaces modified;
 // clang-format on
-

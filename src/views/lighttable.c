@@ -134,11 +134,6 @@ static void _preview_quit(dt_view_t *self)
       dt_thumbtable_set_parent(dt_ui_thumbtable(darktable.gui->ui), dt_ui_center_base(darktable.gui->ui),
                                DT_THUMBTABLE_MODE_FILEMANAGER);
     }
-    else if(lib->current_layout == DT_LIGHTTABLE_LAYOUT_ZOOMABLE)
-    {
-      dt_thumbtable_set_parent(dt_ui_thumbtable(darktable.gui->ui), dt_ui_center_base(darktable.gui->ui),
-                               DT_THUMBTABLE_MODE_ZOOM);
-    }
     gtk_widget_show(dt_ui_thumbtable(darktable.gui->ui)->widget);
     dt_thumbtable_full_redraw(dt_ui_thumbtable(darktable.gui->ui), TRUE);
   }
@@ -161,7 +156,7 @@ static void _lighttable_check_layout(dt_view_t *self)
   // layout has changed, let restore panels
   dt_ui_restore_panels(darktable.gui->ui);
 
-  if(layout == DT_LIGHTTABLE_LAYOUT_FILEMANAGER || layout == DT_LIGHTTABLE_LAYOUT_ZOOMABLE)
+  if(layout == DT_LIGHTTABLE_LAYOUT_FILEMANAGER)
   {
     dt_ui_thumbtable(darktable.gui->ui)->navigate_inside_selection = FALSE;
     gtk_widget_hide(lib->preview->widget);
@@ -178,11 +173,6 @@ static void _lighttable_check_layout(dt_view_t *self)
     {
       dt_thumbtable_set_parent(dt_ui_thumbtable(darktable.gui->ui), dt_ui_center_base(darktable.gui->ui),
                                DT_THUMBTABLE_MODE_FILEMANAGER);
-    }
-    else
-    {
-      dt_thumbtable_set_parent(dt_ui_thumbtable(darktable.gui->ui), dt_ui_center_base(darktable.gui->ui),
-                               DT_THUMBTABLE_MODE_ZOOM);
     }
     dt_thumbtable_full_redraw(dt_ui_thumbtable(darktable.gui->ui), TRUE);
     gtk_widget_show(dt_ui_thumbtable(darktable.gui->ui)->widget);
@@ -313,7 +303,7 @@ static int set_image_visible_cb(lua_State *L)
     //check we are in file manager or zoomable
     dt_library_t *lib = (dt_library_t *)self->data;
     const dt_lighttable_layout_t layout = lib->current_layout;
-    if(layout == DT_LIGHTTABLE_LAYOUT_FILEMANAGER || layout == DT_LIGHTTABLE_LAYOUT_ZOOMABLE)
+    if(layout == DT_LIGHTTABLE_LAYOUT_FILEMANAGER)
     {
       if(luaL_testudata(L, 1, "dt_lua_image_t"))
       {
@@ -341,7 +331,7 @@ static gboolean is_image_visible_cb(lua_State *L)
     //check we are in file manager or zoomable
     dt_library_t *lib = (dt_library_t *)self->data;
     const dt_lighttable_layout_t layout = lib->current_layout;
-    if(layout == DT_LIGHTTABLE_LAYOUT_FILEMANAGER || layout == DT_LIGHTTABLE_LAYOUT_ZOOMABLE)
+    if(layout == DT_LIGHTTABLE_LAYOUT_FILEMANAGER)
     {
       if(luaL_testudata(L, 1, "dt_lua_image_t"))
       {
@@ -392,7 +382,6 @@ void expose(dt_view_t *self, cairo_t *cr, int32_t width, int32_t height, int32_t
   {
     switch(layout)
     {
-      case DT_LIGHTTABLE_LAYOUT_ZOOMABLE:
       case DT_LIGHTTABLE_LAYOUT_FILEMANAGER:
         if(!gtk_widget_get_visible(dt_ui_thumbtable(darktable.gui->ui)->widget))
           gtk_widget_hide(dt_ui_thumbtable(darktable.gui->ui)->widget);
@@ -430,12 +419,6 @@ void enter(dt_view_t *self)
     {
       dt_thumbtable_set_parent(dt_ui_thumbtable(darktable.gui->ui), dt_ui_center_base(darktable.gui->ui),
                                DT_THUMBTABLE_MODE_FILEMANAGER);
-      gtk_widget_show(dt_ui_thumbtable(darktable.gui->ui)->widget);
-    }
-    else if(layout == DT_LIGHTTABLE_LAYOUT_ZOOMABLE)
-    {
-      dt_thumbtable_set_parent(dt_ui_thumbtable(darktable.gui->ui), dt_ui_center_base(darktable.gui->ui),
-                               DT_THUMBTABLE_MODE_ZOOM);
       gtk_widget_show(dt_ui_thumbtable(darktable.gui->ui)->widget);
     }
   }
@@ -659,7 +642,7 @@ static float _action_process_move(gpointer target, dt_action_element_t element, 
   // navigation accels for thumbtable layouts
   // this can't be "normal" key accels because it's usually arrow keys and lot of other widgets
   // will capture them before the usual accel is triggered
-  if(!lib->preview_state && (layout == DT_LIGHTTABLE_LAYOUT_FILEMANAGER || layout == DT_LIGHTTABLE_LAYOUT_ZOOMABLE))
+  if(!lib->preview_state && (layout == DT_LIGHTTABLE_LAYOUT_FILEMANAGER))
   {
     dt_thumbtable_move_t move = DT_THUMBTABLE_MOVE_NONE;
     gboolean select = element == DT_ACTION_ELEMENT_SELECT;
@@ -790,19 +773,11 @@ static void _lighttable_redo_callback(dt_action_t *action)
   dt_undo_do_redo(darktable.undo, DT_UNDO_LIGHTTABLE);
 }
 
-static void _accel_align_to_grid(dt_action_t *action)
-{
-  const dt_lighttable_layout_t layout = dt_view_lighttable_get_layout(darktable.view_manager);
-
-  if(layout == DT_LIGHTTABLE_LAYOUT_ZOOMABLE)
-    dt_thumbtable_key_move(dt_ui_thumbtable(darktable.gui->ui), DT_THUMBTABLE_MOVE_ALIGN, FALSE);
-}
-
 static void _accel_reset_first_offset(dt_action_t *action)
 {
   const dt_lighttable_layout_t layout = dt_view_lighttable_get_layout(darktable.view_manager);
 
-  if(layout == DT_LIGHTTABLE_LAYOUT_FILEMANAGER || layout == DT_LIGHTTABLE_LAYOUT_ZOOMABLE)
+  if(layout == DT_LIGHTTABLE_LAYOUT_FILEMANAGER)
     dt_thumbtable_reset_first_offset(dt_ui_thumbtable(darktable.gui->ui));
 }
 
@@ -882,12 +857,6 @@ GSList *mouse_actions(const dt_view_t *self)
                                        /* xgettext:no-c-format */
                                        _("zoom current image to 100% and back"));
   }
-  else if(lib->current_layout == DT_LIGHTTABLE_LAYOUT_ZOOMABLE)
-  {
-    lm = dt_mouse_action_create_simple(lm, DT_MOUSE_ACTION_SCROLL, 0, _("zoom the main view"));
-    lm = dt_mouse_action_create_simple(lm, DT_MOUSE_ACTION_LEFT_DRAG, 0, _("pan inside the main view"));
-  }
-
   return lm;
 }
 
@@ -1236,7 +1205,6 @@ void gui_init(dt_view_t *self)
   dt_shortcut_register(ac, DT_ACTION_ELEMENT_DEFAULT, DT_ACTION_EFFECT_HOLD, GDK_KEY_w, 0);
   dt_shortcut_register(ac, DT_ACTION_ELEMENT_FOCUS_DETECT, DT_ACTION_EFFECT_HOLD, GDK_KEY_w, GDK_CONTROL_MASK);
 
-  dt_action_register(DT_ACTION(self), N_("align images to grid"), _accel_align_to_grid, 0, 0);
   dt_action_register(DT_ACTION(self), N_("reset first image offset"), _accel_reset_first_offset, 0, 0);
   dt_action_register(DT_ACTION(self), N_("select toggle image"), _accel_select_toggle, GDK_KEY_space, 0);
   dt_action_register(DT_ACTION(self), N_("select single image"), _accel_select_single, GDK_KEY_Return, 0);
