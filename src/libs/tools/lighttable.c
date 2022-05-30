@@ -38,7 +38,6 @@ typedef struct dt_lib_tool_lighttable_t
   GtkWidget *layout_box;
   GtkWidget *layout_filemanager;
   GtkWidget *layout_culling_dynamic;
-  GtkWidget *layout_culling_fix;
   GtkWidget *layout_preview;
   dt_lighttable_layout_t layout, base_layout;
   int current_zoom;
@@ -98,8 +97,6 @@ static void _lib_lighttable_update_btn(dt_lib_module_t *self)
     active = d->layout_preview;
   else if(d->layout == DT_LIGHTTABLE_LAYOUT_CULLING_DYNAMIC)
     active = d->layout_culling_dynamic;
-  else if(d->layout == DT_LIGHTTABLE_LAYOUT_CULLING)
-    active = d->layout_culling_fix;
 
   GList *children = gtk_container_get_children(GTK_CONTAINER(d->layout_box));
   for(const GList *l = children; l; l = g_list_next(l))
@@ -114,11 +111,6 @@ static void _lib_lighttable_update_btn(dt_lib_module_t *self)
     gtk_widget_set_tooltip_text(d->layout_preview, _("click to exit from full preview layout."));
   else
     gtk_widget_set_tooltip_text(d->layout_preview, _("click to enter full preview layout."));
-
-  if(d->layout != DT_LIGHTTABLE_LAYOUT_CULLING || d->fullpreview)
-    gtk_widget_set_tooltip_text(d->layout_culling_fix, _("click to enter culling layout in fixed mode."));
-  else
-    gtk_widget_set_tooltip_text(d->layout_culling_fix, _("click to exit culling layout."));
 
   if(d->layout != DT_LIGHTTABLE_LAYOUT_CULLING_DYNAMIC || d->fullpreview)
     gtk_widget_set_tooltip_text(d->layout_culling_dynamic, _("click to enter culling layout in dynamic mode."));
@@ -155,10 +147,6 @@ static void _lib_lighttable_set_layout(dt_lib_module_t *self, dt_lighttable_layo
     {
       d->current_zoom = MAX(1, MIN(30, dt_collection_get_selected_count(darktable.collection)));
       if(d->current_zoom == 1) d->current_zoom = dt_conf_get_int("plugins/lighttable/culling_num_images");
-    }
-    else if(d->layout == DT_LIGHTTABLE_LAYOUT_CULLING)
-    {
-      d->current_zoom = dt_conf_get_int("plugins/lighttable/culling_num_images");
     }
     else
     {
@@ -202,8 +190,6 @@ static gboolean _lib_lighttable_layout_btn_release(GtkWidget *w, GdkEventButton 
       d->fullpreview_focus = dt_modifier_is(event->state, GDK_CONTROL_MASK);
       new_layout = DT_LIGHTTABLE_LAYOUT_PREVIEW;
     }
-    else if(w == d->layout_culling_fix)
-      new_layout = DT_LIGHTTABLE_LAYOUT_CULLING;
     else if(w == d->layout_culling_dynamic)
       new_layout = DT_LIGHTTABLE_LAYOUT_CULLING_DYNAMIC;
   }
@@ -212,7 +198,7 @@ static gboolean _lib_lighttable_layout_btn_release(GtkWidget *w, GdkEventButton 
     // that means we want to deactivate the button
     if(w == d->layout_preview)
       new_layout = d->layout;
-    else if(w == d->layout_culling_dynamic || w == d->layout_culling_fix)
+    else if(w == d->layout_culling_dynamic)
       new_layout = d->base_layout;
     else
     {
@@ -265,22 +251,8 @@ static void _lib_lighttable_key_accel_toggle_culling_dynamic_mode(dt_action_t *a
   dt_lib_tool_lighttable_t *d = (dt_lib_tool_lighttable_t *)self->data;
 
   // if we are already in any culling layout, we return to the base layout
-  if(d->layout != DT_LIGHTTABLE_LAYOUT_CULLING && d->layout != DT_LIGHTTABLE_LAYOUT_CULLING_DYNAMIC)
+  if(d->layout != DT_LIGHTTABLE_LAYOUT_CULLING_DYNAMIC)
     _lib_lighttable_set_layout(self, DT_LIGHTTABLE_LAYOUT_CULLING_DYNAMIC);
-  else
-    _lib_lighttable_set_layout(self, d->base_layout);
-
-  dt_control_queue_redraw_center();
-}
-
-static void _lib_lighttable_key_accel_toggle_culling_mode(dt_action_t *action)
-{
-  dt_lib_module_t *self = darktable.view_manager->proxy.lighttable.module;
-  dt_lib_tool_lighttable_t *d = (dt_lib_tool_lighttable_t *)self->data;
-
-  // if we are already in any culling layout, we return to the base layout
-  if(d->layout != DT_LIGHTTABLE_LAYOUT_CULLING && d->layout != DT_LIGHTTABLE_LAYOUT_CULLING_DYNAMIC)
-    _lib_lighttable_set_layout(self, DT_LIGHTTABLE_LAYOUT_CULLING);
   else
     _lib_lighttable_set_layout(self, d->base_layout);
 
@@ -290,12 +262,7 @@ static void _lib_lighttable_key_accel_toggle_culling_mode(dt_action_t *action)
 static void _lib_lighttable_key_accel_toggle_culling_zoom_mode(dt_action_t *action)
 {
   dt_lib_module_t *self = darktable.view_manager->proxy.lighttable.module;
-  dt_lib_tool_lighttable_t *d = (dt_lib_tool_lighttable_t *)self->data;
-
-  if(d->layout == DT_LIGHTTABLE_LAYOUT_CULLING)
-    _lib_lighttable_set_layout(self, DT_LIGHTTABLE_LAYOUT_CULLING_DYNAMIC);
-  else if(d->layout == DT_LIGHTTABLE_LAYOUT_CULLING_DYNAMIC)
-    _lib_lighttable_set_layout(self, DT_LIGHTTABLE_LAYOUT_CULLING);
+  _lib_lighttable_set_layout(self, DT_LIGHTTABLE_LAYOUT_CULLING_DYNAMIC);
 }
 
 static void _lib_lighttable_key_accel_exit_layout(dt_action_t *action)
@@ -319,9 +286,7 @@ void gui_init(dt_lib_module_t *self)
   d->layout = MIN(DT_LIGHTTABLE_LAYOUT_LAST - 1, dt_conf_get_int("plugins/lighttable/layout"));
   d->base_layout = MIN(DT_LIGHTTABLE_LAYOUT_LAST - 1, dt_conf_get_int("plugins/lighttable/base_layout"));
 
-  if(d->layout == DT_LIGHTTABLE_LAYOUT_CULLING)
-    d->current_zoom = dt_conf_get_int("plugins/lighttable/culling_num_images");
-  else if(d->layout == DT_LIGHTTABLE_LAYOUT_CULLING_DYNAMIC)
+  if(d->layout == DT_LIGHTTABLE_LAYOUT_CULLING_DYNAMIC)
   {
     d->current_zoom = MAX(1, MIN(DT_LIGHTTABLE_MAX_ZOOM, dt_collection_get_selected_count(darktable.collection)));
     if(d->current_zoom == 1) d->current_zoom = dt_conf_get_int("plugins/lighttable/culling_num_images");
@@ -345,14 +310,6 @@ void gui_init(dt_lib_module_t *self)
   g_signal_connect(G_OBJECT(d->layout_filemanager), "button-release-event",
                    G_CALLBACK(_lib_lighttable_layout_btn_release), self);
   gtk_box_pack_start(GTK_BOX(d->layout_box), d->layout_filemanager, TRUE, TRUE, 0);
-
-  d->layout_culling_fix = dtgtk_togglebutton_new(dtgtk_cairo_paint_lt_mode_culling_fixed, 0, NULL);
-  ac = dt_action_define(ltv, NULL, N_("toggle culling mode"), d->layout_culling_fix, NULL);
-  dt_action_register(ac, NULL, _lib_lighttable_key_accel_toggle_culling_mode, GDK_KEY_x, 0);
-  dt_gui_add_help_link(d->layout_culling_fix, dt_get_help_url("layout_culling"));
-  g_signal_connect(G_OBJECT(d->layout_culling_fix), "button-release-event",
-                   G_CALLBACK(_lib_lighttable_layout_btn_release), self);
-  gtk_box_pack_start(GTK_BOX(d->layout_box), d->layout_culling_fix, TRUE, TRUE, 0);
 
   d->layout_culling_dynamic = dtgtk_togglebutton_new(dtgtk_cairo_paint_lt_mode_culling_dynamic, 0, NULL);
   ac = dt_action_define(ltv, NULL, N_("toggle culling dynamic mode"), d->layout_culling_dynamic, NULL);
@@ -421,12 +378,7 @@ void gui_cleanup(dt_lib_module_t *self)
 static void _set_zoom(dt_lib_module_t *self, int zoom)
 {
   dt_lib_tool_lighttable_t *d = (dt_lib_tool_lighttable_t *)self->data;
-  if(d->layout == DT_LIGHTTABLE_LAYOUT_CULLING)
-  {
-    dt_conf_set_int("plugins/lighttable/culling_num_images", zoom);
-    dt_control_queue_redraw_center();
-  }
-  else if(d->layout == DT_LIGHTTABLE_LAYOUT_FILEMANAGER)
+  if(d->layout == DT_LIGHTTABLE_LAYOUT_FILEMANAGER)
   {
     dt_conf_set_int("plugins/lighttable/images_in_row", zoom);
     dt_thumbtable_zoom_changed(dt_ui_thumbtable(darktable.gui->ui), d->current_zoom, zoom);
@@ -456,7 +408,7 @@ static gboolean _lib_lighttable_zoom_entry_changed(GtkWidget *entry, GdkEventKey
     {
       // reset
       int i = 0;
-      if(d->layout == DT_LIGHTTABLE_LAYOUT_CULLING || d->layout == DT_LIGHTTABLE_LAYOUT_CULLING_DYNAMIC)
+      if(d->layout == DT_LIGHTTABLE_LAYOUT_CULLING_DYNAMIC)
         i = dt_conf_get_int("plugins/lighttable/culling_num_images");
       else
         i = dt_conf_get_int("plugins/lighttable/images_in_row");
@@ -574,7 +526,6 @@ void init(struct dt_lib_module_t *self)
   luaA_enum(L,dt_lighttable_layout_t);
   luaA_enum_value(L, dt_lighttable_layout_t, DT_LIGHTTABLE_LAYOUT_FIRST);
   luaA_enum_value(L, dt_lighttable_layout_t, DT_LIGHTTABLE_LAYOUT_FILEMANAGER);
-  luaA_enum_value(L, dt_lighttable_layout_t, DT_LIGHTTABLE_LAYOUT_CULLING);
   luaA_enum_value(L, dt_lighttable_layout_t, DT_LIGHTTABLE_LAYOUT_CULLING_DYNAMIC);
   luaA_enum_value(L, dt_lighttable_layout_t, DT_LIGHTTABLE_LAYOUT_PREVIEW);
   luaA_enum_value(L, dt_lighttable_layout_t, DT_LIGHTTABLE_LAYOUT_LAST);
