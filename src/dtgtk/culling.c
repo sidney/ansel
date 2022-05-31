@@ -399,12 +399,7 @@ static gboolean _zoom_to_center(dt_thumbnail_t *th, const float zoom_delta)
 static gboolean _thumbs_zoom_add(dt_culling_t *table, const float zoom_delta, const float x_root,
                                  const float y_root, int state)
 {
-  const int max_in_memory_images = _get_max_in_memory_images();
-  if(table->mode == DT_CULLING_MODE_CULLING && table->thumbs_count > max_in_memory_images)
-  {
-    dt_control_log(_("zooming is limited to %d images"), max_in_memory_images);
-    return TRUE;
-  }
+  //const int max_in_memory_images = _get_max_in_memory_images();
 
   // we ensure the zoom 100 is computed for all images
   for(GList *l = table->list; l; l = g_list_next(l))
