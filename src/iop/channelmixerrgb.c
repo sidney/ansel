@@ -3121,7 +3121,7 @@ static void _update_RGB_colors(dt_iop_module_t *self, float r, float g, float b,
 {
   // update the fill background color of x, y sliders
   dt_iop_channelmixer_rgb_params_t *p = (dt_iop_channelmixer_rgb_params_t *)self->params;
-  const struct dt_iop_order_iccprofile_info_t *const work_profile = dt_ioppr_get_pipe_current_profile_info(self, self->dev->pipe);
+  const struct dt_iop_order_iccprofile_info_t *const work_profile = dt_ioppr_get_pipe_output_profile_info(self->dev->pipe);
 
   // scale params if needed
   dt_aligned_pixel_t RGB = { a[0], a[1], a[2] };
@@ -4294,4 +4294,3 @@ void gui_cleanup(struct dt_iop_module_t *self)
 // vim: shiftwidth=2 expandtab tabstop=2 cindent
 // kate: tab-indents: off; indent-width 2; replace-tabs on; indent-mode cstyle; remove-trailing-spaces modified;
 // clang-format on
-
