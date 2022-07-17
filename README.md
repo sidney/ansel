@@ -12,15 +12,16 @@ GUI changes that essentially aim at removing clutter and options.
 
 I strongly disagree with
 the latest decisions of the dev team that has proven to favour
-over-engineered solutions to simple problems, leading to brittle code, regressions and less efficient usage.
+over-engineered solutions to simple problems, leading to brittle code, regressions,
+cumbersom GUI, less efficient usage and performance bottlenecks.
 
 The trend in darktable development lately has been to add many
 options to avoid making design decisions instead of focusing on an
 unified, consistent and streamlined workflow, in an attempt to pretend that everyone can be right at the same time. This is slowly heading
 toward a mix between Microsoft and Dassault Systems software design.
 
-ART (Another RawTherapee) has successfully shown that stripping away an
-old project from its legacy of bloat indeed verifies the saying : less is more.
+Meanwhile, every design book states basic principles like "less is more"
+or "keep it stupid simple".
 
 ### Interoperability with upstream darktable
 
@@ -32,39 +33,6 @@ of the apps.
 GUI changes introduced in upstream darktable may not and will probably not
 be backported here.
 
-### Will you keep working on upstream darktable ?
-
-**I will keep posting and maintaining my image-processing modules** on both repositories, fix bugs, optimize pixel code, write documentation, blog posts, assist users, and make videos about darktable.
-
-I will not engage in large-scale refactorings or GUI changes as I'm tired of arguing with
-people who should probably edit more pictures to feel the pain. I do not endorse
-their approach of design and engineering.
-
-In any case, my opinion for a long time has been that darktable is approaching End Of Life.
-Its pixel pipeline has not been designed to be extended that far, and nobody understands
-its internal circuitery anymore. Its performance can't be improved either, since images
-start their life on CPU, are copied on GPU to be processed by OpenCL kernels (controlled anyway from the CPU - aka host), then brought back to the CPU to be painted in the GUI by Qtk
-(single-threaded), then sent again to the GPU to be displayed on screen. No matter how much you optimize the pixel code, as long as
-you don't remove those back-and-forth copies between RAM and vRAM,
-the performance penalty will stay substantial.
-
-Not to mention, OpenCL can't process real-time user input, like drawing or extracting image content, because it is meant mostly for data-science and low-level computation.
-
-These shortcomings can be solved only by a full rewrite of the pipeline in Vulkan, but darktable's code intimately interleave pixel code with Gtk UI code.
-
-For this reason, @hanatos, the founder of darktable, has started over a complete rewrite of
-an image processing app for Vulkan: [vkdt](https://github.com/hanatos/vkdt). It is already
-used by non-programmers to edit real pictures, but needs love to be comfortably usable.
-
-I plan on joining effort with him in gradually during 2022, to port the scene-referred modules
-of darktable to the performance of Vulkan and bring my knowledge of
-picture editing to reboot a consistent workflow app from scratch.
-
-During this work, legacy darktable/R&Darktable should get you covered to do your daily edits. That's what I use anyway and darktable 4.0
-will be pretty much feature-complete as far as I'm concerned… The only
-things I miss are already available in vkdt and not
-realistic to implement in legacy dt for performance reasons.
-
 ## Test coverage and supported OS/Platforms/Compilers
 
 The build matrix tests the compilation on typical desktop computers (x86_64) over the following OS:
@@ -73,11 +41,19 @@ The build matrix tests the compilation on typical desktop computers (x86_64) ove
 * Ubuntu 20.04,
 * Windows/MingW64
 
-MacOS tests have been removed because they fail at init time (so the software does not even have the opportunity to build). Since Mac is such a closed OS, it's mostly impossible to debug anyway and there are many issues with OpenMP and Gtk anyway. Consider it unsupported.
+MacOS tests have been removed because they fail at init time (so the software does not even have the opportunity to build). Mac OS is a closed OS that doesn't play nice with indie devs,
+and doesn't allow cross-platform development. Instead, they want devs to use only their custom software stack,
+for example they deprecated OpenCL (which they invented 15 years ago) for Metal and are forcing devs
+to rewrite GPU code with this. Not going to happen.
+
+Also, you can't cross-compile for Mac from another OS, and one can legitimately ask if all that is not
+specifically meant to cast away open-source and independent software. R&Darktable may or may not build on
+Mac OS. It may or may not work. It may or may not be able to use OpenCL (GPU acceleration) and
+OpenMP (multi-threading on CPU), I have no way to know nor to debug since I don't own a Mac box.
 
 The following compilers are tested :
 
-* GCC 8 to 11,
+* GCC 9 to 11,
 * Clang/LLVM 9 to 14.
 
 
@@ -366,13 +342,13 @@ the safest way is to completely remove previously built binaries and start again
 darktable provides a shell script that automatically takes care of building on Linux and macOS for classic cases in a single command.
 
 ```bash
-./build.sh --prefix /opt/darktable --build-type Release --install --sudo
+./build.sh --prefix /opt/darktable --build-type Release --install --sudo --clean-all
 ```
 
 If you want to install a test version alongside your regular/stable version, change the install prefix:
 
 ```bash
-./build.sh --prefix /opt/darktable-test --build-type Release --install --sudo
+./build.sh --prefix /opt/darktable-test --build-type Release --install --sudo -clean-all
 ```
 
 This builds the software for your architecture only, with:
