@@ -2659,7 +2659,10 @@ GtkWidget *dt_ui_notebook_page(GtkNotebook *notebook, const char *text, const ch
     _current_notebook = 0;
     _current_action_def = 0;
   }
-  GtkWidget *label = gtk_label_new(_(text));
+  gchar *text_cpy = g_strdup(_(text));
+  dt_capitalize_label(text_cpy);
+  GtkWidget *label = gtk_label_new(text_cpy);
+  g_free(text_cpy);
   GtkWidget *page = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
   if(strlen(text) > 2)
     gtk_label_set_ellipsize(GTK_LABEL(label), PANGO_ELLIPSIZE_END);
@@ -3048,6 +3051,12 @@ void dt_gui_new_collapsible_section(dt_gui_collapsible_section_t *cs,
   g_signal_connect(G_OBJECT(header_evb), "button-release-event",
                    G_CALLBACK(_coeffs_expander_click),
                    (gpointer)cs);
+}
+
+void dt_capitalize_label(gchar *text)
+{
+  if(text)
+    text[0] = g_unichar_toupper(text[0]);
 }
 
 // clang-format off

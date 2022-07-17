@@ -1059,6 +1059,7 @@ static void _iop_panel_label(dt_iop_module_t *module)
     g_free(saved_old_name);
   }
 
+  dt_capitalize_label(module_name);
   gtk_label_set_markup(GTK_LABEL(lab), module_name);
   g_free(module_name);
 

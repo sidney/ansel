@@ -358,6 +358,10 @@ GtkBox *dt_ui_get_container(struct dt_ui_t *ui, const dt_ui_container_t c);
 /*  activate ellipsization of the combox entries */
 void dt_ellipsize_combo(GtkComboBox *cbox);
 
+// capitalize strings. Because grammar says sentences start with a capital,
+// and typography says it makes it easier to extract the structure of the text.
+void dt_capitalize_label(gchar *text);
+
 static inline void dt_ui_section_label_set(GtkWidget *label)
 {
   gtk_widget_set_halign(label, GTK_ALIGN_FILL); // make it span the whole available width
@@ -368,14 +372,20 @@ static inline void dt_ui_section_label_set(GtkWidget *label)
 
 static inline GtkWidget *dt_ui_section_label_new(const gchar *str)
 {
-  GtkWidget *label = gtk_label_new(str);
+  gchar *str_cpy = g_strdup(str);
+  dt_capitalize_label(str_cpy);
+  GtkWidget *label = gtk_label_new(str_cpy);
+  g_free(str_cpy);
   dt_ui_section_label_set(label);
   return label;
 };
 
 static inline GtkWidget *dt_ui_label_new(const gchar *str)
 {
-  GtkWidget *label = gtk_label_new(str);
+  gchar *str_cpy = g_strdup(str);
+  dt_capitalize_label(str_cpy);
+  GtkWidget *label = gtk_label_new(str_cpy);
+  g_free(str_cpy);
   gtk_widget_set_halign(label, GTK_ALIGN_START);
   gtk_label_set_xalign (GTK_LABEL(label), 0.0f);
   gtk_label_set_ellipsize(GTK_LABEL(label), PANGO_ELLIPSIZE_END);

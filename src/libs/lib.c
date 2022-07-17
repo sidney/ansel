@@ -1028,6 +1028,7 @@ GtkWidget *dt_lib_gui_get_expander(dt_lib_module_t *module)
   GtkWidget *label_evb = gtk_event_box_new();
   gtk_container_add(GTK_CONTAINER(label_evb), label);
   gchar *mname = g_markup_escape_text(module->name(module), -1);
+  dt_capitalize_label(mname);
   gtk_label_set_markup(GTK_LABEL(label), mname);
   gtk_widget_set_tooltip_text(label_evb, mname);
   g_free(mname);

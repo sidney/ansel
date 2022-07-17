@@ -363,7 +363,7 @@ void gui_init(dt_lib_module_t *self)
   gtk_widget_set_halign(self->widget, GTK_ALIGN_START);
   gtk_widget_set_valign(self->widget, GTK_ALIGN_CENTER);
 
-  GtkWidget *label = gtk_label_new(C_("quickfilter", "view"));
+  GtkWidget *label = gtk_label_new(C_("quickfilter", "View"));
   gtk_box_pack_start(GTK_BOX(self->widget), label, TRUE, TRUE, 0);
   dt_gui_add_class(label, "quickfilter-label");
 
@@ -424,7 +424,7 @@ void gui_init(dt_lib_module_t *self)
   hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
   gtk_box_pack_start(GTK_BOX(self->widget), hbox, TRUE, TRUE, 0);
 
-  label = gtk_label_new(C_("quickfilter", "sort"));
+  label = gtk_label_new(C_("quickfilter", "Sort"));
   gtk_box_pack_start(GTK_BOX(hbox), label, TRUE, TRUE, 0);
   dt_gui_add_class(label, "quickfilter-label");
 
@@ -455,7 +455,7 @@ void gui_init(dt_lib_module_t *self)
   hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
   gtk_box_pack_end(GTK_BOX(self->widget), hbox, TRUE, TRUE, 0);
 
-  label = gtk_label_new(C_("quickfilter", "find"));
+  label = gtk_label_new(C_("quickfilter", "Find"));
   gtk_box_pack_start(GTK_BOX(hbox), label, TRUE, TRUE, 0);
   dt_gui_add_class(label, "quickfilter-label");
 

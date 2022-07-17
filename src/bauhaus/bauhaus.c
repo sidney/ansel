@@ -948,7 +948,12 @@ void dt_bauhaus_widget_set_label(GtkWidget *widget, const char *section, const c
 {
   dt_bauhaus_widget_t *w = DT_BAUHAUS_WIDGET(widget);
   memset(w->label, 0, sizeof(w->label)); // keep valgrind happy
-  if(label) g_strlcpy(w->label, _(label), sizeof(w->label));
+  if(label)
+  {
+    g_strlcpy(w->label, _(label), sizeof(w->label));
+    dt_capitalize_label(w->label);
+  }
+
   if(section) w->section = g_strdup(_(section));
 
   if(w->module)
