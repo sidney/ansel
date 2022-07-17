@@ -344,7 +344,6 @@ textview,
   border-radius: 0.21em;
   background-color: @button_bg;
   font-weight: normal;
-  font-family: sans-serif;
 }
 
 /* then set specific settings for all text zones and combo */
@@ -419,9 +418,8 @@ popover spinbutton  /* needed to set some margin on overlay popover between it a
 entry,
 textview
 {
-  font-family: sans;
-  margin: 0.07em 0;
-  padding: 0.14em;
+  padding: 2px;
+  min-height: 1em;
 }
 
 label selection,
