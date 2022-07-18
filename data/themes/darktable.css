@@ -920,17 +920,17 @@ notebook header /* add space between notebook tabs and options below */
 scrollbar slider
 {
   background-color: @scroll_bar_inactive;
-  border: 0.14em solid transparent;
-  min-width: 0.42em;
+  border: 1px solid transparent;
+  min-width: 0.6em;
   min-height: 1em;
 }
 
 scale contents trough
 {
   background-color: @scroll_bar_bg;
-  border-radius: 0.14em;
-  min-width: 0.5em;
-  min-height: 0.5em;
+  border-radius: 0.3em;
+  min-width: 0.6em;
+  min-height: 0.6em;
 }
 
 scale contents trough highlight
@@ -943,7 +943,7 @@ scale contents trough highlight
 scale contents trough slider
 {
   background-color: @scroll_bar_inactive;
-  border: 0.035em solid @border_color;
+  border: 0.1em solid @border_color;
   font-size: 1em;
   min-height: 0.5em;
   min-width: 0.5em;
@@ -953,10 +953,10 @@ scrollbar
 {
   border-color: @scroll_bar_bg;
   background: @scroll_bar_bg;
-  border-radius: 0.35em;
-  min-height: 0.42em;
-  min-width: 0.42em;
-  margin: 0.07em;
+  border-radius: 0.6em;
+  min-height: 0.6em;
+  min-width: 0.6em;
+  margin: 0.1em;
 }
 
 /* Scrollbars hover state */
