@@ -3082,18 +3082,24 @@ static gboolean dt_bauhaus_slider_button_press(GtkWidget *widget, GdkEventButton
       d->is_dragging = 0;
       dt_bauhaus_slider_reset(widget);
     }
-    else
+    else if(event_y > darktable.bauhaus->line_height * 0.9) // allow some margin of inaccuracy when clicking
     {
       d->is_dragging = 1;
-      if(!dt_modifier_is(event->state, 0))
-        darktable.bauhaus->mouse_x = ex;
-      else if(ey > darktable.bauhaus->line_height / 2.0f)
-      {
-        const float r = slider_right_pos((float)w3, w);
-        dt_bauhaus_slider_set_normalized(w, (ex / w3) / r);
 
+      if(!dt_modifier_is(event->state, 0))
+      {
+        darktable.bauhaus->mouse_x = event_x;
+      }
+      else
+      {
+        const float x_from_right = slider_position_from_right(slider_width, w);
+        dt_bauhaus_slider_set_normalized(w, (event_x / slider_width) / x_from_right);
         darktable.bauhaus->mouse_x = NAN;
       }
+    }
+    else // we clicked on the header name : do nothing but give focus
+    {
+      d->is_dragging = 0;
     }
     return TRUE;
   }

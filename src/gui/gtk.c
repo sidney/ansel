@@ -366,24 +366,12 @@ static void _toggle_bottom_all_accel_callback(dt_action_t *action)
 
 gboolean dt_gui_ignore_scroll(GdkEventScroll *event)
 {
-  const gboolean ignore_without_mods = dt_conf_get_bool("darkroom/ui/sidebar_scroll_default");
-  const GdkModifierType mods_pressed = (event->state & gtk_accelerator_get_default_mod_mask());
+  // TODO: records which GtkScrollWindow is capturing scroll events,
+  // if it's not the current instance, ignore.
+  // This will need a rewrite of the logic and possibly thread mutex locks,
+  // with a timer that releases the lock after some time of inactivity.
 
-  if(mods_pressed == 0)
-  {
-    return ignore_without_mods;
-  }
-  else
-  {
-    if(mods_pressed == darktable.gui->sidebar_scroll_mask)
-    {
-      if(!ignore_without_mods) return TRUE;
-
-      event->state &= ~darktable.gui->sidebar_scroll_mask;
-    }
-
-    return FALSE;
-  }
+  return FALSE;
 }
 
 gboolean dt_gui_get_scroll_deltas(const GdkEventScroll *event, gdouble *delta_x, gdouble *delta_y)
@@ -936,9 +924,6 @@ int dt_gui_gtk_init(dt_gui_gtk_t *gui)
 
   // smooth scrolling must be enabled to handle trackpad/touch events
   gui->scroll_mask = GDK_SCROLL_MASK | GDK_SMOOTH_SCROLL_MASK;
-
-  // key accelerator that enables scrolling of side panels
-  gui->sidebar_scroll_mask = GDK_MOD1_MASK | GDK_CONTROL_MASK;
 
   // Init focus peaking
   gui->show_focus_peaking = FALSE;
@@ -1727,7 +1712,7 @@ static GtkWidget *_ui_init_panel_container_top(GtkWidget *container)
 static gboolean _ui_init_panel_container_center_scroll_event(GtkWidget *widget, GdkEventScroll *event)
 {
   // just make sure nothing happens unless ctrl-alt are pressed:
-  return (((event->state & gtk_accelerator_get_default_mod_mask()) != darktable.gui->sidebar_scroll_mask) != dt_conf_get_bool("darkroom/ui/sidebar_scroll_default"));
+  return (event->state & gtk_accelerator_get_default_mod_mask());
 }
 
 // this should work as long as everything happens in the gui thread
