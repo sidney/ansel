@@ -573,6 +573,9 @@ int dt_view_manager_button_pressed(dt_view_manager_t *vm, double x, double y, do
   else if(v->button_pressed)
     return v->button_pressed(v, x, y, pressure, which, type, state);
 
+  /* if nothing handles the button press, remove Gtk focus */
+  gtk_widget_grab_focus(NULL);
+
   return 0;
 }
 
