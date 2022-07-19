@@ -169,7 +169,7 @@ typedef struct dt_lib_import_t
 
 const char *name(dt_lib_module_t *self)
 {
-  return _("import");
+  return _("open & import");
 }
 
 
@@ -1987,16 +1987,16 @@ void gui_init(dt_lib_module_t *self)
   // add import buttons
   GtkWidget *hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
 
-  GtkWidget *widget = dt_action_button_new(self, N_("add to library..."), _lib_import_from_callback, self,
-                                           _("add existing images to the library"), 0, 0);
+  GtkWidget *widget = dt_action_button_new(self, N_("open from disk..."), _lib_import_from_callback, self,
+                                           _("add existing images to the library and open them"), 0, 0);
   d->import_inplace = GTK_BUTTON(widget);
   gtk_widget_set_can_focus(widget, TRUE);
   gtk_widget_set_receives_default(widget, TRUE);
   gtk_box_pack_start(GTK_BOX(hbox), widget, TRUE, TRUE, 0);
 
-  widget = dt_action_button_new(self, N_("copy & import..."), _lib_import_from_callback, self,
-                                _("copy and optionally rename images before adding them to the library"
-                                  "\npatterns can be defined to rename the images and specify the destination folders"),
+  widget = dt_action_button_new(self, N_("import from camera..."), _lib_import_from_callback, self,
+                                _("import from any media storage to the disk and optionally rename images,\n"
+                                  "then add them to the library and open them."),
                                 GDK_KEY_i, GDK_CONTROL_MASK | GDK_SHIFT_MASK);
   d->import_copy = GTK_BUTTON(widget);
   gtk_widget_set_can_focus(widget, TRUE);
