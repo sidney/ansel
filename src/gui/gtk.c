@@ -1208,6 +1208,9 @@ static void _init_widgets(dt_gui_gtk_t *gui)
 
   gtk_window_set_default_size(GTK_WINDOW(widget), DT_PIXEL_APPLY_DPI(900), DT_PIXEL_APPLY_DPI(500));
 
+  gtk_widget_set_can_focus(GTK_WIDGET(widget), TRUE);
+  gtk_widget_set_focus_on_click(GTK_WIDGET(widget), TRUE);
+
   gtk_window_set_icon_name(GTK_WINDOW(widget), "darktable");
   gtk_window_set_title(GTK_WINDOW(widget), "R&Darktable");
 
@@ -2567,6 +2570,15 @@ static gboolean _notebook_motion_notify_callback(GtkWidget *widget, GdkEventMoti
   return FALSE;
 }
 
+
+static gboolean _notebook_click_callback(GtkNotebook* self, GtkWidget* page, guint page_num, gpointer user_data)
+{
+  // Gtk gives focus to the first widget child of the tab after switching tabs.
+  // We don't want that since it will capture scroll.
+  gtk_window_set_focus(GTK_WINDOW(dt_ui_main_window(darktable.gui->ui)), NULL);
+  return FALSE;
+}
+
 static float _action_process_tabs(gpointer target, dt_action_element_t element, dt_action_effect_t effect, float move_size)
 {
   GtkNotebook *notebook = GTK_NOTEBOOK(target);
@@ -2644,17 +2656,7 @@ GtkWidget *dt_ui_notebook_page(GtkNotebook *notebook, const char *text, const ch
   {
     g_signal_connect(G_OBJECT(notebook), "size-allocate", G_CALLBACK(_notebook_size_callback), NULL);
     g_signal_connect(G_OBJECT(notebook), "motion-notify-event", G_CALLBACK(_notebook_motion_notify_callback), NULL);
-  }
-  if(_current_action_def)
-  {
-    dt_action_element_def_t *elements = calloc(page_num + 2, sizeof(dt_action_element_def_t));
-    if(_current_action_def->elements)
-      memcpy(elements, _current_action_def->elements, page_num * sizeof(dt_action_element_def_t));
-    elements[page_num].name = text;
-    elements[page_num].effects = dt_action_effect_tabs;
-    if(_current_action_def->elements)
-      free((void *)_current_action_def->elements);
-    _current_action_def->elements = elements;
+    g_signal_connect(G_OBJECT(notebook), "switch-page", G_CALLBACK(_notebook_click_callback), NULL);
   }
 
   return page;

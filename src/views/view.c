@@ -555,6 +555,9 @@ int dt_view_manager_button_pressed(dt_view_manager_t *vm, double x, double y, do
   if(!vm->current_view) return 0;
   dt_view_t *v = vm->current_view;
 
+  /* Reset Gtk focus */
+  gtk_window_set_focus(GTK_WINDOW(dt_ui_main_window(darktable.gui->ui)), NULL);
+
   /* lets check if any plugins want to handle button press */
   gboolean handled = FALSE;
   for(const GList *plugins = g_list_last(darktable.lib->plugins);
@@ -572,9 +575,6 @@ int dt_view_manager_button_pressed(dt_view_manager_t *vm, double x, double y, do
   /* if not handled by any plugin let pass to view handler*/
   else if(v->button_pressed)
     return v->button_pressed(v, x, y, pressure, which, type, state);
-
-  /* if nothing handles the button press, remove Gtk focus */
-  gtk_widget_grab_focus(NULL);
 
   return 0;
 }
