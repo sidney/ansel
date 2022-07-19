@@ -629,11 +629,6 @@ int dt_gui_gtk_load_config()
       gtk_window_unmaximize(GTK_WINDOW(widget));
   }
 
-  if(dt_conf_key_exists("ui/show_focus_peaking"))
-    darktable.gui->show_focus_peaking = dt_conf_get_bool("ui/show_focus_peaking");
-  else
-    darktable.gui->show_focus_peaking = FALSE;
-
   dt_pthread_mutex_unlock(&darktable.gui->mutex);
 
   return 0;
