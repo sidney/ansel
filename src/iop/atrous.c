@@ -1730,9 +1730,7 @@ void gui_init(struct dt_iop_module_t *self)
 
   self->widget = gtk_box_new(GTK_ORIENTATION_VERTICAL, DT_BAUHAUS_SPACE);
 
-  static struct dt_action_def_t notebook_def = { };
-  c->channel_tabs = dt_ui_notebook_new(&notebook_def);
-  dt_action_define_iop(self, NULL, N_("channel"), GTK_WIDGET(c->channel_tabs), &notebook_def);
+  c->channel_tabs = dt_ui_notebook_new();
   dt_ui_notebook_page(c->channel_tabs, N_("luma"), _("change lightness at each feature size"));
   dt_ui_notebook_page(c->channel_tabs, N_("chroma"), _("change color saturation at each feature size"));
   dt_ui_notebook_page(c->channel_tabs, N_("edges"), _("change edge halos at each feature size\nonly changes results of luma and chroma tabs"));
@@ -1782,4 +1780,3 @@ void gui_cleanup(struct dt_iop_module_t *self)
 // vim: shiftwidth=2 expandtab tabstop=2 cindent
 // kate: tab-indents: off; indent-width 2; replace-tabs on; indent-mode cstyle; remove-trailing-spaces modified;
 // clang-format on
-

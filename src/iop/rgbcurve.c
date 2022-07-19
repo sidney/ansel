@@ -1365,7 +1365,6 @@ void gui_init(struct dt_iop_module_t *self)
   GtkWidget *hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
 
   g->channel_tabs = GTK_NOTEBOOK(gtk_notebook_new());
-  dt_action_define_iop(self, NULL, N_("channel"), GTK_WIDGET(g->channel_tabs), &dt_action_def_tabs_rgb);
   dt_ui_notebook_page(g->channel_tabs, N_("R"), _("curve nodes for r channel"));
   dt_ui_notebook_page(g->channel_tabs, N_("G"), _("curve nodes for g channel"));
   dt_ui_notebook_page(g->channel_tabs, N_("B"), _("curve nodes for b channel"));

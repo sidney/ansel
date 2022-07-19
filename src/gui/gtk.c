@@ -2579,66 +2579,18 @@ static gboolean _notebook_click_callback(GtkNotebook* self, GtkWidget* page, gui
   return FALSE;
 }
 
-static float _action_process_tabs(gpointer target, dt_action_element_t element, dt_action_effect_t effect, float move_size)
-{
-  GtkNotebook *notebook = GTK_NOTEBOOK(target);
-  if(!isnan(move_size))
-  {
-    switch(effect)
-    {
-    case DT_ACTION_EFFECT_ACTIVATE:
-      gtk_notebook_set_current_page(notebook, element);
-      break;
-    case DT_ACTION_EFFECT_NEXT:
-      gtk_notebook_next_page(notebook);
-      break;
-    case DT_ACTION_EFFECT_PREVIOUS:
-      gtk_notebook_prev_page(notebook);
-      break;
-    default:
-      fprintf(stderr, "[_action_process_tabs] unknown shortcut effect (%d) for tabs\n", effect);
-      break;
-    }
-  }
-
-  const int c = gtk_notebook_get_current_page(notebook);
-
-  if(!isnan(move_size))
-    dt_action_widget_toast(NULL, GTK_WIDGET(notebook),
-                           gtk_notebook_get_tab_label_text(notebook, gtk_notebook_get_nth_page(notebook, c)));
-
-  return -1 - c + (c == element ? DT_VALUE_PATTERN_ACTIVE : 0);
-}
-
-const gchar *dt_action_effect_tabs[]
-  = { N_("activate"),
-      N_("next"),
-      N_("previous"),
-      NULL };
-
 static GtkNotebook *_current_notebook = NULL;
-static dt_action_def_t *_current_action_def = NULL;
 
-GtkNotebook *dt_ui_notebook_new(dt_action_def_t *def)
+GtkNotebook *dt_ui_notebook_new()
 {
   _current_notebook = GTK_NOTEBOOK(gtk_notebook_new());
-  if(!def->name)
-  {
-    _current_action_def = def;
-    def->name = "tabs";
-    def->process = _action_process_tabs;
-  }
-
   return _current_notebook;
 }
 
 GtkWidget *dt_ui_notebook_page(GtkNotebook *notebook, const char *text, const char *tooltip)
 {
-  if(notebook != _current_notebook)
-  {
-    _current_notebook = 0;
-    _current_action_def = 0;
-  }
+  if(notebook != _current_notebook) _current_notebook = 0;
+
   gchar *text_cpy = g_strdup(_(text));
   dt_capitalize_label(text_cpy);
   GtkWidget *label = gtk_label_new(text_cpy);
@@ -2661,28 +2613,6 @@ GtkWidget *dt_ui_notebook_page(GtkNotebook *notebook, const char *text, const ch
 
   return page;
 }
-
-const dt_action_element_def_t _action_elements_tabs_all_rgb[]
-  = { { N_("all"  ), dt_action_effect_tabs },
-      { N_("red"  ), dt_action_effect_tabs },
-      { N_("green"), dt_action_effect_tabs },
-      { N_("blue" ), dt_action_effect_tabs },
-      { NULL       , dt_action_effect_tabs } };
-
-const dt_action_def_t dt_action_def_tabs_all_rgb
-  = { N_("tabs"),
-      _action_process_tabs,
-      _action_elements_tabs_all_rgb };
-
-const dt_action_def_t dt_action_def_tabs_rgb
-  = { N_("tabs"),
-      _action_process_tabs,
-      _action_elements_tabs_all_rgb + 1 };
-
-const dt_action_def_t dt_action_def_tabs_none
-  = { N_("tabs"),
-      _action_process_tabs,
-      _action_elements_tabs_all_rgb + 4 };
 
 static gint _get_container_row_heigth(GtkWidget *w)
 {

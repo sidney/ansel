@@ -899,7 +899,6 @@ void gui_init(dt_iop_module_t *self)
 
   c->channel = dt_conf_get_int("plugins/darkroom/rawdenoise/gui_channel");
   c->channel_tabs = GTK_NOTEBOOK(gtk_notebook_new());
-  dt_action_define_iop(self, NULL, N_("channel"), GTK_WIDGET(c->channel_tabs), &dt_action_def_tabs_all_rgb);
 
   dt_ui_notebook_page(c->channel_tabs, N_("all"), NULL);
   dt_ui_notebook_page(c->channel_tabs, N_("R"), NULL);

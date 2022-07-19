@@ -1009,7 +1009,6 @@ void gui_init(dt_iop_module_t *self)
   gtk_widget_set_tooltip_text(c->cmb_autoscale, _("choose between linked and independent channels."));
 
   c->channel_tabs = GTK_NOTEBOOK(gtk_notebook_new());
-  dt_action_define_iop(self, NULL, N_("channel"), GTK_WIDGET(c->channel_tabs), &dt_action_def_tabs_rgb);
   dt_ui_notebook_page(c->channel_tabs, N_("R"), _("curve nodes for r channel"));
   dt_ui_notebook_page(c->channel_tabs, N_("G"), _("curve nodes for g channel"));
   dt_ui_notebook_page(c->channel_tabs, N_("B"), _("curve nodes for b channel"));

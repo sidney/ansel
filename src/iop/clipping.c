@@ -2100,9 +2100,7 @@ void gui_init(struct dt_iop_module_t *self)
   g->k_selected = -1;
   g->preview_ready = FALSE;
 
-  static struct dt_action_def_t notebook_def = { };
-  g->notebook = dt_ui_notebook_new(&notebook_def);
-  dt_action_define_iop(self, NULL, N_("page"), GTK_WIDGET(g->notebook), &notebook_def);
+  g->notebook = dt_ui_notebook_new();
 
   self->widget = dt_ui_notebook_page(g->notebook, N_("main"), NULL);
 
@@ -3370,4 +3368,3 @@ GSList *mouse_actions(struct dt_iop_module_t *self)
 // vim: shiftwidth=2 expandtab tabstop=2 cindent
 // kate: tab-indents: off; indent-width 2; replace-tabs on; indent-mode cstyle; remove-trailing-spaces modified;
 // clang-format on
-

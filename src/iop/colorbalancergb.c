@@ -1798,9 +1798,7 @@ void gui_init(dt_iop_module_t *self)
   g->mask_display = FALSE;
 
   // start building top level widget
-  static dt_action_def_t notebook_def = { };
-  g->notebook = dt_ui_notebook_new(&notebook_def);
-  dt_action_define_iop(self, NULL, N_("page"), GTK_WIDGET(g->notebook), &notebook_def);
+  g->notebook = dt_ui_notebook_new();
 
   // Page master
   self->widget = dt_ui_notebook_page(g->notebook, N_("master"), _("global grading"));
