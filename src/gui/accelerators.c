@@ -3691,10 +3691,6 @@ gboolean dt_shortcut_dispatcher(GtkWidget *w, GdkEvent *event, gpointer user_dat
 
     _sc.mods = _key_modifiers_clean(event->key.state);
 
-    // FIXME: for vimkeys and game. Needs generalising for non-bauhaus/non-darkroom
-    if(!_grab_widget && !darktable.control->mapping_widget &&
-       dt_control_key_pressed_override(event->key.keyval, dt_gui_translated_key_state(&event->key))) return TRUE;
-
     dt_shortcut_key_press(DT_SHORTCUT_DEVICE_KEYBOARD_MOUSE, event->key.time, _fix_keyval(event));
     break;
   case GDK_KEY_RELEASE:

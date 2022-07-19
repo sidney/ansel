@@ -135,9 +135,6 @@ void dt_control_init(dt_control_t *s)
 
   s->actions_modifiers = dt_action_define(&s->actions_global, NULL, N_("modifiers"), NULL, &dt_action_def_modifiers);
 
-  memset(s->vimkey, 0, sizeof(s->vimkey));
-  s->vimkey_cnt = 0;
-
   // same thread as init
   s->gui_thread = pthread_self();
 
@@ -594,14 +591,6 @@ void dt_toast_markup_log(const char *msg, ...)
   va_end(ap);
 }
 
-static void _control_log_ack_all()
-{
-  dt_pthread_mutex_lock(&darktable.control->log_mutex);
-  darktable.control->log_pos = darktable.control->log_ack;
-  dt_pthread_mutex_unlock(&darktable.control->log_mutex);
-  dt_control_queue_redraw_center();
-}
-
 void dt_control_log_busy_enter()
 {
   dt_pthread_mutex_lock(&darktable.control->log_mutex);
@@ -671,112 +660,6 @@ void dt_control_queue_redraw_widget(GtkWidget *widget)
   {
     g_idle_add(_widget_queue_draw, (void*)widget);
   }
-}
-
-int dt_control_key_pressed_override(guint key, guint state)
-{
-  // TODO: if darkroom mode
-  // did a : vim-style command start?
-  static GList *autocomplete = NULL;
-  if(darktable.control->vimkey_cnt)
-  {
-    gunichar unichar = gdk_keyval_to_unicode(key);
-    if(key == GDK_KEY_Return)
-    {
-      if(!strcmp(darktable.control->vimkey, ":q"))
-      {
-        dt_control_quit();
-      }
-      else
-      {
-        dt_bauhaus_vimkey_exec(darktable.control->vimkey);
-      }
-      darktable.control->vimkey[0] = 0;
-      darktable.control->vimkey_cnt = 0;
-      _control_log_ack_all();
-      g_list_free(autocomplete);
-      autocomplete = NULL;
-    }
-    else if(key == GDK_KEY_Escape)
-    {
-      darktable.control->vimkey[0] = 0;
-      darktable.control->vimkey_cnt = 0;
-      _control_log_ack_all();
-      g_list_free(autocomplete);
-      autocomplete = NULL;
-    }
-    else if(key == GDK_KEY_BackSpace)
-    {
-      darktable.control->vimkey_cnt
-          -= (darktable.control->vimkey + darktable.control->vimkey_cnt)
-             - g_utf8_prev_char(darktable.control->vimkey + darktable.control->vimkey_cnt);
-      darktable.control->vimkey[darktable.control->vimkey_cnt] = 0;
-      if(darktable.control->vimkey_cnt == 0)
-        _control_log_ack_all();
-      else
-        dt_control_log("%s", darktable.control->vimkey);
-      g_list_free(autocomplete);
-      autocomplete = NULL;
-    }
-    else if(key == GDK_KEY_Tab)
-    {
-      // TODO: also support :preset and :get?
-      // auto complete:
-      if(darktable.control->vimkey_cnt < 5)
-      {
-        g_strlcpy(darktable.control->vimkey, ":set ", sizeof(darktable.control->vimkey));
-        darktable.control->vimkey_cnt = 5;
-      }
-      else if(!autocomplete)
-      {
-        // TODO: handle '.'-separated things separately
-        // this is a static list, and tab cycles through the list
-        if(darktable.control->vimkey_cnt < strlen(darktable.control->vimkey))
-          darktable.control->vimkey[darktable.control->vimkey_cnt] = 0;
-        else
-          autocomplete = dt_bauhaus_vimkey_complete(darktable.control->vimkey + 5);
-      }
-      if(autocomplete)
-      {
-        // pop first.
-        // the paths themselves are owned by bauhaus,
-        // no free required.
-        darktable.control->vimkey[darktable.control->vimkey_cnt] = 0;
-        g_strlcat(darktable.control->vimkey, (char *)autocomplete->data, sizeof(darktable.control->vimkey));
-        autocomplete = g_list_remove(autocomplete, autocomplete->data);
-      }
-      dt_control_log("%s", darktable.control->vimkey);
-    }
-    else if(g_unichar_isprint(unichar)) // printable unicode character
-    {
-      gchar utf8[6] = { 0 };
-      g_unichar_to_utf8(unichar, utf8);
-      g_strlcat(darktable.control->vimkey, utf8, sizeof(darktable.control->vimkey));
-      darktable.control->vimkey_cnt = strlen(darktable.control->vimkey);
-      dt_control_log("%s", darktable.control->vimkey);
-      g_list_free(autocomplete);
-      autocomplete = NULL;
-    }
-    else if(key == GDK_KEY_Up)
-    {
-      // TODO: step history up and copy to vimkey
-    }
-    else if(key == GDK_KEY_Down)
-    {
-      // TODO: step history down and copy to vimkey
-    }
-    return 1;
-  }
-  else if(key == ':')
-  {
-    darktable.control->vimkey[0] = ':';
-    darktable.control->vimkey[1] = 0;
-    darktable.control->vimkey_cnt = 1;
-    dt_control_log("%s", darktable.control->vimkey);
-    return 1;
-  }
-
-  return 0;
 }
 
 void dt_control_hinter_message(const struct dt_control_t *s, const char *message)

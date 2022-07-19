@@ -373,12 +373,6 @@ void dt_bauhaus_combobox_set_entries_ellipsis(GtkWidget *widget, PangoEllipsizeM
 PangoEllipsizeMode dt_bauhaus_combobox_get_entries_ellipsis(GtkWidget *widget);
 void dt_bauhaus_combobox_mute_scrolling(GtkWidget *widget);
 
-// key accel parsing:
-// execute a line of input
-void dt_bauhaus_vimkey_exec(const char *input);
-// give autocomplete suggestions
-GList *dt_bauhaus_vimkey_complete(const char *input);
-
 static inline void set_color(cairo_t *cr, GdkRGBA color)
 {
   cairo_set_source_rgba(cr, color.red, color.green, color.blue, color.alpha);
@@ -389,4 +383,3 @@ static inline void set_color(cairo_t *cr, GdkRGBA color)
 // vim: shiftwidth=2 expandtab tabstop=2 cindent
 // kate: tab-indents: off; indent-width 2; replace-tabs on; indent-mode cstyle; remove-trailing-spaces modified;
 // clang-format on
-
