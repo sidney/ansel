@@ -449,29 +449,6 @@ void expose(
   cairo_surface_t *surface;
   cairo_t *cr = cairo_create(image_surface);
 
-  // adjust scroll bars
-  {
-    float zx = zoom_x, zy = zoom_y, boxw = 1., boxh = 1.;
-    dt_dev_check_zoom_bounds(dev, &zx, &zy, zoom, closeup, &boxw, &boxh);
-
-    /* If boxw and boxh very closely match the zoomed size in the darktable window we might have resizing with
-       every expose because adding a slider will change the image area and might force a resizing in next expose.
-       So we disable in cases close to full.
-    */
-    if(boxw > 0.95f)
-    {
-      zx = .0f;
-      boxw = 1.01f;
-    }
-    if(boxh > 0.95f)
-    {
-      zy = .0f;
-      boxh = 1.01f;
-    }
-
-    dt_view_set_scrollbar(self, zx, -0.5 + boxw/2, 0.5, boxw/2, zy, -0.5+ boxh/2, 0.5, boxh/2);
-  }
-
   if(dev->pipe->output_backbuf && // do we have an image?
     dev->pipe->output_imgid == dev->image_storage.id && // is the right image?
     dev->pipe->backbuf_scale == backbuf_scale && // is this the zoom scale we want to display?
@@ -3588,17 +3565,6 @@ int button_pressed(dt_view_t *self, double x, double y, double pressure, int whi
     return 1;
   }
   return 0;
-}
-
-void scrollbar_changed(dt_view_t *self, double x, double y)
-{
-  dt_control_set_dev_zoom_x(x);
-  dt_control_set_dev_zoom_y(y);
-
-  /* redraw pipe */
-  dt_dev_invalidate(darktable.develop);
-  dt_control_queue_redraw_center();
-  dt_control_navigation_redraw();
 }
 
 void scrolled(dt_view_t *self, double x, double y, int up, int state)
