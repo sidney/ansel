@@ -3577,6 +3577,7 @@ void gui_init(dt_iop_module_t *self)
   g->wavelet_color_mode = dt_bauhaus_combobox_from_params(self, "wavelet_color_mode");
 
   g->channel_tabs = GTK_NOTEBOOK(gtk_notebook_new());
+  dt_action_define_iop(self, NULL, N_("channel"), GTK_WIDGET(g->channel_tabs), &dt_action_def_tabs_rgb);
   dt_ui_notebook_page(g->channel_tabs, N_("all"), NULL);
   dt_ui_notebook_page(g->channel_tabs, N_("R"), NULL);
   dt_ui_notebook_page(g->channel_tabs, N_("G"), NULL);

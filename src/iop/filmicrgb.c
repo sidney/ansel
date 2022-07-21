@@ -4358,7 +4358,9 @@ void gui_init(dt_iop_module_t *self)
   g_signal_connect(G_OBJECT(g->area), "scroll-event", G_CALLBACK(area_scroll_callback), self);
 
   // Init GTK notebook
-  g->notebook = dt_ui_notebook_new();
+  static struct dt_action_def_t notebook_def = { };
+  g->notebook = dt_ui_notebook_new(&notebook_def);
+  dt_action_define_iop(self, NULL, N_("page"), GTK_WIDGET(g->notebook), &notebook_def);
 
   // Page SCENE
   self->widget = dt_ui_notebook_page(g->notebook, N_("scene"), NULL);

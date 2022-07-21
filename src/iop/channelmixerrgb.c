@@ -3999,7 +3999,9 @@ void gui_init(struct dt_iop_module_t *self)
                                   G_CALLBACK(_preview_pipe_finished_callback), self);
 
   // Init GTK notebook
-  g->notebook = dt_ui_notebook_new();
+  static dt_action_def_t notebook_def = { };
+  g->notebook = dt_ui_notebook_new(&notebook_def);
+  dt_action_define_iop(self, NULL, N_("page"), GTK_WIDGET(g->notebook), &notebook_def);
 
   // Page CAT
   self->widget = dt_ui_notebook_page(g->notebook, N_("CAT"), _("chromatic adaptation transform"));

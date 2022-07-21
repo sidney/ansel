@@ -1153,7 +1153,9 @@ void gui_init(struct dt_iop_module_t *self)
                                                  "but applies the saturation changes in XYZ space."));
   GtkWidget *hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
 
-  c->channel_tabs = dt_ui_notebook_new();
+  static dt_action_def_t notebook_def = { };
+  c->channel_tabs = dt_ui_notebook_new(&notebook_def);
+  dt_action_define_iop(self, NULL, N_("channel"), GTK_WIDGET(c->channel_tabs), &notebook_def);
   dt_ui_notebook_page(c->channel_tabs, N_("L"), _("tonecurve for L channel"));
   dt_ui_notebook_page(c->channel_tabs, N_("a"), _("tonecurve for a channel"));
   dt_ui_notebook_page(c->channel_tabs, N_("b"), _("tonecurve for b channel"));
@@ -1826,3 +1828,4 @@ static gboolean dt_iop_tonecurve_button_press(GtkWidget *widget, GdkEventButton 
 // vim: shiftwidth=2 expandtab tabstop=2 cindent
 // kate: tab-indents: off; indent-width 2; replace-tabs on; indent-mode cstyle; remove-trailing-spaces modified;
 // clang-format on
+

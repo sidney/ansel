@@ -2140,6 +2140,7 @@ void dt_iop_gui_init_blendif(GtkBox *blendw, dt_iop_module_t *module)
     bd->tab = 0;
     bd->channel_tabs_csp = DEVELOP_BLEND_CS_NONE;
     bd->channel_tabs = GTK_NOTEBOOK(gtk_notebook_new());
+    dt_action_define_iop(module, "blend", N_("channel"), GTK_WIDGET(bd->channel_tabs), &dt_action_def_tabs_none);
 
     gtk_notebook_set_scrollable(bd->channel_tabs, TRUE);
     gtk_box_pack_start(GTK_BOX(header), GTK_WIDGET(bd->channel_tabs), TRUE, TRUE, 0);
@@ -3191,3 +3192,4 @@ void dt_iop_gui_init_blending(GtkWidget *iopw, dt_iop_module_t *module)
 // vim: shiftwidth=2 expandtab tabstop=2 cindent
 // kate: tab-indents: off; indent-width 2; replace-tabs on; indent-mode cstyle; remove-trailing-spaces modified;
 // clang-format on
+

@@ -2424,7 +2424,9 @@ void gui_init(struct dt_iop_module_t *self)
   GtkWidget *vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
   gtk_box_pack_start(GTK_BOX(vbox), hbox, FALSE, FALSE, 0);
 
-  c->channel_tabs = dt_ui_notebook_new();
+  static dt_action_def_t notebook_def = { };
+  c->channel_tabs = dt_ui_notebook_new(&notebook_def);
+  dt_action_define_iop(self, NULL, N_("channel"), GTK_WIDGET(c->channel_tabs), &notebook_def);
 
   dt_ui_notebook_page(c->channel_tabs, N_("lightness"), NULL);
   dt_ui_notebook_page(c->channel_tabs, N_("saturation"), NULL);
@@ -2736,3 +2738,4 @@ void init(dt_iop_module_t *module)
 // vim: shiftwidth=2 expandtab tabstop=2 cindent
 // kate: tab-indents: off; indent-width 2; replace-tabs on; indent-mode cstyle; remove-trailing-spaces modified;
 // clang-format on
+

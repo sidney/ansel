@@ -3105,7 +3105,9 @@ void gui_init(struct dt_iop_module_t *self)
 
   gui_cache_init(self);
 
-  g->notebook = dt_ui_notebook_new();
+  static dt_action_def_t notebook_def = { };
+  g->notebook = dt_ui_notebook_new(&notebook_def);
+  dt_action_define_iop(self, NULL, N_("page"), GTK_WIDGET(g->notebook), &notebook_def);
 
   // Simple view
 
@@ -3313,3 +3315,4 @@ void gui_cleanup(struct dt_iop_module_t *self)
 // vim: shiftwidth=2 expandtab tabstop=2 cindent
 // kate: tab-indents: off; indent-width 2; replace-tabs on; indent-mode cstyle; remove-trailing-spaces modified;
 // clang-format on
+
