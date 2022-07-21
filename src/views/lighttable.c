@@ -385,6 +385,9 @@ void expose(dt_view_t *self, cairo_t *cr, int32_t width, int32_t height, int32_t
       case DT_LIGHTTABLE_LAYOUT_FILEMANAGER:
         if(!gtk_widget_get_visible(dt_ui_thumbtable(darktable.gui->ui)->widget))
           gtk_widget_hide(dt_ui_thumbtable(darktable.gui->ui)->widget);
+
+        // No filmstrip in file manager
+        dt_ui_panel_show(darktable.gui->ui, DT_UI_PANEL_BOTTOM, FALSE, FALSE);
         break;
       case DT_LIGHTTABLE_LAYOUT_CULLING_DYNAMIC:
         if(!gtk_widget_get_visible(lib->culling->widget)) gtk_widget_show(lib->culling->widget);
