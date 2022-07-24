@@ -791,6 +791,11 @@ guint dt_gui_translated_key_state(GdkEventKey *event)
 
 static gboolean _button_pressed(GtkWidget *w, GdkEventButton *event, gpointer user_data)
 {
+  /* Reset Gtk focus */
+  gtk_window_set_focus(GTK_WINDOW(dt_ui_main_window(darktable.gui->ui)), NULL);
+  darktable.gui->has_scroll_focus = NULL;
+  fprintf(stdout, "focus 2\n");
+
   double pressure = 1.0;
   GdkDevice *device = gdk_event_get_source_device((GdkEvent *)event);
 
@@ -924,6 +929,10 @@ int dt_gui_gtk_init(dt_gui_gtk_t *gui)
 
   // smooth scrolling must be enabled to handle trackpad/touch events
   gui->scroll_mask = GDK_SCROLL_MASK | GDK_SMOOTH_SCROLL_MASK;
+
+  // Emulates the same feature as Gtk focus but for scrolling events
+  // The GtkWidget capturing scrolling events will write its address in this pointer
+  gui->has_scroll_focus = NULL;
 
   // Init focus peaking
   gui->show_focus_peaking = FALSE;
@@ -1207,9 +1216,6 @@ static void _init_widgets(dt_gui_gtk_t *gui)
   dt_configure_ppd_dpi(gui);
 
   gtk_window_set_default_size(GTK_WINDOW(widget), DT_PIXEL_APPLY_DPI(900), DT_PIXEL_APPLY_DPI(500));
-
-  gtk_widget_set_can_focus(GTK_WIDGET(widget), TRUE);
-  gtk_widget_set_focus_on_click(GTK_WIDGET(widget), TRUE);
 
   gtk_window_set_icon_name(GTK_WINDOW(widget), "darktable");
   gtk_window_set_title(GTK_WINDOW(widget), "R&Darktable");
@@ -2570,15 +2576,6 @@ static gboolean _notebook_motion_notify_callback(GtkWidget *widget, GdkEventMoti
   return FALSE;
 }
 
-
-static gboolean _notebook_click_callback(GtkNotebook* self, GtkWidget* page, guint page_num, gpointer user_data)
-{
-  // Gtk gives focus to the first widget child of the tab after switching tabs.
-  // We don't want that since it will capture scroll.
-  gtk_window_set_focus(GTK_WINDOW(dt_ui_main_window(darktable.gui->ui)), NULL);
-  return FALSE;
-}
-
 static float _action_process_tabs(gpointer target, dt_action_element_t element, dt_action_effect_t effect, float move_size)
 {
   GtkNotebook *notebook = GTK_NOTEBOOK(target);
@@ -2656,7 +2653,6 @@ GtkWidget *dt_ui_notebook_page(GtkNotebook *notebook, const char *text, const ch
   {
     g_signal_connect(G_OBJECT(notebook), "size-allocate", G_CALLBACK(_notebook_size_callback), NULL);
     g_signal_connect(G_OBJECT(notebook), "motion-notify-event", G_CALLBACK(_notebook_motion_notify_callback), NULL);
-    g_signal_connect(G_OBJECT(notebook), "switch-page", G_CALLBACK(_notebook_click_callback), NULL);
   }
 
   return page;

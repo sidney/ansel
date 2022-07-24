@@ -244,6 +244,10 @@ int dt_view_manager_switch_by_view(dt_view_manager_t *vm, const dt_view_t *nv)
   // reset the cursor to the default one
   dt_control_change_cursor(GDK_LEFT_PTR);
 
+  /* Reset Gtk focus */
+  gtk_window_set_focus(GTK_WINDOW(dt_ui_main_window(darktable.gui->ui)), NULL);
+  darktable.gui->has_scroll_focus = NULL;
+
   // also ignore what scrolling there was previously happening
   memset(darktable.gui->scroll_to, 0, sizeof(darktable.gui->scroll_to));
 
@@ -557,9 +561,11 @@ int dt_view_manager_button_pressed(dt_view_manager_t *vm, double x, double y, do
 
   /* Reset Gtk focus */
   gtk_window_set_focus(GTK_WINDOW(dt_ui_main_window(darktable.gui->ui)), NULL);
+  darktable.gui->has_scroll_focus = NULL;
 
   /* lets check if any plugins want to handle button press */
   gboolean handled = FALSE;
+
   for(const GList *plugins = g_list_last(darktable.lib->plugins);
       plugins && !handled;
       plugins = g_list_previous(plugins))

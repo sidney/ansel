@@ -70,6 +70,7 @@ static void bauhaus_request_focus(dt_bauhaus_widget_t *w)
   if(w->module && w->module->type == DT_ACTION_TYPE_IOP_INSTANCE)
       dt_iop_request_focus((dt_iop_module_t *)w->module);
   gtk_widget_set_state_flags(GTK_WIDGET(w), GTK_STATE_FLAG_FOCUSED, FALSE);
+  darktable.gui->has_scroll_focus = GTK_WIDGET(w);
 }
 
 static float _widget_get_quad_width(dt_bauhaus_widget_t *w)
@@ -2547,7 +2548,7 @@ static void _slider_add_step(GtkWidget *widget, float delta, guint state, gboole
 
 static gboolean _widget_scroll(GtkWidget *widget, GdkEventScroll *event)
 {
-  if(dt_gui_ignore_scroll(event) || !gtk_widget_has_focus(widget)) return FALSE;
+  if(darktable.gui->has_scroll_focus != widget) return FALSE;
 
   // handle speed adjustment in mapping mode in dispatcher
   if(darktable.control->mapping_widget)
@@ -2559,7 +2560,6 @@ static gboolean _widget_scroll(GtkWidget *widget, GdkEventScroll *event)
     if(delta_y == 0) return TRUE;
 
     dt_bauhaus_widget_t *w = (dt_bauhaus_widget_t *)widget;
-    bauhaus_request_focus(w);
 
     if(w->type == DT_BAUHAUS_SLIDER)
     {
@@ -2885,7 +2885,7 @@ static void _bauhaus_slider_value_change(dt_bauhaus_widget_t *w)
           fprintf(stderr, "[_bauhaus_slider_value_change] unsupported slider data type\n");
       }
     }
-
+    darktable.gui->has_scroll_focus = GTK_WIDGET(w);
     g_signal_emit_by_name(G_OBJECT(w), "value-changed");
     d->is_changed = 0;
   }

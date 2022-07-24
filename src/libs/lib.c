@@ -596,6 +596,15 @@ static gboolean default_preset_autoapply(dt_lib_module_t *self)
   return FALSE;
 }
 
+static int _lib_plugin_body_button_press(GtkWidget *w, GdkEventButton *e, gpointer user_data)
+{
+  /* Reset the scrolling focus. If the click happened on any bauhaus element,
+   * its internal button_press method will set it for itself */
+  darktable.gui->has_scroll_focus = NULL;
+  int handled = FALSE;
+  return handled;
+}
+
 static int dt_lib_load_module(void *m, const char *libname, const char *module_name)
 {
   dt_lib_module_t *module = (dt_lib_module_t *)m;
@@ -882,6 +891,10 @@ static gboolean _lib_plugin_header_button_press(GtkWidget *w, GdkEventButton *e,
 
   dt_lib_module_t *module = (dt_lib_module_t *)user_data;
 
+  /* Reset the scrolling focus. If the click happened on any bauhaus element,
+   * its internal button_press method will set it for itself */
+  darktable.gui->has_scroll_focus = NULL;
+
   if(e->button == 1)
   {
     /* bail out if module is static */
@@ -1005,6 +1018,7 @@ GtkWidget *dt_lib_gui_get_expander(dt_lib_module_t *module)
 
   GtkWidget *expander = dtgtk_expander_new(header, module->widget);
   GtkWidget *header_evb = dtgtk_expander_get_header_event_box(DTGTK_EXPANDER(expander));
+  GtkWidget *body_evb = dtgtk_expander_get_body_event_box(DTGTK_EXPANDER(expander));
   GtkWidget *pluginui_frame = dtgtk_expander_get_frame(DTGTK_EXPANDER(expander));
 
   /* setup the header box */
@@ -1012,6 +1026,10 @@ GtkWidget *dt_lib_gui_get_expander(dt_lib_module_t *module)
                    module);
   g_signal_connect(G_OBJECT(header_evb), "enter-notify-event", G_CALLBACK(_header_enter_notify_callback),
                    GINT_TO_POINTER(DT_ACTION_ELEMENT_SHOW));
+
+  /* connect mouse button callbacks for focus and presets */
+  g_signal_connect(G_OBJECT(body_evb), "button-press-event", G_CALLBACK(_lib_plugin_body_button_press), module);
+  gtk_widget_add_events(body_evb, GDK_POINTER_MOTION_MASK);
 
   /*
    * initialize the header widgets

@@ -134,6 +134,10 @@ typedef struct dt_gui_gtk_t
 
   gint scroll_mask;
 
+  // scrolling focus
+  // This emulates the same feature as Gtk focus, but to capture scrolling events
+  GtkWidget *has_scroll_focus;
+
   cairo_filter_t filter_image;    // filtering used for all modules expect darkroom
   cairo_filter_t dr_filter_image; // filtering used in the darkroom
 
