@@ -71,7 +71,7 @@ static void _thumbs_update_overlays_mode(dt_thumbtable_t *table)
 {
   // we change the overlay mode
   gchar *txt = g_strdup("plugins/lighttable/overlays/global");
-  dt_thumbnail_overlay_t over = dt_conf_get_int(txt);
+  dt_thumbnail_overlay_t over = MIN(dt_conf_get_int(txt), DT_THUMBNAIL_OVERLAYS_ALWAYS_NORMAL);
   g_free(txt);
 
   dt_thumbtable_set_overlays_mode(table, over);

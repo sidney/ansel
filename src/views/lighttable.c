@@ -260,7 +260,7 @@ static void _culling_preview_reload_overlays(dt_view_t *self)
 
   // change overlays if needed for culling and preview
   gchar *otxt = g_strdup("plugins/lighttable/overlays/global");
-  dt_thumbnail_overlay_t over = dt_conf_get_int(otxt);
+  dt_thumbnail_overlay_t over = MIN(dt_conf_get_int(otxt), DT_THUMBNAIL_OVERLAYS_ALWAYS_NORMAL);
   dt_culling_set_overlays_mode(lib->culling, over);
   dt_culling_set_overlays_mode(lib->preview, over);
   g_free(otxt);
