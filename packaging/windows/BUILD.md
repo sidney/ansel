@@ -63,7 +63,7 @@ How to make an R&Darktable Windows installer (x64 only):
     ```bash
     $ cd ~
     $ git clone https://github.com/Aurelien-Pierre/R-Darktable.git
-    $ cd darktable
+    $ cd R-Darktable/
     $ git submodule init
     $ git submodule update
     ```
