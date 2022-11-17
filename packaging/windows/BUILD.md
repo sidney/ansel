@@ -40,6 +40,8 @@ How to make an R&Darktable Windows installer (x64 only):
     $ lensfun-update-data
     ```
     
+* MSYS will initialize a personal Unix-like `/home` folder, by default located in `C:\\msys64\home\USERNAME` where `USERNAME` is your current Windows username. If your username contains non-latin characters, like accentuated letters, the clashes between Windows encoding and Linux encoding will make the compilation fail on directory pathes issues. In that case, create a new directory in `C:\\msys64\home\USERNAME_WITHOUT_ACCENTS`, and in the MSYS terminal, do `cd /home/USERNAME_WITHOUT_ACCENT`.
+    
 * Modify the `.bash_profile` file in your `$HOME` directory and add the following lines:
     ```bash
     # Added as per http://wiki.gimp.org/wiki/Hacking:Building/Windows
@@ -54,7 +56,7 @@ How to make an R&Darktable Windows installer (x64 only):
     ```
     to your `~/.bash_profile` file. This would use 6 cores.
 
-* Execute the following command to actviate profile changes:
+* Execute the following command to activate profile changes:
     ```bash
     $ . .bash_profile
     ```
@@ -82,7 +84,7 @@ How to make an R&Darktable Windows installer (x64 only):
     The Lua scripts check the operating system and see Windows and expect a Windows shell when executing system commands.
     Running darktable from the MSYS2 MINGW64 terminal gives a bash shell and therefore the commands will not work.*
 
-* For building the installer image, which will create darktable-<VERSION>.exe installer in the current build directory, use:
+* To build the installer image, which will create darktable-<VERSION>.exe installer in the current build directory, use:
     ```bash
     $ cmake --build . --target package
     ```
