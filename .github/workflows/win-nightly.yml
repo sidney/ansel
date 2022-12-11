@@ -1,4 +1,4 @@
-name: Nightly PKG
+name: Nightly Win PKG
 
 on:
   schedule:
@@ -10,8 +10,8 @@ permissions:
 
 jobs:
   Win64:
-    if: github.repository == 'darktable-org/darktable' || github.event_name == 'workflow_dispatch'
-    name: Nightly darktable.${{ github.sha }}.win64
+    if: github.repository == 'aurelienpierreeng/ansel' || github.event_name == 'workflow_dispatch'
+    name: Nightly ansel.${{ github.sha }}.win64
     runs-on: windows-latest
     strategy:
       fail-fast: true
@@ -21,6 +21,7 @@ jobs:
           - { compiler: GNU,  CC: gcc,   CXX: g++ }
         eco: [-DBINARY_PACKAGE_BUILD=ON]
         target: [skiptest]
+        generator: Ninja
     defaults:
       run:
         shell: msys2 {0}
@@ -45,6 +46,7 @@ jobs:
           pacboy: >-
             toolchain:p
             cmake:p
+            cmocka:p
             ninja:p
             nsis:p
             dbus-glib:p
@@ -79,6 +81,8 @@ jobs:
             python3-six:p
             sqlite3:p
             zlib:p
+            gmic:p
+            SDL2:p
           update: true
       - uses: actions/checkout@v3
         with:
@@ -116,6 +120,6 @@ jobs:
         if: ${{ success() && matrix.btype == 'Release' && matrix.target == 'skiptest' }}
         uses: actions/upload-artifact@v3
         with:
-          name: darktable.${{ github.sha }}.win64.zip
-          path: ${{ env.BUILD_DIR }}/darktable-*.exe
+          name: ansel.${{ github.sha }}.win64.zip
+          path: ${{ env.BUILD_DIR }}/ansel-*.exe
           retention-days: 2
