@@ -16,11 +16,15 @@ jobs:
     strategy:
       fail-fast: true
       matrix:
-        btype: [Release]
-        compiler: { compiler: GNU,  CC: gcc,   CXX: g++ }
+        btype: 
+          - Release
+        compiler: 
+          - { compiler: GNU,  CC: gcc,   CXX: g++ }
         eco: [-DBINARY_PACKAGE_BUILD=ON]
-        target: [skiptest]
-        generator: [Ninja]
+        target: 
+          - skiptest
+        generator: 
+          - Ninja
     defaults:
       run:
         shell: msys2 {0}
