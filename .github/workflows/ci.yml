@@ -10,7 +10,8 @@ on:
   push:
     branches:
       - master
-      - darktable-**
+      - dev
+      - candidate
     paths-ignore:
         - "po/**"
         - "packaging/**"
@@ -36,6 +37,8 @@ on:
         - "data/themes/**"
         - "data/watermarks/**"
         - "**.md"
+  workflow_dispatch:
+
 
 permissions:
   contents: read
