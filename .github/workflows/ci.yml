@@ -475,8 +475,8 @@ jobs:
           path: src
       - name: Install Base Dependencies
         run: |
-          brew update > /dev/null || true
           brew upgrade > /dev/null || true
+          brew update > /dev/null || true
           brew unlink python@3.8
           sudo rm '/usr/local/bin/2to3'
           brew link --overwrite python@3.9 # workaround introduced 30.12.2020, replace asap.
