@@ -58,21 +58,18 @@ jobs:
             compiler: { compiler: GNU12,   CC: gcc-12,    CXX: g++-12,      packages: gcc-12 g++-12 }
             target: nofeatures_nosse
             generator: Ninja
-
           # Ubuntu 22.04 Clang 14
           - os: { label: ubuntu-22.04, code: jammy }
             btype: Debug
             compiler: { compiler: LLVM14, CC: clang-14, CXX: clang++-14, packages: clang-14 libomp-14-dev libclang-common-14-dev llvm-14-dev clang++-14 libc++-14-dev libc++1-14 libc++abi1-14 lld-14}
             target: nofeatures_nosse
             generator: Ninja
-
           # Ubuntu 20.04 GCC 9
           - os: { label: ubuntu-20.04, code: focal }
             btype: Debug
             compiler: { compiler: GNU9,   CC: gcc-9,    CXX: g++-9,      packages: gcc-9 g++-9 }
             target: nofeatures_nosse
             generator: Ninja
-
           # Ubuntu 20.04 Clang 10
             generator: Ninja
           - os: { label: ubuntu-20.04, code: focal }
