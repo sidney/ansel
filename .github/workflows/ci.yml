@@ -52,47 +52,31 @@ jobs:
       fail-fast: true
       matrix:
         include:
-          # Ubuntu 22.04 GCC
+          # Ubuntu 22.04 GCC 12
           - os: { label: ubuntu-22.04, code: jammy }
-            btype: RelWithDebInfo
-            compiler: { compiler: GNU11,   CC: gcc-11,    CXX: g++-11,      packages: gcc-11 g++-11 }
-            target: nofeatures
-            generator: Ninja
-          - os: { label: ubuntu-22.04, code: jammy }
-            btype: RelWithDebInfo
-            compiler: { compiler: GNU11,   CC: gcc-11,    CXX: g++-11,      packages: gcc-11 g++-11 }
+            btype: Debug
+            compiler: { compiler: GNU12,   CC: gcc-12,    CXX: g++-12,      packages: gcc-12 g++-12 }
             target: nofeatures_nosse
             generator: Ninja
-          # Ubuntu 22.04 Clang
+
+          # Ubuntu 22.04 Clang 14
           - os: { label: ubuntu-22.04, code: jammy }
-            btype: RelWithDebInfo
-            compiler: { compiler: LLVM14, CC: clang-14, CXX: clang++-14, packages: clang-14 libomp-14-dev libclang-common-14-dev llvm-14-dev clang++-14 libc++-14-dev libc++1-14 libc++abi1-14 lld-14}
-            target: nofeatures
-            generator: Ninja
-          - os: { label: ubuntu-22.04, code: jammy }
-            btype: RelWithDebInfo
+            btype: Debug
             compiler: { compiler: LLVM14, CC: clang-14, CXX: clang++-14, packages: clang-14 libomp-14-dev libclang-common-14-dev llvm-14-dev clang++-14 libc++-14-dev libc++1-14 libc++abi1-14 lld-14}
             target: nofeatures_nosse
             generator: Ninja
-          # Ubuntu 20.04 GCC
+
+          # Ubuntu 20.04 GCC 9
           - os: { label: ubuntu-20.04, code: focal }
-            btype: RelWithDebInfo
-            compiler: { compiler: GNU9,   CC: gcc-9,    CXX: g++-9,      packages: gcc-9 g++-9 }
-            target: nofeatures
-            generator: Ninja
-          - os: { label: ubuntu-20.04, code: focal }
-            btype: RelWithDebInfo
+            btype: Debug
             compiler: { compiler: GNU9,   CC: gcc-9,    CXX: g++-9,      packages: gcc-9 g++-9 }
             target: nofeatures_nosse
             generator: Ninja
-          # Ubuntu 20.04 Clang
-          - os: { label: ubuntu-20.04, code: focal }
-            btype: RelWithDebInfo
-            compiler: { compiler: LLVM10, CC: clang-10, CXX: clang++-10, packages: clang-10 libomp-10-dev libclang-common-10-dev llvm-10-dev clang++-10 libc++-10-dev lld-10}
-            target: nofeatures
+
+          # Ubuntu 20.04 Clang 10
             generator: Ninja
           - os: { label: ubuntu-20.04, code: focal }
-            btype: RelWithDebInfo
+            btype: Debug
             compiler: { compiler: LLVM10, CC: clang-10, CXX: clang++-10, packages: clang-10 libomp-10-dev libclang-common-10-dev llvm-10-dev clang++-10 libc++-10-dev lld-10}
             target: nofeatures_nosse
             generator: Ninja
@@ -190,7 +174,7 @@ jobs:
                  --conf plugins/lighttable/export/force_lcms2=FALSE \
                  --conf plugins/lighttable/export/iccintent=0
 
-  Linux-Ubuntu-Jammy:
+  Linux:
     name: Linux.${{ matrix.os.code }}.${{ matrix.compiler.compiler }}.${{ matrix.target }}.${{ matrix.btype }}.${{ matrix.generator }}
     needs: Linux-minimal
     runs-on: ${{ matrix.os.label }}
@@ -207,13 +191,11 @@ jobs:
           - { compiler: LLVM13, CC: clang-13, CXX: clang++-13, packages: clang-13 libomp-13-dev libclang-common-13-dev llvm-13-dev clang++-13 libc++-13-dev libc++1-13 libc++abi1-13 lld-13}
           - { compiler: LLVM14, CC: clang-14, CXX: clang++-14, packages: clang-14 libomp-14-dev libclang-common-14-dev llvm-14-dev clang++-14 libc++-14-dev libc++1-14 libc++abi1-14 lld-14}
         btype:
-          - Debug
           - RelWithDebInfo
           - Release
         target:
           - skiptest
           - nofeatures
-          - nofeatures_nosse
         generator:
           #- Unix Makefiles
           - Ninja
@@ -326,12 +308,10 @@ jobs:
       fail-fast: true
       matrix:
         btype:
-          - Debug
           - RelWithDebInfo
           - Release
         compiler:
           - { compiler: GNU,  CC: gcc,   CXX: g++ }
-          #- { compiler: LLVM, CC: clang, CXX: clang++ }
         target:
           - skiptest
           - nofeatures
@@ -451,7 +431,9 @@ jobs:
           - { os: macos-12,    xcode: 13.4,   deployment: 12.3 }
         compiler:
           - { compiler: XCode,   CC: cc, CXX: c++ }
-        btype: [ RelWithDebInfo ]
+        btype:
+          - RelWithDebInfo
+          - Release
         target:
           - skiptest
           - nofeatures
