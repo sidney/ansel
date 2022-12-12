@@ -20,7 +20,7 @@ jobs:
         compiler: { compiler: GNU,  CC: gcc,   CXX: g++ }
         eco: [-DBINARY_PACKAGE_BUILD=ON]
         target: [skiptest]
-        generator: Ninja
+        generator: [Ninja]
     defaults:
       run:
         shell: msys2 {0}
