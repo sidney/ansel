@@ -1,8 +1,8 @@
 
 IF(WIN32 AND NOT BUILD_MSYS2_INSTALL)
 
-  set(plugin_dest_dir lib/darktable/plugins)
-  set(APPS "\${CMAKE_INSTALL_PREFIX}/bin/darktable.exe")  # paths to executables
+  set(plugin_dest_dir lib/ansel/plugins)
+  set(APPS "\${CMAKE_INSTALL_PREFIX}/bin/ansel.exe")  # paths to executables
   get_filename_component(MINGW_PATH ${CMAKE_CXX_COMPILER} PATH )
 
   find_program(cygcheck_BIN cygcheck)
@@ -16,7 +16,7 @@ IF(WIN32 AND NOT BUILD_MSYS2_INSTALL)
     INSTALL(CODE "
       file(GLOB_RECURSE DTPLUGINS
         \"\${CMAKE_INSTALL_PREFIX}/${plugin_dest_dir}/*${CMAKE_SHARED_LIBRARY_SUFFIX}\")
-      list(APPEND DTPLUGINS \"\${CMAKE_INSTALL_PREFIX}/bin/libdarktable.dll\")
+      list(APPEND DTPLUGINS \"\${CMAKE_INSTALL_PREFIX}/bin/libansel.dll\")
       include(\"${CMAKE_ROOT}/Modules/BundleUtilities.cmake\")
       set(gp_tool \"objdump\")
       fixup_bundle(\"${APPS}\" \"\${DTPLUGINS}\" \"${DIRS}\")
@@ -38,7 +38,7 @@ IF(WIN32 AND NOT BUILD_MSYS2_INSTALL)
       endfunction()
 
       file(GLOB_RECURSE DTPLUGINS \"\${CMAKE_INSTALL_PREFIX}/${plugin_dest_dir}/*${CMAKE_SHARED_LIBRARY_SUFFIX}\")
-      list(APPEND DTPLUGINS \"\${CMAKE_INSTALL_PREFIX}/bin/libdarktable.dll\")
+      list(APPEND DTPLUGINS \"\${CMAKE_INSTALL_PREFIX}/bin/libansel.dll\")
 
       process_file(\"${APPS}\")
       foreach(filename IN LISTS DTPLUGINS)

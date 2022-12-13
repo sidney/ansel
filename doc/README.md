@@ -20,7 +20,7 @@ Optionally, you might need for special features:
 
  - `libcups2` (for the print module)
  - `gphoto2` (for camera support, recommended)
- - `SDL`, SDL-image and Mesa OpenGL (to build darktable-viewer)
+ - `SDL`, SDL-image and Mesa OpenGL (to build ansel-viewer)
  - `osm-gps-map` for geo tagging view
  - `lensfun` (lens distortion plugin)
  - `libheif` for reading HEIF/HEIC images
@@ -59,5 +59,5 @@ darktable has OpenCL support for graphics cards with:
 
 Enjoy!
 
-Send any bug reports to the mailing list: darktable-dev@lists.darktable.org
+Send any bug reports to the mailing list: ansel-dev@lists.darktable.org
 Find more information on the web: https://www.darktable.org/

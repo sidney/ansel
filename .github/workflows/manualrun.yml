@@ -46,7 +46,7 @@ jobs:
       CMAKE_BUILD_TYPE: ${{ matrix.btype }}
       GENERATOR: Ninja
       TARGET: ${{ matrix.target }}
-      DARKTABLE_CLI: ${{ github.workspace }}/install/bin/darktable-cli
+      DARKTABLE_CLI: ${{ github.workspace }}/install/bin/ansel-cli
     steps:
       - name: Install compiler ${{ matrix.compiler.compiler }}
         run: |
@@ -119,8 +119,8 @@ jobs:
           ./src/.ci/ci-script.sh;
       - name: Check if it runs
         run: |
-          ${INSTALL_PREFIX}/bin/darktable --version || true
-          ${INSTALL_PREFIX}/bin/darktable-cli \
+          ${INSTALL_PREFIX}/bin/ansel --version || true
+          ${INSTALL_PREFIX}/bin/ansel-cli \
                  --width 2048 --height 2048 \
                  --hq true --apply-custom-presets false \
                  "${SRC_DIR}/src/tests/integration/images/mire1.cr2" \
@@ -237,8 +237,8 @@ jobs:
           $(cygpath ${SRC_DIR})/.ci/ci-script.sh
       - name: Check if it runs
         run: |
-          $(cygpath ${INSTALL_PREFIX})/bin/darktable.exe --version || true
-          $(cygpath ${INSTALL_PREFIX})/bin/darktable-cli.exe \
+          $(cygpath ${INSTALL_PREFIX})/bin/ansel.exe --version || true
+          $(cygpath ${INSTALL_PREFIX})/bin/ansel-cli.exe \
                  --width 2048 --height 2048 \
                  --hq true --apply-custom-presets false \
                  $(cygpath ${SRC_DIR})/src/tests/integration/images/mire1.cr2 \
@@ -259,7 +259,7 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: Win64.${{ matrix.compiler.compiler }}.${{ matrix.btype}}.${{ github.sha }}
-          path: ${{ env.BUILD_DIR }}/darktable-*.exe
+          path: ${{ env.BUILD_DIR }}/ansel-*.exe
           retention-days: 1
 
   macOS:
@@ -303,8 +303,8 @@ jobs:
           ./src/.ci/ci-script.sh;
       - name: Check if it runs
         run: |
-          ${INSTALL_PREFIX}/bin/darktable --version || true
-          ${INSTALL_PREFIX}/bin/darktable-cli \
+          ${INSTALL_PREFIX}/bin/ansel --version || true
+          ${INSTALL_PREFIX}/bin/ansel-cli \
                  --width 2048 --height 2048 \
                  --hq true --apply-custom-presets false \
                  "${SRC_DIR}/src/tests/integration/images/mire1.cr2" \

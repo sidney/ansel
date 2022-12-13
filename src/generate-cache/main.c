@@ -175,7 +175,7 @@ int main(int argc, char *arg[])
     }
     else if(!strcmp(arg[k], "--version"))
     {
-      printf("this is darktable-generate-cache %s\ncopyright (c) 2014 johannes hanika; 2015 LebedevRI\n",
+      printf("this is ansel-generate-cache %s\ncopyright (c) 2014 johannes hanika; 2015 LebedevRI\n",
         darktable_package_version);
       exit(EXIT_FAILURE);
     }
@@ -209,7 +209,7 @@ int main(int argc, char *arg[])
 
   int m_argc = 0;
   char **m_arg = malloc(sizeof(char *) * (3 + argc - k + 1));
-  m_arg[m_argc++] = "darktable-generate-cache";
+  m_arg[m_argc++] = "ansel-generate-cache";
   m_arg[m_argc++] = "--conf";
   m_arg[m_argc++] = "write_sidecar_files=never";
   for(; k < argc; k++) m_arg[m_argc++] = arg[k];
@@ -268,4 +268,3 @@ int main(int argc, char *arg[])
 // vim: shiftwidth=2 expandtab tabstop=2 cindent
 // kate: tab-indents: off; indent-width 2; replace-tabs on; indent-mode cstyle; remove-trailing-spaces modified;
 // clang-format on
-

@@ -225,7 +225,7 @@ int main(int argc, char *arg[])
       }
       else if(!strcmp(arg[k], "--version"))
       {
-        printf("this is darktable-cli %s\ncopyright (c) 2012-%s johannes hanika, tobias ellinghaus\n",
+        printf("this is ansel-cli %s\ncopyright (c) 2012-%s johannes hanika, tobias ellinghaus\n",
                darktable_package_version, darktable_last_commit_year);
         exit(0);
       }
@@ -412,7 +412,7 @@ int main(int argc, char *arg[])
 
   int m_argc = 0;
   char **m_arg = malloc(sizeof(char *) * (5 + argc - k + 1));
-  m_arg[m_argc++] = "darktable-cli";
+  m_arg[m_argc++] = "ansel-cli";
   m_arg[m_argc++] = "--library";
   m_arg[m_argc++] = ":memory:";
   m_arg[m_argc++] = "--conf";
@@ -775,4 +775,3 @@ int main(int argc, char *arg[])
 // vim: shiftwidth=2 expandtab tabstop=2 cindent
 // kate: tab-indents: off; indent-width 2; replace-tabs on; indent-mode cstyle; remove-trailing-spaces modified;
 // clang-format on
-

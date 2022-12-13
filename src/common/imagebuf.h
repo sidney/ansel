@@ -134,7 +134,7 @@ void dt_iop_image_linear_blend(float *const __restrict__ buf, const float lambda
 // maximal number of threads before saturating the memory bus
 void dt_iop_image_copy_benchmark();
 
-// load configurable settings from darktablerc
+// load configurable settings from anselrc
 void dt_iop_image_copy_configure();
 
 // clang-format off
@@ -142,4 +142,3 @@ void dt_iop_image_copy_configure();
 // vim: shiftwidth=2 expandtab tabstop=2 cindent
 // kate: tab-indents: off; indent-width 2; replace-tabs on; indent-mode cstyle; remove-trailing-spaces modified;
 // clang-format on
-

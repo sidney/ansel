@@ -1768,7 +1768,7 @@ static int dt_dev_pixelpipe_process_rec(dt_dev_pixelpipe_t *pipe, dt_develop_t *
              regularly copying device buffers back to host.
            - But it is worth copying data back from the GPU
              a) for the currently focused iop, as that is the iop which is most likely to change next
-             b) if there is a hint for a module doing heavy processing.  
+             b) if there is a hint for a module doing heavy processing.
         */
         if((darktable.opencl->sync_cache == OPENCL_SYNC_TRUE) ||
            ((darktable.opencl->sync_cache == OPENCL_SYNC_ACTIVE_MODULE) && (module == darktable.develop->gui_module)) ||
@@ -2245,7 +2245,7 @@ restart:
       dt_print(DT_DEBUG_OPENCL,
                "[opencl] frequent opencl errors encountered; disabling opencl for this session!\n");
       dt_control_log(
-          _("darktable discovered problems with your OpenCL setup; disabling OpenCL for this session!"));
+          _("ansel discovered problems with your OpenCL setup; disabling OpenCL for this session!"));
       // also remove "opencl" from capabilities so that the preference entry is greyed out
       dt_capabilities_remove("opencl");
     }

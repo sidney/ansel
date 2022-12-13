@@ -5,24 +5,24 @@ cd "$(dirname "$0")"/
 
 lensfun-update-data || true
 cp -R ~/.local/share/lensfun .
-~/.local/bin/gtk-mac-bundler darktable.bundle
-mv package/darktable.app/Contents/MacOS/darktable-bin package/darktable.app/Contents/MacOS/darktable
-mv package/darktable.app/Contents/Resources/lib/gdk-pixbuf-2.0/*/loaders.cache package/darktable.app/Contents/Resources/etc/gtk-3.0/
+~/.local/bin/gtk-mac-bundler ansel.bundle
+mv package/ansel.app/Contents/MacOS/ansel-bin package/ansel.app/Contents/MacOS/ansel
+mv package/ansel.app/Contents/Resources/lib/gdk-pixbuf-2.0/*/loaders.cache package/ansel.app/Contents/Resources/etc/gtk-3.0/
 rm -Rf lensfun
-sed -i '' 's|/opt/local/share/locale||' package/darktable.app/Contents/Resources/etc/gtk-3.0/gtk.immodules
-glib-compile-schemas package/darktable.app/Contents/Resources/share/glib-2.0/schemas/
-sed -i '' 's|{VERSION}|'$(git describe --tags --long --match '*[0-9.][0-9.][0-9]'|cut -d- -f2|sed 's/^\([0-9]*\.[0-9]*\)$/\1.0/')'|' package/darktable.app/Contents/Info.plist
-sed -i '' 's|{COMMITS}|'$(git describe --tags --long --match '*[0-9.][0-9.][0-9]'|cut -d- -f3)'|' package/darktable.app/Contents/Info.plist
-for i in package/darktable.app/Contents/MacOS/darktable{,-chart,-cli,-cltest,-generate-cache}
+sed -i '' 's|/opt/local/share/locale||' package/ansel.app/Contents/Resources/etc/gtk-3.0/gtk.immodules
+glib-compile-schemas package/ansel.app/Contents/Resources/share/glib-2.0/schemas/
+sed -i '' 's|{VERSION}|'$(git describe --tags --long --match '*[0-9.][0-9.][0-9]'|cut -d- -f2|sed 's/^\([0-9]*\.[0-9]*\)$/\1.0/')'|' package/ansel.app/Contents/Info.plist
+sed -i '' 's|{COMMITS}|'$(git describe --tags --long --match '*[0-9.][0-9.][0-9]'|cut -d- -f3)'|' package/ansel.app/Contents/Info.plist
+for i in package/ansel.app/Contents/MacOS/ansel{,-chart,-cli,-cltest,-generate-cache}
 do
-	install_name_tool -rpath @loader_path/../lib/darktable @loader_path/../Resources/lib/darktable "$i"
+	install_name_tool -rpath @loader_path/../lib/ansel @loader_path/../Resources/lib/ansel "$i"
 done
 ln -s /Applications package/
 
 if [ -z "$STRIPDEBUGINFO" ]
 then
-	find package/darktable.app/Contents/Resources/lib/darktable \( -name \*.dylib -or -name \*.so \) -exec dsymutil \{} \;
-	for i in package/darktable.app/Contents/MacOS/darktable{,-chart,-cli,-cltest,-generate-cache,-curve-tool,-noiseprofile}
+	find package/ansel.app/Contents/Resources/lib/ansel \( -name \*.dylib -or -name \*.so \) -exec dsymutil \{} \;
+	for i in package/ansel.app/Contents/MacOS/ansel{,-chart,-cli,-cltest,-generate-cache,-curve-tool,-noiseprofile}
 	do
 		dsymutil "$i"
 	done
@@ -30,11 +30,11 @@ fi
 
 if [ -n "$CODECERT" ]
 then
-	find package/darktable.app/Contents/Resources/lib{,exec} -type d -name \*.dSYM -prune -or -type f -exec codesign --verbose --force --options runtime -s "${CODECERT}" \{} \;
-	codesign --deep --verbose --force --options runtime -s "${CODECERT}" package/darktable.app
+	find package/ansel.app/Contents/Resources/lib{,exec} -type d -name \*.dSYM -prune -or -type f -exec codesign --verbose --force --options runtime -s "${CODECERT}" \{} \;
+	codesign --deep --verbose --force --options runtime -s "${CODECERT}" package/ansel.app
 fi
 
-PROGN=darktable
+PROGN=ansel
 
 # Creating temporary rw image
 hdiutil create -srcfolder package -volname "${PROGN}" -fs HFS+ \
@@ -71,7 +71,7 @@ rm -f pack.temp.dmg
 rm -Rf package
 if [ -n "${APPLEID}" ]
 then
-	UUID="$(xcrun altool --notarize-app --primary-bundle-id org.darktable -u "${APPLEID}" -p "${APPLEPW}" -f "${DMG}".dmg --output-format xml | grep -A 1 '<key>RequestUUID</key>' | tail -n 1 | cut -d'>' -f2 | cut -d'<' -f1)"
+	UUID="$(xcrun altool --notarize-app --primary-bundle-id org.ansel -u "${APPLEID}" -p "${APPLEPW}" -f "${DMG}".dmg --output-format xml | grep -A 1 '<key>RequestUUID</key>' | tail -n 1 | cut -d'>' -f2 | cut -d'<' -f1)"
 	if [ -n "${UUID}" ]
 	then
 		STATUS="in progress"

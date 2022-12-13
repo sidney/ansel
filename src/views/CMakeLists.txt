@@ -22,17 +22,17 @@ if(CUPS_FOUND)
 endif(CUPS_FOUND)
 
 foreach(module ${MODULES})
-    target_link_libraries(${module} lib_darktable)
+    target_link_libraries(${module} lib_ansel)
 endforeach(module)
 
 foreach(module ${MODULES})
     if (WIN32)
-      _detach_debuginfo (${module} ${CMAKE_INSTALL_LIBDIR}/darktable/views)
+      _detach_debuginfo (${module} ${CMAKE_INSTALL_LIBDIR}/ansel/views)
     else()
         set_target_properties(${module}
                               PROPERTIES
                               INSTALL_RPATH ${CMAKE_INSTALL_LIBDIR_RPATH})
     endif(WIN32)
 
-    install(TARGETS ${module} DESTINATION ${CMAKE_INSTALL_LIBDIR}/darktable/views COMPONENT DTApplication)
+    install(TARGETS ${module} DESTINATION ${CMAKE_INSTALL_LIBDIR}/ansel/views COMPONENT DTApplication)
 endforeach(module)

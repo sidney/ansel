@@ -1,11 +1,11 @@
 include_directories(${DARKTABLE_BINDIR})
-add_executable(darktable-cltest main.c)
+add_executable(ansel-cltest main.c)
 
-set_target_properties(darktable-cltest PROPERTIES LINKER_LANGUAGE C)
-target_link_libraries(darktable-cltest lib_darktable)
+set_target_properties(ansel-cltest PROPERTIES LINKER_LANGUAGE C)
+target_link_libraries(ansel-cltest lib_ansel)
 
 if (WIN32)
-  _detach_debuginfo (darktable-cltest bin)
+  _detach_debuginfo (ansel-cltest bin)
 else()
     # Note that $ORIGIN is not a variable but has a special meaning at runtime.
     # The string "$ORIGIN" should end up in the executable as-is.
@@ -14,10 +14,10 @@ else()
         # The string "@loader_path" should end up in the executable as-is.
         set(RPATH_DT "@loader_path")
     endif()
-    set_target_properties(darktable-cltest
+    set_target_properties(ansel-cltest
                           PROPERTIES
                           INSTALL_RPATH ${CMAKE_INSTALL_LIBDIR_RPATH}
                           RUNTIME_OUTPUT_DIRECTORY ${DARKTABLE_BINDIR})
 endif(WIN32)
 
-install(TARGETS darktable-cltest DESTINATION ${CMAKE_INSTALL_BINDIR} COMPONENT DTApplication)
+install(TARGETS ansel-cltest DESTINATION ${CMAKE_INSTALL_BINDIR} COMPONENT DTApplication)

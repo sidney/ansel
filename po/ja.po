@@ -4494,24 +4494,24 @@ msgstr "rawspeedコントリビューター"
 msgid "integration contributors"
 msgstr "統合作業コントリビューター"
 
-#: ../build/share/darktable/darktable.desktop.in.h:1
-#: ../data/darktable.desktop.in.h:1
+#: ../build/share/darktable/ansel.desktop.in.h:1
+#: ../data/ansel.desktop.in.h:1
 msgid "Virtual Lighttable and Darkroom"
 msgstr "バーチャルのライトテーブルとダークルーム"
 
-#: ../build/share/darktable/darktable.desktop.in.h:2
-#: ../data/darktable.appdata.xml.in.h:1 ../data/darktable.desktop.in.h:2
+#: ../build/share/darktable/ansel.desktop.in.h:2
+#: ../data/ansel.appdata.xml.in.h:1 ../data/ansel.desktop.in.h:2
 msgid "Organize and develop images from digital cameras"
 msgstr "デジタルカメラで撮影した画像を整理し現像します"
 
 #. TRANSLATORS: Search terms to find this application. Do NOT translate or localize the semicolons! The list MUST also end with a semicolon!
-#: ../build/share/darktable/darktable.desktop.in.h:4
-#: ../data/darktable.desktop.in.h:4
+#: ../build/share/darktable/ansel.desktop.in.h:4
+#: ../data/ansel.desktop.in.h:4
 msgid "graphics;photography;raw;"
 msgstr "グラフィックス、写真、RAW"
 
 # darktableはデータベースにデジタルネガを管理し、ライトテーブルモードでそれらを閲覧することができます。またダークルームモードでRAW画像を現像し、より良い画像にすることができます
-#: ../data/darktable.appdata.xml.in.h:2
+#: ../data/ansel.appdata.xml.in.h:2
 msgid ""
 "darktable manages your digital negatives in a database and lets you view "
 "them through a lighttable. It also enables you to develop raw images and "
@@ -4522,7 +4522,7 @@ msgstr ""
 "にすることが出来ます"
 
 # ライトテーブルとダークルーム以外には、ジオタグを利用するためのマップモード、テザリングモード、印刷モード、そしてスライドショーモードがあります。
-#: ../data/darktable.appdata.xml.in.h:3
+#: ../data/ansel.appdata.xml.in.h:3
 msgid ""
 "Other modes besides lighttable and darkroom are a map for geotagging, "
 "tethering, print and a slideshow."
@@ -4531,7 +4531,7 @@ msgstr ""
 "テザリングモード、印刷モード、そしてスライドショーモードがあります"
 
 # darktableは近年作られたほとんど全てのカメラのRAWフォーマットをサポートしており、あらゆる処理を非常に高い精度で行います
-#: ../data/darktable.appdata.xml.in.h:4
+#: ../data/ansel.appdata.xml.in.h:4
 msgid ""
 "darktable supports most modern cameras' raw formats, and does all of its "
 "processing at very high precision."
@@ -4539,23 +4539,23 @@ msgstr ""
 "darktableは近年作られたほとんど全てのカメラのRAWフォーマットをサポートしてお"
 "り、全ての処理を非常に高い精度で行います"
 
-#: ../data/darktable.appdata.xml.in.h:5
+#: ../data/ansel.appdata.xml.in.h:5
 msgid "Virtual light table, showing a collection"
 msgstr "コレクションを表示するバーチャルライトテーブル"
 
-#: ../data/darktable.appdata.xml.in.h:6
+#: ../data/ansel.appdata.xml.in.h:6
 msgid "Virtual dark room with an opened image"
 msgstr "画像を開いて表示すバーチャルダークルーム"
 
-#: ../data/darktable.appdata.xml.in.h:7
+#: ../data/ansel.appdata.xml.in.h:7
 msgid "Virtual dark room, sharpening an image"
 msgstr "画像をシャープにするバーチャルダークルーム"
 
-#: ../data/darktable.appdata.xml.in.h:8
+#: ../data/ansel.appdata.xml.in.h:8
 msgid "Show images on a map"
 msgstr "地図上に画像を表示"
 
-#: ../data/darktable.appdata.xml.in.h:9
+#: ../data/ansel.appdata.xml.in.h:9
 msgid "Print your images"
 msgstr "画像を印刷"
 
@@ -26586,8 +26586,8 @@ msgstr "マウスアクション"
 #~ msgid "blend H"
 #~ msgstr "ブレンド H"
 
-#~ msgid "filename of your custom theme in share/darktable/"
-#~ msgstr "share/darktable/カスタムテーマのファイル名"
+#~ msgid "filename of your custom theme in share/ansel/"
+#~ msgstr "share/ansel/カスタムテーマのファイル名"
 
 #~ msgid "error loading file `%s'"
 #~ msgstr "`%s' ファイル読み込み中にエラーが発生しました"

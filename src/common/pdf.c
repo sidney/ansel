@@ -24,7 +24,7 @@
 // add the following define to compile this into a standalone test program:
 // #define STANDALONE
 // or use
-// gcc -W -Wall -std=c99 -lz -lm `pkg-config --cflags --libs glib-2.0` -g -O3 -fopenmp -DSTANDALONE -o darktable-pdf pdf.c
+// gcc -W -Wall -std=c99 -lz -lm `pkg-config --cflags --libs glib-2.0` -g -O3 -fopenmp -DSTANDALONE -o ansel-pdf pdf.c
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -943,4 +943,3 @@ int main(int argc, char *argv[])
 // vim: shiftwidth=2 expandtab tabstop=2 cindent
 // kate: tab-indents: off; indent-width 2; replace-tabs on; indent-mode cstyle; remove-trailing-spaces modified;
 // clang-format on
-

@@ -37,17 +37,17 @@ macro (add_iop _lib _src)
   # yes, input is added as part of the library. since we just set it's LANGUAGE
   # to "", no compilation will happen. this is needed for proper IDE support.
   add_library(${_lib} MODULE ${_output} ${OPT_SRC} ${_input})
-  target_link_libraries(${_lib} lib_darktable)
+  target_link_libraries(${_lib} lib_ansel)
 
   if (WIN32)
-    _detach_debuginfo (${_lib} ${CMAKE_INSTALL_LIBDIR}/darktable/plugins)
+    _detach_debuginfo (${_lib} ${CMAKE_INSTALL_LIBDIR}/ansel/plugins)
   else()
       set_target_properties(${_lib}
                             PROPERTIES
                             INSTALL_RPATH ${CMAKE_INSTALL_LIBDIR_RPATH})
   endif(WIN32)
 
-  install(TARGETS ${_lib} DESTINATION ${CMAKE_INSTALL_LIBDIR}/darktable/plugins COMPONENT DTApplication)
+  install(TARGETS ${_lib} DESTINATION ${CMAKE_INSTALL_LIBDIR}/ansel/plugins COMPONENT DTApplication)
 
   list(APPEND _iop_list ${_lib})
 

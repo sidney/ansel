@@ -4410,23 +4410,23 @@ msgstr "kontribuantoj de rawspeed"
 msgid "integration contributors"
 msgstr "interiĝaj kontribuintoj"
 
-#: ../build/share/darktable/darktable.desktop.in.h:1
-#: ../data/darktable.desktop.in.h:1
+#: ../build/share/darktable/ansel.desktop.in.h:1
+#: ../data/ansel.desktop.in.h:1
 msgid "Virtual Lighttable and Darkroom"
 msgstr "Virtuala Lumtablo kaj Senluma Ĉambro"
 
-#: ../build/share/darktable/darktable.desktop.in.h:2
-#: ../data/darktable.appdata.xml.in.h:1 ../data/darktable.desktop.in.h:2
+#: ../build/share/darktable/ansel.desktop.in.h:2
+#: ../data/ansel.appdata.xml.in.h:1 ../data/ansel.desktop.in.h:2
 msgid "Organize and develop images from digital cameras"
 msgstr "Organizi kaj disvolvi bildojn de ciferecaj fotiloj"
 
 #. TRANSLATORS: Search terms to find this application. Do NOT translate or localize the semicolons! The list MUST also end with a semicolon!
-#: ../build/share/darktable/darktable.desktop.in.h:4
-#: ../data/darktable.desktop.in.h:4
+#: ../build/share/darktable/ansel.desktop.in.h:4
+#: ../data/ansel.desktop.in.h:4
 msgid "graphics;photography;raw;"
 msgstr "grafikaĵoj;foto;kruda;"
 
-#: ../data/darktable.appdata.xml.in.h:2
+#: ../data/ansel.appdata.xml.in.h:2
 msgid ""
 "darktable manages your digital negatives in a database and lets you view "
 "them through a lighttable. It also enables you to develop raw images and "
@@ -4436,7 +4436,7 @@ msgstr ""
 "al vi vidi ilin per lumtablo. Ĝi ankaŭ ebligas al vi disvolvi krudajn "
 "bildojn kaj plibonigi ilin en senluma ĉambro."
 
-#: ../data/darktable.appdata.xml.in.h:3
+#: ../data/ansel.appdata.xml.in.h:3
 msgid ""
 "Other modes besides lighttable and darkroom are a map for geotagging, "
 "tethering, print and a slideshow."
@@ -4444,7 +4444,7 @@ msgstr ""
 "Aliaj modoj krom lumtablo kaj senluma ĉambro estas mapo por geoetikedo, "
 "kunligado, presado kaj bildoprezento."
 
-#: ../data/darktable.appdata.xml.in.h:4
+#: ../data/ansel.appdata.xml.in.h:4
 msgid ""
 "darktable supports most modern cameras' raw formats, and does all of its "
 "processing at very high precision."
@@ -4452,23 +4452,23 @@ msgstr ""
 "darktable subtenas la krudajn formatojn de plej multaj modernaj fotiloj, kaj "
 "faras sian tutan prilaboradon tre tre precize."
 
-#: ../data/darktable.appdata.xml.in.h:5
+#: ../data/ansel.appdata.xml.in.h:5
 msgid "Virtual light table, showing a collection"
 msgstr "Virtuala lumtablo, montranta kolekton"
 
-#: ../data/darktable.appdata.xml.in.h:6
+#: ../data/ansel.appdata.xml.in.h:6
 msgid "Virtual dark room with an opened image"
 msgstr "Virtuala senluma ĉambro kun malfermita bildo"
 
-#: ../data/darktable.appdata.xml.in.h:7
+#: ../data/ansel.appdata.xml.in.h:7
 msgid "Virtual dark room, sharpening an image"
 msgstr "Virtuala senluma ĉambro, akrigante bildon"
 
-#: ../data/darktable.appdata.xml.in.h:8
+#: ../data/ansel.appdata.xml.in.h:8
 msgid "Show images on a map"
 msgstr "Montru bildojn sur mapo"
 
-#: ../data/darktable.appdata.xml.in.h:9
+#: ../data/ansel.appdata.xml.in.h:9
 msgid "Print your images"
 msgstr "Presi viajn bildojn"
 

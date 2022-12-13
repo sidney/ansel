@@ -1,4 +1,4 @@
-darktable-bench is a simple script to apply standardized processing to
+ansel-bench is a simple script to apply standardized processing to
 a standard image for the purpose of comparing performance between
 systems.  It reports the average time taken for the processing over
 multiple runs, as well as a performance metric which is useful for
@@ -21,11 +21,11 @@ Usage
 In the simplest invocation, you can run the program directly from the
 top-level directory of your darktable source hierarchy:
 
-   src/tests/benchmark/darktable-bench
+   src/tests/benchmark/ansel-bench
 
 This will then run the default sidecar (v3.6) on the default image
-(mire1.cr2 from the integration test suite) using the darktable-cli in
-the build directory, or the darktable-cli on your search path.
+(mire1.cr2 from the integration test suite) using the ansel-cli in
+the build directory, or the ansel-cli on your search path.
 
 
 The following commandline options are available:
@@ -34,7 +34,7 @@ The following commandline options are available:
    		specify the image to use instead of mire1.cr2
 
    -v / --version VER
-   		use alternate sidecar darktable-bench-VER.xmp
+   		use alternate sidecar ansel-bench-VER.xmp
 
    -p / --program PATH
    		specify the program to execute
@@ -47,7 +47,7 @@ The following commandline options are available:
    		run the development N times instead of 3
 
    -t N / --threads N
-   		tell darktable-cli to run with N threads (default is
+   		tell ansel-cli to run with N threads (default is
 		the number of hardware threads)
 
    -C / --cpuonly
@@ -61,15 +61,15 @@ The following commandline options are available:
 Report
 ------
 
-darktable-bench prints the time each development took, as well as the
+ansel-bench prints the time each development took, as well as the
 average and the throughput rating, which is the approximate number of
 images of this size with this processing that could be exported per
 hour.  (You will likely see greater throughput on your own images, as
 the benchmark processing is deliberately very compute-intensive.)  The
 reported times are the total pixelpipe processing time reported by
-darktable-cli, and the pixelpipe time plus load/save time.  As
-darktable-cli currently does not report the time needed to write the
-final result, darktable-bench assumes that the save time is the same
+ansel-cli, and the pixelpipe time plus load/save time.  As
+ansel-cli currently does not report the time needed to write the
+final result, ansel-bench assumes that the save time is the same
 as the load time.
 
 Sample output
@@ -98,13 +98,13 @@ be included in the report
 Structure
 ---------
 
-darktable-bench		 : the benchmarking script (Python 3)
+ansel-bench		 : the benchmarking script (Python 3)
 
-darktable-bench-null.xmp : a sidecar file with minimal processing,
+ansel-bench-null.xmp : a sidecar file with minimal processing,
 			   used to warm up disk caches
 
-darktable-bench-3.6.xmp  : the default benchmarking sidecar
-darktable-bench-3.4.xmp  : alternate sidecar for older version
+ansel-bench-3.6.xmp  : the default benchmarking sidecar
+ansel-bench-3.4.xmp  : alternate sidecar for older version
 
 ../integration/images/mire1.cr2 : the default benchmarking image
 
@@ -115,11 +115,11 @@ How to add a new benchmark
 1. open an image in darktable and apply whatever processing you desire
 
 2. copy the generated .xmp sidecar into src/tests/benchmark under the
-   name 'darktable-bench-XYZ.xmp'
+   name 'ansel-bench-XYZ.xmp'
 
 3. run
 
-   darktable-bench -v XYZ
+   ansel-bench -v XYZ
 
    to apply your new sidecar to the standard image from the
    integration test suite (src/tests/integration/images/mire1.cr2).

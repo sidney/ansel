@@ -148,7 +148,7 @@ static void destroy_pref_element(pref_element *elt)
 
 static pref_element *pref_list = NULL;
 
-// get all the darktablerc keys
+// get all the anselrc keys
 static int get_keys(lua_State *L)
 {
   dt_pthread_mutex_lock(&darktable.conf->mutex);
@@ -637,7 +637,7 @@ static int register_pref_sub(lua_State *L)
       int value = 0;
       built_elt->type_data.enum_data.default_value = strdup(luaL_checkstring(L, cur_param));
       cur_param++;
-      
+
       while(!lua_isnoneornil(L, cur_param))
       {
         luaA_enum_value_type(L, enum_type, &value, luaL_checkstring(L, cur_param));
@@ -902,4 +902,3 @@ int dt_lua_init_preferences(lua_State *L)
 // vim: shiftwidth=2 expandtab tabstop=2 cindent
 // kate: tab-indents: off; indent-width 2; replace-tabs on; indent-mode cstyle; remove-trailing-spaces modified;
 // clang-format on
-

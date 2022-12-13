@@ -86,7 +86,7 @@ typedef enum dt_lib_histogram_vectorscope_type_t
   DT_LIB_HISTOGRAM_VECTORSCOPE_N // needs to be the last one
 } dt_lib_histogram_vectorscope_type_t;
 
-// FIXME: are these lists available from the enum/options in darktableconfig.xml?
+// FIXME: are these lists available from the enum/options in anselconfig.xml?
 const gchar *dt_lib_histogram_scope_type_names[DT_LIB_HISTOGRAM_SCOPE_N] = { "histogram", "waveform", "rgb parade", "vectorscope" };
 const gchar *dt_lib_histogram_scale_names[DT_LIB_HISTOGRAM_SCALE_N] = { "logarithmic", "linear" };
 const gchar *dt_lib_histogram_orient_names[DT_LIB_HISTOGRAM_ORIENT_N] = { "horizontal", "vertical" };

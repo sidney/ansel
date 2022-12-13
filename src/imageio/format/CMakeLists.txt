@@ -46,13 +46,13 @@ if(TARGET xcf)
 endif()
 
 foreach(module ${MODULES})
-    target_link_libraries(${module} PUBLIC lib_darktable)
+    target_link_libraries(${module} PUBLIC lib_ansel)
     if (WIN32)
-        _detach_debuginfo (${module} ${CMAKE_INSTALL_LIBDIR}/darktable/plugins/imageio/format)
+        _detach_debuginfo (${module} ${CMAKE_INSTALL_LIBDIR}/ansel/plugins/imageio/format)
     else()
         set_target_properties(${module}
                               PROPERTIES
                               INSTALL_RPATH ${CMAKE_INSTALL_LIBDIR_RPATH})
     endif(WIN32)
-    install(TARGETS ${module} DESTINATION ${CMAKE_INSTALL_LIBDIR}/darktable/plugins/imageio/format COMPONENT DTApplication)
+    install(TARGETS ${module} DESTINATION ${CMAKE_INSTALL_LIBDIR}/ansel/plugins/imageio/format COMPONENT DTApplication)
 endforeach(module)

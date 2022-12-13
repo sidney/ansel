@@ -1212,7 +1212,7 @@ static void _accels_window_sticky(GtkWidget *widget, GdkEventButton *event, dt_v
   gtk_widget_get_allocation(dt_ui_main_window(darktable.gui->ui), &alloc);
 
   gtk_window_set_resizable(win, TRUE);
-  gtk_window_set_icon_name(win, "darktable");
+  gtk_window_set_icon_name(win, "ansel");
   gtk_window_set_default_size(win, alloc.width * 0.7, alloc.height * 0.7);
   g_signal_connect(win, "destroy", G_CALLBACK(_accels_window_destroy), vm);
 

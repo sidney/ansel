@@ -13,7 +13,7 @@ DT_SRC_DIR=$(cd "$DT_SRC_DIR" && pwd -P)
 # Set default values to option vars
 # ---------------------------------------------------------------------------
 
-INSTALL_PREFIX_DEFAULT="/opt/darktable"
+INSTALL_PREFIX_DEFAULT="/opt/ansel"
 INSTALL_PREFIX="$INSTALL_PREFIX_DEFAULT"
 BUILD_TYPE_DEFAULT="RelWithDebInfo"
 BUILD_TYPE="$BUILD_TYPE_DEFAULT"
@@ -331,7 +331,7 @@ fi
 # ---------------------------------------------------------------------------
 
 cat <<EOF
-darktable build script
+ansel build script
 
 Building directory:  $BUILD_DIR
 Installation prefix: $INSTALL_PREFIX
@@ -403,8 +403,8 @@ cd "$OLDPWD"
 
 if [ $DO_BUILD -eq 0 ] ; then
 	cat <<EOF
-The darktable configuration is finished.
-To build and install darktable you need to type:
+The ansel configuration is finished.
+To build and install ansel you need to type:
 \$ $(printf "$cmd_build")
 \$ $(printf "$cmd_install")
 EOF
@@ -416,8 +416,8 @@ eval "$cmd_build"
 
 if [ $DO_INSTALL -eq 0 ] ; then
 	cat <<EOF
-darktable finished building.
-To actually install darktable you need to type:
+ansel finished building.
+To actually install ansel you need to type:
 \$ $(printf "$cmd_install")
 EOF
 	exit 0

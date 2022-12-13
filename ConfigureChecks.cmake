@@ -81,7 +81,7 @@ set(CMAKE_REQUIRED_INCLUDES)
 test_big_endian(BIGENDIAN)
 if(${BIGENDIAN})
     # we do not really want those.
-    # besides, no one probably tried darktable on such systems
+    # besides, no one probably tried ansel on such systems
     message(FATAL_ERROR "Found big endian system. Bad.")
 else()
     message(STATUS "Found little endian system. Good.")

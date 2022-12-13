@@ -181,30 +181,30 @@ gchar *dt_loc_init_generic(const char *absolute_value, const char *application_d
 
 void dt_loc_init_user_config_dir(const char *configdir)
 {
-  char *default_config_dir = g_build_filename(g_get_user_config_dir(), "darktable", NULL);
+  char *default_config_dir = g_build_filename(g_get_user_config_dir(), "ansel", NULL);
   darktable.configdir = dt_loc_init_generic(configdir, NULL, default_config_dir);
-  dt_check_opendir("darktable.configdir", darktable.configdir);
+  dt_check_opendir("ansel.configdir", darktable.configdir);
   g_free(default_config_dir);
 }
 
 void dt_loc_init_tmp_dir(const char *tmpdir)
 {
   darktable.tmpdir = dt_loc_init_generic(tmpdir, NULL, g_get_tmp_dir());
-  dt_check_opendir("darktable.tmpdir", darktable.tmpdir);
+  dt_check_opendir("ansel.tmpdir", darktable.tmpdir);
 }
 
 void dt_loc_init_user_cache_dir(const char *cachedir)
 {
-  char *default_cache_dir = g_build_filename(g_get_user_cache_dir(), "darktable", NULL);
+  char *default_cache_dir = g_build_filename(g_get_user_cache_dir(), "ansel", NULL);
   darktable.cachedir = dt_loc_init_generic(cachedir, NULL, default_cache_dir);
-  dt_check_opendir("darktable.cachedir", darktable.cachedir);
+  dt_check_opendir("ansel.cachedir", darktable.cachedir);
   g_free(default_cache_dir);
 }
 
 void dt_loc_init_plugindir(const char* application_directory, const char *plugindir)
 {
   darktable.plugindir = dt_loc_init_generic(plugindir, application_directory, DARKTABLE_LIBDIR);
-  dt_check_opendir("darktable.plugindir", darktable.plugindir);
+  dt_check_opendir("ansel.plugindir", darktable.plugindir);
 }
 
 void dt_check_opendir(const char* context, const char* directory)
@@ -247,19 +247,19 @@ void dt_check_opendir(const char* context, const char* directory)
 void dt_loc_init_localedir(const char* application_directory, const char *localedir)
 {
   darktable.localedir = dt_loc_init_generic(localedir, application_directory, DARKTABLE_LOCALEDIR);
-  dt_check_opendir("darktable.localedir", darktable.localedir);
+  dt_check_opendir("ansel.localedir", darktable.localedir);
 }
 
 void dt_loc_init_datadir(const char* application_directory, const char *datadir)
 {
   darktable.datadir = dt_loc_init_generic(datadir, application_directory, DARKTABLE_DATADIR);
-  dt_check_opendir("darktable.datadir", darktable.datadir);
+  dt_check_opendir("ansel.datadir", darktable.datadir);
 }
 
 void dt_loc_init_sharedir(const char* application_directory)
 {
   darktable.sharedir = dt_loc_init_generic(NULL, application_directory, DARKTABLE_SHAREDIR);
-  dt_check_opendir("darktable.sharedir", darktable.sharedir);
+  dt_check_opendir("ansel.sharedir", darktable.sharedir);
 }
 
 void dt_loc_get_kerneldir(char *kerneldir, size_t bufsize)
@@ -304,4 +304,3 @@ void dt_loc_get_sharedir(char *sharedir, size_t bufsize)
 // vim: shiftwidth=2 expandtab tabstop=2 cindent
 // kate: tab-indents: off; indent-width 2; replace-tabs on; indent-mode cstyle; remove-trailing-spaces modified;
 // clang-format on
-

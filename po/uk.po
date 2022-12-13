@@ -4651,23 +4651,23 @@ msgstr "учасники rawspeed"
 msgid "integration contributors"
 msgstr "учасники integration"
 
-#: ../build/share/darktable/darktable.desktop.in.h:1
-#: ../data/darktable.desktop.in.h:1
+#: ../build/share/darktable/ansel.desktop.in.h:1
+#: ../data/ansel.desktop.in.h:1
 msgid "Virtual Lighttable and Darkroom"
 msgstr "Віртуальний світлий стіл і темна кімната"
 
-#: ../build/share/darktable/darktable.desktop.in.h:2
-#: ../data/darktable.appdata.xml.in.h:1 ../data/darktable.desktop.in.h:2
+#: ../build/share/darktable/ansel.desktop.in.h:2
+#: ../data/ansel.appdata.xml.in.h:1 ../data/ansel.desktop.in.h:2
 msgid "Organize and develop images from digital cameras"
 msgstr "Організація і обробка цифрових фотографій"
 
 #. TRANSLATORS: Search terms to find this application. Do NOT translate or localize the semicolons! The list MUST also end with a semicolon!
-#: ../build/share/darktable/darktable.desktop.in.h:4
-#: ../data/darktable.desktop.in.h:4
+#: ../build/share/darktable/ansel.desktop.in.h:4
+#: ../data/ansel.desktop.in.h:4
 msgid "graphics;photography;raw;"
 msgstr "graphics;photography;raw;"
 
-#: ../data/darktable.appdata.xml.in.h:2
+#: ../data/ansel.appdata.xml.in.h:2
 msgid ""
 "darktable manages your digital negatives in a database and lets you view "
 "them through a lighttable. It also enables you to develop raw images and "
@@ -4677,7 +4677,7 @@ msgstr ""
 "переглядати їх через світлий стіл, обробляти raw зображення та покращувати "
 "їх у темній кімнаті."
 
-#: ../data/darktable.appdata.xml.in.h:3
+#: ../data/ansel.appdata.xml.in.h:3
 msgid ""
 "Other modes besides lighttable and darkroom are a map for geotagging, "
 "tethering, print and a slideshow."
@@ -4685,7 +4685,7 @@ msgstr ""
 "Інші режими, крім світлого стола та темної кімнати, - це мапа для "
 "геотегування, керування камерою, друк та слайд-шоу."
 
-#: ../data/darktable.appdata.xml.in.h:4
+#: ../data/ansel.appdata.xml.in.h:4
 msgid ""
 "darktable supports most modern cameras' raw formats, and does all of its "
 "processing at very high precision."
@@ -4693,23 +4693,23 @@ msgstr ""
 "darktable підтримує необроблені (raw) формати більшості сучасних камер і "
 "виконує всю обробку з дуже високою точністю."
 
-#: ../data/darktable.appdata.xml.in.h:5
+#: ../data/ansel.appdata.xml.in.h:5
 msgid "Virtual light table, showing a collection"
 msgstr "Віртуальний світлий стіл, показ колекції"
 
-#: ../data/darktable.appdata.xml.in.h:6
+#: ../data/ansel.appdata.xml.in.h:6
 msgid "Virtual dark room with an opened image"
 msgstr "Віртуальна темна кімната з відкритим зображенням"
 
-#: ../data/darktable.appdata.xml.in.h:7
+#: ../data/ansel.appdata.xml.in.h:7
 msgid "Virtual dark room, sharpening an image"
 msgstr "Віртуальна темна кімната, збільшення різкості зображення"
 
-#: ../data/darktable.appdata.xml.in.h:8
+#: ../data/ansel.appdata.xml.in.h:8
 msgid "Show images on a map"
 msgstr "Показ зображень на мапі"
 
-#: ../data/darktable.appdata.xml.in.h:9
+#: ../data/ansel.appdata.xml.in.h:9
 msgid "Print your images"
 msgstr "Друк зображень"
 

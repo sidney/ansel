@@ -4402,23 +4402,23 @@ msgstr "Участники rawspeed"
 msgid "integration contributors"
 msgstr "участники интеграции"
 
-#: ../build/share/darktable/darktable.desktop.in.h:1
-#: ../data/darktable.desktop.in.h:1
+#: ../build/share/darktable/ansel.desktop.in.h:1
+#: ../data/ansel.desktop.in.h:1
 msgid "Virtual Lighttable and Darkroom"
 msgstr "Виртуальный световой стол и фоторедактор"
 
-#: ../build/share/darktable/darktable.desktop.in.h:2
-#: ../data/darktable.appdata.xml.in.h:1 ../data/darktable.desktop.in.h:2
+#: ../build/share/darktable/ansel.desktop.in.h:2
+#: ../data/ansel.appdata.xml.in.h:1 ../data/ansel.desktop.in.h:2
 msgid "Organize and develop images from digital cameras"
 msgstr "Организация и обработка цифровых фотографий"
 
 #. TRANSLATORS: Search terms to find this application. Do NOT translate or localize the semicolons! The list MUST also end with a semicolon!
-#: ../build/share/darktable/darktable.desktop.in.h:4
-#: ../data/darktable.desktop.in.h:4
+#: ../build/share/darktable/ansel.desktop.in.h:4
+#: ../data/ansel.desktop.in.h:4
 msgid "graphics;photography;raw;"
 msgstr "graphics;photography;raw;"
 
-#: ../data/darktable.appdata.xml.in.h:2
+#: ../data/ansel.appdata.xml.in.h:2
 msgid ""
 "darktable manages your digital negatives in a database and lets you view "
 "them through a lighttable. It also enables you to develop raw images and "
@@ -4427,7 +4427,7 @@ msgstr ""
 "darktable управляет цифровыми фотографиями в формате Raw, позволяя "
 "просматривать их, каталогизировать и редактировать."
 
-#: ../data/darktable.appdata.xml.in.h:3
+#: ../data/ansel.appdata.xml.in.h:3
 msgid ""
 "Other modes besides lighttable and darkroom are a map for geotagging, "
 "tethering, print and a slideshow."
@@ -4435,7 +4435,7 @@ msgstr ""
 "Помимо этого darktable поддерживает геотеггинг, режим дистанционной съёмки, "
 "печать и слайдшоу."
 
-#: ../data/darktable.appdata.xml.in.h:4
+#: ../data/ansel.appdata.xml.in.h:4
 msgid ""
 "darktable supports most modern cameras' raw formats, and does all of its "
 "processing at very high precision."
@@ -4443,23 +4443,23 @@ msgstr ""
 "darktable поддерживает большой спектр современных камер и выполняет "
 "обработку снимков с очень высокой точностью."
 
-#: ../data/darktable.appdata.xml.in.h:5
+#: ../data/ansel.appdata.xml.in.h:5
 msgid "Virtual light table, showing a collection"
 msgstr "Виртуальный световой стол и коллекция снимков"
 
-#: ../data/darktable.appdata.xml.in.h:6
+#: ../data/ansel.appdata.xml.in.h:6
 msgid "Virtual dark room with an opened image"
 msgstr "Фоторедактор с открытым снимком"
 
-#: ../data/darktable.appdata.xml.in.h:7
+#: ../data/ansel.appdata.xml.in.h:7
 msgid "Virtual dark room, sharpening an image"
 msgstr "Фоторедактор, повышение резкости снимка"
 
-#: ../data/darktable.appdata.xml.in.h:8
+#: ../data/ansel.appdata.xml.in.h:8
 msgid "Show images on a map"
 msgstr "Показ снимков на карте"
 
-#: ../data/darktable.appdata.xml.in.h:9
+#: ../data/ansel.appdata.xml.in.h:9
 msgid "Print your images"
 msgstr "Печать снимков"
 
@@ -26772,8 +26772,8 @@ msgstr "Действия мышью"
 #~ msgid "do that from the top left expander."
 #~ msgstr "Сделайте это здесь."
 
-#~ msgid "filename of your custom theme in share/darktable/"
-#~ msgstr "Имя файла вашей собственной темы в share/darktable/"
+#~ msgid "filename of your custom theme in share/ansel/"
+#~ msgstr "Имя файла вашей собственной темы в share/ansel/"
 
 #~ msgid "jpeg quality of on-disk thumbnails"
 #~ msgstr "Качество сохраняемых в базе миниатюр JPEG"

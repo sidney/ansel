@@ -2,7 +2,7 @@
 #
 # Copyright (c) 2012, James C. McPherson. All rights reserved.
 #
-# This script takes an installed build of darktable
+# This script takes an installed build of ansel
 # (see https://www.darktable.org) and turns it into a new IPS package
 # ready for distribution
 #
@@ -22,7 +22,7 @@ PGREP=/usr/bin/pgrep
 AWK=/usr/bin/nawk
 GIT=/usr/bin/git
 
-REPODIR=/tmp/darktable.repo.$$
+REPODIR=/tmp/ansel.repo.$$
 # change MYPUBLISHER if you want
 MYPUBLISHER=
 CSET=`git rev-parse --short=15 --verify HEAD`
@@ -38,14 +38,14 @@ else
 fi
 
 
-if [ ! -f /opt/darktable/share/doc/darktable/README.Solaris ]; then
-    sudo cp README.Solaris /opt/darktable/share/doc/darktable
+if [ ! -f /opt/ansel/share/doc/ansel/README.Solaris ]; then
+    sudo cp README.Solaris /opt/ansel/share/doc/ansel
 fi
 
 # update the manifest...
 ${SED} -e"s,|CHANGESET|,$CSET,g" -e"s,|VERSION|,$VERSION,g" \
     -e"s,|SUFFIX|,$SUFFIX,g" -e"s,|RELEASE|,${RELEASE},g" \
-    < darktable-manifest.pkg5.base > manifest.$CSET
+    < ansel-manifest.pkg5.base > manifest.$CSET
 ${MKDIR} -p ${REPODIR}
 ${PKGREPO} create ${REPODIR}
 ${PKGREPO} add-publisher -s ${REPODIR} ${MYPUBLISHER:-JMCP}
@@ -57,10 +57,8 @@ ${PKGSEND} publish -s http://localhost:24602 --fmri-in-manifest \
 	-d / manifest.$CSET
 
 ${PKGRECV} -s http://localhost:24602 -d Darktable.$CSET.p5p \
-    -a "darktable/darktable$SUFFIX"
+    -a "ansel/ansel$SUFFIX"
 ${GZIP} -9 Darktable.$CSET.p5p
 
 # kill off the depotd:
 ${KILL} $( ${PGREP} -n pkg.depotd )
-
-

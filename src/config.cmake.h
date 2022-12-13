@@ -16,7 +16,7 @@ extern const char darktable_last_commit_year[];
 
 static const char *dt_supported_extensions[] __attribute__((unused)) = {"@DT_SUPPORTED_EXTENSIONS_STRING@", NULL};
 
-#define GETTEXT_PACKAGE "darktable"
+#define GETTEXT_PACKAGE "ansel"
 
 #cmakedefine DARKTABLE_LOCALEDIR "@REL_BIN_TO_LOCALEDIR@"
 #cmakedefine DARKTABLE_LIBDIR    "@REL_BIN_TO_LIBDIR@"
@@ -88,4 +88,3 @@ static const char *dt_supported_extensions[] __attribute__((unused)) = {"@DT_SUP
 // vim: shiftwidth=2 expandtab tabstop=2 cindent
 // kate: tab-indents: off; indent-width 2; replace-tabs on; indent-mode cstyle; remove-trailing-spaces modified;
 // clang-format on
-

@@ -5,15 +5,15 @@
 	<key>CFBundleDevelopmentRegion</key>
 	<string>English</string>
 	<key>CFBundleExecutable</key>
-	<string>darktable</string>
+	<string>ansel</string>
 	<key>CFBundleIconFile</key>
 	<string>Icons.icns</string>
 	<key>CFBundleIdentifier</key>
-	<string>org.darktable</string>
+	<string>org.ansel</string>
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleName</key>
-	<string>darktable</string>
+	<string>ansel</string>
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>

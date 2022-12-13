@@ -357,7 +357,7 @@ static char *_get_base_url()
 
   if(use_default_url)
   {
-    // want to use default URL, reset darktablerc
+    // want to use default URL, reset anselrc
     dt_conf_set_string("context_help/url", c_base_url);
     return g_strdup(c_base_url);
   }

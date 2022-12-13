@@ -15,7 +15,7 @@ Sat Apr 28 06:48:17 UTC 2012 - toganm@opensuse.org
     * New subtle denoise preset for equalizer
     * Various build fixes
     * Numerous other fixes
- 
+
 
 -------------------------------------------------------------------
 Thu Mar 15 07:52:17 UTC 2012 - toganm@opensuse.org
@@ -34,7 +34,7 @@ Thu Mar 15 07:52:17 UTC 2012 - toganm@opensuse.org
     * Canon EOS 1000D
     * Canon EOS 600D
     * Sony Alpha 390
-    * Fuji Finepix HS20EXR 
+    * Fuji Finepix HS20EXR
   + new and updated translations (we now have chinese!)
   + new image cache
     * faster concurrent access and insertion
@@ -57,7 +57,7 @@ Thu Mar 15 07:52:17 UTC 2012 - toganm@opensuse.org
 -------------------------------------------------------------------
 Tue Feb 28 12:06:27 UTC 2012 - fcrozat@suse.com
 
-- Add darktable-fix-deprecation.patch to fix glib deprecation.
+- Add ansel-fix-deprecation.patch to fix glib deprecation.
 
 -------------------------------------------------------------------
 Tue Nov  8 09:07:37 UTC 2011 - toganm@opensuse.org
@@ -98,7 +98,7 @@ Sun Sep 18 17:17:12 UTC 2011 - jengelh@medozas.de
 -------------------------------------------------------------------
 Tue Sep 13 22:36:51 UTC 2011 - toganm@opensuse.org
 
-- Added dbus-1-glib-devel to BuildRequires 
+- Added dbus-1-glib-devel to BuildRequires
 
 -------------------------------------------------------------------
 Sat Sep  3 13:13:43 UTC 2011 - toganm@opensuse.org
@@ -116,14 +116,14 @@ Sat Sep  3 13:13:43 UTC 2011 - toganm@opensuse.org
 -------------------------------------------------------------------
 Tue Jul 26 07:14:25 UTC 2011 - toganm@opensuse.org
 
-- Updated to bugfix release 0.9.1 
+- Updated to bugfix release 0.9.1
   + new rawspeed, dcraw, libraw
   + fixed various segfaults and deadlocks
   + the pipeline is now more real HDR (no more gamut clipping in
     between)
   + fixed a nasty bug which could cause complete loss of history
     for an image
-  + darktable-faster now plays nicely with darktablerc (non-gconf)
+  + ansel-faster now plays nicely with anselrc (non-gconf)
   + lots of opencl improvements
   + updated translations
   + second part of our GSoC: customizable keyboard shortcuts!
@@ -151,16 +151,16 @@ Tue Jul  5 13:56:48 UTC 2011 - toganm@opensuse.org
       bilateral filter)
     + changed images come with the darktable|changed tag
 
-- removed darktable-08 related patches as they are now in the upstream
+- removed ansel-08 related patches as they are now in the upstream
 - use RPM optflags
 -------------------------------------------------------------------
 Fri Jun 17 16:14:09 UTC 2011 - fcrozat@suse.com
 
-- Add darktable-0.8-unused_variables.patch and
-  darktable-0.8-clean_up_set_but_unused_variables.patch to fix
+- Add ansel-0.8-unused_variables.patch and
+  ansel-0.8-clean_up_set_but_unused_variables.patch to fix
   build with gcc 4.6
-- Add darktable-0.8-default_generic_optimizations.patch and
-  darktable-0.8-binary_package_build.patch: don't optimize build
+- Add ansel-0.8-default_generic_optimizations.patch and
+  ansel-0.8-binary_package_build.patch: don't optimize build
   for build system.
 - Ensure package is build with debuginfo.
 
@@ -173,7 +173,7 @@ Fri Jun 10 13:39:01 UTC 2011 - fcrozat@suse.com
 -------------------------------------------------------------------
 Thu Mar  3 23:20:59 UTC 2011 - toganm@opensuse.org
 
-- Fix building for x86_64  
+- Fix building for x86_64
 
 -------------------------------------------------------------------
 Wed Feb 23 16:45:28 UTC 2011 - fcrozat@novell.com
@@ -199,7 +199,7 @@ Wed Feb 23 16:45:28 UTC 2011 - fcrozat@novell.com
 -------------------------------------------------------------------
 Mon Dec 13 13:53:26 UTC 2010 - fcrozat@novell.com
 
-- Release 0.7.1 : 
+- Release 0.7.1 :
  * some more white balance presets
  * layout fixes for overlong profile names
  * styles now actually work
@@ -213,4 +213,3 @@ Tue Nov 23 16:04:01 UTC 2010 - bitshuffler@opensuse.org
 Wed Sep  1 17:52:38 UTC 2010 - bitshuffler@opensuse.org
 
 - Initial package
-

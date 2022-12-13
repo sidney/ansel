@@ -126,7 +126,7 @@ endif(CUPS_FOUND)
 
 # Add libs references
 foreach(module ${MODULES})
-	target_link_libraries(${module} lib_darktable)
+	target_link_libraries(${module} lib_ansel)
 endforeach(module)
 
 # Add installation target for each module
@@ -134,11 +134,11 @@ endforeach(module)
 #       in a better matching structure then just in lighttable directory.
 foreach(module ${MODULES})
     if (WIN32)
-      _detach_debuginfo (${module} ${CMAKE_INSTALL_LIBDIR}/darktable/plugins/lighttable)
+      _detach_debuginfo (${module} ${CMAKE_INSTALL_LIBDIR}/ansel/plugins/lighttable)
     else()
         set_target_properties(${module}
                               PROPERTIES
                               INSTALL_RPATH ${CMAKE_INSTALL_LIBDIR_RPATH})
     endif(WIN32)
-    install(TARGETS ${module} DESTINATION ${CMAKE_INSTALL_LIBDIR}/darktable/plugins/lighttable COMPONENT DTApplication)
+    install(TARGETS ${module} DESTINATION ${CMAKE_INSTALL_LIBDIR}/ansel/plugins/lighttable COMPONENT DTApplication)
 endforeach(module)

@@ -2800,7 +2800,7 @@ static gboolean pid_is_alive(int pid)
     long unsigned int n_filename = sizeof(wfilename);
     int ret = QueryFullProcessImageNameW(h, 0, wfilename, &n_filename);
     char *filename = g_utf16_to_utf8(wfilename, -1, NULL, NULL, NULL);
-    if(ret && n_filename > 0 && filename && g_str_has_suffix(filename, "darktable.exe"))
+    if(ret && n_filename > 0 && filename && g_str_has_suffix(filename, "ansel.exe"))
       pid_is_alive = TRUE;
     g_free(filename);
     CloseHandle(h);
@@ -2820,7 +2820,7 @@ static gboolean pid_is_alive(int pid)
 
     if(g_file_get_contents("", &contents, &length, NULL))
     {
-      if(strstr(contents, "darktable") == NULL)
+      if(strstr(contents, "ansel") == NULL)
       {
         pid_is_alive = FALSE;
       }
@@ -2945,7 +2945,7 @@ void ask_for_upgrade(const gchar *dbname, const gboolean has_gui)
                                                dbname);
 
   gboolean shall_we_update_the_db =
-    dt_gui_show_standalone_yes_no_dialog(_("darktable - schema migration"), label_text,
+    dt_gui_show_standalone_yes_no_dialog(_("ansel - schema migration"), label_text,
                                          _("close darktable"), _("upgrade database"));
 
   g_free(label_text);
@@ -3140,9 +3140,9 @@ start:
       fprintf(stderr, "`%s'!\n", dbname);
     else
       fprintf(stderr, "\n");
-    fprintf(stderr, "[init] maybe your %s/darktablerc is corrupt?\n", datadir);
+    fprintf(stderr, "[init] maybe your %s/anselrc is corrupt?\n", datadir);
     dt_loc_get_datadir(dbfilename_library, sizeof(dbfilename_library));
-    fprintf(stderr, "[init] try `cp %s/darktablerc %s/darktablerc'\n", dbfilename_library, datadir);
+    fprintf(stderr, "[init] try `cp %s/anselrc %s/anselrc'\n", dbfilename_library, datadir);
     sqlite3_close(db->handle);
     g_free(dbname);
     g_free(db->lockfile_data);
@@ -3256,7 +3256,7 @@ start:
 
       if(data_snap)
       {
-        dialog = gtk_dialog_new_with_buttons(_("darktable - error opening database"),
+        dialog = gtk_dialog_new_with_buttons(_("ansel - error opening database"),
                                             NULL,
                                             dflags,
                                             _("close darktable"),
@@ -3274,7 +3274,7 @@ start:
       }
       else
       {
-        dialog = gtk_dialog_new_with_buttons(_("darktable - error opening database"),
+        dialog = gtk_dialog_new_with_buttons(_("ansel - error opening database"),
                                             NULL,
                                             dflags,
                                             _("close darktable"),
@@ -3436,7 +3436,7 @@ start:
 
     if(data_snap)
     {
-      dialog = gtk_dialog_new_with_buttons(_("darktable - error opening database"),
+      dialog = gtk_dialog_new_with_buttons(_("ansel - error opening database"),
                                           NULL,
                                           dflags,
                                           _("close darktable"),
@@ -3454,7 +3454,7 @@ start:
     }
     else
     {
-      dialog = gtk_dialog_new_with_buttons(_("darktable - error opening database"),
+      dialog = gtk_dialog_new_with_buttons(_("ansel - error opening database"),
                                           NULL,
                                           dflags,
                                           _("close darktable"),
@@ -3807,7 +3807,7 @@ gboolean _ask_for_maintenance(const gboolean has_gui, const gboolean closing_tim
                                                  size_info, later_info);
 
     const gboolean shall_perform_maintenance =
-      dt_gui_show_standalone_yes_no_dialog(_("darktable - schema maintenance"), label_text,
+      dt_gui_show_standalone_yes_no_dialog(_("ansel - schema maintenance"), label_text,
                                            _("later"), _("yes"));
 
     g_free(label_text);
@@ -4686,4 +4686,3 @@ void dt_database_rollback_transaction(const struct dt_database_t *db)
 // vim: shiftwidth=2 expandtab tabstop=2 cindent
 // kate: tab-indents: off; indent-width 2; replace-tabs on; indent-mode cstyle; remove-trailing-spaces modified;
 // clang-format on
-

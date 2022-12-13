@@ -85,7 +85,8 @@ jobs:
       CMAKE_BUILD_TYPE: ${{ matrix.btype }}
       GENERATOR: ${{ matrix.generator }}
       TARGET: ${{ matrix.target }}
-      DARKTABLE_CLI: ${{ github.workspace }}/install/bin/darktable-cli
+      DARKTABLE_CLI: ${{ github.workspace }}/install/bin/ansel-cli
+
     steps:
       - name: Install compiler ${{ matrix.compiler.compiler }}
         run: |
@@ -158,8 +159,8 @@ jobs:
       - name: Check if it runs
         if: ${{ matrix.target != 'usermanual' }}
         run: |
-          ${INSTALL_PREFIX}/bin/darktable --version || true
-          ${INSTALL_PREFIX}/bin/darktable-cli \
+          ${INSTALL_PREFIX}/bin/ansel --version || true
+          ${INSTALL_PREFIX}/bin/ansel-cli \
                  --width 2048 --height 2048 \
                  --hq true --apply-custom-presets false \
                  "${SRC_DIR}/src/tests/integration/images/mire1.cr2" \
@@ -204,7 +205,7 @@ jobs:
       CMAKE_BUILD_TYPE: ${{ matrix.btype }}
       GENERATOR: ${{ matrix.generator }}
       TARGET: ${{ matrix.target }}
-      DARKTABLE_CLI: ${{ github.workspace }}/install/bin/darktable-cli
+      DARKTABLE_CLI: ${{ github.workspace }}/install/bin/ansel-cli
     steps:
       - name: Install compiler ${{ matrix.compiler.compiler }}
         run: |
@@ -278,8 +279,8 @@ jobs:
           ./src/.ci/ci-script.sh;
       - name: Check if it runs
         run: |
-          ${INSTALL_PREFIX}/bin/darktable --version || true
-          ${INSTALL_PREFIX}/bin/darktable-cli \
+          ${INSTALL_PREFIX}/bin/ansel --version || true
+          ${INSTALL_PREFIX}/bin/ansel-cli \
                  --width 2048 --height 2048 \
                  --hq true --apply-custom-presets false \
                  "${SRC_DIR}/src/tests/integration/images/mire1.cr2" \
@@ -399,10 +400,10 @@ jobs:
       - name: Check if it runs
         if: ${{success() && matrix.compiler.compiler == 'GNU' }} # LLVM build on windws for some reason breaks in imageio_rawspeed...
         run: |
-          $(cygpath ${INSTALL_PREFIX})/bin/darktable.exe --version || true
-          $(cygpath ${INSTALL_PREFIX})/bin/darktable-cli.exe --version || true
+          $(cygpath ${INSTALL_PREFIX})/bin/ansel.exe --version || true
+          $(cygpath ${INSTALL_PREFIX})/bin/ansel-cli.exe --version || true
           echo "Testing RUN!"
-          $(cygpath ${INSTALL_PREFIX})/bin/darktable-cli.exe \
+          $(cygpath ${INSTALL_PREFIX})/bin/ansel-cli.exe \
                  --verbose \
                  --width 2048 --height 2048 \
                  --hq true --apply-custom-presets false \
@@ -470,8 +471,8 @@ jobs:
           ./src/.ci/ci-script.sh;
       - name: Check if it runs
         run: |
-          ${INSTALL_PREFIX}/bin/darktable --version || true
-          ${INSTALL_PREFIX}/bin/darktable-cli \
+          ${INSTALL_PREFIX}/bin/ansel --version || true
+          ${INSTALL_PREFIX}/bin/ansel-cli \
                  --width 2048 --height 2048 \
                  --hq true --apply-custom-presets false \
                  "${SRC_DIR}/src/tests/integration/images/mire1.cr2" \

@@ -8,7 +8,7 @@
 //
 
 // this is ugly, but needed, because else compilation will fail with:
-// darktable/src/common/poison.h:16:20: error: poisoning existing macro "strncat" [-Werror]
+// ansel/src/common/poison.h:16:20: error: poisoning existing macro "strncat" [-Werror]
 //  #pragma GCC poison strncat  // use g_strncat
 #pragma GCC system_header
 
@@ -30,4 +30,3 @@
 // vim: shiftwidth=2 expandtab tabstop=2 cindent
 // kate: tab-indents: off; indent-width 2; replace-tabs on; indent-mode cstyle; remove-trailing-spaces modified;
 // clang-format on
-

@@ -305,7 +305,7 @@ int store(dt_imageio_module_storage_t *self, dt_imageio_module_data_t *sdata, co
       while(iter)
       {
         GList *next = g_list_next(iter);
-        if(g_str_has_prefix(iter->data, "darktable|"))
+        if(g_str_has_prefix(iter->data, "ansel|"))
         {
           g_free(iter->data);
           res_subj = g_list_delete_link(res_subj, iter);
@@ -453,4 +453,3 @@ int set_params(dt_imageio_module_storage_t *self, const void *params, const int 
 // vim: shiftwidth=2 expandtab tabstop=2 cindent
 // kate: tab-indents: off; indent-width 2; replace-tabs on; indent-mode cstyle; remove-trailing-spaces modified;
 // clang-format on
-

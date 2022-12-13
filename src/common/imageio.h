@@ -58,7 +58,7 @@ typedef enum dt_imageio_levels_t
 gboolean dt_imageio_is_ldr(const char *filename);
 // checks that the image has a monochrome preview attached
 gboolean dt_imageio_has_mono_preview(const char *filename);
-// Set the darktable/mode/hdr tag
+// Set the ansel/mode/hdr tag
 void dt_imageio_set_hdr_tag(dt_image_t *img);
 // Update the tag for b&w workflow
 void dt_imageio_update_monochrome_workflow_tag(int32_t id, int mask);
@@ -122,4 +122,3 @@ dt_image_flags_t dt_imageio_get_type_from_extension(const char *extension);
 // vim: shiftwidth=2 expandtab tabstop=2 cindent
 // kate: tab-indents: off; indent-width 2; replace-tabs on; indent-mode cstyle; remove-trailing-spaces modified;
 // clang-format on
-

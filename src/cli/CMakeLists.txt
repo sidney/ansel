@@ -1,16 +1,16 @@
 include_directories(${DARKTABLE_BINDIR})
-add_executable(darktable-cli main.c)
+add_executable(ansel-cli main.c)
 
-set_target_properties(darktable-cli PROPERTIES LINKER_LANGUAGE C)
-target_link_libraries(darktable-cli lib_darktable whereami)
+set_target_properties(ansel-cli PROPERTIES LINKER_LANGUAGE C)
+target_link_libraries(ansel-cli lib_ansel whereami)
 
 if (WIN32)
-  _detach_debuginfo (darktable-cli bin)
+  _detach_debuginfo (ansel-cli bin)
 else()
-    set_target_properties(darktable-cli
+    set_target_properties(ansel-cli
                           PROPERTIES
                           INSTALL_RPATH ${CMAKE_INSTALL_LIBDIR_RPATH}
                           RUNTIME_OUTPUT_DIRECTORY ${DARKTABLE_BINDIR})
 endif(WIN32)
 
-install(TARGETS darktable-cli DESTINATION ${CMAKE_INSTALL_BINDIR} COMPONENT DTApplication)
+install(TARGETS ansel-cli DESTINATION ${CMAKE_INSTALL_BINDIR} COMPONENT DTApplication)

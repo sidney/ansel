@@ -91,7 +91,7 @@ static void _dt_sigsegv_handler(int param)
   gboolean delete_file = FALSE;
   char datadir[PATH_MAX] = { 0 };
 
-  if((fout = g_file_open_tmp("darktable_bt_XXXXXX.txt", &name_used, NULL)) == -1)
+  if((fout = g_file_open_tmp("ansel_bt_XXXXXX.txt", &name_used, NULL)) == -1)
     fout = STDOUT_FILENO; // just print everything to stdout
 
   dprintf(fout, "this is %s reporting a segfault:\n\n", darktable_package_string);
@@ -152,7 +152,7 @@ static LONG WINAPI dt_toplevel_exception_handler(PEXCEPTION_POINTERS pExceptionI
   BOOL ok;
 
   // Find a filename for the backtrace file
-  if((fout = g_file_open_tmp("darktable_bt_XXXXXX.txt", &name_used, NULL)) == -1)
+  if((fout = g_file_open_tmp("ansel_bt_XXXXXX.txt", &name_used, NULL)) == -1)
     fout = STDOUT_FILENO; // just print everything to stdout
 
   FILE *fd = fdopen(fout, "wb");
@@ -267,4 +267,3 @@ void dt_set_signal_handlers()
 // vim: shiftwidth=2 expandtab tabstop=2 cindent
 // kate: tab-indents: off; indent-width 2; replace-tabs on; indent-mode cstyle; remove-trailing-spaces modified;
 // clang-format on
-

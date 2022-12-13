@@ -21,7 +21,7 @@
   Dependencies: libX11, libXrandr, liblcms2, libglib and optionally libcolord
   Compile with something like this:
     gcc -W -Wall -std=c99 `pkg-config --cflags --libs glib-2.0 lcms2 colord x11 xrandr` \
-        -DHAVE_X11 -DHAVE_COLORD -Ddarktable_package_version=\"'standalone'\" main.c -o darktable-cmstest
+        -DHAVE_X11 -DHAVE_COLORD -Ddarktable_package_version=\"'standalone'\" main.c -o ansel-cmstest
 */
 
 #ifdef HAVE_CONFIG_H
@@ -133,7 +133,7 @@ static gint sort_monitor_list(gconstpointer a, gconstpointer b)
 
 int main(int argc __attribute__((unused)), char *arg[] __attribute__((unused)))
 {
-  printf("darktable-cmstest version %s\n", darktable_package_version);
+  printf("ansel-cmstest version %s\n", darktable_package_version);
 #ifndef HAVE_X11
   printf("this executable doesn't do anything for non-X11 systems currently\n");
   return EXIT_FAILURE;
@@ -146,9 +146,9 @@ int main(int argc __attribute__((unused)), char *arg[] __attribute__((unused)))
 #endif // HAVE_COLORD
 
 #ifdef USE_COLORDGTK
-  printf("darktable itself was built with colord support enabled\n");
+  printf("ansel itself was built with colord support enabled\n");
 #else
-  printf("darktable itself was built without colord support\n");
+  printf("ansel itself was built without colord support\n");
 #endif // USE_COLORDGTK
 
   printf("\n");
@@ -498,4 +498,3 @@ end:
 // vim: shiftwidth=2 expandtab tabstop=2 cindent
 // kate: tab-indents: off; indent-width 2; replace-tabs on; indent-mode cstyle; remove-trailing-spaces modified;
 // clang-format on
-

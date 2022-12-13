@@ -16,16 +16,16 @@ If(CMAKE_SOURCE_DIR STREQUAL CMAKE_BINARY_DIR)
 endif(CMAKE_SOURCE_DIR STREQUAL CMAKE_BINARY_DIR)
 
 if(DEFINED PROJECT_VERSION)
-  project(darktable VERSION ${PROJECT_VERSION} LANGUAGES CXX C)
+  project(ansel VERSION ${PROJECT_VERSION} LANGUAGES CXX C)
 else()
   # Actual version string will be generated from git later
-  project(darktable VERSION 0 LANGUAGES CXX C)
+  project(ansel VERSION 0 LANGUAGES CXX C)
 endif()
 
 # Allow forcing the C/CPP compiler that is actually used during the compilation
 # to something other than what is used by the cmake run. This is useful when
 # the compiler for some reason breaks the initial cmake checks but works fine
-# for actually compiling darktable. This allows building darktable using
+# for actually compiling ansel. This allows building ansel using
 # afl-clang-fast achieving a >4x speedup in fuzzing.
 IF(DEFINED DT_FORCE_C_COMPILER)
   set(CMAKE_C_COMPILER ${DT_FORCE_C_COMPILER})
@@ -47,14 +47,14 @@ include(FeatureSummary)
 # resolve symbolic links into real path?
 get_filename_component(CMAKE_INSTALL_BINDIR_ABS "${CMAKE_INSTALL_FULL_BINDIR}" REALPATH "${CMAKE_INSTALL_PREFIX}")
 # get relative paths specific to the system
-file(RELATIVE_PATH REL_BIN_TO_LIBDIR    ${CMAKE_INSTALL_FULL_BINDIR} "${CMAKE_INSTALL_FULL_LIBDIR}/darktable")
+file(RELATIVE_PATH REL_BIN_TO_LIBDIR    ${CMAKE_INSTALL_FULL_BINDIR} "${CMAKE_INSTALL_FULL_LIBDIR}/ansel")
 file(RELATIVE_PATH REL_BIN_TO_SHAREDIR  ${CMAKE_INSTALL_FULL_BINDIR} "${CMAKE_INSTALL_FULL_DATADIR}")
 file(RELATIVE_PATH REL_BIN_TO_LOCALEDIR ${CMAKE_INSTALL_FULL_BINDIR} "${CMAKE_INSTALL_FULL_LOCALEDIR}")
-set(REL_BIN_TO_DATADIR  "${REL_BIN_TO_SHAREDIR}/darktable")
+set(REL_BIN_TO_DATADIR  "${REL_BIN_TO_SHAREDIR}/darktable") # Required by rawspeed-identify.cpp
 set(DARKTABLE_BINDIR    "${CMAKE_BINARY_DIR}/${CMAKE_INSTALL_BINDIR}")
 set(DARKTABLE_LIBDIR    "${DARKTABLE_BINDIR}/${REL_BIN_TO_LIBDIR}")
 set(DARKTABLE_SHAREDIR  "${DARKTABLE_BINDIR}/${REL_BIN_TO_SHAREDIR}")
-set(DARKTABLE_DATADIR   "${DARKTABLE_BINDIR}/${REL_BIN_TO_DATADIR}") # DATAROOTDIR == DATADIR # darktablerc, themes, icons, ... Cannot use ${CMAKE_BINDIR}/data because not everything resides there. Like icons (pixmaps)
+set(DARKTABLE_DATADIR   "${DARKTABLE_BINDIR}/${REL_BIN_TO_DATADIR}") # DATAROOTDIR == DATADIR # anselrc, themes, icons, ... Cannot use ${CMAKE_BINDIR}/data because not everything resides there. Like icons (pixmaps)
 set(DARKTABLE_LOCALEDIR "${DARKTABLE_BINDIR}/${REL_BIN_TO_LOCALEDIR}")
 
 # https://medium.com/@alasher/colored-c-compiler-output-with-ninja-clang-gcc-10bfe7f2b949
@@ -69,9 +69,9 @@ endif()
 # Whether to use relative paths for the build RPATH
 if (APPLE)
     set(CMAKE_MACOSX_RPATH ON)
-    set(CMAKE_INSTALL_LIBDIR_RPATH @loader_path/../${CMAKE_INSTALL_LIBDIR}/darktable)
+    set(CMAKE_INSTALL_LIBDIR_RPATH @loader_path/../${CMAKE_INSTALL_LIBDIR}/ansel)
 else()
-    set(CMAKE_INSTALL_LIBDIR_RPATH $ORIGIN/../${CMAKE_INSTALL_LIBDIR}/darktable)
+    set(CMAKE_INSTALL_LIBDIR_RPATH $ORIGIN/../${CMAKE_INSTALL_LIBDIR}/ansel)
 endif()
 
 if (USE_OPENMP)
@@ -263,7 +263,7 @@ endif()
 include(compiler-warnings)
 include(windows-macros)
 
-# we need some external programs for building darktable
+# we need some external programs for building ansel
 message(STATUS "Looking for external programs")
 set(EXTERNAL_PROGRAMS_FOUND 1)
 
@@ -276,7 +276,7 @@ else(${perl_BIN} STREQUAL "perl_BIN-NOTFOUND")
   message(STATUS "Found perl")
 endif(${perl_BIN} STREQUAL "perl_BIN-NOTFOUND")
 
-# we need intltool-merge for darktable.desktop
+# we need intltool-merge for ansel.desktop
 find_program(intltool_merge_BIN intltool-merge)
 if(${intltool_merge_BIN} STREQUAL "intltool_merge_BIN-NOTFOUND")
   message(STATUS "Missing intltool-merge")
@@ -285,21 +285,21 @@ else(${intltool_merge_BIN} STREQUAL "intltool_merge_BIN-NOTFOUND")
   message(STATUS "Found intltool-merge")
 endif(${intltool_merge_BIN} STREQUAL "intltool_merge_BIN-NOTFOUND")
 
-# we need desktop-file-validate to check darktable.desktop
+# we need desktop-file-validate to check ansel.desktop
 find_program(desktop_file_validate_BIN desktop-file-validate)
 if(${desktop_file_validate_BIN} STREQUAL "desktop_file_validate_BIN-NOTFOUND")
-  message(STATUS "Missing desktop-file-validate, problems in darktable.desktop might go unnoticed")
+  message(STATUS "Missing desktop-file-validate, problems in ansel.desktop might go unnoticed")
   set(VALIDATE_DESKTOP_FILE 0)
 else(${desktop_file_validate_BIN} STREQUAL "desktop_file_validate_BIN-NOTFOUND")
   message(STATUS "Found desktop-file-validate")
   set(VALIDATE_DESKTOP_FILE 1)
 endif(${desktop_file_validate_BIN} STREQUAL "desktop_file_validate_BIN-NOTFOUND")
 
-# we need appstream-util to check darktable.appdata.xml
+# we need appstream-util to check ansel.appdata.xml
 if(VALIDATE_APPDATA_FILE)
   find_program(appstream_util_BIN appstream-util)
   if(${appstream_util_BIN} STREQUAL "appstream_util_BIN-NOTFOUND")
-    message(STATUS "Missing appstream-util, problems in darktable.appdata.xml might go unnoticed")
+    message(STATUS "Missing appstream-util, problems in ansel.appdata.xml might go unnoticed")
     set(VALIDATE_APPDATA_FILE OFF)
   else(${appstream_util_BIN} STREQUAL "appstream_util_BIN-NOTFOUND")
     message(STATUS "Found appstream-util")
@@ -370,7 +370,7 @@ else(${jsonschema_BIN} STREQUAL "jsonschema_BIN-NOTFOUND")
   set(VALIDATE_JSON 1)
 endif(${jsonschema_BIN} STREQUAL "jsonschema_BIN-NOTFOUND")
 
-# we need an XSLT interpreter to generate preferences_gen.h and darktablerc
+# we need an XSLT interpreter to generate preferences_gen.h and anselrc
 find_program(Xsltproc_BIN xsltproc)
 if(${Xsltproc_BIN} STREQUAL "Xsltproc_BIN-NOTFOUND")
   message(STATUS "Missing xsltproc")
@@ -504,7 +504,7 @@ add_subdirectory(tools "${DARKTABLE_DATADIR}/tools")
 # that fixup_bundle will run _after_ all files has been installed
 add_subdirectory(packaging)
 
-include(cmake/darktable-packaging.cmake)
+include(cmake/ansel-packaging.cmake)
 
 # uninstall target
 configure_file(

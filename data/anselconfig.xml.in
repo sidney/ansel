@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<!DOCTYPE dtconfiglist SYSTEM "darktableconfig.dtd">
+<!DOCTYPE dtconfiglist SYSTEM "anselconfig.dtd">
 <dtconfiglist>
   <dtconfig>
     <name>themes/usercss</name>
@@ -93,7 +93,7 @@
     <type>string</type>
     <default>library.db</default>
     <shortdescription>database location</shortdescription>
-    <longdescription>filename relative to ~/.config/darktable or starting with a slash (needs a restart).</longdescription>
+    <longdescription>filename relative to ~/.config/ansel or starting with a slash (needs a restart).</longdescription>
   </dtconfig>
   <dtconfig>
     <name>storage/piwigo/last_album</name>
@@ -139,7 +139,7 @@
     </type>
     <default>once a week</default>
     <shortdescription>create database snapshot</shortdescription>
-    <longdescription>database snapshots are created right before closing darktable. options allow you to choose how often to make snapshots:\nnever - simply don't do snapshots. that way the only snapshots done are mandatory version-upgrade snapshots\nonce a month - create snapshot if a month has passed since last snapshot\nonce a week - create snapshot if 7 days had passed since last snapshot\nonce a day - create snapshot if over 24h passed since last snapshot\non close - create snapshot every time darktable is closed</longdescription>
+    <longdescription>database snapshots are created right before closing ansel. options allow you to choose how often to make snapshots:\nnever - simply don't do snapshots. that way the only snapshots done are mandatory version-upgrade snapshots\nonce a month - create snapshot if a month has passed since last snapshot\nonce a week - create snapshot if 7 days had passed since last snapshot\nonce a day - create snapshot if over 24h passed since last snapshot\non close - create snapshot every time ansel is closed</longdescription>
   </dtconfig>
   <dtconfig prefs="storage" section="database">
     <name>database/keep_snapshots</name>
@@ -188,7 +188,7 @@
     <default>true</default>
     <shortdescription>do not show april 1st game</shortdescription>
   </dtconfig>
-<!-- be sure to keep the code in sync when changing this enum, see common/darktable.c void dt_get_sysresource_level() -->
+<!-- be sure to keep the code in sync when changing this enum, see common/ansel.c void dt_get_sysresource_level() -->
   <dtconfig prefs="processing" section="cpugpu">
     <name>resourcelevel</name>
     <type>
@@ -200,22 +200,22 @@
       </enum>
     </type>
     <default>default</default>
-    <shortdescription>darktable resources</shortdescription>
-    <longdescription>defines how much darktable may take from your system resources.\n - default: darktable takes ~50% of your systems resources and gives darktable enough to be still performant.\n - small: should be used if you are simultaneously running applications taking large parts of your systems memory or opencl/gl applications like games or hugin.\n - large: is the best option if you are mainly using darktable and want it to take most of your systems resources for performance.\n - unrestricted: should only be used for developing extremely large images as darktable will take all of your systems resources and thus might lead to swapping and unexpected performance drops. use with caution and not recommended for general use!</longdescription>
+    <shortdescription>ansel resources</shortdescription>
+    <longdescription>defines how much ansel may take from your system resources.\n - default: ansel takes ~50% of your systems resources and gives ansel enough to be still performant.\n - small: should be used if you are simultaneously running applications taking large parts of your systems memory or opencl/gl applications like games or hugin.\n - large: is the best option if you are mainly using ansel and want it to take most of your systems resources for performance.\n - unrestricted: should only be used for developing extremely large images as ansel will take all of your systems resources and thus might lead to swapping and unexpected performance drops. use with caution and not recommended for general use!</longdescription>
   </dtconfig>
   <dtconfig prefs="processing" section="cpugpu">
     <name>cache_disk_backend</name>
     <type>bool</type>
     <default>true</default>
     <shortdescription>enable disk backend for thumbnail cache</shortdescription>
-    <longdescription>if enabled, write thumbnails to disk (.cache/darktable/) when evicted from the memory cache. note that this can take a lot of memory (several gigabytes for 20k images) and will never delete cached thumbnails again. it's safe though to delete these manually, if you want. light table performance will be increased greatly when browsing a lot. to generate all thumbnails of your entire collection offline, run 'darktable-generate-cache'.</longdescription>
+    <longdescription>if enabled, write thumbnails to disk (.cache/ansel/) when evicted from the memory cache. note that this can take a lot of memory (several gigabytes for 20k images) and will never delete cached thumbnails again. it's safe though to delete these manually, if you want. light table performance will be increased greatly when browsing a lot. to generate all thumbnails of your entire collection offline, run 'ansel-generate-cache'.</longdescription>
   </dtconfig>
   <dtconfig prefs="processing" section="cpugpu">
     <name>cache_disk_backend_full</name>
     <type>bool</type>
     <default>false</default>
     <shortdescription>enable disk backend for full preview cache</shortdescription>
-    <longdescription>if enabled, write full preview to disk (.cache/darktable/) when evicted from the memory cache. note that this can take a lot of memory (several gigabytes for 20k images) and will never delete cached thumbnails again. it's safe though to delete these manually, if you want. light table performance will be increased greatly when zooming image in full preview mode.</longdescription>
+    <longdescription>if enabled, write full preview to disk (.cache/ansel/) when evicted from the memory cache. note that this can take a lot of memory (several gigabytes for 20k images) and will never delete cached thumbnails again. it's safe though to delete these manually, if you want. light table performance will be increased greatly when zooming image in full preview mode.</longdescription>
   </dtconfig>
   <dtconfig>
     <name>cache_color_managed</name>
@@ -243,7 +243,7 @@
     <type>string</type>
     <default></default>
     <shortdescription>checksum representing the setup of opencl devices on this computer</shortdescription>
-    <longdescription>darktable re-checks the performance benchmarks of your system in case your setup has changed, which is indicated by a change versus the stored checksum in this config variable; darktable de-activates opencl if the GPU benchmark lies below the one of the CPU; initial value is the empty string; set to OFF if you want to deactivate any automatic checks and prefer to do all configurations manually.</longdescription>
+    <longdescription>ansel re-checks the performance benchmarks of your system in case your setup has changed, which is indicated by a change versus the stored checksum in this config variable; ansel de-activates opencl if the GPU benchmark lies below the one of the CPU; initial value is the empty string; set to OFF if you want to deactivate any automatic checks and prefer to do all configurations manually.</longdescription>
   </dtconfig>
   <dtconfig>
     <name>pixelpipe_synchronization_timeout</name>
@@ -283,7 +283,7 @@
     <type>bool</type>
     <default>false</default>
     <shortdescription>omit hierarchy in simple tag lists</shortdescription>
-    <longdescription>when creating XMP file the hierarchical tags are also added as a simple list of non-hierarchical ones to make them visible to some other programs. when this option is checked darktable will only include their last part and ignore the rest. so 'foo|bar|baz' will only add 'baz'.</longdescription>
+    <longdescription>when creating XMP file the hierarchical tags are also added as a simple list of non-hierarchical ones to make them visible to some other programs. when this option is checked ansel will only include their last part and ignore the rest. so 'foo|bar|baz' will only add 'baz'.</longdescription>
   </dtconfig>
   <dtconfig dialog="collect">
     <name>plugins/lighttable/tagging/no_uncategorized</name>
@@ -356,7 +356,7 @@
     <type>string</type>
     <default/>
     <shortdescription>system library with OpenCL runtime</shortdescription>
-    <longdescription>OpenCL runtime library is normally detected automatically by darktable. if your OpenCL runtime is at an unusual place and cannot be detected, enter the full pathname here. leave empty for default behavior.</longdescription>
+    <longdescription>OpenCL runtime library is normally detected automatically by ansel. if your OpenCL runtime is at an unusual place and cannot be detected, enter the full pathname here. leave empty for default behavior.</longdescription>
   </dtconfig>
   <dtconfig prefs="security" section="general">
     <name>ask_before_remove</name>
@@ -494,7 +494,7 @@
   <dtconfig>
     <name>plugins/capture/storage/basedirectory</name>
     <type>string</type>
-    <default>$(PICTURES_FOLDER)/darktable</default>
+    <default>$(PICTURES_FOLDER)/ansel</default>
     <shortdescription>path of storage for captured images</shortdescription>
     <longdescription/>
   </dtconfig>
@@ -1527,7 +1527,7 @@
     <name>plugins/lighttable/tagging/dttags</name>
     <type>bool</type>
     <default>false</default>
-    <shortdescription>whether to show darktable internal tags</shortdescription>
+    <shortdescription>whether to show ansel internal tags</shortdescription>
     <longdescription/>
   </dtconfig>
   <dtconfig>
@@ -1757,7 +1757,7 @@
     <type>bool</type>
     <default>false</default>
     <shortdescription>scroll to utility modules when expanded/collapsed</shortdescription>
-    <longdescription>when this option is enabled then darktable will try to scroll the module to the top of the visible list</longdescription>
+    <longdescription>when this option is enabled then ansel will try to scroll the module to the top of the visible list</longdescription>
   </dtconfig>
   <dtconfig>
     <name>lighttable/ui/preview/bottom_visible</name>
@@ -2073,21 +2073,21 @@
   <dtconfig>
     <name>plugins/imageio/storage/disk/file_directory</name>
     <type>string</type>
-    <default>$(FILE_FOLDER)/darktable_exported/$(FILE_NAME)</default>
+    <default>$(FILE_FOLDER)/ansel_exported/$(FILE_NAME)</default>
     <shortdescription/>
     <longdescription/>
   </dtconfig>
   <dtconfig>
     <name>plugins/imageio/storage/gallery/file_directory</name>
     <type>string</type>
-    <default>$(HOME)/darktable_gallery/img_$(SEQUENCE)</default>
+    <default>$(HOME)/ansel_gallery/img_$(SEQUENCE)</default>
     <shortdescription/>
     <longdescription/>
   </dtconfig>
   <dtconfig>
     <name>plugins/imageio/storage/gallery/title</name>
     <type>string</type>
-    <default>darktable gallery</default>
+    <default>ansel gallery</default>
     <shortdescription/>
     <longdescription/>
   </dtconfig>
@@ -2101,7 +2101,7 @@
   <dtconfig>
     <name>context_help/url</name>
     <type>string</type>
-    <default>https://docs.darktable.org/usermanual/</default>
+    <default>https://docs.ansel.org/usermanual/</default>
     <shortdescription/>
     <longdescription/>
   </dtconfig>

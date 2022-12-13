@@ -98,7 +98,7 @@ gboolean dt_pwstorage_libsecret_set(const backend_libsecret_context_t *context, 
     return FALSE;
   }
 
-  gchar *label = g_strdup_printf("darktable@%s", slot);
+  gchar *label = g_strdup_printf("ansel@%s", slot);
   if(!label)
   {
     g_free(secret_value);
@@ -244,4 +244,3 @@ static GHashTable *secret_to_attributes(gchar *secret)
 // vim: shiftwidth=2 expandtab tabstop=2 cindent
 // kate: tab-indents: off; indent-width 2; replace-tabs on; indent-mode cstyle; remove-trailing-spaces modified;
 // clang-format on
-

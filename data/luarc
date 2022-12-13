@@ -29,7 +29,7 @@ _scripts_install.event_registered = false
 
 _scripts_install.dt = require 'darktable'
 
--- check for gui so that we don't hang darktable-cli
+-- check for gui so that we don't hang ansel-cli
 
 if _scripts_install.dt.configuration.has_gui  then
 
@@ -60,7 +60,7 @@ if _scripts_install.dt.configuration.has_gui  then
     _scripts_install.not_installed = true
     --_scripts_install.dt.print_log("checking for lua directory")
 
-    -- check for lua scripts directory 
+    -- check for lua scripts directory
     if _scripts_install.dt.configuration.running_os == "windows" then
       _scripts_install.dir_cmd = "dir /b "
       _scripts_install.which_cmd = "where "
@@ -73,7 +73,7 @@ if _scripts_install.dt.configuration.has_gui  then
     -- _scripts_install.dt.print_log("checking for scripts")
 
     _scripts_install.p = io.popen(_scripts_install.dir_cmd .. _scripts_install.dt.configuration.config_dir)
-    for line in _scripts_install.p:lines() do 
+    for line in _scripts_install.p:lines() do
       -- _scripts_install.dt.print_log("line is " .. line)
       if string.match(line, "^lua$") then
         _scripts_install.not_installed = false
@@ -95,7 +95,7 @@ if _scripts_install.dt.configuration.has_gui  then
         -- check for a luarc file and move it
       function _scripts_install.backup_luarc()
         local p = io.popen(_scripts_install.dir_cmd .. _scripts_install.dt.configuration.config_dir)
-        for line in p:lines() do 
+        for line in p:lines() do
           if string.match(line, "^luarc$") then
             if _scripts_install.dt.configuration.running_os == "windows" then
               os.execute("rename " .. _scripts_install.dt.configuration.config_dir .. "/luarc " .. _scripts_install.dt.configuration.config_dir .. "/luarc.old")
@@ -144,7 +144,7 @@ if _scripts_install.dt.configuration.has_gui  then
           -- _scripts_install.dt.print_log("with command " .. _scripts_install.which_cmd .. _scripts_install.git_cmd)
 
           _scripts_install.p = io.popen(_scripts_install.which_cmd .. _scripts_install.git_cmd)
-          for line in _scripts_install.p:lines() do 
+          for line in _scripts_install.p:lines() do
             if string.match(line, _scripts_install.git_cmd) then
               -- _scripts_install.dt.print_log("got a match")
               _scripts_install.git_bin = line
@@ -162,7 +162,7 @@ if _scripts_install.dt.configuration.has_gui  then
           if _scripts_install.dt.configuration.running_os ~= "windows" then
             _scripts_install.require_string = "'" .. _scripts_install.require_string .. "'"
           end
-          
+
           _scripts_install.backup_luarc()
           _scripts_install.dt.print(_("lua scripts installing"))
           os.execute("\"" .. _scripts_install.git_bin .. "\" " .. "clone https://github.com/darktable-org/lua-scripts.git " .. _scripts_install.dt.configuration.config_dir .. "/lua")
@@ -204,7 +204,7 @@ if _scripts_install.dt.configuration.has_gui  then
       if not _scripts_install.dt.preferences.read("_scripts_install", "initialized", "bool") then
 
         _scripts_install.widgets["message"] = _scripts_install.dt.new_widget("text_view"){
-          text = _("Choose an action below.\n\n'install scripts' installs the lua scripts from\nthe darktable ") .. 
+          text = _("Choose an action below.\n\n'install scripts' installs the lua scripts from\nthe darktable ") ..
           _("lua-scripts repository\n\n'remind me later' will cause this module to\nreappear every 5th ") ..
           _("darktable is restarted\n\n'dont show again' will cause this module to\nnot be shown again ") ..
           _("for those who do\nnot wish to install the scripts\n\n"),
@@ -217,8 +217,8 @@ if _scripts_install.dt.configuration.has_gui  then
         label = _("select action"),
         tooltip = _("select action to perform"),
         selected = 1,
-        _("install scripts"), 
-        _("remind me later"), 
+        _("install scripts"),
+        _("remind me later"),
         _("don't show again"),
       }
       table.insert(_scripts_install.display_widgets, _scripts_install.widgets["choice"])

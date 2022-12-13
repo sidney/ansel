@@ -181,7 +181,7 @@ Newer versions are always compatible with older edits, but newer edits are gener
 not compatible with older versions.
 
 darktable automatically backs up the library database when a new version causes it to be upgraded
-(in `~/.config/darktable/library.db-pre-3.0.0` for example), so
+(in `~/.config/ansel/library.db-pre-3.0.0` for example), so
 you can revert to the previous release by restoring this backup if needed
 (simply rename it to `library.db`).
 
@@ -342,20 +342,20 @@ git submodule update --init
 #### Easy way
 
 WARNING: If you have previously built darktable, don't forget to first completely remove (`rm -R`) the `build`
-and `/opt/darktable` directories to avoid conflicting files from different versions. Many weird behaviours and transient
+and `/opt/ansel` directories to avoid conflicting files from different versions. Many weird behaviours and transient
 bugs have been reported that can be traced to the build cache not properly invalidating the changed dependencies, so
 the safest way is to completely remove previously built binaries and start again from scratch.
 
 darktable provides a shell script that automatically takes care of building on Linux and macOS for classic cases in a single command.
 
 ```bash
-./build.sh --prefix /opt/darktable --build-type Release --install --sudo --clean-all
+./build.sh --prefix /opt/ansel --build-type Release --install --sudo --clean-all
 ```
 
 If you want to install a test version alongside your regular/stable version, change the install prefix:
 
 ```bash
-./build.sh --prefix /opt/darktable-test --build-type Release --install --sudo -clean-all
+./build.sh --prefix /opt/ansel-test --build-type Release --install --sudo -clean-all
 ```
 
 This builds the software for your architecture only, with:
@@ -369,7 +369,7 @@ This builds the software for your architecture only, with:
 If you want to have dartkable displayed along your other applications, you only need to add a symbolic link:
 
 ```bash
-ln -s /opt/darktable/share/applications/darktable.desktop /usr/share/applications/darktable.desktop
+ln -s /opt/ansel/share/applications/ansel.desktop /usr/share/applications/ansel.desktop
 ```
 
 Now, your custom-built darktable is ready to be used just like any pre-packaged software.
@@ -383,7 +383,7 @@ Alternatively, you can use a manual build to pass custom arguments.
 ```bash
 mkdir build/
 cd build/
-cmake -DCMAKE_INSTALL_PREFIX=/opt/darktable/ ..
+cmake -DCMAKE_INSTALL_PREFIX=/opt/ansel/ ..
 make
 sudo make install
 ```
@@ -399,7 +399,7 @@ See https://github.com/darktable-org/darktable/blob/master/packaging/windows/BUI
 To use a test version of darktable without damaging your regular/stable version's files and database, start darktable in a terminal with:
 
 ```bash
-/opt/darktable-test/bin/darktable --configdir "~/.config/darktable-test"
+/opt/ansel-test/bin/ansel --configdir "~/.config/darktable-test"
 ```
 
 and ensure that you set the option "write sidecar file for each image" to "never" in preferences -> storage -> XMP. This way,
@@ -408,10 +408,10 @@ the test/unstable one will save in `~/.config/darktable-test`, and the two versi
 
 #### Regular/stable version
 
-Simply launch it from your desktop application menu or, from a terminal, run `darktable` or `/opt/darktable/bin/darktable`. If the installation did not create a launcher in your applications menu, run:
+Simply launch it from your desktop application menu or, from a terminal, run `darktable` or `/opt/ansel/bin/ansel`. If the installation did not create a launcher in your applications menu, run:
 
 ```bash
-sudo ln -s /opt/darktable/share/applications/darktable.desktop /usr/share/applications/darktable.desktop
+sudo ln -s /opt/ansel/share/applications/ansel.desktop /usr/share/applications/ansel.desktop
 ```
 
 You may find darktable configuration files in `~/.config/darktable`.

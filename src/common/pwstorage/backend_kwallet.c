@@ -62,8 +62,8 @@
 
 #include <string.h>
 
-static const gchar *app_id = "darktable";
-static const gchar *kwallet_folder = "darktable credentials";
+static const gchar *app_id = "ansel";
+static const gchar *kwallet_folder = "ansel credentials";
 
 static const gchar *kwallet_service_name = "org.kde.kwalletd";
 static const gchar *kwallet_path = "/modules/kwalletd";
@@ -573,4 +573,3 @@ GHashTable *dt_pwstorage_kwallet_get(const backend_kwallet_context_t *context, c
 // vim: shiftwidth=2 expandtab tabstop=2 cindent
 // kate: tab-indents: off; indent-width 2; replace-tabs on; indent-mode cstyle; remove-trailing-spaces modified;
 // clang-format on
-

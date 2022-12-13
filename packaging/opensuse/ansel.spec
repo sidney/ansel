@@ -1,5 +1,5 @@
 #
-# spec file for package darktable
+# spec file for package ansel
 #
 # Copyright (c) 2012 SUSE LINUX Products GmbH, Nuernberg, Germany.
 #
@@ -16,10 +16,10 @@
 #
 
 
-Name:           darktable
+Name:           ansel
 Version:        1.0.3
 Release:        0
-Url:            http://darktable.sourceforge.net
+Url:            http://ansel.sourceforge.net
 Source0:        %{name}-%{version}.tar.gz
 BuildRoot:      %{_tmppath}/%{name}-%{version}-build
 BuildRequires:  Mesa-devel
@@ -49,7 +49,7 @@ License:        GPL-3.0+
 Group:          Productivity/Graphics/Viewers
 
 %description
-darktable is a virtual lighttable and darkroom for photographers: it manages
+ansel is a virtual lighttable and darkroom for photographers: it manages
 your digital negatives in a database and lets you view them through a zoomable
 lighttable. it also enables you to develop raw images and enhance them.
 
@@ -74,24 +74,24 @@ cmake \
 cd build
 %make_install
 cd ..
-%suse_update_desktop_file darktable
+%suse_update_desktop_file ansel
 find %{buildroot}%{_libdir} -name "*.la" -delete
-%find_lang darktable
+%find_lang ansel
 
 %__mkdir_p %{buildroot}%{_defaultdocdir}
-%__mv %{buildroot}%{_datadir}/doc/darktable %{buildroot}%{_defaultdocdir}
+%__mv %{buildroot}%{_datadir}/doc/ansel %{buildroot}%{_defaultdocdir}
 
 %fdupes %{buildroot}
 
-%files -f darktable.lang
+%files -f ansel.lang
 %defattr(-,root,root)
 %doc doc/AUTHORS doc/TODO doc/LICENSE
-%{_bindir}/darktable
-%{_bindir}/darktable-cltest
-%{_libdir}/darktable
-%{_datadir}/applications/darktable.desktop
-%{_datadir}/darktable
-%{_datadir}/icons/hicolor/*/apps/darktable.*
-%{_mandir}/man1/darktable.1.*
+%{_bindir}/ansel
+%{_bindir}/ansel-cltest
+%{_libdir}/ansel
+%{_datadir}/applications/ansel.desktop
+%{_datadir}/ansel
+%{_datadir}/icons/hicolor/*/apps/ansel.*
+%{_mandir}/man1/ansel.1.*
 
 %changelog

@@ -35,53 +35,53 @@ endif(USE_LUA)
 # Install (and generate when necessary) other system shares
 #
 if(NOT WIN32)
-configure_file(${CMAKE_CURRENT_SOURCE_DIR}/darktable.desktop.in ${CMAKE_CURRENT_BINARY_DIR}/darktable.desktop.in)
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/ansel.desktop.in ${CMAKE_CURRENT_BINARY_DIR}/ansel.desktop.in)
 file(GLOB PO_FILES "${CMAKE_CURRENT_SOURCE_DIR}/../po/*.po")
 add_custom_command(
-		OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/darktable.desktop
-		SOURCE ${CMAKE_CURRENT_BINARY_DIR}/darktable.desktop.in
-		COMMAND sh -c "${intltool_merge_BIN} --desktop-style ${CMAKE_CURRENT_SOURCE_DIR}/../po ${CMAKE_CURRENT_BINARY_DIR}/darktable.desktop.in ${CMAKE_CURRENT_BINARY_DIR}/darktable.desktop"
-		MAIN_DEPENDENCY ${CMAKE_CURRENT_BINARY_DIR}/darktable.desktop.in
+		OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/ansel.desktop
+		SOURCE ${CMAKE_CURRENT_BINARY_DIR}/ansel.desktop.in
+		COMMAND sh -c "${intltool_merge_BIN} --desktop-style ${CMAKE_CURRENT_SOURCE_DIR}/../po ${CMAKE_CURRENT_BINARY_DIR}/ansel.desktop.in ${CMAKE_CURRENT_BINARY_DIR}/ansel.desktop"
+		MAIN_DEPENDENCY ${CMAKE_CURRENT_BINARY_DIR}/ansel.desktop.in
 		DEPENDS ${PO_FILES}
 )
-add_custom_target(darktable.desktop_file ALL DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/darktable.desktop)
+add_custom_target(ansel.desktop_file ALL DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/ansel.desktop)
 if(${VALIDATE_DESKTOP_FILE})
   add_custom_target(
-    validate_darktable_desktop ALL
-    COMMAND ${desktop_file_validate_BIN} --warn-kde ${CMAKE_CURRENT_BINARY_DIR}/darktable.desktop
-    DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/darktable.desktop
+    validate_ansel.desktop ALL
+    COMMAND ${desktop_file_validate_BIN} --warn-kde ${CMAKE_CURRENT_BINARY_DIR}/ansel.desktop
+    DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/ansel.desktop
     WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/
-    COMMENT "Checking validity of darktable.desktop"
+    COMMENT "Checking validity of ansel.desktop"
     )
-  add_dependencies(darktable.desktop_file validate_darktable_desktop)
+  add_dependencies(ansel.desktop_file validate_ansel.desktop)
 endif()
-install(FILES ${CMAKE_CURRENT_BINARY_DIR}/darktable.desktop DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/applications COMPONENT DTApplication)
+install(FILES ${CMAKE_CURRENT_BINARY_DIR}/ansel.desktop DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/applications COMPONENT DTApplication)
 endif(NOT WIN32)
 
 if(${VALIDATE_APPDATA_FILE})
   add_custom_command(
-    OUTPUT ${DARKTABLE_SHAREDIR}/metainfo/darktable.appdata.xml
-    SOURCE ${CMAKE_CURRENT_SOURCE_DIR}/darktable.appdata.xml.in
+    OUTPUT ${DARKTABLE_SHAREDIR}/metainfo/ansel.appdata.xml
+    SOURCE ${CMAKE_CURRENT_SOURCE_DIR}/ansel.appdata.xml.in
     COMMAND ${CMAKE_COMMAND} -E make_directory ${DARKTABLE_SHAREDIR}/metainfo
-    COMMAND sh -c "${intltool_merge_BIN} --xml-style ${CMAKE_CURRENT_SOURCE_DIR}/../po ${CMAKE_CURRENT_SOURCE_DIR}/darktable.appdata.xml.in ${DARKTABLE_SHAREDIR}/metainfo/darktable.appdata.xml"
-    COMMAND ${appstream_util_BIN} validate --nonet ${DARKTABLE_SHAREDIR}/metainfo/darktable.appdata.xml
-    MAIN_DEPENDENCY ${CMAKE_CURRENT_SOURCE_DIR}/darktable.appdata.xml.in
+    COMMAND sh -c "${intltool_merge_BIN} --xml-style ${CMAKE_CURRENT_SOURCE_DIR}/../po ${CMAKE_CURRENT_SOURCE_DIR}/ansel.appdata.xml.in ${DARKTABLE_SHAREDIR}/metainfo/ansel.appdata.xml"
+    COMMAND ${appstream_util_BIN} validate --nonet ${DARKTABLE_SHAREDIR}/metainfo/ansel.appdata.xml
+    MAIN_DEPENDENCY ${CMAKE_CURRENT_SOURCE_DIR}/ansel.appdata.xml.in
     DEPENDS ${PO_FILES}
   )
 else()
   add_custom_command(
-    OUTPUT ${DARKTABLE_SHAREDIR}/metainfo/darktable.appdata.xml
-    SOURCE ${CMAKE_CURRENT_SOURCE_DIR}/darktable.appdata.xml.in
+    OUTPUT ${DARKTABLE_SHAREDIR}/metainfo/ansel.appdata.xml
+    SOURCE ${CMAKE_CURRENT_SOURCE_DIR}/ansel.appdata.xml.in
     COMMAND ${CMAKE_COMMAND} -E make_directory ${DARKTABLE_SHAREDIR}/metainfo
-    COMMAND sh -c "${intltool_merge_BIN} --xml-style ${CMAKE_CURRENT_SOURCE_DIR}/../po ${CMAKE_CURRENT_SOURCE_DIR}/darktable.appdata.xml.in ${DARKTABLE_SHAREDIR}/metainfo/darktable.appdata.xml"
-    MAIN_DEPENDENCY ${CMAKE_CURRENT_SOURCE_DIR}/darktable.appdata.xml.in
+    COMMAND sh -c "${intltool_merge_BIN} --xml-style ${CMAKE_CURRENT_SOURCE_DIR}/../po ${CMAKE_CURRENT_SOURCE_DIR}/ansel.appdata.xml.in ${DARKTABLE_SHAREDIR}/metainfo/ansel.appdata.xml"
+    MAIN_DEPENDENCY ${CMAKE_CURRENT_SOURCE_DIR}/ansel.appdata.xml.in
     DEPENDS ${PO_FILES}
   )
 endif()
 
-add_custom_target(darktable.appdata_file ALL DEPENDS ${DARKTABLE_SHAREDIR}/metainfo/darktable.appdata.xml)
+add_custom_target(ansel.appdata_file ALL DEPENDS ${DARKTABLE_SHAREDIR}/metainfo/ansel.appdata.xml)
 
-install(FILES ${DARKTABLE_SHAREDIR}/metainfo/darktable.appdata.xml DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/metainfo COMPONENT DTApplication)
+install(FILES ${DARKTABLE_SHAREDIR}/metainfo/ansel.appdata.xml DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/metainfo COMPONENT DTApplication)
 
 #
 # Install watermarks
@@ -112,7 +112,7 @@ FILE(COPY noiseprofiles.json DESTINATION "${DARKTABLE_DATADIR}")
 install(FILES noiseprofiles.json DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/darktable COMPONENT DTApplication)
 
 #
-# Transform darktableconfig.xml into darktablerc
+# Transform anselconfig.xml into anselrc
 #
 
 set(DEFCONFIG_OPENCL "true")
@@ -125,7 +125,7 @@ if(APPLE)
   # OS X doesn't have aplay, but afplay should do
   set(DEFCONFIG_AUDIOPLAYER "afplay")
 endif(APPLE)
-configure_file(${CMAKE_CURRENT_SOURCE_DIR}/darktableconfig.dtd ${DARKTABLE_DATADIR}/darktableconfig.dtd COPYONLY)
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/anselconfig.dtd ${DARKTABLE_DATADIR}/anselconfig.dtd COPYONLY)
 
 # get_property(DT_PLUGIN_IOPS GLOBAL PROPERTY DT_PLUGIN_IOPS)
 get_property(DT_PLUGIN_IOPS_VISIBLE_BY_DEFAULT GLOBAL PROPERTY DT_PLUGIN_IOPS_VISIBLE_BY_DEFAULT)
@@ -142,50 +142,50 @@ foreach(DT_PLUGIN_IOP IN LISTS DT_PLUGIN_IOPS_VISIBLE_BY_DEFAULT)
   </dtconfig>")
 endforeach()
 
-configure_file(${CMAKE_CURRENT_SOURCE_DIR}/darktableconfig.xml.in ${CMAKE_CURRENT_BINARY_DIR}/darktableconfig.xml)
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/anselconfig.xml.in ${CMAKE_CURRENT_BINARY_DIR}/anselconfig.xml)
 
 if(USE_XMLLINT)
   add_custom_target(
-    validate_darktableconfig_xml ALL
-    COMMAND ${Xmllint_BIN} --nonet --valid --noout ${CMAKE_CURRENT_BINARY_DIR}/darktableconfig.xml
-    DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/darktableconfig.xml
+    validate_anselconfig_xml ALL
+    COMMAND ${Xmllint_BIN} --nonet --valid --noout ${CMAKE_CURRENT_BINARY_DIR}/anselconfig.xml
+    DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/anselconfig.xml
     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/
-    COMMENT "Checking validity of ${CMAKE_CURRENT_BINARY_DIR}/darktableconfig.xml"
+    COMMENT "Checking validity of ${CMAKE_CURRENT_BINARY_DIR}/anselconfig.xml"
   )
 endif(USE_XMLLINT)
 
 if(NOT ${Xsltproc_BIN} STREQUAL "Xsltproc_BIN-NOTFOUND")
   add_custom_command(
-    DEPENDS ${CMAKE_SOURCE_DIR}/tools/generate_darktablerc.xsl ${DARKTABLE_DATADIR}/darktableconfig.dtd ${CMAKE_CURRENT_BINARY_DIR}/darktableconfig.xml
-    OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/darktablerc
-    COMMAND ${Xsltproc_BIN} --nonet ${CMAKE_SOURCE_DIR}/tools/generate_darktablerc.xsl ${CMAKE_CURRENT_BINARY_DIR}/darktableconfig.xml > ${CMAKE_CURRENT_BINARY_DIR}/darktablerc
+    DEPENDS ${CMAKE_SOURCE_DIR}/tools/generate_anselrc.xsl ${DARKTABLE_DATADIR}/anselconfig.dtd ${CMAKE_CURRENT_BINARY_DIR}/anselconfig.xml
+    OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/anselrc
+    COMMAND ${Xsltproc_BIN} --nonet ${CMAKE_SOURCE_DIR}/tools/generate_anselrc.xsl ${CMAKE_CURRENT_BINARY_DIR}/anselconfig.xml > ${CMAKE_CURRENT_BINARY_DIR}/anselrc
   )
 else(NOT ${Xsltproc_BIN} STREQUAL "Xsltproc_BIN-NOTFOUND")
   if(NOT ${Saxon_BIN} STREQUAL "Saxon_BIN-NOTFOUND")
     add_custom_command(
-      DEPENDS ${CMAKE_SOURCE_DIR}/tools/generate_darktablerc.xsl ${DARKTABLE_DATADIR}/darktableconfig.dtd ${CMAKE_CURRENT_BINARY_DIR}/darktableconfig.xml
-      OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/darktablerc
-      COMMAND ${Saxon_BIN} ${CMAKE_CURRENT_BINARY_DIR}/darktableconfig.xml ${CMAKE_SOURCE_DIR}/tools/generate_darktablerc.xsl > ${CMAKE_CURRENT_BINARY_DIR}/darktablerc
+      DEPENDS ${CMAKE_SOURCE_DIR}/tools/generate_anselrc.xsl ${DARKTABLE_DATADIR}/anselconfig.dtd ${CMAKE_CURRENT_BINARY_DIR}/anselconfig.xml
+      OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/anselrc
+      COMMAND ${Saxon_BIN} ${CMAKE_CURRENT_BINARY_DIR}/anselconfig.xml ${CMAKE_SOURCE_DIR}/tools/generate_anselrc.xsl > ${CMAKE_CURRENT_BINARY_DIR}/anselrc
     )
   else(NOT ${Saxon_BIN} STREQUAL "Saxon_BIN-NOTFOUND")
-    message(FATAL_ERROR "Don't know how to generate darktablerc")
+    message(FATAL_ERROR "Don't know how to generate anselrc")
   endif(NOT ${Saxon_BIN} STREQUAL "Saxon_BIN-NOTFOUND")
 endif(NOT ${Xsltproc_BIN} STREQUAL "Xsltproc_BIN-NOTFOUND")
 
 add_custom_target(
-  darktablerc_file ALL
-  DEPENDS ${CMAKE_SOURCE_DIR}/tools/generate_darktablerc.xsl ${DARKTABLE_DATADIR}/darktableconfig.dtd ${CMAKE_CURRENT_BINARY_DIR}/darktableconfig.xml ${CMAKE_CURRENT_BINARY_DIR}/darktablerc
+  anselrc_file ALL
+  DEPENDS ${CMAKE_SOURCE_DIR}/tools/generate_anselrc.xsl ${DARKTABLE_DATADIR}/anselconfig.dtd ${CMAKE_CURRENT_BINARY_DIR}/anselconfig.xml ${CMAKE_CURRENT_BINARY_DIR}/anselrc
 )
 if(USE_XMLLINT)
-  add_dependencies(darktablerc_file validate_darktableconfig_xml)
+  add_dependencies(anselrc_file validate_anselconfig_xml)
 endif(USE_XMLLINT)
 
-# first of all install darktablerc file into share as template
+# first of all install anselrc file into share as template
 # postinst script should copy this into users homedirectory
 # $HOME/.config/darktable/darktable.rc
-install(FILES ${CMAKE_CURRENT_BINARY_DIR}/darktablerc DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/darktable COMPONENT DTApplication)
+install(FILES ${CMAKE_CURRENT_BINARY_DIR}/anselrc DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/darktable COMPONENT DTApplication)
 
 #
 # Install bash completion file. users/packagers can symlink that to /etc/bash_completion.d/
 #
-install(FILES darktable.bash DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/darktable COMPONENT DTApplication)
+install(FILES ansel.bash DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/darktable COMPONENT DTApplication)

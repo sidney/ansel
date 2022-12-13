@@ -112,7 +112,7 @@ darktable_t darktable;
 static int usage(const char *argv0)
 {
 #ifdef _WIN32
-  char *logfile = g_build_filename(g_get_user_cache_dir(), "darktable", "darktable-log.txt", NULL);
+  char *logfile = g_build_filename(g_get_user_cache_dir(), "ansel", "ansel-log.txt", NULL);
 #endif
   // clang-format off
   printf("usage: %s [options] [IMG_1234.{RAW,..}|image_folder/]\n", argv0);
@@ -483,7 +483,7 @@ int dt_init(int argc, char *argv[], const gboolean init_gui, const gboolean load
 
 #ifdef HAVE_OPENCL
   gboolean exclude_opencl = FALSE;
-  gboolean print_statistics = (strstr(argv[0], "darktable-cltest") == NULL);
+  gboolean print_statistics = (strstr(argv[0], "ansel-cltest") == NULL);
 #endif
 
 #ifdef USE_LUA
@@ -928,7 +928,7 @@ int dt_init(int argc, char *argv[], const gboolean init_gui, const gboolean load
 
   if(init_gui)
   {
-    // I doubt that connecting to dbus for darktable-cli makes sense
+    // I doubt that connecting to dbus for ansel-cli makes sense
     darktable.dbus = dt_dbus_init();
 
     // make sure that we have no stale global progress bar visible. thus it's run as early as possible
@@ -947,12 +947,12 @@ int dt_init(int argc, char *argv[], const gboolean init_gui, const gboolean load
   dt_exif_init();
   char datadir[PATH_MAX] = { 0 };
   dt_loc_get_user_config_dir(datadir, sizeof(datadir));
-  char darktablerc[PATH_MAX] = { 0 };
-  snprintf(darktablerc, sizeof(darktablerc), "%s/darktablerc", datadir);
+  char anselrc[PATH_MAX] = { 0 };
+  snprintf(anselrc, sizeof(anselrc), "%s/anselrc", datadir);
 
   // initialize the config backend. this needs to be done first...
   darktable.conf = (dt_conf_t *)calloc(1, sizeof(dt_conf_t));
-  dt_conf_init(darktable.conf, darktablerc, config_override);
+  dt_conf_init(darktable.conf, anselrc, config_override);
   g_slist_free_full(config_override, g_free);
 
   // set the interface language and prepare selection for prefs
@@ -1084,7 +1084,7 @@ int dt_init(int argc, char *argv[], const gboolean init_gui, const gboolean load
       4096,  32,  512, 1024,   // simple notebook with integrated graphics
   };
 
-  /* This is where the sync is to be done if the enum for pref resourcelevel in darktableconfig.xml.in is changed.
+  /* This is where the sync is to be done if the enum for pref resourcelevel in anselconfig.xml.in is changed.
      all values are fractions val/1024 of total memory (0-2) or available OpenCL memory
   */
   static int fractions[16] = {
@@ -1094,7 +1094,7 @@ int dt_init(int argc, char *argv[], const gboolean init_gui, const gboolean load
     16384, 1024, 128,  900, // unrestricted
   };
 
-  // Allow the settings for each UI performance level to be changed via darktablerc
+  // Allow the settings for each UI performance level to be changed via anselrc
   check_resourcelevel("resource_small", fractions, 0);
   check_resourcelevel("resource_default", fractions, 1);
   check_resourcelevel("resource_large", fractions, 2);
@@ -1327,7 +1327,7 @@ void dt_get_sysresource_level()
       If we want a new setting here, we must
         - add a string->level conversion here
         - add a line of fraction in int fractions[] or ref_resources[] above
-        - add a line in darktableconfig.xml.in if available via UI
+        - add a line in anselconfig.xml.in if available via UI
   */
   if(config)
   {

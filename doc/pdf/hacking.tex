@@ -66,14 +66,14 @@
 %\setkomafont{sectioning}{\sfdefault}
 
 
-\title{darktable Programmer's Guide}
+\title{ansel Programmer's Guide}
 \author{hanatos}
 
 \begin{document}
 
 \fbox{\includegraphics[width=\linewidth]{header12}}%
 \vspace*{-1em}%
-\section*{\hfill darktable Programmer's Guide}
+\section*{\hfill ansel Programmer's Guide}
 \hrule
 
 \vspace*{4\baselineskip}
@@ -115,7 +115,7 @@
   \item[film]
 \end{description}
 \begin{description}
-  \item[develop] this implements the darktable.
+  \item[develop] this implements the ansel.
   \item[pixelpipe]
   \item[image operation (iop) modules, aka plug-ins]
 \end{description}
@@ -138,8 +138,8 @@
 
   db $\rightarrow$ image struct, trigger imageio disk $\rightarrow$ image entry in db if miss,
                 metadata through libraw/magick
-  
- 
+
+
 \end{itemize}
 
 \paragraph{in mip cache}
@@ -148,7 +148,7 @@
 
       db $\rightarrow$ mip[0--4], trigger imageio disk $\rightarrow$ mip4 and mip4 $\rightarrow$ mip[0-3] if miss.
 
-  
+
       db $\rightarrow$ mipf, trigger mip4 $\rightarrow$ mipf or pixels $\rightarrow$ mipf if miss.
 \end{itemize}
 
@@ -184,7 +184,7 @@ The buffers are as follows:
     \code{DT\_IMAGE\_MIP0-4}. It stores a capped-size four float per pixel representation of the input image.
 
     This buffer is needed to reduce the overall mem requirements and still process multiple thumbnails of large images
-    in parallel. darktable rather stores and prefetches a few low-resolution \code{MIPF} buffers instead of full images.
+    in parallel. ansel rather stores and prefetches a few low-resolution \code{MIPF} buffers instead of full images.
 
     \code{MIPF} can never be explicitly loaded.
 
@@ -233,7 +233,7 @@ At the time of this writing, the main pixel pipeline stack is organised as follo
 \begin{tabular}{lrl}
 module name & priority & input color format \\
 \hline
-rawimport      &  100  &  - \\ 
+rawimport      &  100  &  - \\
 exposure       &  150  &  fff input color space \\
 temperature    &  200  &  fff input color space \\
 highlights     &  250  &  fff input color space \\

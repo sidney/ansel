@@ -19,18 +19,18 @@ configure_file(README.cmake.md README.md)
 install(TARGETS
             darktable-curve-tool
         RUNTIME DESTINATION
-            ${CMAKE_INSTALL_LIBEXECDIR}/darktable/tools)
+            ${CMAKE_INSTALL_LIBEXECDIR}/ansel/tools)
 
 install(PROGRAMS
             darktable-curve-tool-helper
         DESTINATION
-            ${CMAKE_INSTALL_LIBEXECDIR}/darktable/tools)
+            ${CMAKE_INSTALL_LIBEXECDIR}/ansel/tools)
 
 
 install(FILES
             plot.basecurve plot.tonecurve
         DESTINATION
-            ${CMAKE_INSTALL_DATAROOTDIR}/darktable/tools/basecurve/)
+            ${CMAKE_INSTALL_DATAROOTDIR}/ansel/tools/basecurve/)
 install(FILES
             ${CMAKE_CURRENT_BINARY_DIR}/README.md
         RENAME

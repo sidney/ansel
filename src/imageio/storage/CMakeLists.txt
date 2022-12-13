@@ -20,13 +20,13 @@ foreach(module ${MODULES})
 endforeach(module)
 
 foreach(module ${MODULES})
-    target_link_libraries(${module} lib_darktable)
+    target_link_libraries(${module} lib_ansel)
     if (WIN32)
-        _detach_debuginfo (${module} ${CMAKE_INSTALL_LIBDIR}/darktable/plugins/imageio/storage)
+        _detach_debuginfo (${module} ${CMAKE_INSTALL_LIBDIR}/ansel/plugins/imageio/storage)
     else()
         set_target_properties(${module}
                               PROPERTIES
                               INSTALL_RPATH ${CMAKE_INSTALL_LIBDIR_RPATH})
     endif(WIN32)
-    install(TARGETS ${module} DESTINATION ${CMAKE_INSTALL_LIBDIR}/darktable/plugins/imageio/storage COMPONENT DTApplication)
+    install(TARGETS ${module} DESTINATION ${CMAKE_INSTALL_LIBDIR}/ansel/plugins/imageio/storage COMPONENT DTApplication)
 endforeach(module)

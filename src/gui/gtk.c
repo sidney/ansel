@@ -162,7 +162,7 @@ static void _fullscreen_key_accel_callback(dt_action_t *action)
 #ifdef __APPLE__
   // workaround for GTK Quartz backend bug
   gtk_window_set_title(GTK_WINDOW(widget), widget == dt_ui_main_window(darktable.gui->ui)
-                                         ? "darktable" : _("darktable - darkroom preview"));
+                                         ? "ansel" : _("ansel - darkroom preview"));
 #endif
 }
 
@@ -895,7 +895,7 @@ int dt_gui_gtk_init(dt_gui_gtk_t *gui)
     g_strlcpy(gui->gtkrc, css_theme, sizeof(gui->gtkrc));
   }
   else
-    g_snprintf(gui->gtkrc, sizeof(gui->gtkrc), "darktable");
+    g_snprintf(gui->gtkrc, sizeof(gui->gtkrc), "ansel");
 
 #ifdef MAC_INTEGRATION
 #ifdef GTK_TYPE_OSX_APPLICATION
@@ -1217,7 +1217,7 @@ static void _init_widgets(dt_gui_gtk_t *gui)
 
   gtk_window_set_default_size(GTK_WINDOW(widget), DT_PIXEL_APPLY_DPI(900), DT_PIXEL_APPLY_DPI(500));
 
-  gtk_window_set_icon_name(GTK_WINDOW(widget), "darktable");
+  gtk_window_set_icon_name(GTK_WINDOW(widget), "ansel");
   gtk_window_set_title(GTK_WINDOW(widget), "Ansel");
 
   g_signal_connect(G_OBJECT(widget), "delete_event", G_CALLBACK(dt_gui_quit_callback), NULL);
@@ -2175,7 +2175,7 @@ gboolean dt_gui_show_standalone_yes_no_dialog(const char *title, const char *mar
   // themes not yet loaded, no CSS add some manual padding
   const int padding = darktable.themes ? 0 : 5;
 
-  gtk_window_set_icon_name(GTK_WINDOW(window), "darktable");
+  gtk_window_set_icon_name(GTK_WINDOW(window), "ansel");
   gtk_window_set_title(GTK_WINDOW(window), title);
   g_signal_connect(window, "destroy", G_CALLBACK(gtk_main_quit), NULL);
 
@@ -2257,7 +2257,7 @@ char *dt_gui_show_standalone_string_dialog(const char *title, const char *markup
   dt_osx_disallow_fullscreen(window);
 #endif
 
-  gtk_window_set_icon_name(GTK_WINDOW(window), "darktable");
+  gtk_window_set_icon_name(GTK_WINDOW(window), "ansel");
   gtk_window_set_title(GTK_WINDOW(window), title);
   g_signal_connect(window, "destroy", G_CALLBACK(gtk_main_quit), NULL);
 
@@ -2378,8 +2378,8 @@ void dt_gui_load_theme(const char *theme)
     {
       // fallback to default theme
       g_free(path);
-      path = g_build_filename(datadir, "themes", "darktable.css", NULL);
-      dt_conf_set_string("ui_last/theme", "darktable");
+      path = g_build_filename(datadir, "themes", "ansel.css", NULL);
+      dt_conf_set_string("ui_last/theme", "ansel");
     }
     else
       dt_conf_set_string("ui_last/theme", theme);

@@ -92,7 +92,7 @@ static void _new_connection(SoupServer *server, SoupMessage *msg, const char *pa
     goto end;
   }
 
-  char *page_title = g_strdup_printf(_("darktable » %s"), params->id);
+  char *page_title = g_strdup_printf(_("ansel » %s"), params->id);
   const char *title = _(params->id);
   const char *body = _("<h1>Sorry,</h1><p>something went wrong. Please try again.</p>");
 
@@ -146,7 +146,7 @@ dt_http_server_t *dt_http_server_create(const int *ports, const int n_ports, con
       return NULL;
     }
 
-    httpserver = soup_server_new(SOUP_SERVER_SERVER_HEADER, "darktable internal server", "interface",
+    httpserver = soup_server_new(SOUP_SERVER_SERVER_HEADER, "ansel internal server", "interface",
                                  httpaddress, NULL);
 
     if(httpserver) break;
@@ -163,7 +163,7 @@ dt_http_server_t *dt_http_server_create(const int *ports, const int n_ports, con
 #else
   dt_print(DT_DEBUG_CONTROL, "[http server] using the new libsoup api\n");
 
-  httpserver = soup_server_new(SOUP_SERVER_SERVER_HEADER, "darktable internal server", NULL);
+  httpserver = soup_server_new(SOUP_SERVER_SERVER_HEADER, "ansel internal server", NULL);
   if(httpserver == NULL)
   {
     fprintf(stderr, "error: couldn't create libsoup httpserver\n");
@@ -229,4 +229,3 @@ void dt_http_server_kill(dt_http_server_t *server)
 // vim: shiftwidth=2 expandtab tabstop=2 cindent
 // kate: tab-indents: off; indent-width 2; replace-tabs on; indent-mode cstyle; remove-trailing-spaces modified;
 // clang-format on
-

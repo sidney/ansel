@@ -7,7 +7,7 @@ include(CheckCXXSymbolExists)
 
 
 #
-# Add files for libdarktable
+# Add files for libansel
 #
 FILE(GLOB SOURCE_FILES
   "bauhaus/bauhaus.c"
@@ -197,8 +197,8 @@ if(WIN32)
   # add icon, version, ... resources for Windows executable
   configure_file("${CMAKE_SOURCE_DIR}/data/pixmaps/dt_logo_128x128.ico" "${CMAKE_BINARY_DIR}/data/pixmaps/dt_logo_128x128.ico" COPYONLY)
   SET(CMAKE_RC_COMPILE_OBJECT "<CMAKE_RC_COMPILER> -O coff <DEFINES> -i <SOURCE> -o <OBJECT>")
-  set(RESOURCE_OBJECT "${CMAKE_CURRENT_BINARY_DIR}/win/darktable.rc")
-  configure_file("${CMAKE_CURRENT_SOURCE_DIR}/win/darktable.rc.in" "${CMAKE_CURRENT_BINARY_DIR}/win/darktable.rc")
+  set(RESOURCE_OBJECT "${CMAKE_CURRENT_BINARY_DIR}/win/ansel.rc")
+  configure_file("${CMAKE_CURRENT_SOURCE_DIR}/win/ansel.rc.in" "${CMAKE_CURRENT_BINARY_DIR}/win/ansel.rc")
 endif(WIN32)
 
 set(SOURCES ${SOURCE_FILES} ${HEADER_FILES})
@@ -565,7 +565,7 @@ if(USE_ICU)
 endif(USE_ICU)
 
 #
-# Add HAVE_xxx defines used by darktable
+# Add HAVE_xxx defines used by ansel
 #
 
 if(LensFun_FOUND)
@@ -682,10 +682,10 @@ if(USE_LUA)
     list(APPEND LIBS ${Lua54_LDFLAGS})
   else()
     if(DONT_USE_INTERNAL_LUA)
-      message(STATUS "Lua support: System library for lua 5.4 not found (to use darktable's version use -DDONT_USE_INTERNAL_LUA=Off)")
+      message(STATUS "Lua support: System library for lua 5.4 not found (to use ansel's version use -DDONT_USE_INTERNAL_LUA=Off)")
       set(USE_LUA OFF)
     else(DONT_USE_INTERNAL_LUA)
-      message(STATUS "Lua support: System library not found (using darktable's version)")
+      message(STATUS "Lua support: System library not found (using ansel's version)")
       include_directories(${CMAKE_CURRENT_SOURCE_DIR}/external/lua/src)
       add_subdirectory(external/lua)
       list(APPEND LIBS lua)
@@ -868,29 +868,29 @@ endif()
 #
 if(NOT ${Xsltproc_BIN} STREQUAL "Xsltproc_BIN-NOTFOUND")
   add_custom_command(
-    DEPENDS ${CMAKE_SOURCE_DIR}/tools/generate_prefs.xsl ${CMAKE_SOURCE_DIR}/data/darktableconfig.dtd ${DARKTABLE_DATADIR}/darktableconfig.xml
+    DEPENDS ${CMAKE_SOURCE_DIR}/tools/generate_prefs.xsl ${CMAKE_SOURCE_DIR}/data/anselconfig.dtd ${DARKTABLE_DATADIR}/anselconfig.xml
     OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/preferences_gen.h
-    COMMAND ${Xsltproc_BIN} --nonet --stringparam HAVE_OPENCL ${HAVE_OPENCL} ${CMAKE_SOURCE_DIR}/tools/generate_prefs.xsl ${DARKTABLE_DATADIR}/darktableconfig.xml > ${CMAKE_CURRENT_BINARY_DIR}/preferences_gen.h
+    COMMAND ${Xsltproc_BIN} --nonet --stringparam HAVE_OPENCL ${HAVE_OPENCL} ${CMAKE_SOURCE_DIR}/tools/generate_prefs.xsl ${DARKTABLE_DATADIR}/anselconfig.xml > ${CMAKE_CURRENT_BINARY_DIR}/preferences_gen.h
     COMMENT "Generating preferences"
   )
   add_custom_command(
-    DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/../tools/generate_darktablerc_conf.xsl ${DARKTABLE_DATADIR}/darktableconfig.dtd ${DARKTABLE_DATADIR}/darktableconfig.xml
+    DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/../tools/generate_anselrc_conf.xsl ${DARKTABLE_DATADIR}/anselconfig.dtd ${DARKTABLE_DATADIR}/anselconfig.xml
     OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/conf_gen.h
-    COMMAND ${Xsltproc_BIN} --nonet --stringparam HAVE_OPENCL ${HAVE_OPENCL} ${CMAKE_CURRENT_SOURCE_DIR}/../tools/generate_darktablerc_conf.xsl ${DARKTABLE_DATADIR}/darktableconfig.xml > ${CMAKE_CURRENT_BINARY_DIR}/conf_gen.h
+    COMMAND ${Xsltproc_BIN} --nonet --stringparam HAVE_OPENCL ${HAVE_OPENCL} ${CMAKE_CURRENT_SOURCE_DIR}/../tools/generate_anselrc_conf.xsl ${DARKTABLE_DATADIR}/anselconfig.xml > ${CMAKE_CURRENT_BINARY_DIR}/conf_gen.h
     COMMENT "Generating configuration min/max/default/type"
   )
 else(NOT ${Xsltproc_BIN} STREQUAL "Xsltproc_BIN-NOTFOUND")
   if(NOT ${Saxon_BIN} STREQUAL "Saxon_BIN-NOTFOUND")
     add_custom_command(
-      DEPENDS ${CMAKE_SOURCE_DIR}/tools/generate_prefs.xsl ${CMAKE_SOURCE_DIR}/data/darktableconfig.dtd ${DARKTABLE_DATADIR}/darktableconfig.xml
+      DEPENDS ${CMAKE_SOURCE_DIR}/tools/generate_prefs.xsl ${CMAKE_SOURCE_DIR}/data/anselconfig.dtd ${DARKTABLE_DATADIR}/anselconfig.xml
       OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/preferences_gen.h
-      COMMAND ${Saxon_BIN} ${DARKTABLE_DATADIR}/darktableconfig.xml ${CMAKE_SOURCE_DIR}/tools/generate_prefs.xsl HAVE_OPENCL=${HAVE_OPENCL} > ${CMAKE_CURRENT_BINARY_DIR}/preferences_gen.h
+      COMMAND ${Saxon_BIN} ${DARKTABLE_DATADIR}/anselconfig.xml ${CMAKE_SOURCE_DIR}/tools/generate_prefs.xsl HAVE_OPENCL=${HAVE_OPENCL} > ${CMAKE_CURRENT_BINARY_DIR}/preferences_gen.h
       COMMENT "Generating preferences"
     )
     add_custom_command(
-      DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/../tools/generate_darktablerc_conf.xsl ${DARKTABLE_DATADIR}/darktableconfig.dtd ${DARKTABLE_DATADIR}/darktableconfig.xml
+      DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/../tools/generate_anselrc_conf.xsl ${DARKTABLE_DATADIR}/anselconfig.dtd ${DARKTABLE_DATADIR}/anselconfig.xml
       OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/conf_gen.h
-      COMMAND ${Saxon_BIN} ${DARKTABLE_DATADIR}/darktableconfig.xml ${CMAKE_CURRENT_SOURCE_DIR}/../tools/generate_darktablerc_conf.xsl HAVE_OPENCL=${HAVE_OPENCL} > ${CMAKE_CURRENT_BINARY_DIR}/conf_gen.h
+      COMMAND ${Saxon_BIN} ${DARKTABLE_DATADIR}/anselconfig.xml ${CMAKE_CURRENT_SOURCE_DIR}/../tools/generate_anselrc_conf.xsl HAVE_OPENCL=${HAVE_OPENCL} > ${CMAKE_CURRENT_BINARY_DIR}/conf_gen.h
       COMMENT "Generating configuration min/max/default/type"
     )
   else(NOT ${Saxon_BIN} STREQUAL "Saxon_BIN-NOTFOUND")
@@ -900,65 +900,65 @@ endif(NOT ${Xsltproc_BIN} STREQUAL "Xsltproc_BIN-NOTFOUND")
 
 add_custom_target(
   generate_preferences ALL
-  DEPENDS ${CMAKE_SOURCE_DIR}/tools/generate_prefs.xsl ${CMAKE_SOURCE_DIR}/data/darktableconfig.dtd ${DARKTABLE_DATADIR}/darktableconfig.xml ${CMAKE_CURRENT_BINARY_DIR}/preferences_gen.h
+  DEPENDS ${CMAKE_SOURCE_DIR}/tools/generate_prefs.xsl ${CMAKE_SOURCE_DIR}/data/anselconfig.dtd ${DARKTABLE_DATADIR}/anselconfig.xml ${CMAKE_CURRENT_BINARY_DIR}/preferences_gen.h
   WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
 )
 add_custom_target(
   generate_conf ALL
-  DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/../tools/generate_darktablerc_conf.xsl ${DARKTABLE_DATADIR}/darktableconfig.dtd ${DARKTABLE_DATADIR}/darktableconfig.xml ${CMAKE_CURRENT_BINARY_DIR}/conf_gen.h
+  DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/../tools/generate_anselrc_conf.xsl ${DARKTABLE_DATADIR}/anselconfig.dtd ${DARKTABLE_DATADIR}/anselconfig.xml ${CMAKE_CURRENT_BINARY_DIR}/conf_gen.h
   WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
 )
 if(USE_XMLLINT)
-  add_dependencies(generate_preferences validate_darktableconfig_xml generate_conf)
+  add_dependencies(generate_preferences validate_anselconfig_xml generate_conf)
 endif(USE_XMLLINT)
 
 #
-# build libdarktable
+# build libansel
 #
-add_library(lib_darktable SHARED ${DARKTABLE_BINDIR}/preferences_gen.h ${DARKTABLE_BINDIR}/version_gen.c ${SOURCES})
+add_library(lib_ansel SHARED ${DARKTABLE_BINDIR}/preferences_gen.h ${DARKTABLE_BINDIR}/version_gen.c ${SOURCES})
 
 # cmake implicitly sets GENERATED on the source file in the directory of the custom command
 # since this isn't the same directory we do have to manually set it
 set_source_files_properties(${DARKTABLE_BINDIR}/version_gen.c PROPERTIES GENERATED TRUE)
 
-add_dependencies(lib_darktable generate_conf)
-add_dependencies(lib_darktable generate_version)
-add_dependencies(lib_darktable generate_preferences)
+add_dependencies(lib_ansel generate_conf)
+add_dependencies(lib_ansel generate_version)
+add_dependencies(lib_ansel generate_preferences)
 
 if(APPLE)
-  set_target_properties(lib_darktable PROPERTIES MACOSX_RPATH TRUE)
+  set_target_properties(lib_ansel PROPERTIES MACOSX_RPATH TRUE)
 endif(APPLE)
-set_target_properties(lib_darktable PROPERTIES OUTPUT_NAME darktable)
-set_target_properties(lib_darktable PROPERTIES LINKER_LANGUAGE C)
+set_target_properties(lib_ansel PROPERTIES OUTPUT_NAME ansel)
+set_target_properties(lib_ansel PROPERTIES LINKER_LANGUAGE C)
 
 #
 # Link external libs
 #
 
 if(LIB_DEPS)
-  add_dependencies(lib_darktable ${LIB_DEPS})
+  add_dependencies(lib_ansel ${LIB_DEPS})
 endif()
 
-target_link_libraries(lib_darktable PUBLIC ${STATIC_LIBS})
-target_link_libraries(lib_darktable PRIVATE whereami)
-target_link_libraries(lib_darktable PUBLIC ${LIBS})
+target_link_libraries(lib_ansel PUBLIC ${STATIC_LIBS})
+target_link_libraries(lib_ansel PRIVATE whereami)
+target_link_libraries(lib_ansel PUBLIC ${LIBS})
 
 unset(LIBS)
 unset(STATIC_LIBS)
 unset(LIB_DEPS)
 
-add_library(lib_darktable_imageio_rawspeed STATIC common/imageio_rawspeed.cc)
-target_link_libraries(lib_darktable_imageio_rawspeed PRIVATE rawspeed)
-target_link_libraries(lib_darktable PRIVATE lib_darktable_imageio_rawspeed)
+add_library(lib_ansel_imageio_rawspeed STATIC common/imageio_rawspeed.cc)
+target_link_libraries(lib_ansel_imageio_rawspeed PRIVATE rawspeed)
+target_link_libraries(lib_ansel PRIVATE lib_ansel_imageio_rawspeed)
 
 #
-# Install lib_darktable
+# Install lib_ansel
 #
 if(WIN32)
   # Windows needs its DLLs in the same directory as the executable to find them.
-  install(TARGETS lib_darktable DESTINATION bin COMPONENT DTApplication)
+  install(TARGETS lib_ansel DESTINATION bin COMPONENT DTApplication)
 else(WIN32)
-  install(TARGETS lib_darktable DESTINATION ${CMAKE_INSTALL_LIBDIR}/darktable)
+  install(TARGETS lib_ansel DESTINATION ${CMAKE_INSTALL_LIBDIR}/ansel)
 endif(WIN32)
 
 # Compile views modules
@@ -998,26 +998,26 @@ if(BUILD_TESTING)
 endif(BUILD_TESTING)
 
 #
-# build darktable executable
+# build ansel executable
 #
-add_executable(darktable ${SUBSYSTEM_MACOSX} ${SUBSYSTEM_WIN32} main.c ${RESOURCE_OBJECT})
-set_target_properties(darktable PROPERTIES LINKER_LANGUAGE C)
+add_executable(ansel ${SUBSYSTEM_MACOSX} ${SUBSYSTEM_WIN32} main.c ${RESOURCE_OBJECT})
+set_target_properties(ansel PROPERTIES LINKER_LANGUAGE C)
 if(APPLE)
-  set_target_properties(lib_darktable PROPERTIES LINK_FLAGS "-framework Carbon -framework AppKit")
+  set_target_properties(lib_ansel PROPERTIES LINK_FLAGS "-framework Carbon -framework AppKit")
 endif(APPLE)
-target_link_libraries(darktable lib_darktable)
+target_link_libraries(ansel lib_ansel)
 
 if (WIN32)
-  set_target_properties(darktable PROPERTIES LINK_FLAGS "-mconsole -mwindows -Wl,-subsystem,console")
-  _detach_debuginfo (darktable bin)
-  _detach_debuginfo (lib_darktable bin)
+  set_target_properties(ansel PROPERTIES LINK_FLAGS "-mconsole -mwindows -Wl,-subsystem,console")
+  _detach_debuginfo (ansel bin)
+  _detach_debuginfo (lib_ansel bin)
 else()
-    set_target_properties(darktable
+    set_target_properties(ansel
                           PROPERTIES
                           INSTALL_RPATH ${CMAKE_INSTALL_LIBDIR_RPATH})
 endif(WIN32)
 
-install(TARGETS darktable DESTINATION ${CMAKE_INSTALL_BINDIR} COMPONENT DTApplication)
+install(TARGETS ansel DESTINATION ${CMAKE_INSTALL_BINDIR} COMPONENT DTApplication)
 
 InstallDependencyFiles()
 
@@ -1032,5 +1032,5 @@ if (USE_LIBRAW)
 
   # LibRaw sub-module
   add_subdirectory(external/LibRaw-cmake)
-  target_link_libraries(lib_darktable PRIVATE libraw::libraw)
+  target_link_libraries(lib_ansel PRIVATE libraw::libraw)
 endif()

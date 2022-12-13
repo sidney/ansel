@@ -2225,7 +2225,7 @@ static void draw_exposure_cursor(cairo_t *cr, const double pointerx, const doubl
 static void match_color_to_background(cairo_t *cr, const float exposure, const float alpha)
 {
   float shade = 0.0f;
-  // TODO: put that as a preference in darktablerc
+  // TODO: put that as a preference in anselrc
   const float contrast = 1.0f;
 
   if(exposure > -2.5f)
@@ -3315,4 +3315,3 @@ void gui_cleanup(struct dt_iop_module_t *self)
 // vim: shiftwidth=2 expandtab tabstop=2 cindent
 // kate: tab-indents: off; indent-width 2; replace-tabs on; indent-mode cstyle; remove-trailing-spaces modified;
 // clang-format on
-

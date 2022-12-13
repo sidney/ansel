@@ -59,7 +59,7 @@ static const char *_gui_presets_format_value_str[5]
     = { N_("non-raw"), N_("raw"), N_("HDR"), N_("monochrome"), N_("color") };
 static const int _gui_presets_format_flag[5] = { FOR_LDR, FOR_RAW, FOR_HDR, FOR_NOT_MONO, FOR_NOT_COLOR };
 
-// this is also called for non-gui applications linking to libdarktable!
+// this is also called for non-gui applications linking to libansel!
 // so beware, don't use any darktable.gui stuff here .. (or change this behaviour in darktable.c)
 void dt_gui_presets_init()
 {
@@ -1025,7 +1025,7 @@ static gboolean _menuitem_button_released_preset(GtkMenuItem *menuitem, GdkEvent
 }
 
 /* quick presets list
-  The list of presets to show is saved in darktablerc 'plugins/darkroom/quick_preset_list' key
+  The list of presets to show is saved in anselrc 'plugins/darkroom/quick_preset_list' key
   the content of the key is written in the form :
     ꬹiop_name_0|preset_name_0ꬹꬹiop_name_1|preset_name_1ꬹ...
 */
@@ -1687,4 +1687,3 @@ void dt_gui_presets_update_filter(const char *name, dt_dev_operation_t op, const
 // vim: shiftwidth=2 expandtab tabstop=2 cindent
 // kate: tab-indents: off; indent-width 2; replace-tabs on; indent-mode cstyle; remove-trailing-spaces modified;
 // clang-format on
-

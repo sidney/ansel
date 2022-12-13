@@ -6,14 +6,14 @@ if (UNIX AND NOT WIN32)
     install(TARGETS
                 darktable-noiseprofile
             DESTINATION
-                ${CMAKE_INSTALL_LIBEXECDIR}/darktable/tools
+                ${CMAKE_INSTALL_LIBEXECDIR}/ansel/tools
             COMPONENT
                 DTApplication)
 
     install(PROGRAMS
                 darktable-gen-noiseprofile
             DESTINATION
-                ${CMAKE_INSTALL_LIBEXECDIR}/darktable/tools
+                ${CMAKE_INSTALL_LIBEXECDIR}/ansel/tools
             COMPONENT
                 DTApplication)
 
@@ -21,7 +21,7 @@ if (UNIX AND NOT WIN32)
                 subr.sh
                 profiling-shot.xmp
             DESTINATION
-               ${CMAKE_INSTALL_LIBEXECDIR}/darktable/tools
+               ${CMAKE_INSTALL_LIBEXECDIR}/ansel/tools
             COMPONENT
                 DTApplication)
 endif()

@@ -481,7 +481,7 @@ static void _resize_dialog(GtkWidget *widget)
 void dt_gui_preferences_show()
 {
   GtkWindow *win = GTK_WINDOW(dt_ui_main_window(darktable.gui->ui));
-  _preferences_dialog = gtk_dialog_new_with_buttons(_("darktable preferences"), win,
+  _preferences_dialog = gtk_dialog_new_with_buttons(_("Ansel preferences"), win,
                                                     GTK_DIALOG_DESTROY_WITH_PARENT | GTK_DIALOG_MODAL,
                                                     NULL, NULL);
 #if 0
@@ -553,7 +553,7 @@ void dt_gui_preferences_show()
   gtk_widget_destroy(_preferences_dialog);
 
   if(restart_required)
-    dt_control_log(_("darktable needs to be restarted for settings to take effect"));
+    dt_control_log(_("Ansel needs to be restarted for settings to take effect"));
 
   DT_DEBUG_CONTROL_SIGNAL_RAISE(darktable.signals, DT_SIGNAL_PREFERENCES_CHANGE);
 }
@@ -1002,7 +1002,7 @@ static void import_preset(GtkButton *button, gpointer data)
   filter = GTK_FILE_FILTER(gtk_file_filter_new());
   gtk_file_filter_add_pattern(filter, "*.dtpreset");
   gtk_file_filter_add_pattern(filter, "*.DTPRESET");
-  gtk_file_filter_set_name(filter, _("darktable preset files"));
+  gtk_file_filter_set_name(filter, _("Ansel preset files"));
   gtk_file_chooser_add_filter(GTK_FILE_CHOOSER(chooser), filter);
 
   filter = GTK_FILE_FILTER(gtk_file_filter_new());

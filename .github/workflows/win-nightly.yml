@@ -16,14 +16,14 @@ jobs:
     strategy:
       fail-fast: true
       matrix:
-        btype: 
+        btype:
           - Release
-        compiler: 
+        compiler:
           - { compiler: GNU,  CC: gcc,   CXX: g++ }
         eco: [-DBINARY_PACKAGE_BUILD=ON]
-        target: 
+        target:
           - skiptest
-        generator: 
+        generator:
           - Ninja
     defaults:
       run:
@@ -103,8 +103,8 @@ jobs:
           $(cygpath ${SRC_DIR})/.ci/ci-script.sh
       - name: Check if it runs
         run: |
-          $(cygpath ${INSTALL_PREFIX})/bin/darktable.exe --version || true
-          $(cygpath ${INSTALL_PREFIX})/bin/darktable-cli.exe \
+          $(cygpath ${INSTALL_PREFIX})/bin/ansel.exe --version || true
+          $(cygpath ${INSTALL_PREFIX})/bin/ansel-cli.exe \
                  --width 2048 --height 2048 \
                  --hq true --apply-custom-presets false \
                  $(cygpath ${SRC_DIR})/src/tests/integration/images/mire1.cr2 \

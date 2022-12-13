@@ -57,9 +57,9 @@ int main(int argc, char *argv[])
 
   if(redirect_output)
   {
-    // something like C:\Users\username\AppData\Local\Microsoft\Windows\Temporary Internet Files\darktable\darktable-log.txt
-    char *logdir = g_build_filename(g_get_user_cache_dir(), "darktable", NULL);
-    char *logfile = g_build_filename(logdir, "darktable-log.txt", NULL);
+    // something like C:\Users\username\AppData\Local\Microsoft\Windows\Temporary Internet Files\ansel\ansel-log.txt
+    char *logdir = g_build_filename(g_get_user_cache_dir(), "ansel", NULL);
+    char *logfile = g_build_filename(logdir, "ansel-log.txt", NULL);
 
     g_mkdir_with_parents(logdir, 0700);
 
@@ -111,4 +111,3 @@ int main(int argc, char *argv[])
 // vim: shiftwidth=2 expandtab tabstop=2 cindent
 // kate: tab-indents: off; indent-width 2; replace-tabs on; indent-mode cstyle; remove-trailing-spaces modified;
 // clang-format on
-

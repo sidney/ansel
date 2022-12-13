@@ -153,8 +153,8 @@ static const test_t test_escapes = {
     {"foo\\$\\(bar", "foo$(bar"},
     {"foo\\$(bar$(SEQUENCE)baz", "foo$(bar0023baz"},
     {"foo$(bar$(SEQUENCE)baz", "foo$(bar0023baz"},
-    {"$(FILE_FOLDER)/darktable_exported/img_$(SEQUENCE)", "/home/test/Images/darktable_exported/img_0023"},
-    {"$(FILE_FOLDER)/darktable_exported/$(FILE_NAME)", "/home/test/Images/darktable_exported/IMG_0123"},
+    {"$(FILE_FOLDER)/ansel_exported/img_$(SEQUENCE)", "/home/test/Images/ansel_exported/img_0023"},
+    {"$(FILE_FOLDER)/ansel_exported/$(FILE_NAME)", "/home/test/Images/ansel_exported/IMG_0123"},
 
     {NULL, NULL}
   }
@@ -174,7 +174,7 @@ static const test_t test_real_paths = {
     {"$(FILE_FOLDER/test/$(SEQUENCE//0/o))", "/home/oo23/Images/0023"},
     {"$(FILE_FOLDER/$(SEQUENCE)/XXX)", "/home/test/Images/XXX"},
     {"$(FILE_FOLDER/$(JOBCODE)\\///media/)", "/media/Images/0023"},
-    {"$(FILE_FOLDER/\\/home\\/test\\///media/exports/)/darktable_exported/img_$(SEQUENCE)", "/media/exports/Images/0023/darktable_exported/img_0023"},
+    {"$(FILE_FOLDER/\\/home\\/test\\///media/exports/)/ansel_exported/img_$(SEQUENCE)", "/media/exports/Images/0023/ansel_exported/img_0023"},
 
     {"$(FILE_FOLDER/", "$(FILE_FOLDER/"},
     {"$(FILE_FOLDER/home", "$(FILE_FOLDER/home"},
@@ -199,7 +199,7 @@ static const test_t test_real_paths = {
 
 int main(int argc, char* argv[])
 {
-  char *argv_override[] = {"darktable-test-variables", "--library", ":memory:", "--conf", "write_sidecar_files=never", NULL};
+  char *argv_override[] = {"ansel-test-variables", "--library", ":memory:", "--conf", "write_sidecar_files=never", NULL};
   int argc_override = sizeof(argv_override) / sizeof(*argv_override) - 1;
 
   // init dt without gui and without data.db:
@@ -234,4 +234,3 @@ int main(int argc, char* argv[])
 // vim: shiftwidth=2 expandtab tabstop=2 cindent
 // kate: tab-indents: off; indent-width 2; replace-tabs on; indent-mode cstyle; remove-trailing-spaces modified;
 // clang-format on
-

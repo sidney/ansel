@@ -1730,7 +1730,7 @@ msgstr ""
 "Legt fest, wie das Vorschaubild und die Pixelpipes auf Systemen mit "
 "aktiviertem OpenCL berechnet werden.\n"
 "• Standard: GPU berechnet die volle Pixelpipes und die CPU das Vorschau "
-"(kann über die Konfigurationsdatei „darktablerc” weiter angepasst werden)\n"
+"(kann über die Konfigurationsdatei „anselrc” weiter angepasst werden)\n"
 "• mehrere GPUs: beide Pixelpipes werden parallel auf zwei GPUs berechnet\n"
 "• sehr schnelle GPU: beide Pixelpipes werden nacheinander auf der selben GPU "
 "berechnet."
@@ -4760,23 +4760,23 @@ msgstr "Mitwirkende (rawspeed)"
 msgid "integration contributors"
 msgstr "Mitwirkende Integration"
 
-#: ../build/share/darktable/darktable.desktop.in.h:1
-#: ../data/darktable.desktop.in.h:1
+#: ../build/share/darktable/ansel.desktop.in.h:1
+#: ../data/ansel.desktop.in.h:1
 msgid "Virtual Lighttable and Darkroom"
 msgstr "Virtueller Leuchttisch und Dunkelkammer"
 
-#: ../build/share/darktable/darktable.desktop.in.h:2
-#: ../data/darktable.appdata.xml.in.h:1 ../data/darktable.desktop.in.h:2
+#: ../build/share/darktable/ansel.desktop.in.h:2
+#: ../data/ansel.appdata.xml.in.h:1 ../data/ansel.desktop.in.h:2
 msgid "Organize and develop images from digital cameras"
 msgstr "Organisiere und entwickle Bilder von Digitalkameras"
 
 #. TRANSLATORS: Search terms to find this application. Do NOT translate or localize the semicolons! The list MUST also end with a semicolon!
-#: ../build/share/darktable/darktable.desktop.in.h:4
-#: ../data/darktable.desktop.in.h:4
+#: ../build/share/darktable/ansel.desktop.in.h:4
+#: ../data/ansel.desktop.in.h:4
 msgid "graphics;photography;raw;"
 msgstr "Graphik;Grafik;Photographie;Fotografie;Raw;"
 
-#: ../data/darktable.appdata.xml.in.h:2
+#: ../data/ansel.appdata.xml.in.h:2
 msgid ""
 "darktable manages your digital negatives in a database and lets you view "
 "them through a lighttable. It also enables you to develop raw images and "
@@ -4786,7 +4786,7 @@ msgstr ""
 "diese auf einem Leuchttisch zu betrachten. Außerdem können Raw-Bilder in "
 "einer Dunkelkammer entwickelt und verbessert werden."
 
-#: ../data/darktable.appdata.xml.in.h:3
+#: ../data/ansel.appdata.xml.in.h:3
 msgid ""
 "Other modes besides lighttable and darkroom are a map for geotagging, "
 "tethering, print and a slideshow."
@@ -4794,7 +4794,7 @@ msgstr ""
 "Weitere Modi neben Leuchttisch und Dunkelkammer sind eine Karte für "
 "Geotagging, Tethering, Druck und eine Diashow."
 
-#: ../data/darktable.appdata.xml.in.h:4
+#: ../data/ansel.appdata.xml.in.h:4
 msgid ""
 "darktable supports most modern cameras' raw formats, and does all of its "
 "processing at very high precision."
@@ -4802,23 +4802,23 @@ msgstr ""
 "darktable unterstützt das Raw-Format der meisten modernen Kameras und führt "
 "seine Berechnungen mit sehr hoher Präzision durch."
 
-#: ../data/darktable.appdata.xml.in.h:5
+#: ../data/ansel.appdata.xml.in.h:5
 msgid "Virtual light table, showing a collection"
 msgstr "Der Leuchttisch zeigt eine Sammlung an"
 
-#: ../data/darktable.appdata.xml.in.h:6
+#: ../data/ansel.appdata.xml.in.h:6
 msgid "Virtual dark room with an opened image"
 msgstr "Die Dunkelkammer mit einem geöffneten Bild"
 
-#: ../data/darktable.appdata.xml.in.h:7
+#: ../data/ansel.appdata.xml.in.h:7
 msgid "Virtual dark room, sharpening an image"
 msgstr "Schärfen eines Bildes in der Dunkelkammer"
 
-#: ../data/darktable.appdata.xml.in.h:8
+#: ../data/ansel.appdata.xml.in.h:8
 msgid "Show images on a map"
 msgstr "Zeige Bilder auf der Karte an"
 
-#: ../data/darktable.appdata.xml.in.h:9
+#: ../data/ansel.appdata.xml.in.h:9
 msgid "Print your images"
 msgstr "Drucke deine Bilder"
 
@@ -25744,7 +25744,7 @@ msgstr "Mausaktionen"
 #~ "Speichermenge in MB, die beim Kacheln für einen einzelnen Bild-Puffer "
 #~ "reserviert wird. \n"
 #~ "Dieser Wert hat Vorrang vor den Heuristiken basierend auf "
-#~ "„host_memory_limit” in der Konfigurationsdatei „darktablerc”. \n"
+#~ "„host_memory_limit” in der Konfigurationsdatei „anselrc”. \n"
 #~ "Bei Änderung Neustart erforderlich."
 
 #~ msgid "middle grey luminance"
@@ -29425,8 +29425,8 @@ msgstr "Mausaktionen"
 #~ msgid "auto"
 #~ msgstr "auto"
 
-#~ msgid "filename of your custom theme in share/darktable/"
-#~ msgstr "Dateiname des eigenen Themes in share/darktable/"
+#~ msgid "filename of your custom theme in share/ansel/"
+#~ msgstr "Dateiname des eigenen Themes in share/ansel/"
 
 #~ msgid "jpeg quality of on-disk thumbnails"
 #~ msgstr "JPEG-Qualität der Vorschaubilder auf der Festplatte"

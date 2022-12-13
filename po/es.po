@@ -4451,23 +4451,23 @@ msgstr "Colaboradores de RawSpeed:"
 msgid "integration contributors"
 msgstr "Colaboradores en la integración:"
 
-#: ../build/share/darktable/darktable.desktop.in.h:1
-#: ../data/darktable.desktop.in.h:1
+#: ../build/share/darktable/ansel.desktop.in.h:1
+#: ../data/ansel.desktop.in.h:1
 msgid "Virtual Lighttable and Darkroom"
 msgstr "Mesa de Luz y Cuarto Oscuro Virtuales"
 
-#: ../build/share/darktable/darktable.desktop.in.h:2
-#: ../data/darktable.appdata.xml.in.h:1 ../data/darktable.desktop.in.h:2
+#: ../build/share/darktable/ansel.desktop.in.h:2
+#: ../data/ansel.appdata.xml.in.h:1 ../data/ansel.desktop.in.h:2
 msgid "Organize and develop images from digital cameras"
 msgstr "Organice y revele fotografías de cámaras digitales"
 
 #. TRANSLATORS: Search terms to find this application. Do NOT translate or localize the semicolons! The list MUST also end with a semicolon!
-#: ../build/share/darktable/darktable.desktop.in.h:4
-#: ../data/darktable.desktop.in.h:4
+#: ../build/share/darktable/ansel.desktop.in.h:4
+#: ../data/ansel.desktop.in.h:4
 msgid "graphics;photography;raw;"
 msgstr "gráficos;fotografía;raw;"
 
-#: ../data/darktable.appdata.xml.in.h:2
+#: ../data/ansel.appdata.xml.in.h:2
 msgid ""
 "darktable manages your digital negatives in a database and lets you view "
 "them through a lighttable. It also enables you to develop raw images and "
@@ -4477,7 +4477,7 @@ msgstr ""
 "verlos mediante el uso de una mesa de luz. También le permite revelar "
 "imágenes raw y mejorarlas en el cuarto oscuro."
 
-#: ../data/darktable.appdata.xml.in.h:3
+#: ../data/ansel.appdata.xml.in.h:3
 msgid ""
 "Other modes besides lighttable and darkroom are a map for geotagging, "
 "tethering, print and a slideshow."
@@ -4485,7 +4485,7 @@ msgstr ""
 "Otros modos además de la mesa de luz y el cuarto oscuro son el mapa para geo-"
 "ubicación, captura, imprimir y diapositivas."
 
-#: ../data/darktable.appdata.xml.in.h:4
+#: ../data/ansel.appdata.xml.in.h:4
 msgid ""
 "darktable supports most modern cameras' raw formats, and does all of its "
 "processing at very high precision."
@@ -4493,23 +4493,23 @@ msgstr ""
 "darktable soporta la mayoría de los formatos raw de las cámaras modernas, y "
 "realiza todo el revelado con un gran precisión."
 
-#: ../data/darktable.appdata.xml.in.h:5
+#: ../data/ansel.appdata.xml.in.h:5
 msgid "Virtual light table, showing a collection"
 msgstr "Mesa de Luz  Virtual, mostrando una colección"
 
-#: ../data/darktable.appdata.xml.in.h:6
+#: ../data/ansel.appdata.xml.in.h:6
 msgid "Virtual dark room with an opened image"
 msgstr "Cuarto oscuro virtual con una imagen abierta"
 
-#: ../data/darktable.appdata.xml.in.h:7
+#: ../data/ansel.appdata.xml.in.h:7
 msgid "Virtual dark room, sharpening an image"
 msgstr "Cuarto oscuro virtual, enfocando una imagen"
 
-#: ../data/darktable.appdata.xml.in.h:8
+#: ../data/ansel.appdata.xml.in.h:8
 msgid "Show images on a map"
 msgstr "Mostrar imágenes en un mapa"
 
-#: ../data/darktable.appdata.xml.in.h:9
+#: ../data/ansel.appdata.xml.in.h:9
 msgid "Print your images"
 msgstr "Imprimir tus imágenes"
 
@@ -27603,8 +27603,8 @@ msgstr "acciones con el ratón"
 #~ msgid "apply distortions instead of correcting them"
 #~ msgstr "aplicar distorsiones en vez de corregirlas"
 
-#~ msgid "filename of your custom theme in share/darktable/"
-#~ msgstr "nombre de archivo del tema propio en share/darktable/"
+#~ msgid "filename of your custom theme in share/ansel/"
+#~ msgstr "nombre de archivo del tema propio en share/ansel/"
 
 #~ msgid "jpeg quality of on-disk thumbnails"
 #~ msgstr "calidad del jpeg de las miniaturas de disco"

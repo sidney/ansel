@@ -8,7 +8,7 @@ from shutil import which
 
 # default name of program to execute, can be overridden by the same-named environment variable or via
 # commandline option
-DARKTABLE_CLI = 'darktable-cli'
+DARKTABLE_CLI = 'ansel-cli'
 
 # default name of directory in which to create a scratch folder for darktable to use as config directory,
 # can be overridden by the same-named environment variable, environment variable TMPDIR, or via commandline option
@@ -58,8 +58,8 @@ def locate_program(program):
          if VERBOSE:
             print(f'  did not find {program} in build/bin')
       # are we in a sibling of the source tree?
-      if os.path.exists('../darktable/src/tests/benchmark'):
-         build = '../darktable/build/bin/'
+      if os.path.exists('../ansel/src/tests/benchmark'):
+         build = '../ansel/build/bin/'
          if os.path.exists(build+program):
             return build+program
          if VERBOSE:
@@ -121,7 +121,7 @@ def locate_image(image):
       if os.path.exists(img):
          return img
       # sixth: we are in a sibling of the darktable source tree
-      candidate = os.getcwd() + '/../darktable/src/tests/integration/images/mire1.cr2'
+      candidate = os.getcwd() + '/../ansel/src/tests/integration/images/mire1.cr2'
       if os.path.exists(candidate):
          return candidate
    # finally: give up
@@ -182,10 +182,10 @@ def parse_commandline():
    parser = argparse.ArgumentParser(description="Darktable performance benchmarking")
    parser.add_argument("-i","--image",metavar="FILE",help="the name of the image to use",default="mire1.cr2")
    parser.add_argument("-v","--version",metavar="V",help="look for darktable version V sidecar",default="3.6")
-   parser.add_argument("-x","--xmp",metavar="FILE",help="the root name of the .xmp sidecar file to use",default="darktable-bench")
-   parser.add_argument("-p","--program",metavar="EXE",help="full path to darktable-cli executable",default=DARKTABLE_CLI)
+   parser.add_argument("-x","--xmp",metavar="FILE",help="the root name of the .xmp sidecar file to use",default="ansel-bench")
+   parser.add_argument("-p","--program",metavar="EXE",help="full path to ansel-cli executable",default=DARKTABLE_CLI)
    parser.add_argument("-r","--reps",metavar="N",help="run N times and report average time",type=int,choices=range(1,10),default=3)
-   parser.add_argument("-t","--threads",metavar="N",help="tell darktable-cli to use N threads",default=None)
+   parser.add_argument("-t","--threads",metavar="N",help="tell ansel-cli to use N threads",default=None)
    parser.add_argument("-C","--cpuonly",action="store_true",help="disable OpenCL GPU acceleration",default=False)
    parser.add_argument("-T","--tempdir",metavar="DIR",help="directory in which to create test data",default=DARKTABLE_TMP)
    parser.add_argument("--verbose",action="store_true")
@@ -229,10 +229,10 @@ def extract_seconds(line):
    else:
       return 0.0
    return float(line.strip())
-   
+
 def run_benchmark(program,image,xmp,args):
    confdir=args.tempdir
-   outimage=args.tempdir+'/darktable-bench.png'
+   outimage=args.tempdir+'/ansel-bench.png'
    args.outimage=outimage
    if os.path.exists(outimage):
       os.remove(outimage)
@@ -309,7 +309,7 @@ def cleanup(args):
          pass
    if args.tempdir:
       try:
-         # delete files in temp dir; since the ones darktable-cli creates all start with 'dar' or 'dat', limit the
+         # delete files in temp dir; since the ones ansel-cli creates all start with 'dar' or 'dat', limit the
          #  deletion to such files just in case
          for f in os.listdir(args.tempdir):
             if f.startswith('da') and (f[2] == 'r' or f[2] == 't'):

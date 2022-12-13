@@ -2,11 +2,11 @@
 # ADD NEW MANPAGES HERE
 ###################################
 set(MANPAGES
-  "darktable.pod"
-  "darktable-cli.pod"
-  "darktable-generate-cache.pod"
-  "darktable-cltest.pod"
-  "darktable-cmstest.pod"
+  "ansel.pod"
+  "ansel-cli.pod"
+  "ansel-generate-cache.pod"
+  "ansel-cltest.pod"
+  "ansel-cmstest.pod"
 )
 ###################################
 # THAT'S IT, NO MORE CHANGES NEEDED

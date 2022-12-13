@@ -88,4 +88,4 @@ execute 'Updating lensfun databse' lensfun-update-data
 
 execute 'Installing additional OpenMP library for clang' pacman -S --needed --noconfirm mingw-w64-x86_64-openmp
 
-execute 'Building darktable' build_darktable
+execute 'Building Ansel' build_darktable
