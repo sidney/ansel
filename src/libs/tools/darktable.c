@@ -62,7 +62,7 @@ static void _lib_darktable_show_about_dialog();
 
 const char *name(dt_lib_module_t *self)
 {
-  return _("darktable");
+  return _("Ansel");
 }
 
 const char **views(dt_lib_module_t *self)
@@ -274,12 +274,12 @@ static void _lib_darktable_show_about_dialog()
 #endif
   gtk_about_dialog_set_program_name(GTK_ABOUT_DIALOG(dialog), PACKAGE_NAME);
   gtk_about_dialog_set_version(GTK_ABOUT_DIALOG(dialog), darktable_package_version);
-  char *copyright = g_strdup_printf(_("copyright (c) the authors 2009-%s"), darktable_last_commit_year);
+  char *copyright = g_strdup_printf(_("Copyright © darktable authors 2009-2022\nCopyright © Ansel authors 2022-%s"), darktable_last_commit_year);
   gtk_about_dialog_set_copyright(GTK_ABOUT_DIALOG(dialog), copyright);
   g_free(copyright);
   gtk_about_dialog_set_comments(GTK_ABOUT_DIALOG(dialog),
-                                _("organize and develop images from digital cameras"));
-  gtk_about_dialog_set_website(GTK_ABOUT_DIALOG(dialog), "https://www.darktable.org/");
+                                _("Organize and develop images from digital cameras"));
+  gtk_about_dialog_set_website(GTK_ABOUT_DIALOG(dialog), "https://ansel.photos");
   gtk_about_dialog_set_website_label(GTK_ABOUT_DIALOG(dialog), "website");
   dt_logo_season_t season = dt_util_get_logo_season();
   char *icon;

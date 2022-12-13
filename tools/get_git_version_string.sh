@@ -1,10 +1,10 @@
 #!/bin/sh
 
-VERSION="$(git describe --tags --dirty)"
+VERSION="$(git describe --tags)"
 
 if [ $? -eq 0 ] ;
 then
-  echo "$VERSION" | sed 's,^release-,,;s,-,+,;s,-,~,;'
+  echo "$VERSION" | sed 's,^v,,;s,-,+,;s,-,~,;'
   exit 0
 fi
 
@@ -13,7 +13,7 @@ fi
 
 # in that case let's at least return the commit hash
 
-VERSION="$(git describe --always --dirty)"
+VERSION="$(git describe --always)"
 if [ $? -eq 0 ] ;
 then
   echo "$VERSION"
