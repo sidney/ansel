@@ -28,7 +28,6 @@ jobs:
         branch:
           - { code: master, label: stable }
           - { code: candidate, label: pre-release }
-          - { code: dev, label: experimental }
     defaults:
       run:
         shell: msys2 {0}
