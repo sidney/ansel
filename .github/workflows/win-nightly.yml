@@ -11,7 +11,7 @@ permissions:
 jobs:
   Win64:
     if: github.repository == 'aurelienpierreeng/ansel' || github.event_name == 'workflow_dispatch'
-    name: Nightly ansel.${{ github.sha }}.win64
+    name: Nightly Ansel Win64 build
     runs-on: windows-latest
     strategy:
       fail-fast: true
@@ -25,6 +25,10 @@ jobs:
           - skiptest
         generator:
           - Ninja
+        branch:
+          - { code: master, label: stable }
+          - { code: candidate, label: pre-release }
+          - { code: dev, label: experimental }
     defaults:
       run:
         shell: msys2 {0}
@@ -38,6 +42,8 @@ jobs:
       CMAKE_BUILD_TYPE: ${{ matrix.btype }}
       GENERATOR: ${{ matrix.generator }}
       TARGET: ${{ matrix.target }}
+      BRANCH: ${{ matrix.branch.code }}
+      BUILD_NAME: ${{ matrix.branch.label }}
     steps:
       - uses: msys2/setup-msys2@v2
         with:
@@ -88,11 +94,12 @@ jobs:
           update: true
       - uses: actions/checkout@v3
         with:
+          ref: ${BRANCH}
           fetch-depth: 0
           submodules: true
           path: src
       - name: Update lensfun data
-        if: ${{ success() && matrix.btype == 'Release' && matrix.target == 'skiptest' }}
+        if: ${{ success() }}
         run: |
           lensfun-update-data
       - name: Build and Install
@@ -114,14 +121,14 @@ jobs:
                  --conf plugins/lighttable/export/force_lcms2=FALSE \
                  --conf plugins/lighttable/export/iccintent=0
       - name: Package
-        if: ${{ success() && matrix.btype == 'Release' && matrix.target == 'skiptest' }}
+        if: ${{ success() }}
         run: |
           cd "${BUILD_DIR}"
           cmake --build "${BUILD_DIR}" --target package
       - name: Package upload
-        if: ${{ success() && matrix.btype == 'Release' && matrix.target == 'skiptest' }}
+        if: ${{ success() }}
         uses: actions/upload-artifact@v3
         with:
-          name: ansel.${{ github.sha }}.win64.zip
+          name: ansel.${BUILD_NAME}.win64
           path: ${{ env.BUILD_DIR }}/ansel-*.exe
-          retention-days: 2
+          retention-days: 90
