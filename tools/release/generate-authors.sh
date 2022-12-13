@@ -52,7 +52,7 @@ ALL_DEVELOPERS=("Aldric Renaudin"
                 "parafin"
                 "Aurélien PIERRE")
 
-function short-log()
+function shortlog()
 {
     local RANGE="$1"
     local MIN=$2
@@ -66,7 +66,7 @@ function short-log()
         done
 }
 
-function for-submodule()
+function forsubmodule()
 {
     local SUBPATH=$1
     local MIN=$2
@@ -89,11 +89,11 @@ function for-submodule()
 
     (
         cd $SUBPATH
-        short-log "$SRANGE" $MIN
+        shortlog "$SRANGE" $MIN
     )
 }
 
-function is-developer()
+function isdeveloper()
 {
     local AUTH="$1"
 
@@ -113,9 +113,9 @@ if [ ! -z $BASE ]; then
 fi
 
 echo "* developers:"
-short-log $RANGE $SHORTLOG_THRESHOLD |
+shortlog $RANGE $SHORTLOG_THRESHOLD |
     while read name; do
-        is-developer "$name"
+        isdeveloper "$name"
         if [ $? == 1 ]; then
             echo $name
         fi
@@ -123,13 +123,13 @@ short-log $RANGE $SHORTLOG_THRESHOLD |
 
 echo
 echo "* translators:"
-short-log $RANGE $TRANSLATOR_THRESHOLD "./po/*.po ./doc/man/po/*.po ./doc/usermanual/po/*.po"
+shortlog $RANGE $TRANSLATOR_THRESHOLD "./po/*.po ./doc/man/po/*.po ./doc/usermanual/po/*.po"
 
 echo
 echo "* contributors (at least $CONTRIBUTOR_THRESHOLD commits):"
-short-log $RANGE $CONTRIBUTOR_THRESHOLD |
+shortlog $RANGE $CONTRIBUTOR_THRESHOLD |
     while read name; do
-        is-developer "$name"
+        isdeveloper "$name"
         if [ $? == 0 ]; then
             echo $name
         fi
@@ -143,7 +143,7 @@ if [ -f .gitmodules ]; then
             MODULE_NAME=$(basename $module)
             echo
             echo "* Sub-module $MODULE_NAME contributors (at least 1 commit):"
-            for-submodule $module $SHORTLOG_THRESHOLD
+            forsubmodule $module $SHORTLOG_THRESHOLD
         done
 fi
 
