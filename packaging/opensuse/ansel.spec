@@ -35,7 +35,6 @@ BuildRequires:  lensfun-devel
 BuildRequires:  libcurl-devel
 BuildRequires:  libexiv2-devel
 BuildRequires:  libglade2-devel
-BuildRequires:  libgphoto2-devel
 BuildRequires:  libjpeg-devel
 BuildRequires:  liblcms2-devel
 BuildRequires:  librsvg-devel

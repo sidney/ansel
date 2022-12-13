@@ -16,7 +16,7 @@ How to make an Ansel Windows installer (x64 only):
 
 * Install required libraries and dependencies for darktable:
     ```bash
-    $ pacman -S --needed mingw-w64-x86_64-{exiv2,lcms2,lensfun,dbus-glib,openexr,sqlite3,libxslt,libsoup,libavif,libheif,libwebp,libsecret,lua,graphicsmagick,openjpeg2,gtk3,pugixml,libexif,osm-gps-map,libgphoto2,drmingw,gettext,python3,iso-codes,python3-jsonschema,python3-setuptools}
+    $ pacman -S --needed mingw-w64-x86_64-{exiv2,lcms2,lensfun,dbus-glib,openexr,sqlite3,libxslt,libsoup,libavif,libheif,libwebp,libsecret,lua,graphicsmagick,openjpeg2,gtk3,pugixml,libexif,osm-gps-map,drmingw,gettext,python3,iso-codes,python3-jsonschema,python3-setuptools}
     ```
 
 * Install optional libraries and dependencies:

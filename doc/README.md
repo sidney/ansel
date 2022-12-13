@@ -19,7 +19,6 @@ In summary, you'll need:
 Optionally, you might need for special features:
 
  - `libcups2` (for the print module)
- - `gphoto2` (for camera support, recommended)
  - `SDL`, SDL-image and Mesa OpenGL (to build ansel-viewer)
  - `osm-gps-map` for geo tagging view
  - `lensfun` (lens distortion plugin)

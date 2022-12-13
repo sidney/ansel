@@ -227,32 +227,6 @@ if (WIN32 AND NOT BUILD_MSYS2_INSTALL)
       DESTINATION share/libthai/
       COMPONENT DTApplication)
 
-  # Add libgphoto2 files and dependencies
-  if(Gphoto2_FOUND)
-    file(GLOB TMP_SYSTEM_RUNTIME_LIBS
-      ${MINGW_PATH}/imagequant.dll
-      ${MINGW_PATH}/libexif*.dll
-      ${MINGW_PATH}/libgd.dll
-      ${MINGW_PATH}/libusb*.dll
-      ${MINGW_PATH}/libXpm-noX*.dll
-    )
-    list(APPEND CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS ${TMP_SYSTEM_RUNTIME_LIBS})
-
-    install(DIRECTORY
-        "${MINGW_PATH}/../lib/libgphoto2"
-        DESTINATION lib/
-        COMPONENT DTApplication
-        PATTERN "*.a" EXCLUDE)
-    _install_translations(libgphoto2-6 ${MINGW_PATH}/../share/locale)
-
-    install(DIRECTORY
-        "${MINGW_PATH}/../lib/libgphoto2_port"
-        DESTINATION lib/
-        COMPONENT DTApplication
-        PATTERN "*.a" EXCLUDE
-        PATTERN "usb.dll" EXCLUDE)
-  endif()
-
   # Add GraphicsMagick libraries
   if(GraphicsMagick_FOUND)
     install(DIRECTORY

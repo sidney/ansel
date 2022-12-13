@@ -12,7 +12,7 @@ in stdenv.mkDerivation rec {
   buildInputs = with pkgs; with xorg; with gnome2;
     [ atk cairo cmake curl dbus_glib exiv2 glib gtk3
       ilmbase intltool lcms2 lensfun libX11 libexif
-      libgphoto2 libjpeg libpng
+      libjpeg libpng
       librsvg libtiff libxcb openexr pixman pkgconfig sqlite libxslt
       libsoup graphicsmagick json_glib openjpeg lua5_3 pugixml
       colord colord-gtk libxshmfence libxkbcommon at_spi2_core

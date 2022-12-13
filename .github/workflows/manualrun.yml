@@ -76,7 +76,6 @@ jobs:
             libexiv2-dev \
             libgdk-pixbuf2.0-dev \
             libglib2.0-dev \
-            libgphoto2-dev \
             libgraphicsmagick1-dev \
             libgtk-3-dev \
             libheif-dev \
@@ -216,7 +215,6 @@ jobs:
             mingw-w64-x86_64-pugixml
             mingw-w64-x86_64-libexif
             mingw-w64-x86_64-osm-gps-map
-            mingw-w64-x86_64-libgphoto2
             mingw-w64-x86_64-drmingw
             mingw-w64-x86_64-gettext
             mingw-w64-x86_64-python3

@@ -64,7 +64,6 @@ jobs:
             lensfun:p
             libavif:p
             libexif:p
-            libgphoto2:p
             libheif:p
             libjpeg-turbo:p
             libsecret:p

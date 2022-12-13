@@ -229,7 +229,6 @@ Optional dependencies (minimum version):
 * libavif 0.8.2 *(for AVIF import/export)*
 * libheif 1.9.0 *(for HEIF/HEIC/HIF import)*
 * WebP 0.3.0 *(for WebP export)*
-* libgphoto2 2.5 *(for camera tethering)*
 
 Optional dependencies (no version requirement):
 * Lensfun *(for automatic lens correction)*
@@ -439,10 +438,6 @@ There are many ways you can contribute to the darktable project:
 
 FAQ
 ---
-
-### Why is my camera not detected when plugged-in ?
-
-Check that you have the latest [gphoto2 library](http://www.gphoto.org/ "gphoto2 homepage") installed in order to support the newest cameras.
 
 ### Why is my lens not detected/corrected in darkroom ?
 
