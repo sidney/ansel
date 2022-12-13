@@ -14,7 +14,7 @@ jobs:
     name: Nightly Ansel Win64 build
     runs-on: windows-latest
     strategy:
-      fail-fast: true
+      fail-fast: false
       matrix:
         btype:
           - Release
@@ -132,3 +132,10 @@ jobs:
           name: ansel.${{ env.BUILD_NAME }}.win64
           path: ${{ env.BUILD_DIR }}/ansel-*.exe
           retention-days: 90
+      - name: Update nightly release
+        uses: eine/tip@master
+        with:
+          tag: v0.0.0
+          rm: true
+          token: ${{ secrets.GITHUB_TOKEN }}
+          files: ${{ env.BUILD_DIR }}/ansel-*.exe
