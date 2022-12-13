@@ -109,22 +109,17 @@ void gui_init(dt_lib_module_t *self)
   else
   {
     // let's fall back to the PNG
-    char *logo;
+    char *logo = g_strdup("idbutton.png");
     char datadir[PATH_MAX] = { 0 };
 
     dt_loc_get_datadir(datadir, sizeof(datadir));
-    const dt_logo_season_t season = dt_util_get_logo_season();
-    if(season != DT_LOGO_SEASON_NONE)
-      logo = g_strdup_printf("idbutton-%d.png", (int)season);
-    else
-      logo = g_strdup("idbutton.png");
     char *filename = g_build_filename(datadir, "pixmaps", logo, NULL);
 
     cairo_surface_t *surface = cairo_image_surface_create_from_png(filename);
     g_free(logo);
     if(cairo_surface_status(surface) != CAIRO_STATUS_SUCCESS)
     {
-      fprintf(stderr, "warning: can't load darktable logo from PNG file `%s'\n", filename);
+      fprintf(stderr, "warning: can't load Ansel logo from PNG file `%s'\n", filename);
       goto done;
     }
     const int png_width = cairo_image_surface_get_width(surface),
@@ -166,13 +161,12 @@ done:
 
   /* try to load program name as svg */
   d->text = dt_util_get_logo_text(DT_PIXEL_APPLY_DPI(-1.0));
-  /* no png fallback, we'll use text */
   d->text_width = d->text ? dt_cairo_image_surface_get_width(d->text) : 0;
   d->text_height = d->text ? dt_cairo_image_surface_get_height(d->text) : 0;
 
   /* set size of drawing area */
   gtk_widget_set_size_request(self->widget, d->image_width + (int)DT_PIXEL_APPLY_DPI(180),
-                              d->image_height + (int)DT_PIXEL_APPLY_DPI(8));
+                              d->image_height + (int)DT_PIXEL_APPLY_DPI(15));
 }
 
 void gui_cleanup(dt_lib_module_t *self)
@@ -216,9 +210,8 @@ static gboolean _lib_darktable_draw_callback(GtkWidget *widget, cairo_t *cr, gpo
   /* paint icon image */
   if(d->image)
   {
-    cairo_set_source_surface(cr, d->image, 0, (int)DT_PIXEL_APPLY_DPI(7));
-    cairo_rectangle(cr, 0, 0, d->image_width + (int)DT_PIXEL_APPLY_DPI(8),
-                    d->image_height + (int)DT_PIXEL_APPLY_DPI(8));
+    cairo_set_source_surface(cr, d->image, DT_PIXEL_APPLY_DPI(5), DT_PIXEL_APPLY_DPI(5));
+    cairo_rectangle(cr, 0, 0, d->image_width + DT_PIXEL_APPLY_DPI(10), d->image_height + DT_PIXEL_APPLY_DPI(10));
     cairo_fill(cr);
   }
 
@@ -229,9 +222,9 @@ static gboolean _lib_darktable_draw_callback(GtkWidget *widget, cairo_t *cr, gpo
   /* try to use logo text in svg */
   if(d->text)
   {
-    cairo_set_source_surface(cr, d->text, d->image_width + (int)DT_PIXEL_APPLY_DPI(5),
-                             (int)DT_PIXEL_APPLY_DPI(9));
-    cairo_rectangle(cr, 0, 0, d->image_width + d->text_width + (int)DT_PIXEL_APPLY_DPI(11),
+    cairo_set_source_surface(cr, d->text, d->image_width + (int)DT_PIXEL_APPLY_DPI(15),
+                             (int)DT_PIXEL_APPLY_DPI(7));
+    cairo_rectangle(cr, DT_PIXEL_APPLY_DPI(5), 0, d->image_width + d->text_width + (int)DT_PIXEL_APPLY_DPI(15),
                     d->text_height + (int)DT_PIXEL_APPLY_DPI(13));
     cairo_fill(cr);
   }
@@ -280,13 +273,8 @@ static void _lib_darktable_show_about_dialog()
   gtk_about_dialog_set_comments(GTK_ABOUT_DIALOG(dialog),
                                 _("Organize and develop images from digital cameras"));
   gtk_about_dialog_set_website(GTK_ABOUT_DIALOG(dialog), "https://ansel.photos");
-  gtk_about_dialog_set_website_label(GTK_ABOUT_DIALOG(dialog), "website");
-  dt_logo_season_t season = dt_util_get_logo_season();
-  char *icon;
-  if(season != DT_LOGO_SEASON_NONE)
-    icon = g_strdup_printf("darktable-%d", (int)season);
-  else
-    icon = g_strdup("darktable");
+  gtk_about_dialog_set_website_label(GTK_ABOUT_DIALOG(dialog), "Website");
+  char *icon = g_strdup("ansel");
   gtk_about_dialog_set_logo_icon_name(GTK_ABOUT_DIALOG(dialog), icon);
   g_free(icon);
 
