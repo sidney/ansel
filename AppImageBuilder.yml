@@ -22,16 +22,48 @@ AppDir:
   apt:
     arch: [ x86_64 ]
     sources:
-       - sourceline: 'deb [arch=amd64] http://azure.archive.ubuntu.com/ubuntu jammy main restricted universe multiverse'
-       - sourceline: 'deb [arch=amd64] http://azure.archive.ubuntu.com/ubuntu jammy-updates main restricted universe multiverse'
+      - sourceline: 'deb [arch=amd64] http://azure.archive.ubuntu.com/ubuntu jammy main restricted universe multiverse'
+      - sourceline: 'deb [arch=amd64] http://azure.archive.ubuntu.com/ubuntu jammy-updates main restricted universe multiverse'
       - sourceline: 'deb [arch=amd64] http://azure.archive.ubuntu.com/ubuntu jammy-backports main restricted universe multiverse'
     include:
-       - libcairo2
-       - libcolord
-       - libcolord-gtk
-       - libcups2
-       - libexiv2
-       - libglib2
+      - libavif
+      - libcairo2
+      - libcolord
+      - libcolord-gtk
+      - libcups2
+      - libcurl4-gnutls
+      - libexiv2
+      - libimage-exiftool-perl
+      - libgdk-pixbuf2.0
+      - libglib2.0-dev
+      - libgraphicsmagick1
+      - libgtk-3
+      - libheif
+      - libjpeg
+      - libjson
+      - liblcms2
+      - liblensfun-bin
+      - liblensfun-data-v1
+      - liblensfun1
+      - liblua5.3
+      - libgmic
+      - libopenexr
+      - libopenjp2-7
+      - libosmgpsmap-1.0
+      - libpango1.0
+      - libpng
+      - libportmidi
+      - libpugixml
+      - librsvg2
+      - libsdl2
+      - libsecret-1
+      - libsoup2.4
+      - libsqlite3
+      - libtiff5
+      - libwebp
+      - libx11
+      - libxml2
+      - libxml2-utils
   test:
     fedora-30:
       image: appimagecrafters/tests-env:fedora-30
