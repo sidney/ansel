@@ -1,7 +1,7 @@
 # appimage-builder recipe see https://appimage-builder.readthedocs.io for details
 version: 1
 AppDir:
-  path: /home/aurelienpierre/Documents/Programmes/darktable/AppDir
+  path: AppDir
   app_info:
     id: com.ansel.app
     name: Ansel
