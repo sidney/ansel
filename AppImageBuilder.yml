@@ -12,6 +12,7 @@ AppDir:
   files:
     include:
       - /lib64/ld-linux-x86-64.so.2
+      - ~/.local/share/lensfun/updates/version_1
     exclude:
       - usr/share/man
       - usr/share/doc/*/README.*
