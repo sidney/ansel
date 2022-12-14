@@ -21,9 +21,13 @@ AppDir:
       - usr/share/doc/*/TODO.*
   apt:
     arch: [ x86_64 ]
+    sources:
+       - sourceline: 'deb [arch=amd64] http://azure.archive.ubuntu.com/ubuntu jammy main restricted universe multiverse'
+       - sourceline: 'deb [arch=amd64] http://azure.archive.ubuntu.com/ubuntu jammy-updates main restricted universe multiverse'
+      - sourceline: 'deb [arch=amd64] http://azure.archive.ubuntu.com/ubuntu jammy-backports main restricted universe multiverse'
     include:
        - libcairo2
-       - libcodord
+       - libcolord
        - libcolord-gtk
        - libcups2
        - libexiv2
