@@ -60,6 +60,7 @@ jobs:
             gdb \
             intltool \
             libatk1.0-dev \
+            libavif-dev \
             libcairo2-dev \
             libcolord-dev \
             libcolord-gtk-dev \
@@ -138,7 +139,7 @@ jobs:
         uses: AppImageCrafters/build-appimage-action@master
         if: ${{ success() }}
         with:
-          recipe: "${{ env.SRC_DIR }}/AppImageBuilder.yml"
+          recipe: ${{ github.workspace }}/AppImageBuilder.yml
       - name: Package upload
         if: ${{ success() }}
         uses: actions/upload-artifact@v3
