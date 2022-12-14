@@ -82,6 +82,7 @@ jobs:
             liblensfun-data-v1 \
             liblensfun1 \
             liblua5.3-dev \
+            libgmic-dev \
             libopenexr-dev \
             libopenjp2-7-dev \
             libosmgpsmap-1.0-dev \
