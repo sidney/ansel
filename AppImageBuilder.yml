@@ -11,13 +11,22 @@ AppDir:
     exec_args: $@
   files:
     include:
-    - /lib64/ld-linux-x86-64.so.2
+      - /lib64/ld-linux-x86-64.so.2
     exclude:
-    - usr/share/man
-    - usr/share/doc/*/README.*
-    - usr/share/doc/*/changelog.*
-    - usr/share/doc/*/NEWS.*
-    - usr/share/doc/*/TODO.*
+      - usr/share/man
+      - usr/share/doc/*/README.*
+      - usr/share/doc/*/changelog.*
+      - usr/share/doc/*/NEWS.*
+      - usr/share/doc/*/TODO.*
+  apt:
+    arch: [ x86_64 ]
+    include:
+       - libcairo2
+       - libcodord
+       - libcolord-gtk
+       - libcups2
+       - libexiv2
+       - libglib2
   test:
     fedora-30:
       image: appimagecrafters/tests-env:fedora-30
