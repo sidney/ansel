@@ -23,3 +23,6 @@ output*png
 *.code-workspace
 Brewfile.lock.json
 CMakeLists.txt.user
+AppDir
+*.AppImage*
+appimage-build
