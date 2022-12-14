@@ -32,12 +32,12 @@ jobs:
       CXX: ${{ matrix.compiler.CXX }}
       SRC_DIR: ${{ github.workspace }}/src
       BUILD_DIR: ${{ github.workspace }}/build
-      INSTALL_PREFIX: ${{ github.workspace }}/usr
+      INSTALL_PREFIX: ${{ github.workspace }}/AppDir/usr
       ECO: ${{ matrix.eco }}
       CMAKE_BUILD_TYPE: ${{ matrix.btype }}
       GENERATOR: ${{ matrix.generator }}
       TARGET: ${{ matrix.target }}
-      DARKTABLE_CLI: ${{ github.workspace }}/usr/bin/ansel-cli
+      DARKTABLE_CLI: ${{ github.workspace }}/AppDir/usr/bin/ansel-cli
       BRANCH: ${{ matrix.branch.code }}
       BUILD_NAME: ${{ matrix.branch.label }}
     steps:
@@ -138,7 +138,7 @@ jobs:
         uses: AppImageCrafters/build-appimage-action@master
         if: ${{ success() }}
         with:
-          recipe: AppImageBuilder.yml
+          recipe: "${{ env.SRC_DIR }}/AppImageBuilder.yml"
       - name: Package upload
         if: ${{ success() }}
         uses: actions/upload-artifact@v3
