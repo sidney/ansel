@@ -76,6 +76,9 @@ jobs:
             libjson-glib-dev \
             liblcms2-dev \
             liblensfun-dev \
+            liblensfun-bin \
+            liblensfun-data-v1 \
+            liblensfun1 \
             liblua5.3-dev \
             libopenexr-dev \
             libopenjp2-7-dev \
