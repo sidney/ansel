@@ -67,6 +67,7 @@ jobs:
             libcups2-dev \
             libcurl4-gnutls-dev \
             libexiv2-dev \
+            libimage-exiftool-perl \
             libgdk-pixbuf2.0-dev \
             libglib2.0-dev \
             libgraphicsmagick1-dev \
