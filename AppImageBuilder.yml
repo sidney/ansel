@@ -22,10 +22,9 @@ AppDir:
   apt:
     arch: [ x86_64 ]
     sources:
-      - sourceline: 'deb [arch=amd64] http://azure.archive.ubuntu.com/ubuntu jammy main restricted universe multiverse'
+      - sourceline: 'deb [arch=amd64] http://archive.ubuntu.com/ubuntu/ jammy main restricted universe multiverse'
         key_url: 'http://keyserver.ubuntu.com/pks/lookup?op=get&search=0x871920D1991BC93C'
-      - sourceline: 'deb [arch=amd64] http://azure.archive.ubuntu.com/ubuntu jammy-updates main restricted universe multiverse'
-      - sourceline: 'deb [arch=amd64] http://azure.archive.ubuntu.com/ubuntu jammy-backports main restricted universe multiverse'
+      - sourceline: 'deb [arch=amd64] http://archive.ubuntu.com/ubuntu/ jammy main restricted universe multiverse jammy-updates main restricted universe multiverse'
     include:
       - libavif-bin
       - libcairo2
@@ -67,13 +66,6 @@ AppDir:
       - clang-14
       - llvm-14
       - ocl-icd-libopencl1
-      - mesa-va-drivers
-      - mesa-vdpau-drivers
-      - va-driver-all
-      - vdpau-driver-all
-      - i965-va-driver
-      - intel-media-va-driver
-      - wayland-protocols
       - colord
       - colord-data
       - fonts-roboto
