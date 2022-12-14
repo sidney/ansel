@@ -21,14 +21,8 @@ AppDir:
       - usr/share/doc/*/TODO.*
   apt:
     arch: [ x86_64 ]
-    sources:
-      - sourceline: 'deb [arch=amd64] http://archive.ubuntu.com/ubuntu/ jammy main restricted universe multiverse'
-        key_url: 'http://keyserver.ubuntu.com/pks/lookup?op=get&search=0x871920D1991BC93C'
-      - sourceline: 'deb [arch=amd64] http://archive.ubuntu.com/ubuntu/ jammy main restricted universe multiverse jammy-updates main restricted universe multiverse'
     include:
       - fonts-roboto
-      - fonts-droid-fallback
-      - fonts-noto-mono
   test:
     fedora-30:
       image: appimagecrafters/tests-env:fedora-30
