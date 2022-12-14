@@ -27,44 +27,58 @@ AppDir:
       - sourceline: 'deb [arch=amd64] http://azure.archive.ubuntu.com/ubuntu jammy-updates main restricted universe multiverse'
       - sourceline: 'deb [arch=amd64] http://azure.archive.ubuntu.com/ubuntu jammy-backports main restricted universe multiverse'
     include:
-      - libavif
+      - libavif-bin
       - libcairo2
-      - libcolord
-      - libcolord-gtk
+      - libcolord2
+      - libcolord-gtk1
       - libcups2
-      - libcurl4-gnutls
-      - libexiv2
+      - libexiv2-27
       - libimage-exiftool-perl
       - libgdk-pixbuf2.0
-      - libglib2.0-dev
+      - libglib2.0-bin
       - libgraphicsmagick1
-      - libgtk-3
-      - libheif
-      - libjpeg
-      - libjson
-      - liblcms2
+      - libgtk-3-0
+      - libheif1
+      - libjpeg9
+      - libjson-glib-1.0-0
+      - liblcms2-2
       - liblensfun-bin
       - liblensfun-data-v1
       - liblensfun1
-      - liblua5.3
-      - libgmic
-      - libopenexr
+      - liblua5.3-0
+      - libgmic1
+      - libopenexr-3-1-30
       - libopenjp2-7
-      - libosmgpsmap-1.0
-      - libpango1.0
-      - libpng
-      - libportmidi
-      - libpugixml
-      - librsvg2
-      - libsdl2
-      - libsecret-1
-      - libsoup2.4
-      - libsqlite3
+      - libosmgpsmap-1.0-1
+      - libpango-1.0-0
+      - libpng16-16
+      - libportmidi0
+      - libpugixml1v5
+      - librsvg2-2
+      - libsdl2-2.0-0
+      - libsecret-1-0
+      - libsoup2.4-1
+      - libsqlite3-0
       - libtiff5
-      - libwebp
-      - libx11
+      - libwebp7
+      - libx11-6
       - libxml2
       - libxml2-utils
+      - clang-14
+      - llvm-14
+      - ocl-icd-libopencl1
+      - mesa-va-drivers
+      - mesa-vdpau-drivers
+      - va-driver-all
+      - vdpau-driver-all
+      - i965-va-driver
+      - intel-media-va-driver
+      - wayland-protocols
+      - colord
+      - colord-data
+      - fonts-roboto
+      - fonts-droid-fallback
+      - fonts-noto-mono
   test:
     fedora-30:
       image: appimagecrafters/tests-env:fedora-30
