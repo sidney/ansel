@@ -27,7 +27,6 @@ jobs:
           - Ninja
         branch:
           - { code: master, label: stable }
-          - { code: candidate, label: pre-release }
     defaults:
       run:
         shell: msys2 {0}
