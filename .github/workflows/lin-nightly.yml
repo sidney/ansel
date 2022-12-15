@@ -20,7 +20,7 @@ jobs:
           - Release
         compiler:
           - { compiler: GNU12,   CC: gcc-12,    CXX: g++-12,      packages: gcc-12 g++-12 }
-        eco: [-DBINARY_PACKAGE_BUILD=ON -DCMAKE_BUILD_PARALLEL_LEVEL="8"]
+        eco: [-DBINARY_PACKAGE_BUILD=ON]
         target:
           - skiptest
         generator:
@@ -108,17 +108,15 @@ jobs:
             python3-jsonschema \
             xsltproc \
             zlib1g-dev \
-            squashfs-tools;
-      # squashfs is a dependency of AppImage builder, not Ansel
+            squashfs-tools \
+            libfuse2;
+      # squashfs and libfuse2 are deps of AppImage builder, not Ansel
       - uses: actions/checkout@v3
         with:
           ref: ${{ env.BRANCH }}
           fetch-depth: 0
           submodules: true
           path: src
-      - name: List number of CPU cores
-        run: |
-          grep -c "^processor" /proc/cpuinfo
       - name: Update lensfun data for root
         if: ${{ success() }}
         run: |

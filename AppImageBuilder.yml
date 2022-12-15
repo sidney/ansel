@@ -3,7 +3,7 @@ version: 1
 AppDir:
   path: AppDir
   app_info:
-    id: com.ansel.app
+    id: org.ansel.app
     name: Ansel
     icon: ansel
     version: latest
@@ -12,7 +12,8 @@ AppDir:
   files:
     include:
       - /lib64/ld-linux-x86-64.so.2
-      - ~/.local/share/lensfun/updates/version_1
+      # Lens database. For this to work, you first need to run `sudo lensfun-update-data` on your OS.
+      - /var/lib/lensfun-updates/version_1/*
     exclude:
       - usr/share/man
       - usr/share/doc/*/README.*
