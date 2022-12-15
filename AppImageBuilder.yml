@@ -23,13 +23,14 @@ AppDir:
   apt:
     arch: [ amd64 ]
     sources:
-      - sourceline: 'deb http://archive.ubuntu.com/ubuntu/ focal main restricted universe multiverse'
+      - sourceline: 'deb [arch=amd64] http://archive.ubuntu.com/ubuntu/ focal main restricted universe multiverse'
         key_url: 'http://keyserver.ubuntu.com/pks/lookup?op=get&search=0x871920D1991BC93C'
       - sourceline: 'deb [arch=amd64] http://archive.ubuntu.com/ubuntu/ focal-updates main restricted universe multiverse'
       - sourceline: 'deb [arch=amd64] http://archive.ubuntu.com/ubuntu/ focal-backports main restricted universe multiverse'
     include:
       - fonts-roboto
       - bash
+      - squashfs-tools
   test:
     fedora-30:
       image: appimagecrafters/tests-env:fedora-30
@@ -46,6 +47,7 @@ AppDir:
     ubuntu-xenial:
       image: appimagecrafters/tests-env:ubuntu-xenial
       command: ./AppRun
+
 AppImage:
   arch: x86_64
   update-information: guess
