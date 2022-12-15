@@ -134,6 +134,8 @@ jobs:
     steps:
       - name: Download artifact
         uses: actions/download-artifact@v3
+        with:
+          name: ansel.stable.win64
       - name: Update nightly release
         uses: eine/tip@master
         with:
