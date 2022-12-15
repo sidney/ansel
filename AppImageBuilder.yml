@@ -21,6 +21,7 @@ AppDir:
       - usr/share/doc/*/TODO.*
   apt:
     arch: [ x86_64 ]
+    sources:
       - sourceline: 'deb [arch=amd64] http://archive.ubuntu.com/ubuntu/ jammy main restricted universe multiverse'
         key_url: 'http://keyserver.ubuntu.com/pks/lookup?op=get&search=0x3b4fe6acc0b21f32'
       - sourceline: 'deb [arch=amd64] http://archive.ubuntu.com/ubuntu/ jammy-updates main restricted universe multiverse'
