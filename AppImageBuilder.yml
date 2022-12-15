@@ -29,6 +29,7 @@ AppDir:
       - sourceline: 'deb [arch=amd64] http://archive.ubuntu.com/ubuntu/ jammy-backports main restricted universe multiverse'
     include:
       - fonts-roboto
+      - bash
   test:
     fedora-30:
       image: appimagecrafters/tests-env:fedora-30
