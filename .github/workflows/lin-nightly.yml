@@ -61,7 +61,7 @@ jobs:
             gdb \
             intltool \
             libatk1.0-dev \
-            libavif-dev \
+            libavifile-0.7-dev \
             libcairo2-dev \
             libcolord-dev \
             libcolord-gtk-dev \
