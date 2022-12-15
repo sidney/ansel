@@ -109,8 +109,10 @@ jobs:
             xsltproc \
             zlib1g-dev \
             squashfs-tools \
-            libfuse2;
-      # squashfs and libfuse2 are deps of AppImage builder, not Ansel
+            libfuse2 \
+            gstreamer1.0-tools \
+            debianutils;
+      # squashfs, libfuse2, gstreamer are deps of AppImage builder, not Ansel
       - uses: actions/checkout@v3
         with:
           ref: ${{ env.BRANCH }}
@@ -162,6 +164,8 @@ jobs:
     steps:
       - name: Download artifact
         uses: actions/download-artifact@v3
+        with:
+          name: ansel.stable.AppImage
       - name: Update nightly release
         uses: eine/tip@master
         with:
