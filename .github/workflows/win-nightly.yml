@@ -142,4 +142,4 @@ jobs:
           tag: v0.0.0
           rm: false
           token: ${{ secrets.GITHUB_TOKEN }}
-          files: ansel.stable.win64
+          files: ansel-*.exe
