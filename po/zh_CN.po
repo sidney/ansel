@@ -4309,7 +4309,7 @@ msgid "Virtual Lighttable and Darkroom"
 msgstr "虚拟的光台和暗房"
 
 #: ../build/share/darktable/ansel.desktop.in.h:2
-#: ../data/ansel.appdata.xml.in.h:1 ../data/ansel.desktop.in.h:2
+#: ../data/photos.ansel.app.appdata.xml.in.h:1 ../data/ansel.desktop.in.h:2
 msgid "Organize and develop images from digital cameras"
 msgstr "组织并冲印来自数码相机的图片"
 
@@ -4319,7 +4319,7 @@ msgstr "组织并冲印来自数码相机的图片"
 msgid "graphics;photography;raw;"
 msgstr "graphics;photography;raw;图片;图像;摄影;"
 
-#: ../data/ansel.appdata.xml.in.h:2
+#: ../data/photos.ansel.app.appdata.xml.in.h:2
 msgid ""
 "darktable manages your digital negatives in a database and lets you view "
 "them through a lighttable. It also enables you to develop raw images and "
@@ -4327,7 +4327,7 @@ msgid ""
 msgstr ""
 "使用 darktable 管理您的电子底片，在光台中浏览照片，在暗室中处理 RAW 图像。"
 
-#: ../data/ansel.appdata.xml.in.h:3
+#: ../data/photos.ansel.app.appdata.xml.in.h:3
 msgid ""
 "Other modes besides lighttable and darkroom are a map for geotagging, "
 "tethering, print and a slideshow."
@@ -4335,30 +4335,30 @@ msgstr ""
 "除了光台和暗房模式，您可以使用地图为照片添加地理位置标签、使用有线模式连接相"
 "机、打印照片及放映幻灯片。"
 
-#: ../data/ansel.appdata.xml.in.h:4
+#: ../data/photos.ansel.app.appdata.xml.in.h:4
 msgid ""
 "darktable supports most modern cameras' raw formats, and does all of its "
 "processing at very high precision."
 msgstr ""
 "darktable 支持绝大多数现代相机的 RAW 文件格式，并以极高精确度处理图像。"
 
-#: ../data/ansel.appdata.xml.in.h:5
+#: ../data/photos.ansel.app.appdata.xml.in.h:5
 msgid "Virtual light table, showing a collection"
 msgstr "虚拟光台，用于展示照片集"
 
-#: ../data/ansel.appdata.xml.in.h:6
+#: ../data/photos.ansel.app.appdata.xml.in.h:6
 msgid "Virtual dark room with an opened image"
 msgstr "虚拟暗房，打开单张图像"
 
-#: ../data/ansel.appdata.xml.in.h:7
+#: ../data/photos.ansel.app.appdata.xml.in.h:7
 msgid "Virtual dark room, sharpening an image"
 msgstr "虚拟暗房，对图像进行锐化"
 
-#: ../data/ansel.appdata.xml.in.h:8
+#: ../data/photos.ansel.app.appdata.xml.in.h:8
 msgid "Show images on a map"
 msgstr "在地图上显示图像"
 
-#: ../data/ansel.appdata.xml.in.h:9
+#: ../data/photos.ansel.app.appdata.xml.in.h:9
 msgid "Print your images"
 msgstr "打印图像"
 

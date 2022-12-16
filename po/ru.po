@@ -4408,7 +4408,7 @@ msgid "Virtual Lighttable and Darkroom"
 msgstr "Виртуальный световой стол и фоторедактор"
 
 #: ../build/share/darktable/ansel.desktop.in.h:2
-#: ../data/ansel.appdata.xml.in.h:1 ../data/ansel.desktop.in.h:2
+#: ../data/photos.ansel.app.appdata.xml.in.h:1 ../data/ansel.desktop.in.h:2
 msgid "Organize and develop images from digital cameras"
 msgstr "Организация и обработка цифровых фотографий"
 
@@ -4418,7 +4418,7 @@ msgstr "Организация и обработка цифровых фотог
 msgid "graphics;photography;raw;"
 msgstr "graphics;photography;raw;"
 
-#: ../data/ansel.appdata.xml.in.h:2
+#: ../data/photos.ansel.app.appdata.xml.in.h:2
 msgid ""
 "darktable manages your digital negatives in a database and lets you view "
 "them through a lighttable. It also enables you to develop raw images and "
@@ -4427,7 +4427,7 @@ msgstr ""
 "darktable управляет цифровыми фотографиями в формате Raw, позволяя "
 "просматривать их, каталогизировать и редактировать."
 
-#: ../data/ansel.appdata.xml.in.h:3
+#: ../data/photos.ansel.app.appdata.xml.in.h:3
 msgid ""
 "Other modes besides lighttable and darkroom are a map for geotagging, "
 "tethering, print and a slideshow."
@@ -4435,7 +4435,7 @@ msgstr ""
 "Помимо этого darktable поддерживает геотеггинг, режим дистанционной съёмки, "
 "печать и слайдшоу."
 
-#: ../data/ansel.appdata.xml.in.h:4
+#: ../data/photos.ansel.app.appdata.xml.in.h:4
 msgid ""
 "darktable supports most modern cameras' raw formats, and does all of its "
 "processing at very high precision."
@@ -4443,23 +4443,23 @@ msgstr ""
 "darktable поддерживает большой спектр современных камер и выполняет "
 "обработку снимков с очень высокой точностью."
 
-#: ../data/ansel.appdata.xml.in.h:5
+#: ../data/photos.ansel.app.appdata.xml.in.h:5
 msgid "Virtual light table, showing a collection"
 msgstr "Виртуальный световой стол и коллекция снимков"
 
-#: ../data/ansel.appdata.xml.in.h:6
+#: ../data/photos.ansel.app.appdata.xml.in.h:6
 msgid "Virtual dark room with an opened image"
 msgstr "Фоторедактор с открытым снимком"
 
-#: ../data/ansel.appdata.xml.in.h:7
+#: ../data/photos.ansel.app.appdata.xml.in.h:7
 msgid "Virtual dark room, sharpening an image"
 msgstr "Фоторедактор, повышение резкости снимка"
 
-#: ../data/ansel.appdata.xml.in.h:8
+#: ../data/photos.ansel.app.appdata.xml.in.h:8
 msgid "Show images on a map"
 msgstr "Показ снимков на карте"
 
-#: ../data/ansel.appdata.xml.in.h:9
+#: ../data/photos.ansel.app.appdata.xml.in.h:9
 msgid "Print your images"
 msgstr "Печать снимков"
 

@@ -4623,7 +4623,7 @@ msgid "Virtual Lighttable and Darkroom"
 msgstr "Virtuální katalog a editor"
 
 #: ../build/share/darktable/ansel.desktop.in.h:2
-#: ../data/ansel.appdata.xml.in.h:1 ../data/ansel.desktop.in.h:2
+#: ../data/photos.ansel.app.appdata.xml.in.h:1 ../data/ansel.desktop.in.h:2
 msgid "Organize and develop images from digital cameras"
 msgstr "Uspořádejte a vytvářejte snímky z digitálních fotoaparátů"
 
@@ -4633,7 +4633,7 @@ msgstr "Uspořádejte a vytvářejte snímky z digitálních fotoaparátů"
 msgid "graphics;photography;raw;"
 msgstr "grafika;fotografie;raw;"
 
-#: ../data/ansel.appdata.xml.in.h:2
+#: ../data/photos.ansel.app.appdata.xml.in.h:2
 msgid ""
 "darktable manages your digital negatives in a database and lets you view "
 "them through a lighttable. It also enables you to develop raw images and "
@@ -4643,7 +4643,7 @@ msgstr ""
 "prohlížet přes katalog. Umožňuje také vyvolat nezpracované obrázky a "
 "vylepšit je v editoru."
 
-#: ../data/ansel.appdata.xml.in.h:3
+#: ../data/photos.ansel.app.appdata.xml.in.h:3
 msgid ""
 "Other modes besides lighttable and darkroom are a map for geotagging, "
 "tethering, print and a slideshow."
@@ -4651,7 +4651,7 @@ msgstr ""
 "Další režimy kromě katalogu a editoru jsou mapa pro geotagging, tethering, "
 "tisk a slideshow."
 
-#: ../data/ansel.appdata.xml.in.h:4
+#: ../data/photos.ansel.app.appdata.xml.in.h:4
 msgid ""
 "darktable supports most modern cameras' raw formats, and does all of its "
 "processing at very high precision."
@@ -4659,23 +4659,23 @@ msgstr ""
 "darktable podporuje raw formáty většiny moderních fotoaparátů a veškeré "
 "zpracování provádí s velmi vysokou přesností."
 
-#: ../data/ansel.appdata.xml.in.h:5
+#: ../data/photos.ansel.app.appdata.xml.in.h:5
 msgid "Virtual light table, showing a collection"
 msgstr "Virtuální katalog zobrazující kolekci"
 
-#: ../data/ansel.appdata.xml.in.h:6
+#: ../data/photos.ansel.app.appdata.xml.in.h:6
 msgid "Virtual dark room with an opened image"
 msgstr "Virtuální editor s otevřeným obrázkem"
 
-#: ../data/ansel.appdata.xml.in.h:7
+#: ../data/photos.ansel.app.appdata.xml.in.h:7
 msgid "Virtual dark room, sharpening an image"
 msgstr "Virtuální editor, zaostření obrázku"
 
-#: ../data/ansel.appdata.xml.in.h:8
+#: ../data/photos.ansel.app.appdata.xml.in.h:8
 msgid "Show images on a map"
 msgstr "Zobrazit obrázky na mapě"
 
-#: ../data/ansel.appdata.xml.in.h:9
+#: ../data/photos.ansel.app.appdata.xml.in.h:9
 msgid "Print your images"
 msgstr "Tisk vašich obrázků"
 

@@ -4766,7 +4766,7 @@ msgid "Virtual Lighttable and Darkroom"
 msgstr "Virtueller Leuchttisch und Dunkelkammer"
 
 #: ../build/share/darktable/ansel.desktop.in.h:2
-#: ../data/ansel.appdata.xml.in.h:1 ../data/ansel.desktop.in.h:2
+#: ../data/photos.ansel.app.appdata.xml.in.h:1 ../data/ansel.desktop.in.h:2
 msgid "Organize and develop images from digital cameras"
 msgstr "Organisiere und entwickle Bilder von Digitalkameras"
 
@@ -4776,7 +4776,7 @@ msgstr "Organisiere und entwickle Bilder von Digitalkameras"
 msgid "graphics;photography;raw;"
 msgstr "Graphik;Grafik;Photographie;Fotografie;Raw;"
 
-#: ../data/ansel.appdata.xml.in.h:2
+#: ../data/photos.ansel.app.appdata.xml.in.h:2
 msgid ""
 "darktable manages your digital negatives in a database and lets you view "
 "them through a lighttable. It also enables you to develop raw images and "
@@ -4786,7 +4786,7 @@ msgstr ""
 "diese auf einem Leuchttisch zu betrachten. Außerdem können Raw-Bilder in "
 "einer Dunkelkammer entwickelt und verbessert werden."
 
-#: ../data/ansel.appdata.xml.in.h:3
+#: ../data/photos.ansel.app.appdata.xml.in.h:3
 msgid ""
 "Other modes besides lighttable and darkroom are a map for geotagging, "
 "tethering, print and a slideshow."
@@ -4794,7 +4794,7 @@ msgstr ""
 "Weitere Modi neben Leuchttisch und Dunkelkammer sind eine Karte für "
 "Geotagging, Tethering, Druck und eine Diashow."
 
-#: ../data/ansel.appdata.xml.in.h:4
+#: ../data/photos.ansel.app.appdata.xml.in.h:4
 msgid ""
 "darktable supports most modern cameras' raw formats, and does all of its "
 "processing at very high precision."
@@ -4802,23 +4802,23 @@ msgstr ""
 "darktable unterstützt das Raw-Format der meisten modernen Kameras und führt "
 "seine Berechnungen mit sehr hoher Präzision durch."
 
-#: ../data/ansel.appdata.xml.in.h:5
+#: ../data/photos.ansel.app.appdata.xml.in.h:5
 msgid "Virtual light table, showing a collection"
 msgstr "Der Leuchttisch zeigt eine Sammlung an"
 
-#: ../data/ansel.appdata.xml.in.h:6
+#: ../data/photos.ansel.app.appdata.xml.in.h:6
 msgid "Virtual dark room with an opened image"
 msgstr "Die Dunkelkammer mit einem geöffneten Bild"
 
-#: ../data/ansel.appdata.xml.in.h:7
+#: ../data/photos.ansel.app.appdata.xml.in.h:7
 msgid "Virtual dark room, sharpening an image"
 msgstr "Schärfen eines Bildes in der Dunkelkammer"
 
-#: ../data/ansel.appdata.xml.in.h:8
+#: ../data/photos.ansel.app.appdata.xml.in.h:8
 msgid "Show images on a map"
 msgstr "Zeige Bilder auf der Karte an"
 
-#: ../data/ansel.appdata.xml.in.h:9
+#: ../data/photos.ansel.app.appdata.xml.in.h:9
 msgid "Print your images"
 msgstr "Drucke deine Bilder"
 

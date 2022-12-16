@@ -4413,7 +4413,7 @@ msgid "Virtual Lighttable and Darkroom"
 msgstr "Virtuális átvilágító és sötétkamra"
 
 #: ../build/share/darktable/ansel.desktop.in.h:2
-#: ../data/ansel.appdata.xml.in.h:1 ../data/ansel.desktop.in.h:2
+#: ../data/photos.ansel.app.appdata.xml.in.h:1 ../data/ansel.desktop.in.h:2
 msgid "Organize and develop images from digital cameras"
 msgstr "Digitális fényképező képeinek rendezése, kidolgozása"
 
@@ -4423,7 +4423,7 @@ msgstr "Digitális fényképező képeinek rendezése, kidolgozása"
 msgid "graphics;photography;raw;"
 msgstr "grafika;fénykép;fotó;raw;"
 
-#: ../data/ansel.appdata.xml.in.h:2
+#: ../data/photos.ansel.app.appdata.xml.in.h:2
 msgid ""
 "darktable manages your digital negatives in a database and lets you view "
 "them through a lighttable. It also enables you to develop raw images and "
@@ -4433,7 +4433,7 @@ msgstr ""
 "a nézegetésüket egy átvilágító asztalon. Lehetőséget ad a nyers képek "
 "kidolgozására és feljavítására a sötétkamrában."
 
-#: ../data/ansel.appdata.xml.in.h:3
+#: ../data/photos.ansel.app.appdata.xml.in.h:3
 msgid ""
 "Other modes besides lighttable and darkroom are a map for geotagging, "
 "tethering, print and a slideshow."
@@ -4441,7 +4441,7 @@ msgstr ""
 "Az átvilágító és sötétkamra módokon túl térképes geokódolást, tetheringet, "
 "nyomtatást és diavetítést tesz lehetővé."
 
-#: ../data/ansel.appdata.xml.in.h:4
+#: ../data/photos.ansel.app.appdata.xml.in.h:4
 msgid ""
 "darktable supports most modern cameras' raw formats, and does all of its "
 "processing at very high precision."
@@ -4449,23 +4449,23 @@ msgstr ""
 "a darktable támogatja a legtöbb modern kamera raw formátumát, a "
 "feldolgozásukat pedig nagy pontossággal végzi."
 
-#: ../data/ansel.appdata.xml.in.h:5
+#: ../data/photos.ansel.app.appdata.xml.in.h:5
 msgid "Virtual light table, showing a collection"
 msgstr "Virtuális átvilágító, egy gyűjtemény megjelenítése"
 
-#: ../data/ansel.appdata.xml.in.h:6
+#: ../data/photos.ansel.app.appdata.xml.in.h:6
 msgid "Virtual dark room with an opened image"
 msgstr "Virtuális sötétkamra egy megnyitott képpel"
 
-#: ../data/ansel.appdata.xml.in.h:7
+#: ../data/photos.ansel.app.appdata.xml.in.h:7
 msgid "Virtual dark room, sharpening an image"
 msgstr "Virtuális sötétkamra, egy kép élesítése"
 
-#: ../data/ansel.appdata.xml.in.h:8
+#: ../data/photos.ansel.app.appdata.xml.in.h:8
 msgid "Show images on a map"
 msgstr "Képek megjelenítése a térképen"
 
-#: ../data/ansel.appdata.xml.in.h:9
+#: ../data/photos.ansel.app.appdata.xml.in.h:9
 msgid "Print your images"
 msgstr "Képek nyomtatása"
 

@@ -4671,7 +4671,7 @@ msgid "Virtual Lighttable and Darkroom"
 msgstr "Sanal Işık Masası ve Karanlık Oda"
 
 #: ../build/share/darktable/ansel.desktop.in.h:2
-#: ../data/ansel.appdata.xml.in.h:1 ../data/ansel.desktop.in.h:2
+#: ../data/photos.ansel.app.appdata.xml.in.h:1 ../data/ansel.desktop.in.h:2
 msgid "Organize and develop images from digital cameras"
 msgstr "Dijital kameralardan görüntüleri düzenleyin ve geliştirin"
 
@@ -4681,7 +4681,7 @@ msgstr "Dijital kameralardan görüntüleri düzenleyin ve geliştirin"
 msgid "graphics;photography;raw;"
 msgstr "grafik;fotoğrafçılık;raw;"
 
-#: ../data/ansel.appdata.xml.in.h:2
+#: ../data/photos.ansel.app.appdata.xml.in.h:2
 msgid ""
 "darktable manages your digital negatives in a database and lets you view "
 "them through a lighttable. It also enables you to develop raw images and "
@@ -4691,7 +4691,7 @@ msgstr ""
 "ışık masası aracılığıyla görüntülemenizi sağlar. Ayrıca, ham görüntüler "
 "geliştirmenize ve bunları karanlık bir odada geliştirmenize olanak tanır."
 
-#: ../data/ansel.appdata.xml.in.h:3
+#: ../data/photos.ansel.app.appdata.xml.in.h:3
 msgid ""
 "Other modes besides lighttable and darkroom are a map for geotagging, "
 "tethering, print and a slideshow."
@@ -4699,7 +4699,7 @@ msgstr ""
 "Aydınlık masa ve karanlık oda dışındaki diğer modlar, coğrafi etiketleme, "
 "bağlama, yazdırma ve slayt gösterisi için bir haritadır."
 
-#: ../data/ansel.appdata.xml.in.h:4
+#: ../data/photos.ansel.app.appdata.xml.in.h:4
 msgid ""
 "darktable supports most modern cameras' raw formats, and does all of its "
 "processing at very high precision."
@@ -4707,23 +4707,23 @@ msgstr ""
 "darktable, çoğu modern kameranın raw formatını destekler ve tüm işlemlerini "
 "çok yüksek hassasiyette yapar."
 
-#: ../data/ansel.appdata.xml.in.h:5
+#: ../data/photos.ansel.app.appdata.xml.in.h:5
 msgid "Virtual light table, showing a collection"
 msgstr "Bir koleksiyonu gösteren sanal ışık tablosu"
 
-#: ../data/ansel.appdata.xml.in.h:6
+#: ../data/photos.ansel.app.appdata.xml.in.h:6
 msgid "Virtual dark room with an opened image"
 msgstr "Açılmış bir görüntü ile sanal karanlık oda"
 
-#: ../data/ansel.appdata.xml.in.h:7
+#: ../data/photos.ansel.app.appdata.xml.in.h:7
 msgid "Virtual dark room, sharpening an image"
 msgstr "Sanal karanlık oda, bir görüntüyü keskinleştirme"
 
-#: ../data/ansel.appdata.xml.in.h:8
+#: ../data/photos.ansel.app.appdata.xml.in.h:8
 msgid "Show images on a map"
 msgstr "Görüntüleri haritada göster"
 
-#: ../data/ansel.appdata.xml.in.h:9
+#: ../data/photos.ansel.app.appdata.xml.in.h:9
 msgid "Print your images"
 msgstr "Görüntüleri yazdırın"
 

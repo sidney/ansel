@@ -4422,7 +4422,7 @@ msgid "Virtual Lighttable and Darkroom"
 msgstr "Virtuaalinen valopöytä ja pimiö."
 
 #: ../build/share/darktable/ansel.desktop.in.h:2
-#: ../data/ansel.appdata.xml.in.h:1 ../data/ansel.desktop.in.h:2
+#: ../data/photos.ansel.app.appdata.xml.in.h:1 ../data/ansel.desktop.in.h:2
 msgid "Organize and develop images from digital cameras"
 msgstr "Hallinnoi ja kehitä digitaalikameroilla otettuja valokuvia."
 
@@ -4432,7 +4432,7 @@ msgstr "Hallinnoi ja kehitä digitaalikameroilla otettuja valokuvia."
 msgid "graphics;photography;raw;"
 msgstr "Grafiikka;Valokuvaus;RAW;"
 
-#: ../data/ansel.appdata.xml.in.h:2
+#: ../data/photos.ansel.app.appdata.xml.in.h:2
 msgid ""
 "darktable manages your digital negatives in a database and lets you view "
 "them through a lighttable. It also enables you to develop raw images and "
@@ -4442,7 +4442,7 @@ msgstr ""
 "ne sinulle valopöydällä. Se myös kehittää raakakuvasi ja muokkaa ne "
 "pimiötilassa."
 
-#: ../data/ansel.appdata.xml.in.h:3
+#: ../data/photos.ansel.app.appdata.xml.in.h:3
 msgid ""
 "Other modes besides lighttable and darkroom are a map for geotagging, "
 "tethering, print and a slideshow."
@@ -4451,7 +4451,7 @@ msgstr ""
 "lisäämiseksi, liitetyn kuvauksen tila, tulostustila ja kuvien esitys "
 "kuvasarjana."
 
-#: ../data/ansel.appdata.xml.in.h:4
+#: ../data/photos.ansel.app.appdata.xml.in.h:4
 msgid ""
 "darktable supports most modern cameras' raw formats, and does all of its "
 "processing at very high precision."
@@ -4459,23 +4459,23 @@ msgstr ""
 "Darktable tukee lähes kaikkia nykyaikaisia kameroiden raakakuvamuotoja ja "
 "prosessoi ne erittäin tarkasti."
 
-#: ../data/ansel.appdata.xml.in.h:5
+#: ../data/photos.ansel.app.appdata.xml.in.h:5
 msgid "Virtual light table, showing a collection"
 msgstr "Virtuaalinen valopöytä, näyttää kuvakokoelman."
 
-#: ../data/ansel.appdata.xml.in.h:6
+#: ../data/photos.ansel.app.appdata.xml.in.h:6
 msgid "Virtual dark room with an opened image"
 msgstr "Virtuaalinen pimiö näyttää avatun valokuvan."
 
-#: ../data/ansel.appdata.xml.in.h:7
+#: ../data/photos.ansel.app.appdata.xml.in.h:7
 msgid "Virtual dark room, sharpening an image"
 msgstr "Virtuaalinen pimiö, valokuvan terävöitykseen."
 
-#: ../data/ansel.appdata.xml.in.h:8
+#: ../data/photos.ansel.app.appdata.xml.in.h:8
 msgid "Show images on a map"
 msgstr "Näytä valokuvat kartalla."
 
-#: ../data/ansel.appdata.xml.in.h:9
+#: ../data/photos.ansel.app.appdata.xml.in.h:9
 msgid "Print your images"
 msgstr "Tulosta valokuvasi."
 

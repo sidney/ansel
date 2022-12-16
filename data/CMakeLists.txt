@@ -38,50 +38,50 @@ if(NOT WIN32)
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/ansel.desktop.in ${CMAKE_CURRENT_BINARY_DIR}/ansel.desktop.in)
 file(GLOB PO_FILES "${CMAKE_CURRENT_SOURCE_DIR}/../po/*.po")
 add_custom_command(
-		OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/ansel.desktop
+		OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/photos.ansel.app.desktop
 		SOURCE ${CMAKE_CURRENT_BINARY_DIR}/ansel.desktop.in
-		COMMAND sh -c "${intltool_merge_BIN} --desktop-style ${CMAKE_CURRENT_SOURCE_DIR}/../po ${CMAKE_CURRENT_BINARY_DIR}/ansel.desktop.in ${CMAKE_CURRENT_BINARY_DIR}/ansel.desktop"
+		COMMAND sh -c "${intltool_merge_BIN} --desktop-style ${CMAKE_CURRENT_SOURCE_DIR}/../po ${CMAKE_CURRENT_BINARY_DIR}/ansel.desktop.in ${CMAKE_CURRENT_BINARY_DIR}/photos.ansel.app.desktop"
 		MAIN_DEPENDENCY ${CMAKE_CURRENT_BINARY_DIR}/ansel.desktop.in
 		DEPENDS ${PO_FILES}
 )
-add_custom_target(ansel.desktop_file ALL DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/ansel.desktop)
+add_custom_target(photos.ansel.desktop_file ALL DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/photos.ansel.app.desktop)
 if(${VALIDATE_DESKTOP_FILE})
   add_custom_target(
-    validate_ansel.desktop ALL
-    COMMAND ${desktop_file_validate_BIN} --warn-kde ${CMAKE_CURRENT_BINARY_DIR}/ansel.desktop
-    DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/ansel.desktop
+    validate_photos.ansel.desktop ALL
+    COMMAND ${desktop_file_validate_BIN} --warn-kde ${CMAKE_CURRENT_BINARY_DIR}/photos.ansel.app.desktop
+    DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/photos.ansel.app.desktop
     WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/
-    COMMENT "Checking validity of ansel.desktop"
+    COMMENT "Checking validity of photos.ansel.app.desktop"
     )
-  add_dependencies(ansel.desktop_file validate_ansel.desktop)
+  add_dependencies(photos.ansel.desktop_file validate_photos.ansel.desktop)
 endif()
-install(FILES ${CMAKE_CURRENT_BINARY_DIR}/ansel.desktop DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/applications COMPONENT DTApplication)
+install(FILES ${CMAKE_CURRENT_BINARY_DIR}/photos.ansel.app.desktop DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/applications COMPONENT DTApplication)
 endif(NOT WIN32)
 
 if(${VALIDATE_APPDATA_FILE})
   add_custom_command(
-    OUTPUT ${DARKTABLE_SHAREDIR}/metainfo/ansel.appdata.xml
-    SOURCE ${CMAKE_CURRENT_SOURCE_DIR}/ansel.appdata.xml.in
+    OUTPUT ${DARKTABLE_SHAREDIR}/metainfo/photos.ansel.app.appdata.xml
+    SOURCE ${CMAKE_CURRENT_SOURCE_DIR}/photos.ansel.app.appdata.xml.in
     COMMAND ${CMAKE_COMMAND} -E make_directory ${DARKTABLE_SHAREDIR}/metainfo
-    COMMAND sh -c "${intltool_merge_BIN} --xml-style ${CMAKE_CURRENT_SOURCE_DIR}/../po ${CMAKE_CURRENT_SOURCE_DIR}/ansel.appdata.xml.in ${DARKTABLE_SHAREDIR}/metainfo/ansel.appdata.xml"
-    COMMAND ${appstream_util_BIN} validate --nonet ${DARKTABLE_SHAREDIR}/metainfo/ansel.appdata.xml
-    MAIN_DEPENDENCY ${CMAKE_CURRENT_SOURCE_DIR}/ansel.appdata.xml.in
+    COMMAND sh -c "${intltool_merge_BIN} --xml-style ${CMAKE_CURRENT_SOURCE_DIR}/../po ${CMAKE_CURRENT_SOURCE_DIR}/photos.ansel.app.appdata.xml.in ${DARKTABLE_SHAREDIR}/metainfo/ansel.appdata.xml"
+    COMMAND ${appstream_util_BIN} validate --nonet ${DARKTABLE_SHAREDIR}/metainfo/photos.ansel.app.appdata.xml
+    MAIN_DEPENDENCY ${CMAKE_CURRENT_SOURCE_DIR}/photos.ansel.app.appdata.xml.in
     DEPENDS ${PO_FILES}
   )
 else()
   add_custom_command(
-    OUTPUT ${DARKTABLE_SHAREDIR}/metainfo/ansel.appdata.xml
-    SOURCE ${CMAKE_CURRENT_SOURCE_DIR}/ansel.appdata.xml.in
+    OUTPUT ${DARKTABLE_SHAREDIR}/metainfo/photos.ansel.app.appdata.xml
+    SOURCE ${CMAKE_CURRENT_SOURCE_DIR}/photos.ansel.app.appdata.xml.in
     COMMAND ${CMAKE_COMMAND} -E make_directory ${DARKTABLE_SHAREDIR}/metainfo
-    COMMAND sh -c "${intltool_merge_BIN} --xml-style ${CMAKE_CURRENT_SOURCE_DIR}/../po ${CMAKE_CURRENT_SOURCE_DIR}/ansel.appdata.xml.in ${DARKTABLE_SHAREDIR}/metainfo/ansel.appdata.xml"
-    MAIN_DEPENDENCY ${CMAKE_CURRENT_SOURCE_DIR}/ansel.appdata.xml.in
+    COMMAND sh -c "${intltool_merge_BIN} --xml-style ${CMAKE_CURRENT_SOURCE_DIR}/../po ${CMAKE_CURRENT_SOURCE_DIR}/photos.ansel.app.appdata.xml.in ${DARKTABLE_SHAREDIR}/metainfo/photos.ansel.app.appdata.xml"
+    MAIN_DEPENDENCY ${CMAKE_CURRENT_SOURCE_DIR}/photos.ansel.app.appdata.xml.in
     DEPENDS ${PO_FILES}
   )
 endif()
 
-add_custom_target(ansel.appdata_file ALL DEPENDS ${DARKTABLE_SHAREDIR}/metainfo/ansel.appdata.xml)
+add_custom_target(ansel.appdata_file ALL DEPENDS ${DARKTABLE_SHAREDIR}/metainfo/photos.ansel.app.appdata.xml)
 
-install(FILES ${DARKTABLE_SHAREDIR}/metainfo/ansel.appdata.xml DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/metainfo COMPONENT DTApplication)
+install(FILES ${DARKTABLE_SHAREDIR}/metainfo/photos.ansel.app.appdata.xml DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/metainfo COMPONENT DTApplication)
 
 #
 # Install watermarks

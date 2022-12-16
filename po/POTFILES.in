@@ -87,7 +87,7 @@ build/lib/ansel/plugins/introspection_watermark.c
 build/lib/ansel/plugins/introspection_zonesystem.c
 build/lib/ansel/plugins/lighttable/tools/ansel_authors.h
 build/share/darktable/ansel.desktop.in
-data/ansel.appdata.xml.in
+data/photos.ansel.app.appdata.xml.in
 data/ansel.desktop.in
 src/bauhaus/bauhaus.c
 src/chart/main.c

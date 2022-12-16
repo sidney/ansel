@@ -54,7 +54,7 @@ OpenMP (multi-threading on CPU), I have no way to know nor to debug since I do
 The following compilers are tested :
 
 * GCC 9 to 11,
-* Clang/LLVM 9 to 14.
+* Clang/LLVM 9 to 15.
 
 
 ## Back to your usual program
@@ -368,7 +368,7 @@ This builds the software for your architecture only, with:
 If you want to have dartkable displayed along your other applications, you only need to add a symbolic link:
 
 ```bash
-ln -s /opt/ansel/share/applications/ansel.desktop /usr/share/applications/ansel.desktop
+ln -s /opt/ansel/share/applications/photos.ansel.app.desktop /usr/share/applications/photos.ansel.app.desktop
 ```
 
 Now, your custom-built darktable is ready to be used just like any pre-packaged software.
@@ -410,7 +410,7 @@ the test/unstable one will save in `~/.config/darktable-test`, and the two versi
 Simply launch it from your desktop application menu or, from a terminal, run `darktable` or `/opt/ansel/bin/ansel`. If the installation did not create a launcher in your applications menu, run:
 
 ```bash
-sudo ln -s /opt/ansel/share/applications/ansel.desktop /usr/share/applications/ansel.desktop
+sudo ln -s /opt/ansel/share/applications/photos.ansel.app.desktop /usr/share/applications/photos.ansel.app.desktop
 ```
 
 You may find darktable configuration files in `~/.config/darktable`.
