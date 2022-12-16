@@ -13,6 +13,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
+        build:
+          - { os: macos-12,    xcode: 13.4,   deployment: 12.3 }
         btype:
           - Release
         compiler:
