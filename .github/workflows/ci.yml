@@ -455,8 +455,12 @@ jobs:
           brew unlink python@3.8
           brew unlink python@3.11
           sudo rm '/usr/local/bin/2to3'
+          # The following rm are a workaround for lensfun dep (python 3.10) conflicting with
+          # python 3.11 already installed on the system. We need to remove the symlinks
+          # so python 3.10 can capture them.
           sudo rm '/usr/local/bin/idle3'
           sudo rm '/usr/local/bin/pydoc3'
+          sudo rm '/usr/local/bin/python3'
           # brew link --overwrite python@3.9 # workaround introduced 30.12.2020, replace asap.
           brew link --overwrite python@3.10 # workaround introduced 16.12.2022
           # brew upgrade --ignore-pinned # workaround introduced 18.07.2021, replace asap
