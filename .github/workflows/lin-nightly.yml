@@ -128,7 +128,8 @@ jobs:
           ls -R
       - name: Build and Install
         run: |
-          ./src/.ci/ci-script-appimage.sh
+          cd src
+          ./.ci/ci-script-appimage.sh
       - name: Check if it runs
         if: ${{ matrix.target != 'usermanual' }}
         run: |
