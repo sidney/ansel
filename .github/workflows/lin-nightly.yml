@@ -128,9 +128,7 @@ jobs:
           ls -R
       - name: Build and Install
         run: |
-          cmake -E make_directory "${BUILD_DIR}"
-          cmake -E make_directory "${INSTALL_PREFIX}"
-          ./src/.ci/ci-script.sh;
+          .ci/ci-script-appimage.sh
       - name: Check if it runs
         if: ${{ matrix.target != 'usermanual' }}
         run: |
