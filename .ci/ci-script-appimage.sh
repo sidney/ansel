@@ -22,7 +22,7 @@ export CXXFLAGS="-O3 -fno-strict-aliasing "
 export CFLAGS="$CXXFLAGS"
 
 ## AppImages require us to install everything in /usr, where root is the AppDir
-pushd ./build
+pushd ../build
 export DESTDIR=../AppDir
 cmake .. -DCMAKE_INSTALL_PREFIX=/usr -G Ninja -DCMAKE_BUILD_TYPE=Release -DBINARY_PACKAGE_BUILD=1
 cmake --build . --target install  -- -j$(nproc)

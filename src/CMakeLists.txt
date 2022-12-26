@@ -920,6 +920,7 @@ if(APPLE)
   set_target_properties(lib_ansel PROPERTIES MACOSX_RPATH TRUE)
 endif(APPLE)
 set_target_properties(lib_ansel PROPERTIES OUTPUT_NAME ansel)
+set_target_properties(lib_ansel PROPERTIES INSTALL_RPATH "")
 set_target_properties(lib_ansel PROPERTIES LINKER_LANGUAGE C)
 
 #
