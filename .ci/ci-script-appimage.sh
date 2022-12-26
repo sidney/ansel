@@ -7,11 +7,11 @@
 
 # For local builds, purge and clean build pathes if any
 if [ -d "build" ];
-then rm -R build;
+then yes | rm -R build;
 fi;
 
 if [ -d "AppDir" ];
-then rm -R AppDir;
+then yes | rm -R AppDir;
 fi;
 
 mkdir build
@@ -25,7 +25,7 @@ export CFLAGS="$CXXFLAGS"
 pushd ../build
 export DESTDIR=../AppDir
 cmake .. -DCMAKE_INSTALL_PREFIX=/usr -G Ninja -DCMAKE_BUILD_TYPE=Release -DBINARY_PACKAGE_BUILD=1
-cmake --build . --target install  -- -j$(nproc)
+cmake --build . --target install
 
 ## Replace relative pathes to executable in ansel.desktop
 ## The pathes will be handled by AppImage.
