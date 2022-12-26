@@ -24,7 +24,7 @@ export CFLAGS="$CXXFLAGS"
 ## AppImages require us to install everything in /usr, where root is the AppDir
 pushd ../build
 export DESTDIR=../AppDir
-cmake .. -DCMAKE_INSTALL_PREFIX=/usr -G Ninja -DCMAKE_BUILD_TYPE=Release -DBINARY_PACKAGE_BUILD=1
+cmake .. -DCMAKE_INSTALL_PREFIX=/usr -G Ninja -DCMAKE_BUILD_TYPE=Release -DBINARY_PACKAGE_BUILD=1 -DCMAKE_INSTALL_LIBDIR=lib64
 cmake --build . --target install
 
 ## Replace relative pathes to executable in ansel.desktop
