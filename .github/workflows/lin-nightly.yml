@@ -153,4 +153,4 @@ jobs:
           tag: v0.0.0
           rm: false
           token: ${{ secrets.GITHUB_TOKEN }}
-          files: ansel-*.AppImage
+          files: Ansel-*-x86_64.AppImage
