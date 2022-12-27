@@ -144,10 +144,9 @@ jobs:
         with:
           name: ansel.stable.AppImage
       - name: Update nightly release
-        uses: svenstaro/upload-release-action@v2
+        uses: eine/tip@master
         with:
-          repo_token: ${{ secrets.GITHUB_TOKEN }}
-          file: Ansel-*-x86_64.AppImage*
           tag: v0.0.0
-          overwrite: true
-          file_glob: true
+          rm: false
+          token: ${{ secrets.GITHUB_TOKEN }}
+          files: Ansel-*-x86_64.AppImage*
