@@ -123,13 +123,14 @@ jobs:
         if: ${{ success() }}
         run: |
           sudo lensfun-update-data
-      - name: List files
-        run: |
-          ls -R
       - name: Build and Install
         run: |
           cd src
           sh .ci/ci-script-appimage.sh
+      - name: List files
+        run: |
+          cd ${{ github.workspace }}
+          ls -R
       - name: Package upload
         if: ${{ success() }}
         uses: actions/upload-artifact@v3
