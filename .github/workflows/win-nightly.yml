@@ -137,7 +137,7 @@ jobs:
         with:
           name: ansel.stable.win64
       - name: Update nightly release
-        uses: eine/tip@master
+        uses: aurelienpierreeng/tip@master
         with:
           tag: v0.0.0
           rm: false
