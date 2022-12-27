@@ -127,16 +127,12 @@ jobs:
         run: |
           cd src
           sh .ci/ci-script-appimage.sh
-      - name: List files
-        run: |
-          cd ${{ github.workspace }}
-          ls -R
       - name: Package upload
         if: ${{ success() }}
         uses: actions/upload-artifact@v3
         with:
           name: ansel.${{ env.BUILD_NAME }}.AppImage
-          path: ${{ env.SRC_DIR }}/build/Ansel-*-x86_64.AppImage
+          path: ${{ env.SRC_DIR }}/build/Ansel-*-x86_64.AppImage*
           retention-days: 90
 
   upload_to_release:
@@ -148,9 +144,9 @@ jobs:
         with:
           name: ansel.stable.AppImage
       - name: Update nightly release
-        uses: eine/tip@master
+        uses: pyTooling/Actions/releaser@main
         with:
           tag: v0.0.0
           rm: false
           token: ${{ secrets.GITHUB_TOKEN }}
-          files: Ansel-*-x86_64.AppImage
+          files: Ansel-*-x86_64.AppImage*
