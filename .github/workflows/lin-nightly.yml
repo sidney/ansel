@@ -136,7 +136,7 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: ansel.${{ env.BUILD_NAME }}.AppImage
-          path: ${{ env.BUILD_DIR }}/ansel-*.AppImage
+          path: ${{ SRC_DIR }}/build/ansel-*.AppImage
           retention-days: 90
 
   upload_to_release:
