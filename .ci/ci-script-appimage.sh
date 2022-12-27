@@ -22,7 +22,6 @@ export CXXFLAGS="-O3 -fno-strict-aliasing "
 export CFLAGS="$CXXFLAGS"
 
 ## AppImages require us to install everything in /usr, where root is the AppDir
-pushd ../build
 export DESTDIR=../AppDir
 cmake .. -DCMAKE_INSTALL_PREFIX=/usr -G Ninja -DCMAKE_BUILD_TYPE=Release -DBINARY_PACKAGE_BUILD=1 -DCMAKE_INSTALL_LIBDIR=lib64
 cmake --build . --target install
@@ -37,5 +36,6 @@ wget -c "https://github.com/linuxdeploy/linuxdeploy/releases/download/continuous
 chmod +x linuxdeploy-x86_64.AppImage linuxdeploy-plugin-gtk.sh
 
 export DEPLOY_GTK_VERSION="3"
+export VERSION=$(sh ../tools/get_git_version_string.sh)
 
 ./linuxdeploy-x86_64.AppImage --appdir ../AppDir --plugin gtk --output appimage
