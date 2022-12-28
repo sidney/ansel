@@ -413,6 +413,7 @@ jobs:
                  --conf plugins/lighttable/export/iccintent=0
 
   macOS:
+    if: ${{ false }}
     name: macOS.${{ matrix.compiler.compiler }}.${{ matrix.build.xcode }}.${{ matrix.target }}.${{ matrix.generator }}
     needs: Linux-minimal
     runs-on: ${{ matrix.build.os }}
