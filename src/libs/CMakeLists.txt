@@ -134,7 +134,7 @@ endforeach(module)
 #       in a better matching structure then just in lighttable directory.
 foreach(module ${MODULES})
     if (WIN32)
-      _detach_debuginfo (${module} ${CMAKE_INSTALL_LIBDIR}/ansel/plugins/lighttable)
+      #_detach_debuginfo (${module} ${CMAKE_INSTALL_LIBDIR}/ansel/plugins/lighttable)
     else()
         set_target_properties(${module}
                               PROPERTIES

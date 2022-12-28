@@ -1002,8 +1002,8 @@ target_link_libraries(ansel lib_ansel)
 
 if (WIN32)
   set_target_properties(ansel PROPERTIES LINK_FLAGS "-mconsole -mwindows -Wl,-subsystem,console")
-  _detach_debuginfo (ansel bin)
-  _detach_debuginfo (lib_ansel bin)
+  #_detach_debuginfo (ansel bin)
+  #_detach_debuginfo (lib_ansel bin)
 else()
     set_target_properties(ansel
                           PROPERTIES

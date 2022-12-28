@@ -40,7 +40,7 @@ macro (add_iop _lib _src)
   target_link_libraries(${_lib} lib_ansel)
 
   if (WIN32)
-    _detach_debuginfo (${_lib} ${CMAKE_INSTALL_LIBDIR}/ansel/plugins)
+    #_detach_debuginfo (${_lib} ${CMAKE_INSTALL_LIBDIR}/ansel/plugins)
   else()
       set_target_properties(${_lib}
                             PROPERTIES
