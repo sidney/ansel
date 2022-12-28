@@ -1,0 +1,6 @@
+build/bin/conf_gen.h
+build/bin/preferences_gen.h
+build/lib64/ansel/plugins/lighttable/tools/darktable_authors.h
+build/share/darktable/ansel.desktop.in
+data/build/ansel.desktop.in
+src/iop/restorescans.c
