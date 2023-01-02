@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-12-28 12:43+0100\n"
+"POT-Creation-Date: 2023-01-02 20:49+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -1939,10 +1939,2361 @@ msgid ""
 "the value `-1' disables the recent list"
 msgstr ""
 
+#: ../build/lib64/ansel/plugins/introspection_ashift.c:130
+#: ../build/lib64/ansel/plugins/introspection_ashift.c:279
+msgid "lens shift (vertical)"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_ashift.c:136
+#: ../build/lib64/ansel/plugins/introspection_ashift.c:283
+msgid "lens shift (horizontal)"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_ashift.c:142
+#: ../build/lib64/ansel/plugins/introspection_ashift.c:287
+msgid "shear"
+msgstr ""
+
+#. focal length
+#: ../build/lib64/ansel/plugins/introspection_ashift.c:148
+#: ../build/lib64/ansel/plugins/introspection_ashift.c:291
+#: ../src/common/collection.c:826 ../src/gui/preferences.c:819
+#: ../src/gui/presets.c:600 ../src/libs/metadata_view.c:143
+msgid "focal length"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_ashift.c:154
+#: ../build/lib64/ansel/plugins/introspection_ashift.c:295
+msgid "crop factor"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_ashift.c:160
+#: ../build/lib64/ansel/plugins/introspection_ashift.c:299
+msgid "lens dependence"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_ashift.c:166
+#: ../build/lib64/ansel/plugins/introspection_ashift.c:303
+msgid "aspect adjust"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_ashift.c:172
+#: ../build/lib64/ansel/plugins/introspection_ashift.c:307
+#: ../src/iop/lens.cc:2332
+msgid "lens model"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_ashift.c:178
+#: ../build/lib64/ansel/plugins/introspection_ashift.c:311
+#: ../build/lib64/ansel/plugins/introspection_clipping.c:244
+#: ../build/lib64/ansel/plugins/introspection_clipping.c:371
+msgid "automatic cropping"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_ashift.c:361
+msgid "generic"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_ashift.c:362
+msgid "specific"
+msgstr ""
+
+#. DEVELOP_MASK_DISABLED
+#: ../build/lib64/ansel/plugins/introspection_ashift.c:366
+#: ../build/lib64/ansel/plugins/introspection_colorin.c:301
+#: ../build/lib64/ansel/plugins/introspection_vignette.c:263
+#: ../src/develop/blend_gui.c:101 ../src/develop/blend_gui.c:124
+#: ../src/develop/blend_gui.c:2974 ../src/develop/develop.c:2076
+#: ../src/gui/accelerators.c:121 ../src/gui/accelerators.c:130
+#: ../src/gui/accelerators.c:198 ../src/imageio/format/avif.c:825
+#: ../src/imageio/format/j2k.c:672
+msgid "off"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_ashift.c:367
+msgid "largest area"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_ashift.c:368
+msgid "original format"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_basecurve.c:134
+#: ../build/lib64/ansel/plugins/introspection_basecurve.c:231
+msgid "fusion"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_basecurve.c:140
+#: ../build/lib64/ansel/plugins/introspection_basecurve.c:235
+msgid "exposure shift"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_basecurve.c:146
+#: ../build/lib64/ansel/plugins/introspection_basecurve.c:239
+#: ../src/libs/metadata_view.c:142
+msgid "exposure bias"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_basecurve.c:152
+#: ../build/lib64/ansel/plugins/introspection_basecurve.c:243
+#: ../build/lib64/ansel/plugins/introspection_basicadj.c:122
+#: ../build/lib64/ansel/plugins/introspection_basicadj.c:215
+#: ../build/lib64/ansel/plugins/introspection_rgbcurve.c:140
+#: ../build/lib64/ansel/plugins/introspection_rgbcurve.c:227
+#: ../build/lib64/ansel/plugins/introspection_rgblevels.c:57
+#: ../build/lib64/ansel/plugins/introspection_rgblevels.c:122
+#: ../build/lib64/ansel/plugins/introspection_tonecurve.c:153
+#: ../build/lib64/ansel/plugins/introspection_tonecurve.c:244
+msgid "preserve colors"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_basecurve.c:262
+#: ../build/lib64/ansel/plugins/introspection_basicadj.c:249
+#: ../build/lib64/ansel/plugins/introspection_colorreconstruction.c:153
+#: ../build/lib64/ansel/plugins/introspection_rgbcurve.c:251
+#: ../build/lib64/ansel/plugins/introspection_rgblevels.c:153
+#: ../build/lib64/ansel/plugins/introspection_tonecurve.c:270
+#: ../src/gui/guides.c:712 ../src/iop/basecurve.c:2082
+#: ../src/iop/channelmixerrgb.c:4229 ../src/iop/clipping.c:1918
+#: ../src/iop/clipping.c:2111 ../src/iop/clipping.c:2126
+#: ../src/iop/lens.cc:2268 ../src/iop/retouch.c:460 ../src/libs/collect.c:1909
+#: ../src/libs/colorpicker.c:51 ../src/libs/export.c:1026
+#: ../src/libs/print_settings.c:2668
+msgid "none"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_basecurve.c:263
+#: ../build/lib64/ansel/plugins/introspection_basicadj.c:250
+#: ../build/lib64/ansel/plugins/introspection_rgbcurve.c:252
+#: ../build/lib64/ansel/plugins/introspection_rgblevels.c:154
+#: ../build/lib64/ansel/plugins/introspection_tonecurve.c:271
+#: ../src/develop/blend_gui.c:2007 ../src/develop/blend_gui.c:2026
+#: ../src/iop/colorbalancergb.c:2062 ../src/iop/colorbalancergb.c:2063
+#: ../src/iop/colorbalancergb.c:2064 ../src/iop/colorbalancergb.c:2065
+msgid "luminance"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_basecurve.c:264
+#: ../build/lib64/ansel/plugins/introspection_basicadj.c:251
+#: ../build/lib64/ansel/plugins/introspection_filmicrgb.c:535
+#: ../build/lib64/ansel/plugins/introspection_rgbcurve.c:253
+#: ../build/lib64/ansel/plugins/introspection_rgblevels.c:155
+#: ../build/lib64/ansel/plugins/introspection_tonecurve.c:272
+msgid "max RGB"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_basecurve.c:265
+#: ../build/lib64/ansel/plugins/introspection_basicadj.c:252
+#: ../build/lib64/ansel/plugins/introspection_rgbcurve.c:254
+#: ../build/lib64/ansel/plugins/introspection_rgblevels.c:156
+#: ../build/lib64/ansel/plugins/introspection_tonecurve.c:273
+msgid "average RGB"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_basecurve.c:266
+#: ../build/lib64/ansel/plugins/introspection_basicadj.c:253
+#: ../build/lib64/ansel/plugins/introspection_rgbcurve.c:255
+#: ../build/lib64/ansel/plugins/introspection_rgblevels.c:157
+#: ../build/lib64/ansel/plugins/introspection_tonecurve.c:274
+msgid "sum RGB"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_basecurve.c:267
+#: ../build/lib64/ansel/plugins/introspection_basicadj.c:254
+#: ../build/lib64/ansel/plugins/introspection_rgbcurve.c:256
+#: ../build/lib64/ansel/plugins/introspection_rgblevels.c:158
+#: ../build/lib64/ansel/plugins/introspection_tonecurve.c:275
+msgid "norm RGB"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_basecurve.c:268
+#: ../build/lib64/ansel/plugins/introspection_basicadj.c:255
+#: ../build/lib64/ansel/plugins/introspection_rgbcurve.c:257
+#: ../build/lib64/ansel/plugins/introspection_rgblevels.c:159
+#: ../build/lib64/ansel/plugins/introspection_tonecurve.c:276
+msgid "basic power"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_basicadj.c:92
+#: ../build/lib64/ansel/plugins/introspection_basicadj.c:195
+#: ../build/lib64/ansel/plugins/introspection_exposure.c:67
+#: ../build/lib64/ansel/plugins/introspection_exposure.c:138
+msgid "black level correction"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_basicadj.c:104
+#: ../build/lib64/ansel/plugins/introspection_basicadj.c:203
+msgid "highlight compression"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_basicadj.c:128
+#: ../build/lib64/ansel/plugins/introspection_basicadj.c:219
+msgid "middle gray"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_bilat.c:78
+#: ../build/lib64/ansel/plugins/introspection_bilat.c:137
+msgid "midtone range"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_bilat.c:151
+msgid "bilateral grid"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_bilat.c:152
+msgid "local laplacian filter"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_blurs.c:83
+#: ../build/lib64/ansel/plugins/introspection_blurs.c:174
+#: ../build/lib64/ansel/plugins/introspection_retouch.c:255
+#: ../build/lib64/ansel/plugins/introspection_retouch.c:406
+msgid "blur type"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_blurs.c:89
+#: ../build/lib64/ansel/plugins/introspection_blurs.c:178
+#: ../build/lib64/ansel/plugins/introspection_retouch.c:261
+#: ../build/lib64/ansel/plugins/introspection_retouch.c:410
+msgid "blur radius"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_blurs.c:95
+#: ../build/lib64/ansel/plugins/introspection_blurs.c:182
+msgid "diaphragm blades"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_blurs.c:101
+#: ../build/lib64/ansel/plugins/introspection_blurs.c:186
+msgid "concavity"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_blurs.c:107
+#: ../build/lib64/ansel/plugins/introspection_blurs.c:190
+msgid "linearity"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_blurs.c:113
+#: ../build/lib64/ansel/plugins/introspection_blurs.c:194
+#: ../build/lib64/ansel/plugins/introspection_graduatednd.c:75
+#: ../build/lib64/ansel/plugins/introspection_graduatednd.c:144
+#: ../build/lib64/ansel/plugins/introspection_watermark.c:118
+#: ../build/lib64/ansel/plugins/introspection_watermark.c:235
+#: ../src/iop/ashift.c:5692
+msgid "rotation"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_blurs.c:119
+#: ../build/lib64/ansel/plugins/introspection_blurs.c:198
+#: ../src/iop/diffuse.c:1549
+msgid "direction"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_blurs.c:125
+#: ../build/lib64/ansel/plugins/introspection_blurs.c:202
+msgid "curvature"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_blurs.c:131
+#: ../build/lib64/ansel/plugins/introspection_blurs.c:206
+#: ../build/lib64/ansel/plugins/introspection_graduatednd.c:81
+#: ../build/lib64/ansel/plugins/introspection_graduatednd.c:148
+#: ../src/iop/colorbalancergb.c:2057 ../src/iop/colorbalancergb.c:2061
+#: ../src/iop/colorbalancergb.c:2065
+msgid "offset"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_blurs.c:220
+#: ../src/common/collection.c:825 ../src/gui/preferences.c:803
+#: ../src/gui/presets.c:551 ../src/libs/metadata_view.c:139
+msgid "lens"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_blurs.c:221
+msgid "motion"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_blurs.c:222
+#: ../build/lib64/ansel/plugins/introspection_filmicrgb.c:552
+#: ../build/lib64/ansel/plugins/introspection_lowpass.c:189
+#: ../build/lib64/ansel/plugins/introspection_retouch.c:452
+#: ../build/lib64/ansel/plugins/introspection_shadhi.c:267
+msgid "gaussian"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_borders.c:110
+#: ../build/lib64/ansel/plugins/introspection_borders.c:251
+#: ../src/common/collection.c:830 ../src/libs/tools/filter.c:109
+msgid "aspect ratio"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_borders.c:128
+#: ../build/lib64/ansel/plugins/introspection_borders.c:263
+#: ../src/iop/flip.c:74 ../src/libs/print_settings.c:2365
+msgid "orientation"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_borders.c:134
+#: ../build/lib64/ansel/plugins/introspection_borders.c:267
+msgid "border size"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_borders.c:140
+#: ../build/lib64/ansel/plugins/introspection_borders.c:271
+msgid "horizontal offset"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_borders.c:158
+#: ../build/lib64/ansel/plugins/introspection_borders.c:283
+msgid "vertical offset"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_borders.c:176
+#: ../build/lib64/ansel/plugins/introspection_borders.c:295
+msgid "frame line size"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_borders.c:182
+#: ../build/lib64/ansel/plugins/introspection_borders.c:299
+msgid "frame line offset"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_cacorrect.c:42
+#: ../build/lib64/ansel/plugins/introspection_cacorrect.c:91
+msgid "avoid colorshift"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_cacorrect.c:48
+#: ../build/lib64/ansel/plugins/introspection_cacorrect.c:95
+#: ../build/lib64/ansel/plugins/introspection_diffuse.c:117
+#: ../build/lib64/ansel/plugins/introspection_diffuse.c:244
+#: ../build/lib64/ansel/plugins/introspection_highlights.c:143
+#: ../build/lib64/ansel/plugins/introspection_highlights.c:240
+msgid "iterations"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_cacorrect.c:109
+#: ../build/lib64/ansel/plugins/introspection_demosaic.c:205
+msgid "once"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_cacorrect.c:110
+#: ../build/lib64/ansel/plugins/introspection_demosaic.c:206
+msgid "twice"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_cacorrect.c:111
+#: ../build/lib64/ansel/plugins/introspection_demosaic.c:207
+msgid "three times"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_cacorrect.c:112
+#: ../build/lib64/ansel/plugins/introspection_demosaic.c:208
+msgid "four times"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_cacorrect.c:113
+#: ../build/lib64/ansel/plugins/introspection_demosaic.c:209
+msgid "five times"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_cacorrectrgb.c:61
+#: ../build/lib64/ansel/plugins/introspection_cacorrectrgb.c:128
+msgid "guide"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_cacorrectrgb.c:67
+#: ../build/lib64/ansel/plugins/introspection_cacorrectrgb.c:132
+#: ../src/iop/atrous.c:1591 ../src/iop/bilateral.cc:301 ../src/iop/clahe.c:335
+#: ../src/iop/dither.c:886 ../src/iop/lowpass.c:571 ../src/iop/shadhi.c:684
+#: ../src/iop/sharpen.c:448
+msgid "radius"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_cacorrectrgb.c:73
+#: ../build/lib64/ansel/plugins/introspection_cacorrectrgb.c:136
+#: ../src/iop/bloom.c:398 ../src/iop/denoiseprofile.c:3680
+#: ../src/iop/grain.c:570 ../src/iop/hazeremoval.c:201
+#: ../src/iop/hotpixels.c:389 ../src/iop/nlmeans.c:514 ../src/iop/velvia.c:266
+msgid "strength"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_cacorrectrgb.c:79
+#: ../build/lib64/ansel/plugins/introspection_cacorrectrgb.c:140
+msgid "correction mode"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_cacorrectrgb.c:85
+#: ../build/lib64/ansel/plugins/introspection_cacorrectrgb.c:144
+msgid "very large chromatic aberration"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_cacorrectrgb.c:158
+#: ../src/common/collection.c:1653 ../src/common/color_vocabulary.c:232
+#: ../src/common/colorlabels.c:329 ../src/develop/blend_gui.c:1989
+#: ../src/develop/blend_gui.c:2016 ../src/develop/lightroom.c:834
+#: ../src/gui/gtk.c:2663 ../src/gui/guides.c:730 ../src/iop/bilateral.cc:305
+#: ../src/iop/channelmixer.c:625 ../src/iop/channelmixer.c:635
+#: ../src/iop/channelmixerrgb.c:4181 ../src/iop/colorzones.c:2302
+#: ../src/iop/temperature.c:1819 ../src/iop/temperature.c:1992
+#: ../src/libs/collect.c:1793
+msgid "red"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_cacorrectrgb.c:159
+#: ../src/common/collection.c:1657 ../src/common/color_vocabulary.c:277
+#: ../src/common/colorlabels.c:331 ../src/develop/blend_gui.c:1992
+#: ../src/develop/blend_gui.c:2019 ../src/develop/lightroom.c:838
+#: ../src/gui/gtk.c:2664 ../src/gui/guides.c:731 ../src/iop/bilateral.cc:310
+#: ../src/iop/channelmixer.c:626 ../src/iop/channelmixer.c:641
+#: ../src/iop/channelmixerrgb.c:4182 ../src/iop/colorzones.c:2305
+#: ../src/iop/temperature.c:1803 ../src/iop/temperature.c:1821
+#: ../src/iop/temperature.c:1993 ../src/libs/collect.c:1793
+msgid "green"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_cacorrectrgb.c:160
+#: ../src/common/collection.c:1659 ../src/common/color_vocabulary.c:324
+#: ../src/common/colorlabels.c:332 ../src/develop/blend_gui.c:1995
+#: ../src/develop/blend_gui.c:2022 ../src/develop/lightroom.c:840
+#: ../src/gui/gtk.c:2665 ../src/iop/bilateral.cc:315
+#: ../src/iop/channelmixer.c:627 ../src/iop/channelmixer.c:647
+#: ../src/iop/channelmixerrgb.c:4183 ../src/iop/colorzones.c:2307
+#: ../src/iop/temperature.c:1823 ../src/iop/temperature.c:1994
+#: ../src/libs/collect.c:1793
+msgid "blue"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_cacorrectrgb.c:164
+msgid "standard"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_cacorrectrgb.c:165
+msgid "darken only"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_cacorrectrgb.c:166
+msgid "brighten only"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_censorize.c:51
+#: ../build/lib64/ansel/plugins/introspection_censorize.c:112
+msgid "input blur radius"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_censorize.c:57
+#: ../build/lib64/ansel/plugins/introspection_censorize.c:116
+msgid "pixellation radius"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_censorize.c:63
+#: ../build/lib64/ansel/plugins/introspection_censorize.c:120
+msgid "output blur radius"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_censorize.c:69
+#: ../build/lib64/ansel/plugins/introspection_censorize.c:124
+#: ../build/lib64/ansel/plugins/introspection_highlights.c:137
+#: ../build/lib64/ansel/plugins/introspection_highlights.c:236
+msgid "noise level"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_channelmixerrgb.c:252
+#: ../build/lib64/ansel/plugins/introspection_channelmixerrgb.c:258
+#: ../build/lib64/ansel/plugins/introspection_channelmixerrgb.c:264
+#: ../build/lib64/ansel/plugins/introspection_channelmixerrgb.c:270
+#: ../build/lib64/ansel/plugins/introspection_channelmixerrgb.c:276
+#: ../build/lib64/ansel/plugins/introspection_channelmixerrgb.c:282
+#: ../build/lib64/ansel/plugins/introspection_channelmixerrgb.c:433
+#: ../build/lib64/ansel/plugins/introspection_channelmixerrgb.c:437
+#: ../build/lib64/ansel/plugins/introspection_channelmixerrgb.c:441
+#: ../build/lib64/ansel/plugins/introspection_channelmixerrgb.c:445
+#: ../build/lib64/ansel/plugins/introspection_channelmixerrgb.c:449
+#: ../build/lib64/ansel/plugins/introspection_channelmixerrgb.c:453
+msgid "normalize channels"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_channelmixerrgb.c:294
+#: ../build/lib64/ansel/plugins/introspection_channelmixerrgb.c:461
+msgid "F source"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_channelmixerrgb.c:300
+#: ../build/lib64/ansel/plugins/introspection_channelmixerrgb.c:465
+msgid "LED source"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_channelmixerrgb.c:330
+#: ../build/lib64/ansel/plugins/introspection_channelmixerrgb.c:485
+msgid "gamut compression"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_channelmixerrgb.c:336
+#: ../build/lib64/ansel/plugins/introspection_channelmixerrgb.c:489
+msgid "clip negative RGB from gamut"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_channelmixerrgb.c:342
+#: ../build/lib64/ansel/plugins/introspection_channelmixerrgb.c:493
+msgid "saturation algorithm"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_channelmixerrgb.c:507
+msgid "same as pipeline (D50)"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_channelmixerrgb.c:508
+msgid "A (incandescent)"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_channelmixerrgb.c:509
+msgid "D (daylight)"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_channelmixerrgb.c:510
+msgid "E (equi-energy)"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_channelmixerrgb.c:511
+msgid "F (fluorescent)"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_channelmixerrgb.c:512
+msgid "LED (LED light)"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_channelmixerrgb.c:513
+msgid "Planckian (black body)"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_channelmixerrgb.c:514
+#: ../src/common/iop_order.c:58
+msgid "custom"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_channelmixerrgb.c:515
+msgid "(AI) detect from image surfaces..."
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_channelmixerrgb.c:516
+msgid "(AI) detect from image edges..."
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_channelmixerrgb.c:517
+#: ../src/iop/channelmixerrgb.c:3554
+msgid "as shot in camera"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_channelmixerrgb.c:522
+msgid "F1 (Daylight 6430 K) – medium CRI"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_channelmixerrgb.c:523
+msgid "F2 (Cool White 4230 K) – medium CRI"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_channelmixerrgb.c:524
+msgid "F3 (White 3450 K) – medium CRI"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_channelmixerrgb.c:525
+msgid "F4 (Warm White 2940 K) – medium CRI"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_channelmixerrgb.c:526
+msgid "F5 (Daylight 6350 K) – medium CRI"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_channelmixerrgb.c:527
+msgid "F6 (Lite White 4150 K) – medium CRI"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_channelmixerrgb.c:528
+msgid "F7 (D65 simulator 6500 K) – high CRI"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_channelmixerrgb.c:529
+msgid "F8 (D50 simulator 5000 K) – high CRI"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_channelmixerrgb.c:530
+msgid "F9 (Cool White Deluxe 4150 K) – high CRI"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_channelmixerrgb.c:531
+msgid "F10 (Tuned RGB 5000 K) – low CRI"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_channelmixerrgb.c:532
+msgid "F11 (Tuned RGB 4000 K) – low CRI"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_channelmixerrgb.c:533
+msgid "F12 (Tuned RGB 3000 K) – low CRI"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_channelmixerrgb.c:538
+msgid "B1 (Blue 2733 K)"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_channelmixerrgb.c:539
+msgid "B2 (Blue 2998 K)"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_channelmixerrgb.c:540
+msgid "B3 (Blue 4103 K)"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_channelmixerrgb.c:541
+msgid "B4 (Blue 5109 K)"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_channelmixerrgb.c:542
+msgid "B5 (Blue 6598 K)"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_channelmixerrgb.c:543
+msgid "BH1 (Blue-Red hybrid 2851 K)"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_channelmixerrgb.c:544
+msgid "RGB1 (RGB 2840 K)"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_channelmixerrgb.c:545
+msgid "V1 (Violet 2724 K)"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_channelmixerrgb.c:546
+msgid "V2 (Violet 4070 K)"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_channelmixerrgb.c:551
+msgid "linear Bradford (ICC v4)"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_channelmixerrgb.c:552
+msgid "CAT16 (CIECAM16)"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_channelmixerrgb.c:553
+msgid "non-linear Bradford"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_channelmixerrgb.c:554
+msgid "XYZ"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_channelmixerrgb.c:555
+msgid "none (bypass)"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_channelmixerrgb.c:560
+msgid "version 1 (2020)"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_channelmixerrgb.c:561
+msgid "version 2 (2021)"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_channelmixerrgb.c:562
+msgid "version 3 (Apr 2021)"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_clipping.c:142
+#: ../build/lib64/ansel/plugins/introspection_clipping.c:303
+#: ../build/lib64/ansel/plugins/introspection_crop.c:61
+#: ../build/lib64/ansel/plugins/introspection_crop.c:134 ../src/gui/gtk.c:979
+#: ../src/iop/atrous.c:1587
+msgid "left"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_clipping.c:148
+#: ../build/lib64/ansel/plugins/introspection_clipping.c:307
+#: ../build/lib64/ansel/plugins/introspection_crop.c:67
+#: ../build/lib64/ansel/plugins/introspection_crop.c:138
+#: ../src/gui/accelerators.c:106 ../src/gui/gtk.c:985
+msgid "top"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_clipping.c:154
+#: ../build/lib64/ansel/plugins/introspection_clipping.c:311
+#: ../build/lib64/ansel/plugins/introspection_crop.c:73
+#: ../build/lib64/ansel/plugins/introspection_crop.c:142 ../src/gui/gtk.c:982
+#: ../src/iop/atrous.c:1586
+msgid "right"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_clipping.c:160
+#: ../build/lib64/ansel/plugins/introspection_clipping.c:315
+#: ../build/lib64/ansel/plugins/introspection_crop.c:79
+#: ../build/lib64/ansel/plugins/introspection_crop.c:146
+#: ../src/gui/accelerators.c:107 ../src/gui/gtk.c:988
+msgid "bottom"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_colorbalance.c:114
+#: ../build/lib64/ansel/plugins/introspection_colorbalance.c:203
+msgid "input saturation"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_colorbalance.c:126
+#: ../build/lib64/ansel/plugins/introspection_colorbalance.c:211
+msgid "contrast fulcrum"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_colorbalance.c:132
+#: ../build/lib64/ansel/plugins/introspection_colorbalance.c:215
+msgid "output saturation"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_colorbalance.c:229
+msgid "lift, gamma, gain (ProPhoto RGB)"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_colorbalance.c:230
+msgid "slope, offset, power (ProPhoto RGB)"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_colorbalance.c:231
+msgid "lift, gamma, gain (sRGB)"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_colorbalancergb.c:226
+#: ../build/lib64/ansel/plugins/introspection_colorbalancergb.c:461
+msgid "lift luminance"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_colorbalancergb.c:232
+#: ../build/lib64/ansel/plugins/introspection_colorbalancergb.c:465
+msgid "lift chroma"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_colorbalancergb.c:238
+#: ../build/lib64/ansel/plugins/introspection_colorbalancergb.c:469
+msgid "lift hue"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_colorbalancergb.c:244
+#: ../build/lib64/ansel/plugins/introspection_colorbalancergb.c:473
+msgid "power luminance"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_colorbalancergb.c:250
+#: ../build/lib64/ansel/plugins/introspection_colorbalancergb.c:477
+msgid "power chroma"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_colorbalancergb.c:256
+#: ../build/lib64/ansel/plugins/introspection_colorbalancergb.c:481
+msgid "power hue"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_colorbalancergb.c:262
+#: ../build/lib64/ansel/plugins/introspection_colorbalancergb.c:485
+msgid "gain luminance"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_colorbalancergb.c:268
+#: ../build/lib64/ansel/plugins/introspection_colorbalancergb.c:489
+msgid "gain chroma"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_colorbalancergb.c:274
+#: ../build/lib64/ansel/plugins/introspection_colorbalancergb.c:493
+msgid "gain hue"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_colorbalancergb.c:280
+#: ../build/lib64/ansel/plugins/introspection_colorbalancergb.c:497
+msgid "offset luminance"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_colorbalancergb.c:286
+#: ../build/lib64/ansel/plugins/introspection_colorbalancergb.c:501
+msgid "offset chroma"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_colorbalancergb.c:292
+#: ../build/lib64/ansel/plugins/introspection_colorbalancergb.c:505
+msgid "offset hue"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_colorbalancergb.c:298
+#: ../build/lib64/ansel/plugins/introspection_colorbalancergb.c:509
+msgid "shadows fall-off"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_colorbalancergb.c:304
+#: ../build/lib64/ansel/plugins/introspection_colorbalancergb.c:513
+msgid "white fulcrum"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_colorbalancergb.c:310
+#: ../build/lib64/ansel/plugins/introspection_colorbalancergb.c:517
+msgid "highlights fall-off"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_colorbalancergb.c:316
+#: ../build/lib64/ansel/plugins/introspection_colorbalancergb.c:521
+msgid "chroma shadows"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_colorbalancergb.c:322
+#: ../build/lib64/ansel/plugins/introspection_colorbalancergb.c:525
+msgid "chroma highlights"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_colorbalancergb.c:328
+#: ../build/lib64/ansel/plugins/introspection_colorbalancergb.c:529
+msgid "chroma global"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_colorbalancergb.c:334
+#: ../build/lib64/ansel/plugins/introspection_colorbalancergb.c:533
+msgid "chroma mid-tones"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_colorbalancergb.c:340
+#: ../build/lib64/ansel/plugins/introspection_colorbalancergb.c:537
+msgid "saturation global"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_colorbalancergb.c:346
+#: ../build/lib64/ansel/plugins/introspection_colorbalancergb.c:541
+msgid "saturation highlights"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_colorbalancergb.c:352
+#: ../build/lib64/ansel/plugins/introspection_colorbalancergb.c:545
+msgid "saturation mid-tones"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_colorbalancergb.c:358
+#: ../build/lib64/ansel/plugins/introspection_colorbalancergb.c:549
+msgid "saturation shadows"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_colorbalancergb.c:364
+#: ../build/lib64/ansel/plugins/introspection_colorbalancergb.c:553
+msgid "hue shift"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_colorbalancergb.c:370
+#: ../build/lib64/ansel/plugins/introspection_colorbalancergb.c:557
+msgid "brilliance global"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_colorbalancergb.c:376
+#: ../build/lib64/ansel/plugins/introspection_colorbalancergb.c:561
+msgid "brilliance highlights"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_colorbalancergb.c:382
+#: ../build/lib64/ansel/plugins/introspection_colorbalancergb.c:565
+msgid "brilliance mid-tones"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_colorbalancergb.c:388
+#: ../build/lib64/ansel/plugins/introspection_colorbalancergb.c:569
+msgid "brilliance shadows"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_colorbalancergb.c:394
+#: ../build/lib64/ansel/plugins/introspection_colorbalancergb.c:573
+msgid "mask middle-gray fulcrum"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_colorbalancergb.c:400
+#: ../build/lib64/ansel/plugins/introspection_colorbalancergb.c:577
+msgid "global vibrance"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_colorbalancergb.c:406
+#: ../build/lib64/ansel/plugins/introspection_colorbalancergb.c:581
+msgid "contrast gray fulcrum"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_colorbalancergb.c:412
+#: ../build/lib64/ansel/plugins/introspection_colorbalancergb.c:585
+#: ../src/gui/guides.c:740 ../src/iop/basicadj.c:607 ../src/iop/bilat.c:451
+#: ../src/iop/colisa.c:305 ../src/iop/colorbalance.c:1895
+#: ../src/iop/colorbalance.c:1901 ../src/iop/filmic.c:1649
+#: ../src/iop/filmicrgb.c:4652 ../src/iop/lowpass.c:573
+msgid "contrast"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_colorbalancergb.c:418
+#: ../build/lib64/ansel/plugins/introspection_colorbalancergb.c:589
+msgid "saturation formula"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_colorbalancergb.c:603
+msgid "JzAzBz (2021)"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_colorbalancergb.c:604
+msgid "darktable UCS (2022)"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_colorcontrast.c:54
+#: ../build/lib64/ansel/plugins/introspection_colorcontrast.c:121
+msgid "green-magenta contrast"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_colorcontrast.c:66
+#: ../build/lib64/ansel/plugins/introspection_colorcontrast.c:129
+msgid "blue-yellow contrast"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_colorin.c:149
+#: ../build/lib64/ansel/plugins/introspection_colorin.c:232
+msgid "gamut clipping"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_colorin.c:302
+#: ../build/lib64/ansel/plugins/introspection_lut3d.c:201
+#: ../src/common/colorspaces.c:1714
+msgid "sRGB"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_colorin.c:303
+#: ../src/common/colorspaces.c:1490 ../src/common/colorspaces.c:1716
+#: ../src/libs/print_settings.c:1292
+msgid "Adobe RGB (compatible)"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_colorin.c:304
+#: ../build/lib64/ansel/plugins/introspection_lut3d.c:204
+#: ../src/common/colorspaces.c:1495 ../src/common/colorspaces.c:1718
+msgid "linear Rec709 RGB"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_colorin.c:305
+#: ../build/lib64/ansel/plugins/introspection_lut3d.c:205
+#: ../src/common/colorspaces.c:1504 ../src/common/colorspaces.c:1720
+msgid "linear Rec2020 RGB"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_colorize.c:65
+#: ../build/lib64/ansel/plugins/introspection_colorize.c:128
+msgid "source mix"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_colormapping.c:94
+#: ../build/lib64/ansel/plugins/introspection_colormapping.c:249
+msgid "number of clusters"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_colormapping.c:100
+#: ../build/lib64/ansel/plugins/introspection_colormapping.c:253
+msgid "color dominance"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_colormapping.c:106
+#: ../build/lib64/ansel/plugins/introspection_colormapping.c:257
+msgid "histogram equalization"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_colorreconstruction.c:62
+#: ../build/lib64/ansel/plugins/introspection_colorreconstruction.c:127
+#: ../build/lib64/ansel/plugins/introspection_tonemap.cc:45
+#: ../build/lib64/ansel/plugins/introspection_tonemap.cc:92
+#: ../src/iop/shadhi.c:695
+msgid "spatial extent"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_colorreconstruction.c:68
+#: ../build/lib64/ansel/plugins/introspection_colorreconstruction.c:131
+msgid "range extent"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_colorreconstruction.c:154
+#: ../src/iop/channelmixerrgb.c:4231
+msgid "saturated colors"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_colorreconstruction.c:155
+#: ../build/lib64/ansel/plugins/introspection_colorzones.c:257
+#: ../build/lib64/ansel/plugins/introspection_graduatednd.c:87
+#: ../build/lib64/ansel/plugins/introspection_graduatednd.c:152
+#: ../build/lib64/ansel/plugins/introspection_splittoning.c:61
+#: ../build/lib64/ansel/plugins/introspection_splittoning.c:73
+#: ../build/lib64/ansel/plugins/introspection_splittoning.c:134
+#: ../build/lib64/ansel/plugins/introspection_splittoning.c:142
+#: ../src/develop/blend_gui.c:1980 ../src/develop/blend_gui.c:1999
+#: ../src/develop/blend_gui.c:2034 ../src/iop/channelmixer.c:622
+#: ../src/iop/channelmixerrgb.c:4053 ../src/iop/channelmixerrgb.c:4143
+#: ../src/iop/colorbalance.c:1990 ../src/iop/colorbalancergb.c:2054
+#: ../src/iop/colorbalancergb.c:2055 ../src/iop/colorbalancergb.c:2056
+#: ../src/iop/colorbalancergb.c:2057 ../src/iop/colorize.c:344
+#: ../src/iop/colorreconstruction.c:1288 ../src/iop/colorzones.c:2433
+#: ../src/iop/splittoning.c:471
+msgid "hue"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_colorzones.c:78
+#: ../build/lib64/ansel/plugins/introspection_colorzones.c:193
+msgid "select by"
+msgstr ""
+
+#. mix slider
+#: ../build/lib64/ansel/plugins/introspection_colorzones.c:138
+#: ../build/lib64/ansel/plugins/introspection_colorzones.c:233
+#: ../build/lib64/ansel/plugins/introspection_soften.c:66
+#: ../build/lib64/ansel/plugins/introspection_soften.c:121
+#: ../src/iop/atrous.c:1765
+msgid "mix"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_colorzones.c:144
+#: ../build/lib64/ansel/plugins/introspection_colorzones.c:237
+msgid "process mode"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_colorzones.c:255
+#: ../src/develop/blend_gui.c:1966 ../src/iop/channelmixer.c:624
+#: ../src/iop/channelmixerrgb.c:4136 ../src/iop/colorchecker.c:1358
+#: ../src/iop/colorize.c:363 ../src/iop/colorzones.c:2431
+#: ../src/iop/exposure.c:1097
+msgid "lightness"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_colorzones.c:256
+#: ../build/lib64/ansel/plugins/introspection_graduatednd.c:93
+#: ../build/lib64/ansel/plugins/introspection_graduatednd.c:156
+#: ../build/lib64/ansel/plugins/introspection_splittoning.c:67
+#: ../build/lib64/ansel/plugins/introspection_splittoning.c:79
+#: ../build/lib64/ansel/plugins/introspection_splittoning.c:138
+#: ../build/lib64/ansel/plugins/introspection_splittoning.c:146
+#: ../src/develop/blend_gui.c:1976 ../src/iop/basicadj.c:624
+#: ../src/iop/channelmixer.c:623 ../src/iop/colisa.c:307
+#: ../src/iop/colorbalance.c:2007 ../src/iop/colorbalancergb.c:2072
+#: ../src/iop/colorbalancergb.c:2073 ../src/iop/colorbalancergb.c:2074
+#: ../src/iop/colorchecker.c:1376 ../src/iop/colorcontrast.c:94
+#: ../src/iop/colorcorrection.c:283 ../src/iop/colorize.c:357
+#: ../src/iop/colorzones.c:2432 ../src/iop/lowpass.c:575
+#: ../src/iop/soften.c:399 ../src/iop/splittoning.c:483 ../src/iop/velvia.c:84
+#: ../src/iop/vibrance.c:72 ../src/iop/vignette.c:982
+msgid "saturation"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_colorzones.c:267
+#: ../src/iop/atrous.c:1368 ../src/iop/atrous.c:1372
+#: ../src/iop/denoiseprofile.c:3410 ../src/iop/rawdenoise.c:756
+msgid "smooth"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_colorzones.c:268
+msgid "strong"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_defringe.c:47
+#: ../build/lib64/ansel/plugins/introspection_defringe.c:102
+msgid "edge detection radius"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_defringe.c:53
+#: ../build/lib64/ansel/plugins/introspection_defringe.c:106
+#: ../build/lib64/ansel/plugins/introspection_filmicrgb.c:225
+#: ../build/lib64/ansel/plugins/introspection_filmicrgb.c:424
+#: ../src/iop/atrous.c:1641 ../src/iop/bloom.c:394
+#: ../src/iop/colorbalancergb.c:2015 ../src/iop/colorreconstruction.c:1284
+#: ../src/iop/hotpixels.c:385 ../src/iop/sharpen.c:457
+msgid "threshold"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_defringe.c:59
+#: ../build/lib64/ansel/plugins/introspection_defringe.c:110
+msgid "operation mode"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_defringe.c:124
+msgid "global average (fast)"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_defringe.c:125
+msgid "local average (slow)"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_defringe.c:126
+msgid "static threshold (fast)"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_demosaic.c:90
+#: ../build/lib64/ansel/plugins/introspection_demosaic.c:163
+msgid "match greens"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_demosaic.c:96
+#: ../build/lib64/ansel/plugins/introspection_demosaic.c:167
+#: ../build/lib64/ansel/plugins/introspection_diffuse.c:141
+#: ../build/lib64/ansel/plugins/introspection_diffuse.c:260
+msgid "edge threshold"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_demosaic.c:102
+#: ../build/lib64/ansel/plugins/introspection_demosaic.c:171
+msgid "color smoothing"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_demosaic.c:108
+#: ../build/lib64/ansel/plugins/introspection_demosaic.c:175
+msgid "demosaicing method"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_demosaic.c:114
+#: ../build/lib64/ansel/plugins/introspection_demosaic.c:179
+msgid "LMMSE refine"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_demosaic.c:120
+#: ../build/lib64/ansel/plugins/introspection_demosaic.c:183
+msgid "dual threshold"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_demosaic.c:197
+#: ../build/lib64/ansel/plugins/introspection_demosaic.c:204
+#: ../build/lib64/ansel/plugins/introspection_rawprepare.c:197
+msgid "disabled"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_demosaic.c:198
+msgid "local average"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_demosaic.c:199
+msgid "full average"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_demosaic.c:200
+msgid "full and local average"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_demosaic.c:213
+msgid "PPG"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_demosaic.c:214
+msgid "AMaZE"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_demosaic.c:215
+msgid "VNG4"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_demosaic.c:216
+msgid "RCD"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_demosaic.c:217
+msgid "LMMSE"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_demosaic.c:218
+msgid "RCD + VNG4"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_demosaic.c:219
+msgid "AMaZE + VNG4"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_demosaic.c:220
+#: ../build/lib64/ansel/plugins/introspection_demosaic.c:227
+msgid "passthrough (monochrome)"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_demosaic.c:221
+#: ../build/lib64/ansel/plugins/introspection_demosaic.c:228
+msgid "photosite color (debug)"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_demosaic.c:222
+msgid "VNG"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_demosaic.c:223
+msgid "Markesteijn 1-pass"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_demosaic.c:224
+msgid "Markesteijn 3-pass"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_demosaic.c:225
+msgid "frequency domain chroma"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_demosaic.c:226
+msgid "Markesteijn 3-pass + VNG"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_demosaic.c:232
+#: ../src/common/collection.c:1678 ../src/common/collection.c:1686
+#: ../src/libs/collect.c:1747
+msgid "basic"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_demosaic.c:233
+msgid "median"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_demosaic.c:234
+msgid "3x median"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_demosaic.c:235
+msgid "refine & medians"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_demosaic.c:236
+msgid "2x refine + medians"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_denoiseprofile.c:125
+#: ../build/lib64/ansel/plugins/introspection_denoiseprofile.c:300
+#: ../build/lib64/ansel/plugins/introspection_nlmeans.c:48
+#: ../build/lib64/ansel/plugins/introspection_nlmeans.c:109
+msgid "patch size"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_denoiseprofile.c:131
+#: ../build/lib64/ansel/plugins/introspection_denoiseprofile.c:304
+msgid "search radius"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_denoiseprofile.c:143
+#: ../build/lib64/ansel/plugins/introspection_denoiseprofile.c:312
+msgid "preserve shadows"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_denoiseprofile.c:149
+#: ../build/lib64/ansel/plugins/introspection_denoiseprofile.c:316
+msgid "bias correction"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_denoiseprofile.c:155
+#: ../build/lib64/ansel/plugins/introspection_denoiseprofile.c:320
+msgid "scattering"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_denoiseprofile.c:161
+#: ../build/lib64/ansel/plugins/introspection_denoiseprofile.c:324
+msgid "central pixel weight"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_denoiseprofile.c:167
+#: ../build/lib64/ansel/plugins/introspection_denoiseprofile.c:328
+msgid "adjust autoset parameters"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_denoiseprofile.c:239
+#: ../build/lib64/ansel/plugins/introspection_denoiseprofile.c:376
+msgid "whitebalance-adaptive transform"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_denoiseprofile.c:245
+#: ../build/lib64/ansel/plugins/introspection_denoiseprofile.c:380
+msgid "fix various bugs in algorithm"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_denoiseprofile.c:251
+#: ../build/lib64/ansel/plugins/introspection_denoiseprofile.c:384
+msgid "upgrade profiled transform"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_denoiseprofile.c:257
+#: ../build/lib64/ansel/plugins/introspection_denoiseprofile.c:388
+#: ../src/imageio/format/avif.c:800 ../src/libs/colorpicker.c:577
+msgid "color mode"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_denoiseprofile.c:410
+#: ../src/libs/colorpicker.c:51 ../src/libs/colorpicker.c:260
+msgid "RGB"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_denoiseprofile.c:411
+msgid "Y0U0V0"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_diffuse.c:123
+#: ../build/lib64/ansel/plugins/introspection_diffuse.c:248
+#: ../src/iop/atrous.c:1633 ../src/iop/highpass.c:394
+msgid "sharpness"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_diffuse.c:129
+#: ../build/lib64/ansel/plugins/introspection_diffuse.c:252
+msgid "radius span"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_diffuse.c:135
+#: ../build/lib64/ansel/plugins/introspection_diffuse.c:256
+msgid "edge sensitivity"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_diffuse.c:147
+#: ../build/lib64/ansel/plugins/introspection_diffuse.c:264
+msgid "1st order anisotropy"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_diffuse.c:153
+#: ../build/lib64/ansel/plugins/introspection_diffuse.c:268
+msgid "2nd order anisotropy"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_diffuse.c:159
+#: ../build/lib64/ansel/plugins/introspection_diffuse.c:272
+msgid "3rd order anisotropy"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_diffuse.c:165
+#: ../build/lib64/ansel/plugins/introspection_diffuse.c:276
+msgid "4th order anisotropy"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_diffuse.c:171
+#: ../build/lib64/ansel/plugins/introspection_diffuse.c:280
+msgid "luminance masking threshold"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_diffuse.c:177
+#: ../build/lib64/ansel/plugins/introspection_diffuse.c:284
+msgid "1st order speed"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_diffuse.c:183
+#: ../build/lib64/ansel/plugins/introspection_diffuse.c:288
+msgid "2nd order speed"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_diffuse.c:189
+#: ../build/lib64/ansel/plugins/introspection_diffuse.c:292
+msgid "3rd order speed"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_diffuse.c:195
+#: ../build/lib64/ansel/plugins/introspection_diffuse.c:296
+msgid "4th order speed"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_diffuse.c:201
+#: ../build/lib64/ansel/plugins/introspection_diffuse.c:300
+msgid "central radius"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_dither.c:62
+#: ../build/lib64/ansel/plugins/introspection_dither.c:141
+#: ../build/lib64/ansel/plugins/introspection_highlights.c:107
+#: ../build/lib64/ansel/plugins/introspection_highlights.c:216
+msgid "method"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_dither.c:92
+#: ../build/lib64/ansel/plugins/introspection_dither.c:161
+msgid "damping"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_dither.c:179
+msgid "random"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_dither.c:180
+msgid "Floyd-Steinberg 1-bit B&W"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_dither.c:181
+msgid "Floyd-Steinberg 4-bit gray"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_dither.c:182
+msgid "Floyd-Steinberg 8-bit RGB"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_dither.c:183
+msgid "Floyd-Steinberg 16-bit RGB"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_dither.c:184
+msgid "Floyd-Steinberg auto"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_exposure.c:79
+#: ../build/lib64/ansel/plugins/introspection_exposure.c:146
+msgid "percentile"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_exposure.c:85
+#: ../build/lib64/ansel/plugins/introspection_exposure.c:150
+msgid "target level"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_exposure.c:91
+#: ../build/lib64/ansel/plugins/introspection_exposure.c:154
+msgid "compensate exposure bias"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_exposure.c:168
+#: ../build/lib64/ansel/plugins/introspection_levels.c:160
+msgid "manual"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_exposure.c:169
+#: ../build/lib64/ansel/plugins/introspection_levels.c:161
+msgid "automatic"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_filmicrgb.c:207
+#: ../build/lib64/ansel/plugins/introspection_filmicrgb.c:412
+#: ../src/iop/filmic.c:1594
+msgid "middle gray luminance"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_filmicrgb.c:213
+#: ../build/lib64/ansel/plugins/introspection_filmicrgb.c:416
+#: ../build/lib64/ansel/plugins/introspection_profile_gamma.c:97
+#: ../build/lib64/ansel/plugins/introspection_profile_gamma.c:166
+#: ../src/iop/filmic.c:1617
+msgid "black relative exposure"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_filmicrgb.c:219
+#: ../build/lib64/ansel/plugins/introspection_filmicrgb.c:420
+#: ../src/iop/filmic.c:1605
+msgid "white relative exposure"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_filmicrgb.c:231
+#: ../build/lib64/ansel/plugins/introspection_filmicrgb.c:428
+msgid "transition"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_filmicrgb.c:237
+#: ../build/lib64/ansel/plugins/introspection_filmicrgb.c:432
+msgid "bloom ↔ reconstruct"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_filmicrgb.c:243
+#: ../build/lib64/ansel/plugins/introspection_filmicrgb.c:436
+msgid "gray ↔ colorful details"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_filmicrgb.c:249
+#: ../build/lib64/ansel/plugins/introspection_filmicrgb.c:440
+msgid "structure ↔ texture"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_filmicrgb.c:255
+#: ../build/lib64/ansel/plugins/introspection_filmicrgb.c:444
+msgid "dynamic range scaling"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_filmicrgb.c:261
+#: ../build/lib64/ansel/plugins/introspection_filmicrgb.c:448
+#: ../src/iop/filmic.c:1747
+msgid "target middle gray"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_filmicrgb.c:267
+#: ../build/lib64/ansel/plugins/introspection_filmicrgb.c:452
+#: ../src/iop/filmic.c:1738
+msgid "target black luminance"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_filmicrgb.c:273
+#: ../build/lib64/ansel/plugins/introspection_filmicrgb.c:456
+#: ../src/iop/filmic.c:1756
+msgid "target white luminance"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_filmicrgb.c:279
+#: ../build/lib64/ansel/plugins/introspection_filmicrgb.c:460
+#: ../build/lib64/ansel/plugins/introspection_graduatednd.c:69
+#: ../build/lib64/ansel/plugins/introspection_graduatednd.c:140
+msgid "hardness"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_filmicrgb.c:297
+#: ../build/lib64/ansel/plugins/introspection_filmicrgb.c:472
+#: ../src/iop/filmic.c:1687 ../src/iop/filmicrgb.c:4825
+msgid "extreme luminance saturation"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_filmicrgb.c:303
+#: ../build/lib64/ansel/plugins/introspection_filmicrgb.c:476
+msgid "shadows ↔ highlights balance"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_filmicrgb.c:309
+#: ../build/lib64/ansel/plugins/introspection_filmicrgb.c:480
+msgid "add noise in highlights"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_filmicrgb.c:315
+#: ../build/lib64/ansel/plugins/introspection_filmicrgb.c:484
+msgid "preserve chrominance"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_filmicrgb.c:321
+#: ../build/lib64/ansel/plugins/introspection_filmicrgb.c:488
+msgid "color science"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_filmicrgb.c:327
+#: ../build/lib64/ansel/plugins/introspection_filmicrgb.c:492
+msgid "auto adjust hardness"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_filmicrgb.c:333
+#: ../build/lib64/ansel/plugins/introspection_filmicrgb.c:496
+msgid "use custom middle-gray values"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_filmicrgb.c:339
+#: ../build/lib64/ansel/plugins/introspection_filmicrgb.c:500
+msgid "iterations of high-quality reconstruction"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_filmicrgb.c:345
+#: ../build/lib64/ansel/plugins/introspection_filmicrgb.c:504
+msgid "type of noise"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_filmicrgb.c:351
+#: ../build/lib64/ansel/plugins/introspection_filmicrgb.c:508
+msgid "contrast in shadows"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_filmicrgb.c:357
+#: ../build/lib64/ansel/plugins/introspection_filmicrgb.c:512
+msgid "contrast in highlights"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_filmicrgb.c:363
+#: ../build/lib64/ansel/plugins/introspection_filmicrgb.c:516
+msgid "compensate output ICC profile black point"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_filmicrgb.c:369
+#: ../build/lib64/ansel/plugins/introspection_filmicrgb.c:520
+msgid "spline handling"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_filmicrgb.c:534
+#: ../build/lib64/ansel/plugins/introspection_toneequal.c:371
+#: ../src/common/database.c:2751 ../src/common/variables.c:592
+#: ../src/develop/imageop_gui.c:196 ../src/imageio/format/pdf.c:647
+#: ../src/imageio/format/pdf.c:672 ../src/libs/export.c:1198
+#: ../src/libs/export.c:1204 ../src/libs/export.c:1211
+#: ../src/libs/metadata_view.c:678
+msgid "no"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_filmicrgb.c:536
+msgid "luminance Y"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_filmicrgb.c:537
+#: ../build/lib64/ansel/plugins/introspection_toneequal.c:384
+msgid "RGB power norm"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_filmicrgb.c:538
+#: ../build/lib64/ansel/plugins/introspection_toneequal.c:383
+msgid "RGB euclidean norm"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_filmicrgb.c:539
+msgid "RGB euclidean norm (legacy)"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_filmicrgb.c:543
+msgid "v3 (2019)"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_filmicrgb.c:544
+msgid "v4 (2020)"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_filmicrgb.c:545
+msgid "v5 (2021)"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_filmicrgb.c:546
+msgid "v6 (2022)"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_filmicrgb.c:547
+msgid "v7 (2023)"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_filmicrgb.c:551
+msgid "uniform"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_filmicrgb.c:553
+msgid "poissonian"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_filmicrgb.c:557
+msgid "hard"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_filmicrgb.c:558
+msgid "soft"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_filmicrgb.c:559
+msgid "safe"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_filmicrgb.c:563
+msgid "v1 (2019)"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_filmicrgb.c:564
+msgid "v2 (2020)"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_filmicrgb.c:565
+msgid "v3 (2021)"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_globaltonemap.c:60
+#: ../build/lib64/ansel/plugins/introspection_globaltonemap.c:125
+msgid "bias"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_globaltonemap.c:66
+#: ../build/lib64/ansel/plugins/introspection_globaltonemap.c:129
+#: ../src/iop/channelmixerrgb.c:4124 ../src/iop/exposure.c:1085
+msgid "target"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_globaltonemap.c:151
+msgid "reinhard"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_globaltonemap.c:152
+#: ../src/iop/filmic.c:164
+msgid "filmic"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_globaltonemap.c:153
+msgid "drago"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_graduatednd.c:63
+#: ../build/lib64/ansel/plugins/introspection_graduatednd.c:136
+msgid "density"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_grain.c:58
+#: ../build/lib64/ansel/plugins/introspection_grain.c:117
+#: ../src/iop/bilat.c:445
+msgid "coarseness"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_grain.c:70
+#: ../build/lib64/ansel/plugins/introspection_grain.c:125
+#: ../build/lib64/ansel/plugins/introspection_velvia.c:44
+#: ../build/lib64/ansel/plugins/introspection_velvia.c:91
+msgid "mid-tones bias"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_highlights.c:131
+#: ../build/lib64/ansel/plugins/introspection_highlights.c:232
+#: ../src/views/darkroom.c:2242
+msgid "clipping threshold"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_highlights.c:149
+#: ../build/lib64/ansel/plugins/introspection_highlights.c:244
+msgid "diameter of reconstruction"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_highlights.c:155
+#: ../build/lib64/ansel/plugins/introspection_highlights.c:248
+msgid "cast balance"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_highlights.c:161
+#: ../build/lib64/ansel/plugins/introspection_highlights.c:252
+msgid "combine segments"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_highlights.c:173
+#: ../build/lib64/ansel/plugins/introspection_highlights.c:260
+msgid "inpaint a flat color"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_highlights.c:274
+msgid "clip highlights"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_highlights.c:275
+msgid "reconstruct in LCh"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_highlights.c:276
+msgid "reconstruct color"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_highlights.c:277
+#: ../src/iop/highlights.c:2154
+msgid "guided laplacians"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_highlights.c:281
+msgid "4 px"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_highlights.c:282
+msgid "8 px"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_highlights.c:283
+msgid "16 px"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_highlights.c:284
+msgid "32 px"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_highlights.c:285
+msgid "64 px"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_highlights.c:286
+msgid "128 px"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_highlights.c:287
+msgid "256 px (slow)"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_highlights.c:288
+msgid "512 px (slow)"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_highlights.c:289
+msgid "1024 px (very slow)"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_highlights.c:290
+msgid "2048 px (insanely slow)"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_highpass.c:44
+#: ../build/lib64/ansel/plugins/introspection_highpass.c:91
+msgid "contrast boost"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_hotpixels.c:59
+#: ../build/lib64/ansel/plugins/introspection_hotpixels.c:116
+msgid "mark fixed pixels"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_hotpixels.c:65
+#: ../build/lib64/ansel/plugins/introspection_hotpixels.c:120
+msgid "detect by 3 neighbors"
+msgstr ""
+
+#. mode choice
+#: ../build/lib64/ansel/plugins/introspection_lens.cc:106
+#: ../build/lib64/ansel/plugins/introspection_lens.cc:237
+#: ../build/lib64/ansel/plugins/introspection_rgbcurve.c:128
+#: ../build/lib64/ansel/plugins/introspection_rgbcurve.c:219
+#: ../build/lib64/ansel/plugins/introspection_rgblevels.c:51
+#: ../build/lib64/ansel/plugins/introspection_rgblevels.c:118
+#: ../src/iop/bilat.c:427 ../src/iop/colorbalance.c:1857
+#: ../src/iop/denoiseprofile.c:3665 ../src/iop/exposure.c:1033
+#: ../src/iop/levels.c:680 ../src/iop/profile_gamma.c:676
+#: ../src/libs/copy_history.c:369 ../src/libs/export.c:1292
+#: ../src/libs/image.c:594 ../src/libs/print_settings.c:2707
+#: ../src/libs/styles.c:827 ../src/views/darkroom.c:2218
+msgid "mode"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_lens.cc:142
+#: ../build/lib64/ansel/plugins/introspection_lens.cc:261
+#: ../src/iop/lens.cc:2380
+msgid "geometry"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_lens.cc:172
+#: ../build/lib64/ansel/plugins/introspection_lens.cc:281
+msgid "TCA overwrite"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_lens.cc:178
+#: ../build/lib64/ansel/plugins/introspection_lens.cc:285
+msgid "TCA red"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_lens.cc:184
+#: ../build/lib64/ansel/plugins/introspection_lens.cc:289
+msgid "TCA blue"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_liquify.c:428
+msgid "invalidated"
+msgstr ""
+
+#. move left/right/up/down
+#: ../build/lib64/ansel/plugins/introspection_liquify.c:429
+#: ../src/views/darkroom.c:2125 ../src/views/darkroom.c:2522
+#: ../src/views/darkroom.c:2525 ../src/views/lighttable.c:722
+#: ../src/views/lighttable.c:731 ../src/views/lighttable.c:1182
+#: ../src/views/lighttable.c:1186 ../src/views/lighttable.c:1190
+#: ../src/views/lighttable.c:1194 ../src/views/lighttable.c:1198
+msgid "move"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_liquify.c:430
+msgid "line"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_liquify.c:431
+#: ../src/iop/basecurve.c:2075 ../src/iop/rgbcurve.c:1396
+#: ../src/iop/tonecurve.c:1173
+msgid "curve"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_lowlight.c:43
+#: ../build/lib64/ansel/plugins/introspection_lowlight.c:110
+msgid "blue shift"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_lowpass.c:96
+#: ../build/lib64/ansel/plugins/introspection_lowpass.c:165
+#: ../build/lib64/ansel/plugins/introspection_shadhi.c:160
+#: ../build/lib64/ansel/plugins/introspection_shadhi.c:247
+msgid "soften with"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_lowpass.c:183
+#: ../build/lib64/ansel/plugins/introspection_shadhi.c:261
+msgid "order 0"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_lowpass.c:184
+#: ../build/lib64/ansel/plugins/introspection_shadhi.c:262
+msgid "order 1"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_lowpass.c:185
+#: ../build/lib64/ansel/plugins/introspection_shadhi.c:263
+msgid "order 2"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_lowpass.c:190
+#: ../build/lib64/ansel/plugins/introspection_shadhi.c:268
+msgid "bilateral filter"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_lut3d.c:76
+#: ../build/lib64/ansel/plugins/introspection_lut3d.c:163
+msgid "application color space"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_lut3d.c:202
+msgid "Adobe RGB"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_lut3d.c:203
+msgid "gamma Rec709 RGB"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_lut3d.c:209
+msgid "tetrahedral"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_lut3d.c:210
+msgid "trilinear"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_lut3d.c:211
+msgid "pyramid"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_negadoctor.c:84
+#: ../build/lib64/ansel/plugins/introspection_negadoctor.c:199
+msgid "film stock"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_negadoctor.c:132
+#: ../build/lib64/ansel/plugins/introspection_negadoctor.c:231
+msgid "scan exposure bias"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_negadoctor.c:138
+#: ../build/lib64/ansel/plugins/introspection_negadoctor.c:235
+msgid "paper black (density correction)"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_negadoctor.c:144
+#: ../build/lib64/ansel/plugins/introspection_negadoctor.c:239
+#: ../src/iop/negadoctor.c:963
+msgid "paper grade (gamma)"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_negadoctor.c:150
+#: ../build/lib64/ansel/plugins/introspection_negadoctor.c:243
+msgid "paper gloss (specular highlights)"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_negadoctor.c:156
+#: ../build/lib64/ansel/plugins/introspection_negadoctor.c:247
+msgid "print exposure adjustment"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_negadoctor.c:261
+#: ../src/iop/negadoctor.c:390
+msgid "black and white film"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_negadoctor.c:262
+#: ../src/iop/negadoctor.c:375
+msgid "color film"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_profile_gamma.c:85
+#: ../build/lib64/ansel/plugins/introspection_profile_gamma.c:158
+msgid "dynamic range"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_profile_gamma.c:91
+#: ../build/lib64/ansel/plugins/introspection_profile_gamma.c:162
+msgid "middle gray luma"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_profile_gamma.c:103
+#: ../build/lib64/ansel/plugins/introspection_profile_gamma.c:170
+#: ../src/iop/filmic.c:1628
+msgid "safety factor"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_profile_gamma.c:184
+msgid "logarithmic"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_profile_gamma.c:185
+#: ../src/iop/profile_gamma.c:633
+msgid "gamma"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_rawdenoise.c:43
+#: ../build/lib64/ansel/plugins/introspection_rawdenoise.c:122
+msgid "noise threshold"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_rawprepare.c:70
+#: ../build/lib64/ansel/plugins/introspection_rawprepare.c:155
+msgid "crop left"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_rawprepare.c:76
+#: ../build/lib64/ansel/plugins/introspection_rawprepare.c:159
+msgid "crop top"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_rawprepare.c:82
+#: ../build/lib64/ansel/plugins/introspection_rawprepare.c:163
+msgid "crop right"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_rawprepare.c:88
+#: ../build/lib64/ansel/plugins/introspection_rawprepare.c:167
+msgid "crop bottom"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_rawprepare.c:94
+#: ../build/lib64/ansel/plugins/introspection_rawprepare.c:100
+#: ../build/lib64/ansel/plugins/introspection_rawprepare.c:171
+#: ../build/lib64/ansel/plugins/introspection_rawprepare.c:175
+msgid "black level"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_rawprepare.c:106
+#: ../build/lib64/ansel/plugins/introspection_rawprepare.c:179
+#: ../src/iop/rawprepare.c:847
+msgid "white point"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_rawprepare.c:112
+#: ../build/lib64/ansel/plugins/introspection_rawprepare.c:183
+msgid "flat field correction"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_rawprepare.c:198
+msgid "embedded GainMap"
+msgstr ""
+
+#. exposure
+#: ../build/lib64/ansel/plugins/introspection_relight.c:43
+#: ../build/lib64/ansel/plugins/introspection_relight.c:98
+#: ../src/common/collection.c:829 ../src/gui/preferences.c:811
+#: ../src/gui/presets.c:570 ../src/iop/basicadj.c:598 ../src/iop/exposure.c:123
+#: ../src/iop/exposure.c:998 ../src/libs/metadata_view.c:141
+msgid "exposure"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_retouch.c:267
+#: ../build/lib64/ansel/plugins/introspection_retouch.c:414
+msgid "fill mode"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_retouch.c:285
+#: ../build/lib64/ansel/plugins/introspection_retouch.c:426
+#: ../src/iop/basicadj.c:620 ../src/iop/channelmixerrgb.c:4186
+#: ../src/iop/colisa.c:306 ../src/iop/lowpass.c:574 ../src/iop/soften.c:403
+#: ../src/iop/vignette.c:981 ../src/libs/history.c:868
+msgid "brightness"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_retouch.c:291
+#: ../build/lib64/ansel/plugins/introspection_retouch.c:430
+msgid "max_iter"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_retouch.c:444
+#: ../src/libs/metadata_view.c:330
+msgid "unused"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_retouch.c:445
+msgid "clone"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_retouch.c:446
+msgid "heal"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_retouch.c:447
+#: ../src/iop/retouch.c:1834
+msgid "blur"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_retouch.c:448
+#: ../src/iop/retouch.c:1836
+msgid "fill"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_retouch.c:453
+msgid "bilateral"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_retouch.c:457
+msgid "erase"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_retouch.c:458
+#: ../src/gui/presets.c:59 ../src/iop/watermark.c:1107
+#: ../src/libs/colorpicker.c:285 ../src/libs/image.c:610
+#: ../src/libs/modulegroups.c:2409
+msgid "color"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_rgbcurve.c:134
+#: ../build/lib64/ansel/plugins/introspection_rgbcurve.c:223
+#: ../src/iop/rgbcurve.c:1434
+msgid "compensate middle gray"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_rgbcurve.c:246
+#: ../build/lib64/ansel/plugins/introspection_rgblevels.c:148
+#: ../build/lib64/ansel/plugins/introspection_tonecurve.c:266
+msgid "RGB, linked channels"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_rgbcurve.c:247
+#: ../build/lib64/ansel/plugins/introspection_rgblevels.c:149
+msgid "RGB, independent channels"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_shadhi.c:112
+#: ../build/lib64/ansel/plugins/introspection_shadhi.c:215
+msgid "white point adjustment"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_shadhi.c:136
+#: ../build/lib64/ansel/plugins/introspection_shadhi.c:231
+msgid "shadows color adjustment"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_shadhi.c:142
+#: ../build/lib64/ansel/plugins/introspection_shadhi.c:235
+msgid "highlights color adjustment"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_temperature.c:66
+#: ../build/lib64/ansel/plugins/introspection_temperature.c:121
+#: ../src/iop/temperature.c:1825
+msgid "emerald"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_tonecurve.c:135
+#: ../build/lib64/ansel/plugins/introspection_tonecurve.c:232
+msgid "color space"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_tonecurve.c:263
+msgid "Lab, linked channels"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_tonecurve.c:264
+msgid "Lab, independent channels"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_tonecurve.c:265
+msgid "XYZ, linked channels"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_toneequal.c:144
+#: ../build/lib64/ansel/plugins/introspection_toneequal.c:289
+msgid "blacks"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_toneequal.c:150
+#: ../build/lib64/ansel/plugins/introspection_toneequal.c:293
+msgid "deep shadows"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_toneequal.c:156
+#: ../build/lib64/ansel/plugins/introspection_toneequal.c:297
+#: ../src/iop/bilat.c:459 ../src/iop/colorbalance.c:2047
+#: ../src/iop/colorbalancergb.c:2070 ../src/iop/colorbalancergb.c:2074
+#: ../src/iop/colorbalancergb.c:2078 ../src/iop/shadhi.c:680
+#: ../src/iop/splittoning.c:520
+msgid "shadows"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_toneequal.c:162
+#: ../build/lib64/ansel/plugins/introspection_toneequal.c:301
+msgid "light shadows"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_toneequal.c:168
+#: ../build/lib64/ansel/plugins/introspection_toneequal.c:305
+#: ../src/iop/colorbalance.c:2048 ../src/iop/colorbalancergb.c:2069
+#: ../src/iop/colorbalancergb.c:2073 ../src/iop/colorbalancergb.c:2077
+msgid "mid-tones"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_toneequal.c:174
+#: ../build/lib64/ansel/plugins/introspection_toneequal.c:309
+msgid "dark highlights"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_toneequal.c:180
+#: ../build/lib64/ansel/plugins/introspection_toneequal.c:313
+#: ../src/iop/bilat.c:454 ../src/iop/colorbalance.c:2049
+#: ../src/iop/colorbalancergb.c:2068 ../src/iop/colorbalancergb.c:2072
+#: ../src/iop/colorbalancergb.c:2076 ../src/iop/monochrome.c:576
+#: ../src/iop/shadhi.c:681 ../src/iop/splittoning.c:522
+msgid "highlights"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_toneequal.c:186
+#: ../build/lib64/ansel/plugins/introspection_toneequal.c:317
+msgid "whites"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_toneequal.c:192
+#: ../build/lib64/ansel/plugins/introspection_toneequal.c:321
+msgid "speculars"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_toneequal.c:198
+#: ../build/lib64/ansel/plugins/introspection_toneequal.c:325
+msgid "smoothing diameter"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_toneequal.c:210
+#: ../build/lib64/ansel/plugins/introspection_toneequal.c:333
+msgid "edges refinement/feathering"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_toneequal.c:216
+#: ../build/lib64/ansel/plugins/introspection_toneequal.c:337
+msgid "mask quantization"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_toneequal.c:222
+#: ../build/lib64/ansel/plugins/introspection_toneequal.c:341
+msgid "mask contrast compensation"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_toneequal.c:228
+#: ../build/lib64/ansel/plugins/introspection_toneequal.c:345
+msgid "mask exposure compensation"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_toneequal.c:240
+#: ../build/lib64/ansel/plugins/introspection_toneequal.c:353
+msgid "luminance estimator"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_toneequal.c:246
+#: ../build/lib64/ansel/plugins/introspection_toneequal.c:357
+msgid "filter diffusion"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_toneequal.c:372
+msgid "averaged guided filter"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_toneequal.c:373
+msgid "guided filter"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_toneequal.c:374
+msgid "averaged eigf"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_toneequal.c:375
+msgid "eigf"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_toneequal.c:379
+msgid "RGB average"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_toneequal.c:380
+msgid "HSL lightness"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_toneequal.c:381
+msgid "HSV value / RGB max"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_toneequal.c:382
+msgid "RGB sum"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_toneequal.c:385
+msgid "RGB geometric mean"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_tonemap.cc:39
+#: ../build/lib64/ansel/plugins/introspection_tonemap.cc:88
+#: ../src/iop/rgbcurve.c:183 ../src/iop/tonecurve.c:554
+msgid "contrast compression"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_vibrance.c:33
+#: ../build/lib64/ansel/plugins/introspection_vibrance.c:76
+#: ../src/iop/basicadj.c:627 ../src/iop/vibrance.c:67
+msgid "vibrance"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_vignette.c:97
+#: ../build/lib64/ansel/plugins/introspection_vignette.c:204
+msgid "fall-off strength"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_vignette.c:115
+#: ../build/lib64/ansel/plugins/introspection_vignette.c:216
+msgid "horizontal center"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_vignette.c:121
+#: ../build/lib64/ansel/plugins/introspection_vignette.c:220
+msgid "vertical center"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_vignette.c:133
+#: ../build/lib64/ansel/plugins/introspection_vignette.c:228
+msgid "automatic ratio"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_vignette.c:139
+#: ../build/lib64/ansel/plugins/introspection_vignette.c:232
+msgid "width/height ratio"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_vignette.c:145
+#: ../build/lib64/ansel/plugins/introspection_vignette.c:236
+#: ../src/iop/vignette.c:989
+msgid "shape"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_vignette.c:264
+msgid "8-bit output"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_vignette.c:265
+msgid "16-bit output"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_watermark.c:100
+#: ../build/lib64/ansel/plugins/introspection_watermark.c:223
+msgid "x offset"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_watermark.c:106
+#: ../build/lib64/ansel/plugins/introspection_watermark.c:227
+msgid "y offset"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_watermark.c:124
+#: ../build/lib64/ansel/plugins/introspection_watermark.c:239
+msgid "scale on"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_watermark.c:285
+#: ../src/imageio/format/tiff.c:121 ../src/imageio/format/xcf.c:149
+#: ../src/iop/borders.c:960
+msgid "image"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_watermark.c:286
+msgid "larger border"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/introspection_watermark.c:287
+msgid "smaller border"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/lighttable/tools/darktable_authors.h:6
+msgid "developers"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/lighttable/tools/darktable_authors.h:11
+msgid "translators"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/lighttable/tools/darktable_authors.h:16
+msgid "contributors"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/lighttable/tools/darktable_authors.h:21
+msgid "rawspeed contributors"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/lighttable/tools/darktable_authors.h:26
+msgid "integration contributors"
+msgstr ""
+
+#: ../build/lib64/ansel/plugins/lighttable/tools/darktable_authors.h:31
+msgid "LibRaw contributors"
+msgstr ""
+
+#: ../data/build/ansel.desktop.in.h:1 ../data/ansel.desktop.in.h:1
+msgid "Virtual Lighttable and Darkroom"
+msgstr ""
+
+#: ../data/build/ansel.desktop.in.h:2
 #: ../data/photos.ansel.app.appdata.xml.in.h:1 ../data/ansel.desktop.in.h:2
 #: ../src/libs/tools/darktable.c:274
-#: ../build/share/darktable/photos.ansel.app.desktop.in.h:3
 msgid "Organize and develop images from digital cameras"
+msgstr ""
+
+#. TRANSLATORS: Search terms to find this application. Do NOT translate or localize the semicolons! The list MUST also end with a semicolon!
+#: ../data/build/ansel.desktop.in.h:4 ../data/ansel.desktop.in.h:4
+msgid "graphics;photography;raw;"
 msgstr ""
 
 #: ../data/photos.ansel.app.appdata.xml.in.h:2
@@ -1954,16 +4305,6 @@ msgstr ""
 
 #: ../data/photos.ansel.app.appdata.xml.in.h:3
 msgid "Virtual light table, showing a collection"
-msgstr ""
-
-#: ../data/ansel.desktop.in.h:1
-#: ../build/share/darktable/photos.ansel.app.desktop.in.h:2
-msgid "Virtual Lighttable and Darkroom"
-msgstr ""
-
-#. TRANSLATORS: Search terms to find this application. Do NOT translate or localize the semicolons! The list MUST also end with a semicolon!
-#: ../data/ansel.desktop.in.h:4
-msgid "graphics;photography;raw;"
 msgstr ""
 
 #: ../src/bauhaus/bauhaus.c:3196
@@ -2209,17 +4550,6 @@ msgstr ""
 msgid "color label"
 msgstr ""
 
-#: ../src/common/collection.c:825 ../src/gui/preferences.c:803
-#: ../src/gui/presets.c:551 ../src/libs/metadata_view.c:139
-msgid "lens"
-msgstr ""
-
-#. focal length
-#: ../src/common/collection.c:826 ../src/gui/preferences.c:819
-#: ../src/gui/presets.c:600 ../src/libs/metadata_view.c:143
-msgid "focal length"
-msgstr ""
-
 #. iso
 #: ../src/common/collection.c:827 ../src/gui/preferences.c:807
 #: ../src/gui/presets.c:557 ../src/libs/metadata_view.c:145
@@ -2230,17 +4560,6 @@ msgstr ""
 #: ../src/common/collection.c:828 ../src/gui/preferences.c:815
 #: ../src/gui/presets.c:585 ../src/libs/metadata_view.c:140
 msgid "aperture"
-msgstr ""
-
-#. exposure
-#: ../src/common/collection.c:829 ../src/gui/preferences.c:811
-#: ../src/gui/presets.c:570 ../src/iop/basicadj.c:598 ../src/iop/exposure.c:123
-#: ../src/iop/exposure.c:998 ../src/libs/metadata_view.c:141
-msgid "exposure"
-msgstr ""
-
-#: ../src/common/collection.c:830 ../src/libs/tools/filter.c:109
-msgid "aspect ratio"
 msgstr ""
 
 #: ../src/common/collection.c:831 ../src/libs/metadata_view.c:126
@@ -2278,17 +4597,6 @@ msgstr ""
 msgid "rating"
 msgstr ""
 
-#: ../src/common/collection.c:1653 ../src/common/color_vocabulary.c:232
-#: ../src/common/colorlabels.c:329 ../src/develop/blend_gui.c:1989
-#: ../src/develop/blend_gui.c:2016 ../src/develop/lightroom.c:834
-#: ../src/gui/gtk.c:2663 ../src/gui/guides.c:730 ../src/iop/bilateral.cc:305
-#: ../src/iop/channelmixer.c:625 ../src/iop/channelmixer.c:635
-#: ../src/iop/channelmixerrgb.c:4181 ../src/iop/colorzones.c:2302
-#: ../src/iop/temperature.c:1819 ../src/iop/temperature.c:1992
-#: ../src/libs/collect.c:1793
-msgid "red"
-msgstr ""
-
 #: ../src/common/collection.c:1655 ../src/common/colorlabels.c:330
 #: ../src/develop/lightroom.c:836 ../src/gui/guides.c:732
 #: ../src/iop/colorzones.c:2304 ../src/iop/temperature.c:1809
@@ -2296,37 +4604,10 @@ msgstr ""
 msgid "yellow"
 msgstr ""
 
-#: ../src/common/collection.c:1657 ../src/common/color_vocabulary.c:277
-#: ../src/common/colorlabels.c:331 ../src/develop/blend_gui.c:1992
-#: ../src/develop/blend_gui.c:2019 ../src/develop/lightroom.c:838
-#: ../src/gui/gtk.c:2664 ../src/gui/guides.c:731 ../src/iop/bilateral.cc:310
-#: ../src/iop/channelmixer.c:626 ../src/iop/channelmixer.c:641
-#: ../src/iop/channelmixerrgb.c:4182 ../src/iop/colorzones.c:2305
-#: ../src/iop/temperature.c:1803 ../src/iop/temperature.c:1821
-#: ../src/iop/temperature.c:1993 ../src/libs/collect.c:1793
-msgid "green"
-msgstr ""
-
-#: ../src/common/collection.c:1659 ../src/common/color_vocabulary.c:324
-#: ../src/common/colorlabels.c:332 ../src/develop/blend_gui.c:1995
-#: ../src/develop/blend_gui.c:2022 ../src/develop/lightroom.c:840
-#: ../src/gui/gtk.c:2665 ../src/iop/bilateral.cc:315
-#: ../src/iop/channelmixer.c:627 ../src/iop/channelmixer.c:647
-#: ../src/iop/channelmixerrgb.c:4183 ../src/iop/colorzones.c:2307
-#: ../src/iop/temperature.c:1823 ../src/iop/temperature.c:1994
-#: ../src/libs/collect.c:1793
-msgid "blue"
-msgstr ""
-
 #: ../src/common/collection.c:1661 ../src/common/color_vocabulary.c:339
 #: ../src/common/colorlabels.c:333 ../src/iop/colorzones.c:2308
 #: ../src/libs/collect.c:1793
 msgid "purple"
-msgstr ""
-
-#: ../src/common/collection.c:1678 ../src/common/collection.c:1686
-#: ../src/libs/collect.c:1747
-msgid "basic"
 msgstr ""
 
 #: ../src/common/collection.c:1680 ../src/libs/collect.c:1747
@@ -2716,21 +4997,8 @@ msgstr ""
 msgid "sRGB (web-safe)"
 msgstr ""
 
-#: ../src/common/colorspaces.c:1490 ../src/common/colorspaces.c:1716
-#: ../src/libs/print_settings.c:1292
-msgid "Adobe RGB (compatible)"
-msgstr ""
-
-#: ../src/common/colorspaces.c:1495 ../src/common/colorspaces.c:1718
-msgid "linear Rec709 RGB"
-msgstr ""
-
 #: ../src/common/colorspaces.c:1499 ../src/common/colorspaces.c:1752
 msgid "Rec709 RGB"
-msgstr ""
-
-#: ../src/common/colorspaces.c:1504 ../src/common/colorspaces.c:1720
-msgid "linear Rec2020 RGB"
 msgstr ""
 
 #: ../src/common/colorspaces.c:1509
@@ -2775,10 +5043,6 @@ msgstr ""
 #, c-format
 msgid ""
 "profile `%s' not usable as histogram profile. it has been replaced by sRGB!"
-msgstr ""
-
-#: ../src/common/colorspaces.c:1714
-msgid "sRGB"
 msgstr ""
 
 #: ../src/common/colorspaces.c:1730
@@ -2993,14 +5257,6 @@ msgstr ""
 msgid ""
 "\n"
 "do you really want to delete the lock files?\n"
-msgstr ""
-
-#: ../src/common/database.c:2751 ../src/common/variables.c:592
-#: ../src/develop/imageop_gui.c:196 ../src/imageio/format/pdf.c:647
-#: ../src/imageio/format/pdf.c:672 ../src/libs/export.c:1198
-#: ../src/libs/export.c:1204 ../src/libs/export.c:1211
-#: ../src/libs/metadata_view.c:678
-msgid "no"
 msgstr ""
 
 #: ../src/common/database.c:2751 ../src/common/database.c:3811
@@ -3430,10 +5686,6 @@ msgstr ""
 
 #: ../src/common/import_session.c:373
 msgid "requested session path not available. device not mounted?"
-msgstr ""
-
-#: ../src/common/iop_order.c:58
-msgid "custom"
 msgstr ""
 
 #: ../src/common/iop_order.c:59 ../src/libs/ioporder.c:208
@@ -4602,15 +6854,6 @@ msgstr ""
 msgid "RGB (scene)"
 msgstr ""
 
-#. DEVELOP_MASK_DISABLED
-#: ../src/develop/blend_gui.c:101 ../src/develop/blend_gui.c:124
-#: ../src/develop/blend_gui.c:2974 ../src/develop/develop.c:2076
-#: ../src/gui/accelerators.c:121 ../src/gui/accelerators.c:130
-#: ../src/gui/accelerators.c:198 ../src/imageio/format/avif.c:825
-#: ../src/imageio/format/j2k.c:672
-msgid "off"
-msgstr ""
-
 #. DEVELOP_MASK_ENABLED
 #: ../src/develop/blend_gui.c:102 ../src/develop/blend_gui.c:2980
 msgid "uniformly"
@@ -4713,13 +6956,6 @@ msgstr ""
 msgid "sliders for L channel"
 msgstr ""
 
-#: ../src/develop/blend_gui.c:1966 ../src/iop/channelmixer.c:624
-#: ../src/iop/channelmixerrgb.c:4136 ../src/iop/colorchecker.c:1358
-#: ../src/iop/colorize.c:363 ../src/iop/colorzones.c:2431
-#: ../src/iop/exposure.c:1097
-msgid "lightness"
-msgstr ""
-
 #: ../src/develop/blend_gui.c:1967 ../src/iop/tonecurve.c:1160
 msgid "a"
 msgstr ""
@@ -4752,35 +6988,12 @@ msgstr ""
 msgid "sliders for chroma channel (of LCh)"
 msgstr ""
 
-#: ../src/develop/blend_gui.c:1976 ../src/iop/basicadj.c:624
-#: ../src/iop/channelmixer.c:623 ../src/iop/colisa.c:307
-#: ../src/iop/colorbalance.c:2007 ../src/iop/colorbalancergb.c:2072
-#: ../src/iop/colorbalancergb.c:2073 ../src/iop/colorbalancergb.c:2074
-#: ../src/iop/colorchecker.c:1376 ../src/iop/colorcontrast.c:94
-#: ../src/iop/colorcorrection.c:283 ../src/iop/colorize.c:357
-#: ../src/iop/colorzones.c:2432 ../src/iop/lowpass.c:575
-#: ../src/iop/soften.c:399 ../src/iop/splittoning.c:483 ../src/iop/velvia.c:84
-#: ../src/iop/vibrance.c:72 ../src/iop/vignette.c:982
-msgid "saturation"
-msgstr ""
-
 #: ../src/develop/blend_gui.c:1977
 msgid "h"
 msgstr ""
 
 #: ../src/develop/blend_gui.c:1977
 msgid "sliders for hue channel (of LCh)"
-msgstr ""
-
-#: ../src/develop/blend_gui.c:1980 ../src/develop/blend_gui.c:1999
-#: ../src/develop/blend_gui.c:2034 ../src/iop/channelmixer.c:622
-#: ../src/iop/channelmixerrgb.c:4053 ../src/iop/channelmixerrgb.c:4143
-#: ../src/iop/colorbalance.c:1990 ../src/iop/colorbalancergb.c:2054
-#: ../src/iop/colorbalancergb.c:2055 ../src/iop/colorbalancergb.c:2056
-#: ../src/iop/colorbalancergb.c:2057 ../src/iop/colorize.c:344
-#: ../src/iop/colorreconstruction.c:1288 ../src/iop/colorzones.c:2433
-#: ../src/iop/splittoning.c:471
-msgid "hue"
 msgstr ""
 
 #: ../src/develop/blend_gui.c:1984 ../src/develop/blend_gui.c:2011
@@ -4852,12 +7065,6 @@ msgstr ""
 
 #: ../src/develop/blend_gui.c:2004
 msgid "sliders for value channel (of HSL)"
-msgstr ""
-
-#: ../src/develop/blend_gui.c:2007 ../src/develop/blend_gui.c:2026
-#: ../src/iop/colorbalancergb.c:2062 ../src/iop/colorbalancergb.c:2063
-#: ../src/iop/colorbalancergb.c:2064 ../src/iop/colorbalancergb.c:2065
-msgid "luminance"
 msgstr ""
 
 #: ../src/develop/blend_gui.c:2023
@@ -4945,8 +7152,8 @@ msgstr ""
 #: ../src/iop/basicadj.c:600 ../src/iop/colorbalancergb.c:2019
 #: ../src/iop/exposure.c:1001 ../src/iop/exposure.c:1014
 #: ../src/iop/filmic.c:1607 ../src/iop/filmic.c:1619 ../src/iop/filmic.c:1659
-#: ../src/iop/filmicrgb.c:4381 ../src/iop/filmicrgb.c:4391
-#: ../src/iop/filmicrgb.c:4426 ../src/iop/filmicrgb.c:4436
+#: ../src/iop/filmicrgb.c:4541 ../src/iop/filmicrgb.c:4551
+#: ../src/iop/filmicrgb.c:4586 ../src/iop/filmicrgb.c:4596
 #: ../src/iop/graduatednd.c:1098 ../src/iop/negadoctor.c:983
 #: ../src/iop/profile_gamma.c:651 ../src/iop/profile_gamma.c:657
 #: ../src/iop/relight.c:267 ../src/iop/soften.c:404 ../src/iop/toneequal.c:3117
@@ -6138,14 +8345,6 @@ msgstr ""
 msgid "down"
 msgstr ""
 
-#: ../src/gui/accelerators.c:106 ../src/gui/gtk.c:985
-msgid "top"
-msgstr ""
-
-#: ../src/gui/accelerators.c:107 ../src/gui/gtk.c:988
-msgid "bottom"
-msgstr ""
-
 #: ../src/gui/accelerators.c:108
 msgid "set"
 msgstr ""
@@ -6670,14 +8869,6 @@ msgstr ""
 msgid "panels"
 msgstr ""
 
-#: ../src/gui/gtk.c:979 ../src/iop/atrous.c:1587
-msgid "left"
-msgstr ""
-
-#: ../src/gui/gtk.c:982 ../src/iop/atrous.c:1586
-msgid "right"
-msgstr ""
-
 #. an action that does nothing - used for overriding/removing default shortcuts
 #: ../src/gui/gtk.c:1010
 msgid "no-op"
@@ -7146,15 +9337,6 @@ msgstr ""
 msgid "flip guides"
 msgstr ""
 
-#: ../src/gui/guides.c:712 ../src/iop/basecurve.c:2082
-#: ../src/iop/channelmixerrgb.c:4229 ../src/iop/clipping.c:1918
-#: ../src/iop/clipping.c:2111 ../src/iop/clipping.c:2126
-#: ../src/iop/lens.cc:2268 ../src/iop/retouch.c:460 ../src/libs/collect.c:1909
-#: ../src/libs/colorpicker.c:51 ../src/libs/export.c:1026
-#: ../src/libs/print_settings.c:2668
-msgid "none"
-msgstr ""
-
 #: ../src/gui/guides.c:713
 msgid "horizontally"
 msgstr ""
@@ -7178,13 +9360,6 @@ msgstr ""
 
 #: ../src/gui/guides.c:727
 msgid "set overlay color"
-msgstr ""
-
-#: ../src/gui/guides.c:740 ../src/iop/basicadj.c:607 ../src/iop/bilat.c:451
-#: ../src/iop/colisa.c:305 ../src/iop/colorbalance.c:1895
-#: ../src/iop/colorbalance.c:1901 ../src/iop/filmic.c:1649
-#: ../src/iop/filmicrgb.c:4492 ../src/iop/lowpass.c:573
-msgid "contrast"
 msgstr ""
 
 #: ../src/gui/guides.c:741
@@ -7427,12 +9602,6 @@ msgstr ""
 #: ../src/gui/presets.c:59 ../src/iop/monochrome.c:77 ../src/libs/image.c:606
 #: ../src/libs/metadata_view.c:341
 msgid "monochrome"
-msgstr ""
-
-#: ../src/gui/presets.c:59 ../src/iop/watermark.c:1107
-#: ../src/libs/colorpicker.c:285 ../src/libs/image.c:610
-#: ../src/libs/modulegroups.c:2409
-msgid "color"
 msgstr ""
 
 #: ../src/gui/presets.c:165
@@ -7710,10 +9879,6 @@ msgstr ""
 
 #: ../src/imageio/format/avif.c:790
 msgid "color information stored in an image, higher is better"
-msgstr ""
-
-#: ../src/imageio/format/avif.c:800 ../src/libs/colorpicker.c:577
-msgid "color mode"
 msgstr ""
 
 #: ../src/imageio/format/avif.c:802
@@ -8037,11 +10202,6 @@ msgstr ""
 
 #: ../src/imageio/format/ppm.c:109
 msgid "PPM (16-bit)"
-msgstr ""
-
-#: ../src/imageio/format/tiff.c:121 ../src/imageio/format/xcf.c:149
-#: ../src/iop/borders.c:960
-msgid "image"
 msgstr ""
 
 #: ../src/imageio/format/tiff.c:228
@@ -8422,10 +10582,6 @@ msgstr ""
 msgid "lens shift (%s)"
 msgstr ""
 
-#: ../src/iop/ashift.c:5692
-msgid "rotation"
-msgstr ""
-
 #: ../src/iop/ashift.c:5704
 msgid "manual perspective"
 msgstr ""
@@ -8565,7 +10721,7 @@ msgid "add or remove local contrast, sharpness, acutance"
 msgstr ""
 
 #: ../src/iop/atrous.c:139 ../src/iop/bilateral.cc:99 ../src/iop/diffuse.c:147
-#: ../src/iop/exposure.c:131 ../src/iop/filmicrgb.c:354
+#: ../src/iop/exposure.c:131 ../src/iop/filmicrgb.c:355
 #: ../src/iop/graduatednd.c:150 ../src/iop/negadoctor.c:156
 #: ../src/iop/rgbcurve.c:142 ../src/iop/rgblevels.c:122 ../src/iop/shadhi.c:197
 #: ../src/iop/tonecurve.c:213 ../src/iop/toneequal.c:306
@@ -8662,11 +10818,6 @@ msgstr ""
 msgid "contrasty"
 msgstr ""
 
-#: ../src/iop/atrous.c:1368 ../src/iop/atrous.c:1372
-#: ../src/iop/denoiseprofile.c:3410 ../src/iop/rawdenoise.c:756
-msgid "smooth"
-msgstr ""
-
 #: ../src/iop/atrous.c:1373 ../src/iop/denoiseprofile.c:3415
 #: ../src/iop/rawdenoise.c:761
 msgid "noisy"
@@ -8697,12 +10848,6 @@ msgstr ""
 msgid "lower"
 msgstr ""
 
-#: ../src/iop/atrous.c:1591 ../src/iop/bilateral.cc:301 ../src/iop/clahe.c:335
-#: ../src/iop/dither.c:886 ../src/iop/lowpass.c:571 ../src/iop/shadhi.c:684
-#: ../src/iop/sharpen.c:448
-msgid "radius"
-msgstr ""
-
 #: ../src/iop/atrous.c:1592
 msgid "coarsest"
 msgstr ""
@@ -8717,16 +10862,6 @@ msgstr ""
 
 #: ../src/iop/atrous.c:1597
 msgid "finest"
-msgstr ""
-
-#: ../src/iop/atrous.c:1633 ../src/iop/highpass.c:394
-msgid "sharpness"
-msgstr ""
-
-#: ../src/iop/atrous.c:1641 ../src/iop/bloom.c:394
-#: ../src/iop/colorbalancergb.c:2015 ../src/iop/colorreconstruction.c:1284
-#: ../src/iop/hotpixels.c:385 ../src/iop/sharpen.c:457
-msgid "threshold"
 msgstr ""
 
 #: ../src/iop/atrous.c:1655 ../src/libs/export.c:1152 ../src/libs/export.c:1167
@@ -8756,15 +10891,10 @@ msgid ""
 msgstr ""
 
 #: ../src/iop/atrous.c:1755 ../src/iop/colorbalancergb.c:1985
-#: ../src/iop/colorzones.c:2507 ../src/iop/filmicrgb.c:4348
+#: ../src/iop/colorzones.c:2507 ../src/iop/filmicrgb.c:4508
 #: ../src/iop/lowlight.c:836 ../src/iop/rawdenoise.c:932
 #: ../src/iop/toneequal.c:3162
 msgid "graph"
-msgstr ""
-
-#. mix slider
-#: ../src/iop/atrous.c:1765
-msgid "mix"
 msgstr ""
 
 #: ../src/iop/atrous.c:1766 ../src/iop/colorzones.c:2500
@@ -8878,7 +11008,7 @@ msgstr ""
 
 #: ../src/iop/basecurve.c:341 ../src/iop/basicadj.c:149
 #: ../src/iop/colorbalance.c:161 ../src/iop/colorbalancergb.c:184
-#: ../src/iop/dither.c:105 ../src/iop/filmicrgb.c:356
+#: ../src/iop/dither.c:105 ../src/iop/filmicrgb.c:357
 #: ../src/iop/graduatednd.c:152 ../src/iop/negadoctor.c:158
 #: ../src/iop/profile_gamma.c:103 ../src/iop/rgbcurve.c:144
 #: ../src/iop/rgblevels.c:124 ../src/iop/vignette.c:160
@@ -8887,7 +11017,7 @@ msgid "non-linear, RGB"
 msgstr ""
 
 #: ../src/iop/basecurve.c:342 ../src/iop/dither.c:104 ../src/iop/dither.c:106
-#: ../src/iop/filmicrgb.c:357 ../src/iop/graduatednd.c:153
+#: ../src/iop/filmicrgb.c:358 ../src/iop/graduatednd.c:153
 #: ../src/iop/negadoctor.c:159 ../src/iop/profile_gamma.c:104
 #: ../src/iop/rgblevels.c:125 ../src/iop/vignette.c:159
 #: ../src/iop/vignette.c:161 ../src/iop/watermark.c:298
@@ -8897,11 +11027,6 @@ msgstr ""
 
 #: ../src/iop/basecurve.c:2073
 msgid "abscissa: input, ordinate: output. works on RGB channels"
-msgstr ""
-
-#: ../src/iop/basecurve.c:2075 ../src/iop/rgbcurve.c:1396
-#: ../src/iop/tonecurve.c:1173
-msgid "curve"
 msgstr ""
 
 #: ../src/iop/basecurve.c:2079 ../src/iop/basicadj.c:612
@@ -8991,22 +11116,12 @@ msgstr ""
 msgid "middle gray adjustment"
 msgstr ""
 
-#: ../src/iop/basicadj.c:620 ../src/iop/channelmixerrgb.c:4186
-#: ../src/iop/colisa.c:306 ../src/iop/lowpass.c:574 ../src/iop/soften.c:403
-#: ../src/iop/vignette.c:981 ../src/libs/history.c:868
-msgid "brightness"
-msgstr ""
-
 #: ../src/iop/basicadj.c:622 ../src/iop/colisa.c:310
 msgid "brightness adjustment"
 msgstr ""
 
 #: ../src/iop/basicadj.c:625
 msgid "saturation adjustment"
-msgstr ""
-
-#: ../src/iop/basicadj.c:627 ../src/iop/vibrance.c:67
-msgid "vibrance"
 msgstr ""
 
 #: ../src/iop/basicadj.c:628
@@ -9068,16 +11183,6 @@ msgstr ""
 msgid "HDR local tone-mapping"
 msgstr ""
 
-#. mode choice
-#: ../src/iop/bilat.c:427 ../src/iop/colorbalance.c:1857
-#: ../src/iop/denoiseprofile.c:3665 ../src/iop/exposure.c:1033
-#: ../src/iop/levels.c:680 ../src/iop/profile_gamma.c:676
-#: ../src/libs/copy_history.c:369 ../src/libs/export.c:1292
-#: ../src/libs/image.c:594 ../src/libs/print_settings.c:2707
-#: ../src/libs/styles.c:827 ../src/views/darkroom.c:2218
-msgid "mode"
-msgstr ""
-
 #: ../src/iop/bilat.c:428
 msgid ""
 "the filter used for local contrast enhancement. bilateral is faster but can "
@@ -9092,10 +11197,6 @@ msgstr ""
 msgid "changes the local contrast"
 msgstr ""
 
-#: ../src/iop/bilat.c:445
-msgid "coarseness"
-msgstr ""
-
 #: ../src/iop/bilat.c:446
 msgid "feature size of local details (spatial sigma of bilateral filter)"
 msgstr ""
@@ -9104,22 +11205,8 @@ msgstr ""
 msgid "L difference to detect edges (range sigma of bilateral filter)"
 msgstr ""
 
-#: ../src/iop/bilat.c:454 ../src/iop/colorbalance.c:2049
-#: ../src/iop/colorbalancergb.c:2068 ../src/iop/colorbalancergb.c:2072
-#: ../src/iop/colorbalancergb.c:2076 ../src/iop/monochrome.c:576
-#: ../src/iop/shadhi.c:681 ../src/iop/splittoning.c:522
-msgid "highlights"
-msgstr ""
-
 #: ../src/iop/bilat.c:457
 msgid "changes the local contrast of highlights"
-msgstr ""
-
-#: ../src/iop/bilat.c:459 ../src/iop/colorbalance.c:2047
-#: ../src/iop/colorbalancergb.c:2070 ../src/iop/colorbalancergb.c:2074
-#: ../src/iop/colorbalancergb.c:2078 ../src/iop/shadhi.c:680
-#: ../src/iop/splittoning.c:520
-msgid "shadows"
 msgstr ""
 
 #: ../src/iop/bilat.c:462
@@ -9182,12 +11269,6 @@ msgstr ""
 
 #: ../src/iop/bloom.c:396
 msgid "the threshold of light"
-msgstr ""
-
-#: ../src/iop/bloom.c:398 ../src/iop/denoiseprofile.c:3680
-#: ../src/iop/grain.c:570 ../src/iop/hazeremoval.c:201
-#: ../src/iop/hotpixels.c:389 ../src/iop/nlmeans.c:514 ../src/iop/velvia.c:266
-msgid "strength"
 msgstr ""
 
 #: ../src/iop/bloom.c:400
@@ -9511,7 +11592,7 @@ msgid "censorize license plates and body parts for privacy"
 msgstr ""
 
 #: ../src/iop/censorize.c:84 ../src/iop/colorin.c:137
-#: ../src/iop/filmicrgb.c:355 ../src/iop/graduatednd.c:151
+#: ../src/iop/filmicrgb.c:356 ../src/iop/graduatednd.c:151
 msgid "linear or non-linear, RGB, scene-referred"
 msgstr ""
 
@@ -9845,10 +11926,6 @@ msgid ""
 "cannot be computed at all so you need to use a custom illuminant."
 msgstr ""
 
-#: ../src/iop/channelmixerrgb.c:3554
-msgid "as shot in camera"
-msgstr ""
-
 #: ../src/iop/channelmixerrgb.c:3630
 msgid "white balance successfully extracted from raw image"
 msgstr ""
@@ -9874,7 +11951,7 @@ msgstr ""
 
 #. //////////////////////// PAGE SETTINGS
 #: ../src/iop/channelmixerrgb.c:4004 ../src/iop/clipping.c:2105
-#: ../src/iop/colorbalancergb.c:1803 ../src/iop/filmicrgb.c:4363
+#: ../src/iop/colorbalancergb.c:1803 ../src/iop/filmicrgb.c:4523
 #: ../src/iop/negadoctor.c:802 ../src/iop/toneequal.c:3110
 #: ../src/libs/image.c:457 ../src/libs/print_settings.c:2351
 #: ../src/views/lighttable.c:1194
@@ -9981,10 +12058,6 @@ msgstr ""
 msgid "these LCh coordinates are computed from CIE Lab 1976 coordinates"
 msgstr ""
 
-#: ../src/iop/channelmixerrgb.c:4124 ../src/iop/exposure.c:1085
-msgid "target"
-msgstr ""
-
 #: ../src/iop/channelmixerrgb.c:4130
 msgid "the desired target color after mapping"
 msgstr ""
@@ -10081,10 +12154,6 @@ msgstr ""
 
 #: ../src/iop/channelmixerrgb.c:4230
 msgid "neutral colors"
-msgstr ""
-
-#: ../src/iop/channelmixerrgb.c:4231
-msgid "saturated colors"
 msgstr ""
 
 #: ../src/iop/channelmixerrgb.c:4232
@@ -10579,11 +12648,6 @@ msgstr ""
 msgid "factor of blue for gain/slope"
 msgstr ""
 
-#: ../src/iop/colorbalance.c:2048 ../src/iop/colorbalancergb.c:2069
-#: ../src/iop/colorbalancergb.c:2073 ../src/iop/colorbalancergb.c:2077
-msgid "mid-tones"
-msgstr ""
-
 #: ../src/iop/colorbalance.c:2054
 msgid "auto optimizers"
 msgstr ""
@@ -10836,11 +12900,6 @@ msgstr ""
 #: ../src/iop/colorbalancergb.c:2056 ../src/iop/colorbalancergb.c:2060
 #: ../src/iop/colorbalancergb.c:2064
 msgid "gain"
-msgstr ""
-
-#: ../src/iop/colorbalancergb.c:2057 ../src/iop/colorbalancergb.c:2061
-#: ../src/iop/colorbalancergb.c:2065
-msgid "offset"
 msgstr ""
 
 #: ../src/iop/colorbalancergb.c:2067
@@ -11870,10 +13929,6 @@ msgid ""
 "zero does nothing."
 msgstr ""
 
-#: ../src/iop/diffuse.c:1549
-msgid "direction"
-msgstr ""
-
 #: ../src/iop/diffuse.c:1555
 msgid ""
 "direction of 1st order speed (set above).\n"
@@ -12102,10 +14157,6 @@ msgstr ""
 msgid "the desired target exposure after mapping"
 msgstr ""
 
-#: ../src/iop/filmic.c:164
-msgid "filmic"
-msgstr ""
-
 #: ../src/iop/filmic.c:179
 msgid "this module is deprecated. better use filmic rgb module instead."
 msgstr ""
@@ -12154,41 +14205,25 @@ msgstr ""
 msgid "logarithmic shaper"
 msgstr ""
 
-#: ../src/iop/filmic.c:1594
-msgid "middle gray luminance"
-msgstr ""
-
 #: ../src/iop/filmic.c:1597
 msgid ""
 "adjust to match the average luminance of the subject.\n"
 "except in back-lighting situations, this should be around 18%."
 msgstr ""
 
-#: ../src/iop/filmic.c:1605
-msgid "white relative exposure"
-msgstr ""
-
-#: ../src/iop/filmic.c:1608 ../src/iop/filmicrgb.c:4383
+#: ../src/iop/filmic.c:1608 ../src/iop/filmicrgb.c:4543
 msgid ""
 "number of stops between middle gray and pure white.\n"
 "this is a reading a lightmeter would give you on the scene.\n"
 "adjust so highlights clipping is avoided"
 msgstr ""
 
-#: ../src/iop/filmic.c:1617
-msgid "black relative exposure"
-msgstr ""
-
-#: ../src/iop/filmic.c:1620 ../src/iop/filmicrgb.c:4393
+#: ../src/iop/filmic.c:1620 ../src/iop/filmicrgb.c:4553
 msgid ""
 "number of stops between middle gray and pure black.\n"
 "this is a reading a lightmeter would give you on the scene.\n"
 "increase to get more contrast.\n"
 "decrease to recover more details in low-lights."
-msgstr ""
-
-#: ../src/iop/filmic.c:1628
-msgid "safety factor"
 msgstr ""
 
 #: ../src/iop/filmic.c:1631
@@ -12197,8 +14232,8 @@ msgid ""
 "useful in conjunction with \"auto tune levels\"."
 msgstr ""
 
-#: ../src/iop/filmic.c:1637 ../src/iop/filmicrgb.c:4406
-#: ../src/iop/filmicrgb.c:4409 ../src/iop/profile_gamma.c:667
+#: ../src/iop/filmic.c:1637 ../src/iop/filmicrgb.c:4566
+#: ../src/iop/filmicrgb.c:4569 ../src/iop/profile_gamma.c:667
 msgid "auto tune levels"
 msgstr ""
 
@@ -12214,14 +14249,14 @@ msgstr ""
 msgid "filmic S curve"
 msgstr ""
 
-#: ../src/iop/filmic.c:1651 ../src/iop/filmicrgb.c:4495
+#: ../src/iop/filmic.c:1651 ../src/iop/filmicrgb.c:4655
 msgid ""
 "slope of the linear part of the curve\n"
 "affects mostly the mid-tones"
 msgstr ""
 
 #. geotagging
-#: ../src/iop/filmic.c:1658 ../src/iop/filmicrgb.c:4504
+#: ../src/iop/filmic.c:1658 ../src/iop/filmicrgb.c:4664
 #: ../src/libs/metadata_view.c:157
 msgid "latitude"
 msgstr ""
@@ -12237,7 +14272,7 @@ msgstr ""
 msgid "shadows/highlights balance"
 msgstr ""
 
-#: ../src/iop/filmic.c:1671 ../src/iop/filmicrgb.c:4515
+#: ../src/iop/filmic.c:1671 ../src/iop/filmicrgb.c:4675
 msgid ""
 "slides the latitude along the slope\n"
 "to give more room to shadows or highlights.\n"
@@ -12250,10 +14285,6 @@ msgid ""
 "desaturates the input of the module globally.\n"
 "you need to set this value below 100%\n"
 "if the chrominance preservation is enabled."
-msgstr ""
-
-#: ../src/iop/filmic.c:1687 ../src/iop/filmicrgb.c:4665
-msgid "extreme luminance saturation"
 msgstr ""
 
 #: ../src/iop/filmic.c:1691
@@ -12309,31 +14340,19 @@ msgstr ""
 msgid "destination/display"
 msgstr ""
 
-#: ../src/iop/filmic.c:1738
-msgid "target black luminance"
-msgstr ""
-
-#: ../src/iop/filmic.c:1741 ../src/iop/filmicrgb.c:4534
+#: ../src/iop/filmic.c:1741 ../src/iop/filmicrgb.c:4694
 msgid ""
 "luminance of output pure black, this should be 0%\n"
 "except if you want a faded look"
 msgstr ""
 
-#: ../src/iop/filmic.c:1747
-msgid "target middle gray"
-msgstr ""
-
-#: ../src/iop/filmic.c:1750 ../src/iop/filmicrgb.c:4541
+#: ../src/iop/filmic.c:1750 ../src/iop/filmicrgb.c:4701
 msgid ""
 "middle gray value of the target display or color space.\n"
 "you should never touch that unless you know what you are doing."
 msgstr ""
 
-#: ../src/iop/filmic.c:1756
-msgid "target white luminance"
-msgstr ""
-
-#: ../src/iop/filmic.c:1759 ../src/iop/filmicrgb.c:4548
+#: ../src/iop/filmic.c:1759 ../src/iop/filmicrgb.c:4708
 msgid ""
 "luminance of output pure white, this should be 100%\n"
 "except if you want a faded look"
@@ -12350,103 +14369,103 @@ msgid ""
 "you should never touch that unless you know what you are doing."
 msgstr ""
 
-#: ../src/iop/filmicrgb.c:341
+#: ../src/iop/filmicrgb.c:342
 msgid "filmic rgb"
 msgstr ""
 
-#: ../src/iop/filmicrgb.c:346
+#: ../src/iop/filmicrgb.c:347
 msgid "tone mapping|curve|view transform|contrast|saturation|highlights"
 msgstr ""
 
-#: ../src/iop/filmicrgb.c:351
+#: ../src/iop/filmicrgb.c:352
 msgid ""
 "apply a view transform to prepare the scene-referred pipeline\n"
 "for display on SDR screens and paper prints\n"
 "while preventing clipping in non-destructive ways"
 msgstr ""
 
-#: ../src/iop/filmicrgb.c:1211
+#: ../src/iop/filmicrgb.c:1212
 msgid ""
 "filmic highlights reconstruction failed to allocate memory, check your RAM "
 "settings"
 msgstr ""
 
-#: ../src/iop/filmicrgb.c:1999 ../src/iop/filmicrgb.c:2288
+#: ../src/iop/filmicrgb.c:2151 ../src/iop/filmicrgb.c:2448
 msgid "filmic works only on RGB input"
 msgstr ""
 
-#: ../src/iop/filmicrgb.c:2143
+#: ../src/iop/filmicrgb.c:2303
 msgid "filmic highlights reconstruction failed to allocate memory on GPU"
 msgstr ""
 
-#: ../src/iop/filmicrgb.c:3387
+#: ../src/iop/filmicrgb.c:3547
 msgid "look only"
 msgstr ""
 
-#: ../src/iop/filmicrgb.c:3389
+#: ../src/iop/filmicrgb.c:3549
 msgid "look + mapping (lin)"
 msgstr ""
 
-#: ../src/iop/filmicrgb.c:3391
+#: ../src/iop/filmicrgb.c:3551
 msgid "look + mapping (log)"
 msgstr ""
 
-#: ../src/iop/filmicrgb.c:3393
+#: ../src/iop/filmicrgb.c:3553
 msgid "dynamic range mapping"
 msgstr ""
 
-#: ../src/iop/filmicrgb.c:3760
+#: ../src/iop/filmicrgb.c:3920
 #, c-format
 msgid "(%.0f %%)"
 msgstr ""
 
-#: ../src/iop/filmicrgb.c:3776
+#: ../src/iop/filmicrgb.c:3936
 #, no-c-format
 msgid "% display"
 msgstr ""
 
-#: ../src/iop/filmicrgb.c:3788
+#: ../src/iop/filmicrgb.c:3948
 msgid "EV scene"
 msgstr ""
 
-#: ../src/iop/filmicrgb.c:3792
+#: ../src/iop/filmicrgb.c:3952
 #, no-c-format
 msgid "% camera"
 msgstr ""
 
 #. Page DISPLAY
-#: ../src/iop/filmicrgb.c:3828 ../src/iop/filmicrgb.c:4528
+#: ../src/iop/filmicrgb.c:3988 ../src/iop/filmicrgb.c:4688
 msgid "display"
 msgstr ""
 
 #. axis legend
-#: ../src/iop/filmicrgb.c:3837
+#: ../src/iop/filmicrgb.c:3997
 msgid "(%)"
 msgstr ""
 
 #. Page SCENE
-#: ../src/iop/filmicrgb.c:3846 ../src/iop/filmicrgb.c:4366
+#: ../src/iop/filmicrgb.c:4006 ../src/iop/filmicrgb.c:4526
 msgid "scene"
 msgstr ""
 
 #. axis legend
-#: ../src/iop/filmicrgb.c:3855
+#: ../src/iop/filmicrgb.c:4015
 msgid "(EV)"
 msgstr ""
 
 #. we are over the graph area
-#: ../src/iop/filmicrgb.c:4284
+#: ../src/iop/filmicrgb.c:4444
 msgid ""
 "use the parameters below to set the nodes.\n"
 "the bright curve is the filmic tone mapping curve\n"
 "the dark curve is the desaturation curve."
 msgstr ""
 
-#: ../src/iop/filmicrgb.c:4290
+#: ../src/iop/filmicrgb.c:4450
 msgid "toggle axis labels and values display"
 msgstr ""
 
-#: ../src/iop/filmicrgb.c:4294
+#: ../src/iop/filmicrgb.c:4454
 msgid ""
 "cycle through graph views.\n"
 "left click: cycle forward.\n"
@@ -12454,20 +14473,20 @@ msgid ""
 "double-click: reset to look view."
 msgstr ""
 
-#: ../src/iop/filmicrgb.c:4373
+#: ../src/iop/filmicrgb.c:4533
 msgid ""
 "adjust to match the average luminance of the image's subject.\n"
 "the value entered here will then be remapped to 18.45%.\n"
 "decrease the value to increase the overall brightness."
 msgstr ""
 
-#: ../src/iop/filmicrgb.c:4401
+#: ../src/iop/filmicrgb.c:4561
 msgid ""
 "symmetrically enlarge or shrink the computed dynamic range.\n"
 "useful to give a safety margin to extreme luminances."
 msgstr ""
 
-#: ../src/iop/filmicrgb.c:4411
+#: ../src/iop/filmicrgb.c:4571
 msgid ""
 "try to optimize the settings with some statistical assumptions.\n"
 "this will fit the luminance range inside the histogram bounds.\n"
@@ -12478,15 +14497,15 @@ msgid ""
 msgstr ""
 
 #. Page RECONSTRUCT
-#: ../src/iop/filmicrgb.c:4420
+#: ../src/iop/filmicrgb.c:4580
 msgid "reconstruct"
 msgstr ""
 
-#: ../src/iop/filmicrgb.c:4422
+#: ../src/iop/filmicrgb.c:4582
 msgid "highlights clipping"
 msgstr ""
 
-#: ../src/iop/filmicrgb.c:4428
+#: ../src/iop/filmicrgb.c:4588
 msgid ""
 "set the exposure threshold upon which\n"
 "clipped highlights get reconstructed.\n"
@@ -12496,22 +14515,22 @@ msgid ""
 "increase to exclude more areas."
 msgstr ""
 
-#: ../src/iop/filmicrgb.c:4438
+#: ../src/iop/filmicrgb.c:4598
 msgid ""
 "soften the transition between clipped highlights and valid pixels.\n"
 "decrease to make the transition harder and sharper,\n"
 "increase to make the transition softer and blurrier."
 msgstr ""
 
-#: ../src/iop/filmicrgb.c:4444 ../src/iop/filmicrgb.c:4445
+#: ../src/iop/filmicrgb.c:4604 ../src/iop/filmicrgb.c:4605
 msgid "display highlight reconstruction mask"
 msgstr ""
 
-#: ../src/iop/filmicrgb.c:4452 ../src/iop/splittoning.c:527
+#: ../src/iop/filmicrgb.c:4612 ../src/iop/splittoning.c:527
 msgid "balance"
 msgstr ""
 
-#: ../src/iop/filmicrgb.c:4459
+#: ../src/iop/filmicrgb.c:4619
 #, no-c-format
 msgid ""
 "decide which reconstruction strategy to favor,\n"
@@ -12522,7 +14541,7 @@ msgid ""
 "decrease if all RGB channels are clipped over large areas."
 msgstr ""
 
-#: ../src/iop/filmicrgb.c:4470
+#: ../src/iop/filmicrgb.c:4630
 #, no-c-format
 msgid ""
 "decide which reconstruction strategy to favor,\n"
@@ -12533,7 +14552,7 @@ msgid ""
 "decrease if you want more blur."
 msgstr ""
 
-#: ../src/iop/filmicrgb.c:4482
+#: ../src/iop/filmicrgb.c:4642
 #, no-c-format
 msgid ""
 "decide which reconstruction strategy to favor,\n"
@@ -12545,18 +14564,18 @@ msgid ""
 msgstr ""
 
 #. Page LOOK
-#: ../src/iop/filmicrgb.c:4490
+#: ../src/iop/filmicrgb.c:4650
 msgid "look"
 msgstr ""
 
-#: ../src/iop/filmicrgb.c:4500
+#: ../src/iop/filmicrgb.c:4660
 msgid ""
 "equivalent to paper grade in analog.\n"
 "increase to make highlights brighter and less compressed.\n"
 "decrease to mute highlights."
 msgstr ""
 
-#: ../src/iop/filmicrgb.c:4508
+#: ../src/iop/filmicrgb.c:4668
 msgid ""
 "width of the linear domain in the middle of the curve,\n"
 "increase to get more contrast and less desaturation at extreme luminances,\n"
@@ -12564,7 +14583,7 @@ msgid ""
 "this has no effect on mid-tones."
 msgstr ""
 
-#: ../src/iop/filmicrgb.c:4523 ../src/iop/filmicrgb.c:4666
+#: ../src/iop/filmicrgb.c:4683 ../src/iop/filmicrgb.c:4826
 msgid ""
 "desaturates the output of the module\n"
 "specifically at extreme luminances.\n"
@@ -12572,38 +14591,38 @@ msgid ""
 msgstr ""
 
 #. Page OPTIONS
-#: ../src/iop/filmicrgb.c:4552
+#: ../src/iop/filmicrgb.c:4712
 msgid "options"
 msgstr ""
 
-#: ../src/iop/filmicrgb.c:4557
+#: ../src/iop/filmicrgb.c:4717
 msgid ""
 "v3 is darktable 3.0 desaturation method, same as color balance.\n"
 "v4 is a newer desaturation method, based on spectral purity of light."
 msgstr ""
 
-#: ../src/iop/filmicrgb.c:4561
+#: ../src/iop/filmicrgb.c:4721
 msgid ""
 "ensure the original color are preserved.\n"
 "may reinforce chromatic aberrations and chroma noise,\n"
 "so ensure they are properly corrected elsewhere.\n"
 msgstr ""
 
-#: ../src/iop/filmicrgb.c:4567
+#: ../src/iop/filmicrgb.c:4727
 msgid ""
 "choose the desired curvature of the filmic spline in highlights.\n"
 "hard uses a high curvature resulting in more tonal compression.\n"
 "soft uses a low curvature resulting in less tonal compression."
 msgstr ""
 
-#: ../src/iop/filmicrgb.c:4572
+#: ../src/iop/filmicrgb.c:4732
 msgid ""
 "choose the desired curvature of the filmic spline in shadows.\n"
 "hard uses a high curvature resulting in more tonal compression.\n"
 "soft uses a low curvature resulting in less tonal compression."
 msgstr ""
 
-#: ../src/iop/filmicrgb.c:4577
+#: ../src/iop/filmicrgb.c:4737
 #, c-format
 msgid ""
 "enable to input custom middle-gray values.\n"
@@ -12612,7 +14631,7 @@ msgid ""
 "disable to use standard 18.45 %% middle gray."
 msgstr ""
 
-#: ../src/iop/filmicrgb.c:4584
+#: ../src/iop/filmicrgb.c:4744
 msgid ""
 "enable to auto-set the look hardness depending on the scene white and black "
 "points.\n"
@@ -12620,7 +14639,7 @@ msgid ""
 "disable if you want a manual control."
 msgstr ""
 
-#: ../src/iop/filmicrgb.c:4590
+#: ../src/iop/filmicrgb.c:4750
 msgid ""
 "run extra passes of chromaticity reconstruction.\n"
 "more iterations means more color propagation from neighbourhood.\n"
@@ -12628,7 +14647,7 @@ msgid ""
 "it also helps with difficult cases of magenta highlights."
 msgstr ""
 
-#: ../src/iop/filmicrgb.c:4597
+#: ../src/iop/filmicrgb.c:4757
 msgid ""
 "add statistical noise in reconstructed highlights.\n"
 "this avoids highlights to look too smooth\n"
@@ -12636,17 +14655,17 @@ msgid ""
 "so they blend with the rest of the picture."
 msgstr ""
 
-#: ../src/iop/filmicrgb.c:4604
+#: ../src/iop/filmicrgb.c:4764
 msgid ""
 "choose the statistical distribution of noise.\n"
 "this is useful to match natural sensor noise pattern.\n"
 msgstr ""
 
-#: ../src/iop/filmicrgb.c:4672
+#: ../src/iop/filmicrgb.c:4832
 msgid "mid-tones saturation"
 msgstr ""
 
-#: ../src/iop/filmicrgb.c:4673
+#: ../src/iop/filmicrgb.c:4833
 msgid ""
 "desaturates the output of the module\n"
 "specifically at medium luminances.\n"
@@ -12656,10 +14675,6 @@ msgstr ""
 #: ../src/iop/finalscale.c:39
 msgctxt "modulename"
 msgid "scale into final size"
-msgstr ""
-
-#: ../src/iop/flip.c:74 ../src/libs/print_settings.c:2365
-msgid "orientation"
 msgstr ""
 
 #: ../src/iop/flip.c:79
@@ -12909,10 +14924,6 @@ msgid ""
 "back to clip."
 msgstr ""
 
-#: ../src/iop/highlights.c:2154
-msgid "guided laplacians"
-msgstr ""
-
 #: ../src/iop/highlights.c:2189
 msgid "highlight reconstruction method"
 msgstr ""
@@ -13144,10 +15155,6 @@ msgstr ""
 msgid "find camera"
 msgstr ""
 
-#: ../src/iop/lens.cc:2332
-msgid "lens model"
-msgstr ""
-
 #: ../src/iop/lens.cc:2335
 msgid "find lens"
 msgstr ""
@@ -13159,10 +15166,6 @@ msgstr ""
 
 #: ../src/iop/lens.cc:2367
 msgid "which corrections to apply"
-msgstr ""
-
-#: ../src/iop/lens.cc:2380
-msgid "geometry"
 msgstr ""
 
 #: ../src/iop/lens.cc:2382
@@ -13715,14 +15718,6 @@ msgstr ""
 msgid "invert film negative scans and simulate printing on paper"
 msgstr ""
 
-#: ../src/iop/negadoctor.c:375
-msgid "color film"
-msgstr ""
-
-#: ../src/iop/negadoctor.c:390
-msgid "black and white film"
-msgstr ""
-
 #: ../src/iop/negadoctor.c:442
 msgid "D min"
 msgstr ""
@@ -13868,10 +15863,6 @@ msgid ""
 "to adjust the global contrast while avoiding clipping shadows."
 msgstr ""
 
-#: ../src/iop/negadoctor.c:963
-msgid "paper grade (gamma)"
-msgstr ""
-
 #: ../src/iop/negadoctor.c:964
 msgid ""
 "select the grade of the virtual paper, which is actually\n"
@@ -13973,10 +15964,6 @@ msgstr ""
 msgid "linear part"
 msgstr ""
 
-#: ../src/iop/profile_gamma.c:633
-msgid "gamma"
-msgstr ""
-
 #: ../src/iop/profile_gamma.c:635
 msgid "gamma exponential factor"
 msgstr ""
@@ -14066,10 +16053,6 @@ msgstr ""
 
 #: ../src/iop/rawprepare.c:826
 msgid "black level 3"
-msgstr ""
-
-#: ../src/iop/rawprepare.c:847
-msgid "white point"
 msgstr ""
 
 #: ../src/iop/rawprepare.c:851
@@ -14174,14 +16157,6 @@ msgstr ""
 
 #: ../src/iop/retouch.c:1832
 msgid "healing"
-msgstr ""
-
-#: ../src/iop/retouch.c:1834
-msgid "blur"
-msgstr ""
-
-#: ../src/iop/retouch.c:1836
-msgid "fill"
 msgstr ""
 
 #: ../src/iop/retouch.c:2187
@@ -14369,10 +16344,6 @@ msgstr ""
 msgid "alter an image’s tones using curves in RGB color space"
 msgstr ""
 
-#: ../src/iop/rgbcurve.c:183 ../src/iop/tonecurve.c:554
-msgid "contrast compression"
-msgstr ""
-
 #: ../src/iop/rgbcurve.c:192 ../src/iop/tonecurve.c:563
 msgid "gamma 1.0 (linear)"
 msgstr ""
@@ -14423,10 +16394,6 @@ msgstr ""
 
 #: ../src/iop/rgbcurve.c:1371 ../src/iop/rgblevels.c:1015
 msgid "curve nodes for b channel"
-msgstr ""
-
-#: ../src/iop/rgbcurve.c:1434
-msgid "compensate middle gray"
 msgstr ""
 
 #: ../src/iop/rgblevels.c:101
@@ -14505,10 +16472,6 @@ msgstr ""
 
 #: ../src/iop/shadhi.c:694
 msgid "shift white point"
-msgstr ""
-
-#: ../src/iop/shadhi.c:695
-msgid "spatial extent"
 msgstr ""
 
 #: ../src/iop/shadhi.c:696
@@ -14743,10 +16706,6 @@ msgstr ""
 
 #: ../src/iop/temperature.c:1824
 msgid "blue channel coefficient"
-msgstr ""
-
-#: ../src/iop/temperature.c:1825
-msgid "emerald"
 msgstr ""
 
 #: ../src/iop/temperature.c:1826
@@ -15203,10 +17162,6 @@ msgstr ""
 msgid "position / form"
 msgstr ""
 
-#: ../src/iop/vignette.c:989
-msgid "shape"
-msgstr ""
-
 #: ../src/iop/vignette.c:1003
 msgid "the radii scale of vignette for start of fall-off"
 msgstr ""
@@ -15544,10 +17499,6 @@ msgstr ""
 #: ../src/libs/metadata.c:633 ../src/libs/metadata_view.c:1298
 #: ../src/libs/recentcollect.c:369 ../src/libs/tagging.c:3475
 msgid "preferences..."
-msgstr ""
-
-#: ../src/libs/colorpicker.c:51 ../src/libs/colorpicker.c:260
-msgid "RGB"
 msgstr ""
 
 #: ../src/libs/colorpicker.c:51
@@ -17041,10 +18992,6 @@ msgstr ""
 msgid "flags"
 msgstr ""
 
-#: ../src/libs/metadata_view.c:142
-msgid "exposure bias"
-msgstr ""
-
 #: ../src/libs/metadata_view.c:144
 msgid "focus distance"
 msgstr ""
@@ -17079,10 +19026,6 @@ msgstr ""
 
 #: ../src/libs/metadata_view.c:170
 msgid "display metadata"
-msgstr ""
-
-#: ../src/libs/metadata_view.c:330
-msgid "unused"
 msgstr ""
 
 #: ../src/libs/metadata_view.c:331
@@ -18289,7 +20232,6 @@ msgid "toggle color label of selected images"
 msgstr ""
 
 #: ../src/libs/tools/darktable.c:65
-#: ../build/share/darktable/photos.ansel.app.desktop.in.h:1
 msgid "Ansel"
 msgstr ""
 
@@ -18785,15 +20727,6 @@ msgstr ""
 msgid "no styles have been created yet"
 msgstr ""
 
-#. move left/right/up/down
-#: ../src/views/darkroom.c:2125 ../src/views/darkroom.c:2522
-#: ../src/views/darkroom.c:2525 ../src/views/lighttable.c:722
-#: ../src/views/lighttable.c:731 ../src/views/lighttable.c:1182
-#: ../src/views/lighttable.c:1186 ../src/views/lighttable.c:1190
-#: ../src/views/lighttable.c:1194 ../src/views/lighttable.c:1198
-msgid "move"
-msgstr ""
-
 #: ../src/views/darkroom.c:2172
 msgid "quick access to presets"
 msgstr ""
@@ -18860,10 +20793,6 @@ msgstr ""
 msgid ""
 "select the solid color to indicate over exposure.\n"
 "will only be used if mode = mark with solid color"
-msgstr ""
-
-#: ../src/views/darkroom.c:2242
-msgid "clipping threshold"
 msgstr ""
 
 #: ../src/views/darkroom.c:2244
