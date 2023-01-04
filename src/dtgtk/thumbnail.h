@@ -39,7 +39,8 @@ typedef enum dt_thumbnail_overlay_t
 {
   DT_THUMBNAIL_OVERLAYS_NONE,
   DT_THUMBNAIL_OVERLAYS_HOVER_NORMAL,
-  DT_THUMBNAIL_OVERLAYS_ALWAYS_NORMAL
+  DT_THUMBNAIL_OVERLAYS_ALWAYS_NORMAL,
+  DT_THUMBNAIL_OVERLAYS_LAST
 } dt_thumbnail_overlay_t;
 
 typedef enum dt_thumbnail_container_t
@@ -170,6 +171,11 @@ void dt_thumbnail_image_refresh_position(dt_thumbnail_t *thumb);
 float dt_thumbnail_get_zoom100(dt_thumbnail_t *thumb);
 // get the zoom ratio from 0 ("image to fit") to 1 ("max zoom value")
 float dt_thumbnail_get_zoom_ratio(dt_thumbnail_t *thumb);
+
+static inline dt_thumbnail_overlay_t sanitize_overlays(dt_thumbnail_overlay_t overlays)
+{
+  return (dt_thumbnail_overlay_t)MIN(overlays, DT_THUMBNAIL_OVERLAYS_LAST - 1);
+}
 
 #endif
 // clang-format off

@@ -139,7 +139,7 @@ static void _overlays_show_popup(GtkWidget *button, dt_lib_module_t *self)
   if(thumbs_state)
   {
     // we get and set the current value
-    dt_thumbnail_overlay_t mode = dt_ui_thumbtable(darktable.gui->ui)->overlays;
+    dt_thumbnail_overlay_t mode = sanitize_overlays(dt_ui_thumbtable(darktable.gui->ui)->overlays);
     if(mode == DT_THUMBNAIL_OVERLAYS_NONE)
       gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(d->over_r0), TRUE);
     else if(mode == DT_THUMBNAIL_OVERLAYS_HOVER_NORMAL)
