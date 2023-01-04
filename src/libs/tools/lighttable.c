@@ -138,7 +138,7 @@ static void _lib_lighttable_set_layout(dt_lib_module_t *self, dt_lighttable_layo
     // and we continue to select the right layout...
   }
 
-  const int current_layout = dt_conf_get_int("plugins/lighttable/layout");
+  const int current_layout = sanitize_lighttable_layout(dt_conf_get_int("plugins/lighttable/layout"));
   d->layout = layout;
 
   if(current_layout != layout)
@@ -157,7 +157,7 @@ static void _lib_lighttable_set_layout(dt_lib_module_t *self, dt_lighttable_layo
     gtk_widget_set_sensitive(d->zoom, (d->layout != DT_LIGHTTABLE_LAYOUT_CULLING_DYNAMIC && !d->fullpreview));
     gtk_range_set_value(GTK_RANGE(d->zoom), d->current_zoom);
 
-    dt_conf_set_int("plugins/lighttable/layout", layout);
+    dt_conf_set_int("plugins/lighttable/layout", sanitize_lighttable_layout(layout));
     if(layout == DT_LIGHTTABLE_LAYOUT_FILEMANAGER)
     {
       d->base_layout = layout;
@@ -283,8 +283,8 @@ void gui_init(dt_lib_module_t *self)
   self->data = (void *)d;
 
   self->widget = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
-  d->layout = MIN(DT_LIGHTTABLE_LAYOUT_LAST - 1, dt_conf_get_int("plugins/lighttable/layout"));
-  d->base_layout = MIN(DT_LIGHTTABLE_LAYOUT_LAST - 1, dt_conf_get_int("plugins/lighttable/base_layout"));
+  d->layout = sanitize_lighttable_layout(dt_conf_get_int("plugins/lighttable/layout"));
+  d->base_layout = sanitize_lighttable_layout(dt_conf_get_int("plugins/lighttable/base_layout"));
 
   if(d->layout == DT_LIGHTTABLE_LAYOUT_CULLING_DYNAMIC)
   {

@@ -452,8 +452,18 @@ void dt_view_map_drag_set_icon(const dt_view_manager_t *vm, GdkDragContext *cont
 void dt_view_print_settings(const dt_view_manager_t *vm, dt_print_info_t *pinfo, dt_images_box *imgs);
 #endif
 
-// clang-format off
+/*
+* Sanitize lighttable layout for compat with darktablerc prefs
+*/
+
+static inline dt_lighttable_layout_t sanitize_lighttable_layout(dt_lighttable_layout_t layout)
+{
+  return (dt_lighttable_layout_t)MIN(layout, DT_LIGHTTABLE_LAYOUT_LAST - 1);
+}
+
+
+  // clang-format off
 // modelines: These editor modelines have been set for all relevant files by tools/update_modelines.py
 // vim: shiftwidth=2 expandtab tabstop=2 cindent
 // kate: tab-indents: off; indent-width 2; replace-tabs on; indent-mode cstyle; remove-trailing-spaces modified;
-// clang-format on
+  // clang-format on
