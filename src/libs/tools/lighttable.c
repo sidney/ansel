@@ -288,7 +288,7 @@ void gui_init(dt_lib_module_t *self)
 
   if(d->layout == DT_LIGHTTABLE_LAYOUT_CULLING_DYNAMIC)
   {
-    d->current_zoom = MAX(1, MIN(DT_LIGHTTABLE_MAX_ZOOM, dt_collection_get_selected_count(darktable.collection)));
+    d->current_zoom = CLAMP(dt_collection_get_selected_count(darktable.collection), 1, DT_LIGHTTABLE_MAX_ZOOM);
     if(d->current_zoom == 1) d->current_zoom = dt_conf_get_int("plugins/lighttable/culling_num_images");
   }
   else
