@@ -150,27 +150,19 @@ typedef struct dt_colorspaces_t
   uint8_t *xprofile_data;
   int xprofile_size;
 
-  gchar *colord_profile_file2;
-  uint8_t *xprofile_data2;
-  int xprofile_size2;
-
   // the current set of selected profiles
   dt_colorspaces_color_profile_type_t display_type;
-  dt_colorspaces_color_profile_type_t display2_type;
   dt_colorspaces_color_profile_type_t softproof_type;
   dt_colorspaces_color_profile_type_t histogram_type;
   char display_filename[512];
-  char display2_filename[512];
   char softproof_filename[512];
   char histogram_filename[512];
   dt_iop_color_intent_t display_intent;
-  dt_iop_color_intent_t display2_intent;
   dt_iop_color_intent_t softproof_intent;
 
   dt_colorspaces_color_mode_t mode;
 
   cmsHTRANSFORM transform_srgb_to_display, transform_adobe_rgb_to_display;
-  cmsHTRANSFORM transform_srgb_to_display2, transform_adobe_rgb_to_display2;
 
 } dt_colorspaces_t;
 
@@ -183,7 +175,6 @@ typedef struct dt_colorspaces_color_profile_t
   int in_pos;                               // position in input combo box, -1 if not applicable
   int out_pos;                              // position in output combo box, -1 if not applicable
   int display_pos;                          // position in display combo box, -1 if not applicable
-  int display2_pos;                         // position in display2 combo box, -1 if not applicable
   int category_pos;                         // position in category combo box, -1 if not applicable
   int work_pos;                             // position in working combo box, -1 if not applicable
 } dt_colorspaces_color_profile_t;

@@ -625,14 +625,13 @@ void commit_params(struct dt_iop_module_t *self, dt_iop_params_t *p1, dt_dev_pix
   uint32_t transformFlags = 0;
 
   /* creating output profile */
-  if(out_type == DT_COLORSPACE_DISPLAY || out_type == DT_COLORSPACE_DISPLAY2)
+  if(out_type == DT_COLORSPACE_DISPLAY)
     pthread_rwlock_rdlock(&darktable.color_profiles->xprofile_lock);
 
   const dt_colorspaces_color_profile_t *out_profile
       = dt_colorspaces_get_profile(out_type, out_filename,
                                    DT_PROFILE_DIRECTION_OUT
-                                   | DT_PROFILE_DIRECTION_DISPLAY
-                                   | DT_PROFILE_DIRECTION_DISPLAY2);
+                                   | DT_PROFILE_DIRECTION_DISPLAY);
   if(out_profile)
   {
     // Path for internal profile or external ICC file
@@ -651,8 +650,7 @@ void commit_params(struct dt_iop_module_t *self, dt_iop_params_t *p1, dt_dev_pix
   {
     output = dt_colorspaces_get_profile(DT_COLORSPACE_SRGB, "",
                                         DT_PROFILE_DIRECTION_OUT
-                                        | DT_PROFILE_DIRECTION_DISPLAY
-                                        | DT_PROFILE_DIRECTION_DISPLAY2)
+                                        | DT_PROFILE_DIRECTION_DISPLAY)
                  ->profile;
     dt_control_log(_("missing output profile has been replaced by sRGB!"));
     fprintf(stderr, "missing output profile `%s' has been replaced by sRGB!\n",
@@ -665,7 +663,7 @@ void commit_params(struct dt_iop_module_t *self, dt_iop_params_t *p1, dt_dev_pix
     const dt_colorspaces_color_profile_t *prof = dt_colorspaces_get_profile
       (darktable.color_profiles->softproof_type,
        darktable.color_profiles->softproof_filename,
-       DT_PROFILE_DIRECTION_OUT | DT_PROFILE_DIRECTION_DISPLAY | DT_PROFILE_DIRECTION_DISPLAY2);
+       DT_PROFILE_DIRECTION_OUT | DT_PROFILE_DIRECTION_DISPLAY);
 
     if(prof)
       softproof = prof->profile;
@@ -673,8 +671,7 @@ void commit_params(struct dt_iop_module_t *self, dt_iop_params_t *p1, dt_dev_pix
     {
       softproof = dt_colorspaces_get_profile(DT_COLORSPACE_SRGB, "",
                                              DT_PROFILE_DIRECTION_OUT
-                                             | DT_PROFILE_DIRECTION_DISPLAY
-                                             | DT_PROFILE_DIRECTION_DISPLAY2)
+                                             | DT_PROFILE_DIRECTION_DISPLAY)
                       ->profile;
       dt_control_log(_("missing softproof profile has been replaced by sRGB!"));
       fprintf(stderr, "missing softproof profile `%s' has been replaced by sRGB!\n",
@@ -735,7 +732,7 @@ void commit_params(struct dt_iop_module_t *self, dt_iop_params_t *p1, dt_dev_pix
     }
   }
 
-  if(out_type == DT_COLORSPACE_DISPLAY || out_type == DT_COLORSPACE_DISPLAY2)
+  if(out_type == DT_COLORSPACE_DISPLAY)
     pthread_rwlock_unlock(&darktable.color_profiles->xprofile_lock);
 
   // now try to initialize unbounded mode:

@@ -707,7 +707,7 @@ dt_view_surface_value_t dt_view_image_get_surface(int imgid, int width, int heig
         {
           fprintf(stderr, "oops, there seems to be a code path not setting the color space of thumbnails!\n");
         }
-        else if(buf.color_space != DT_COLORSPACE_DISPLAY && buf.color_space != DT_COLORSPACE_DISPLAY2)
+        else if(buf.color_space != DT_COLORSPACE_DISPLAY)
         {
           fprintf(stderr,
                   "oops, there seems to be a code path setting an unhandled color space of thumbnails (%s)!\n",
