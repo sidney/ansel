@@ -137,6 +137,14 @@ void init_presets(dt_iop_module_so_t *self)
   dt_database_release_transaction(darktable.db);
 }
 
+
+void reload_defaults(dt_iop_module_t *module)
+{
+  // Auto-enable for safe JPEG export
+  module->default_enabled = TRUE;
+}
+
+
 #ifdef _OPENMP
 #pragma omp declare simd simdlen(4)
 #endif
