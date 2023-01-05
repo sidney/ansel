@@ -75,7 +75,7 @@ typedef struct dt_iop_colorbalancergb_params_t
   float global_C;              // $MIN:  0.0 $MAX:   1.0 $DEFAULT: 0.0 $DESCRIPTION: "offset chroma"
   float global_H;              // $MIN:  0.0 $MAX: 360.0 $DEFAULT: 0.0 $DESCRIPTION: "offset hue"
   float shadows_weight;        // $MIN:  0.0 $MAX:   3.0 $DEFAULT: 1.0 $DESCRIPTION: "shadows fall-off"
-  float white_fulcrum;         // $MIN: -16.0 $MAX: 16.0 $DEFAULT: 0.0 $DESCRIPTION: "white fulcrum"
+  float white_fulcrum;         // $MIN: -16.0 $MAX: 16.0 $DEFAULT: 1.0 $DESCRIPTION: "white fulcrum"
   float highlights_weight;     // $MIN:  0.0 $MAX:   3.0 $DEFAULT: 1.0 $DESCRIPTION: "highlights fall-off"
   float chroma_shadows;        // $MIN: -1.0 $MAX:   1.0 $DEFAULT: 0.0 $DESCRIPTION: "chroma shadows"
   float chroma_highlights;     // $MIN: -1.0 $MAX:   1.0 $DEFAULT: 0.0 $DESCRIPTION: "chroma highlights"
@@ -429,6 +429,7 @@ void init_presets(dt_iop_module_so_t *self)
   p.highlights_weight = 1.f;     // DEFAULT: 1.0 DESCRIPTION: "highlights fall-off"
   p.mask_grey_fulcrum = 0.1845f; // DEFAULT: 0.1845 DESCRIPTION: "mask middle-gray fulcrum"
   p.grey_fulcrum = 0.1845f;      // DEFAULT: 0.1845 DESCRIPTION: "contrast gray fulcrum"
+  p.white_fulcrum = 1.f;
   p.saturation_formula = DT_COLORBALANCE_SATURATION_JZAZBZ;
 
   // preset
@@ -459,6 +460,21 @@ void init_presets(dt_iop_module_so_t *self)
   p.saturation_midtones = 0.f;
   p.saturation_highlights = -0.25f;
   dt_gui_presets_add_generic(_("basic colorfulness: standard"), self->op, self->version(), &p, sizeof(p), 1, DEVELOP_BLEND_CS_RGB_SCENE);
+}
+
+
+void reload_defaults(dt_iop_module_t *module)
+{
+  dt_iop_colorbalancergb_params_t *p = module->default_params;
+
+  // Basic colorfulness standard
+  p->saturation_global = 0.2f;
+  p->saturation_shadows = 0.25f;
+  p->saturation_midtones = 0.f;
+  p->saturation_highlights = -0.25f;
+
+  // Auto-enable so people find their default JPEG look by default
+  module->default_enabled = TRUE;
 }
 
 
