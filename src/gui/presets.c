@@ -930,10 +930,6 @@ static void _menuitem_pick_preset(GtkMenuItem *menuitem, dt_iop_module_t *module
 gboolean dt_gui_presets_autoapply_for_module(dt_iop_module_t *module)
 {
   dt_image_t *image = &module->dev->image_storage;
-
-  const char *workflow = dt_conf_get_string_const("plugins/darkroom/workflow");
-  const gboolean is_display_referred = strcmp(workflow, "display-referred") == 0;
-  const gboolean is_scene_referred = strcmp(workflow, "scene-referred") == 0;
   const gboolean has_matrix = dt_image_is_matrix_correction_supported(image);
 
   char query[2024];
@@ -950,17 +946,12 @@ gboolean dt_gui_presets_autoapply_for_module(dt_iop_module_t *module)
      "           AND ?10 BETWEEN focal_length_min AND focal_length_max"
      "           AND (format = 0 OR (format&?11 != 0 AND ~format&?12 != 0))"
      "           AND operation NOT IN"
-     "               ('ioporder', 'metadata', 'export', 'tagging', 'collect', '%s'))"
-     "  OR (name = ?13)) AND op_version = ?14",
-     is_display_referred?"":"basecurve");
+     "               ('ioporder', 'metadata', 'export', 'tagging', 'collect', 'basecurve'))"
+     "  OR (name = ?13)) AND op_version = ?14");
   // clang-format on
 
   sqlite3_stmt *stmt;
-  const char *workflow_preset = has_matrix && is_display_referred
-                                ? _("display-referred default")
-                                : (has_matrix && is_scene_referred
-                                   ?_("scene-referred default")
-                                   :"\t\n");
+  const char *workflow_preset = (has_matrix) ? _("scene-referred default") : "\t\n";
   int iformat = 0;
   if(dt_image_is_rawprepare_supported(image)) iformat |= FOR_RAW;
   else iformat |= FOR_LDR;

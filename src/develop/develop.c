@@ -1288,29 +1288,22 @@ static gboolean _dev_auto_apply_presets(dt_develop_t *dev)
     return FALSE;
   }
 
-  const char *workflow = dt_conf_get_string_const("plugins/darkroom/workflow");
-  const gboolean is_scene_referred = strcmp(workflow, "scene-referred") == 0;
-  const gboolean is_display_referred = strcmp(workflow, "display-referred") == 0;
-  const gboolean is_workflow_none = strcmp(workflow, "none") == 0;
-
   //  Add scene-referred workflow
   //  Note that we cannot use a preset for FilmicRGB as the default values are
   //  dynamically computed depending on the actual exposure compensation
   //  (see reload_default routine in filmicrgb.c)
 
   const gboolean has_matrix = dt_image_is_matrix_correction_supported(image);
-
-  const gboolean auto_apply_filmic = is_raw && is_scene_referred;
   const gboolean auto_apply_cat = has_matrix && is_modern_chroma;
   const gboolean auto_apply_sharpen = dt_conf_get_bool("plugins/darkroom/sharpen/auto_apply");
 
-  if(auto_apply_filmic || auto_apply_sharpen || auto_apply_cat)
+  if(is_raw || auto_apply_sharpen || auto_apply_cat)
   {
     for(GList *modules = dev->iop; modules; modules = g_list_next(modules))
     {
       dt_iop_module_t *module = (dt_iop_module_t *)modules->data;
 
-      if(((auto_apply_filmic && strcmp(module->op, "filmicrgb") == 0)
+      if(((strcmp(module->op, "filmicrgb") == 0)
           || (auto_apply_sharpen && strcmp(module->op, "sharpen") == 0)
           || (auto_apply_cat && strcmp(module->op, "channelmixerrgb") == 0))
          && !dt_history_check_module_exists(imgid, module->op, FALSE)
@@ -1320,6 +1313,8 @@ static gboolean _dev_auto_apply_presets(dt_develop_t *dev)
       }
     }
   }
+
+  // FIXME : the following query seems duplicated from gui/presets.c/dt_gui_presets_autoapply_for_module()
 
   // select all presets from one of the following table and add them into memory.history. Note that
   // this is appended to possibly already present default modules.
@@ -1341,18 +1336,13 @@ static gboolean _dev_auto_apply_presets(dt_develop_t *dev)
            "          AND (format = 0 OR (format&?11 != 0 AND ~format&?12 != 0)))"
            "        OR (name = ?13))"
            "   AND operation NOT IN"
-           "        ('ioporder', 'metadata', 'modulegroups', 'export', 'tagging', 'collect', '%s')"
+           "        ('ioporder', 'metadata', 'modulegroups', 'export', 'tagging', 'collect', 'basecurve')"
            " ORDER BY writeprotect DESC, LENGTH(model), LENGTH(maker), LENGTH(lens)",
-           preset_table[legacy],
-           is_display_referred?"":"basecurve");
+           preset_table[legacy]);
   // clang-format on
   // query for all modules at once:
   sqlite3_stmt *stmt;
-  const char *workflow_preset = has_matrix && is_display_referred
-                                ? _("display-referred default")
-                                : (has_matrix && is_scene_referred
-                                   ?_("scene-referred default")
-                                   :"\t\n");
+  const char *workflow_preset = has_matrix ? _("scene-referred default") : "\t\n";
   int iformat = 0;
   if(dt_image_is_rawprepare_supported(image)) iformat |= FOR_RAW;
   else iformat |= FOR_LDR;
@@ -1426,11 +1416,7 @@ static gboolean _dev_auto_apply_presets(dt_develop_t *dev)
     else
     {
       // we have no auto-apply order, so apply iop order, depending of the workflow
-      GList *iop_list;
-      if(is_scene_referred || is_workflow_none)
-        iop_list = dt_ioppr_get_iop_order_list_version(DT_IOP_ORDER_V30);
-      else
-        iop_list = dt_ioppr_get_iop_order_list_version(DT_IOP_ORDER_LEGACY);
+      GList *iop_list = dt_ioppr_get_iop_order_list_version(DT_IOP_ORDER_V30);
       dt_ioppr_write_iop_order_list(iop_list, imgid);
       g_list_free_full(iop_list, free);
       dt_ioppr_set_default_iop_order(dev, imgid);

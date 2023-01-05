@@ -1568,8 +1568,7 @@ void init_presets(dt_lib_module_t *self)
 
   const gboolean is_modern =
     dt_conf_is_equal("plugins/darkroom/chromatic-adaptation", "modern");
-  const gboolean is_scene_referred =
-    dt_conf_is_equal("plugins/darkroom/workflow", "scene-referred");
+  const gboolean is_scene_referred = TRUE;
 
   // all modules
   gchar *tx = NULL;
@@ -1902,7 +1901,7 @@ void init_presets(dt_lib_module_t *self)
 static gchar *_presets_get_minimal(dt_lib_module_t *self)
 {
   const gboolean is_modern = dt_conf_is_equal("plugins/darkroom/chromatic-adaptation", "modern");
-  const gboolean is_scene_referred = dt_conf_is_equal("plugins/darkroom/workflow", "scene-referred");
+  const gboolean is_scene_referred = TRUE;
 
   // all modules
   gchar *tx = NULL;
@@ -3996,4 +3995,3 @@ gboolean preset_autoapply(dt_lib_module_t *self)
 // vim: shiftwidth=2 expandtab tabstop=2 cindent
 // kate: tab-indents: off; indent-width 2; replace-tabs on; indent-mode cstyle; remove-trailing-spaces modified;
 // clang-format on
-
