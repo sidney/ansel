@@ -1296,18 +1296,15 @@ static gboolean _dev_auto_apply_presets(dt_develop_t *dev)
   //  (see reload_default routine in filmicrgb.c)
 
   const gboolean has_matrix = dt_image_is_matrix_correction_supported(image);
-  const gboolean auto_apply_cat = has_matrix;
-  const gboolean auto_apply_sharpen = dt_conf_get_bool("plugins/darkroom/sharpen/auto_apply");
 
-  if(is_raw || auto_apply_sharpen)
+  if(is_raw)
   {
     for(GList *modules = dev->iop; modules; modules = g_list_next(modules))
     {
       dt_iop_module_t *module = (dt_iop_module_t *)modules->data;
 
       if(((strcmp(module->op, "filmicrgb") == 0)
-          || (auto_apply_sharpen && strcmp(module->op, "sharpen") == 0)
-          || (auto_apply_cat && strcmp(module->op, "channelmixerrgb") == 0))
+          || (has_matrix && strcmp(module->op, "channelmixerrgb") == 0))
          && !dt_history_check_module_exists(imgid, module->op, FALSE)
          && !(module->flags() & IOP_FLAGS_NO_HISTORY_STACK))
       {
