@@ -2873,18 +2873,6 @@
     <shortdescription>3D lut root folder</shortdescription>
     <longdescription>this folder (and sub-folders) contains Lut files used by lut3d modules. (need a restart).</longdescription>
   </dtconfig>
-  <dtconfig prefs="processing" section="general">
-    <name>plugins/darkroom/chromatic-adaptation</name>
-    <type>
-      <enum>
-        <option>modern</option>
-        <option>legacy</option>
-      </enum>
-    </type>
-    <default>legacy</default>
-    <shortdescription>auto-apply chromatic adaptation defaults</shortdescription>
-    <longdescription>legacy performs a basic chromatic adaptation using only the white balance module\nmodern uses a combination of white balance module and color calibration module, with improved color science for chromatic adaptation</longdescription>
-  </dtconfig>
   <dtconfig prefs="processing" section="general" restart="true">
     <name>plugins/darkroom/basecurve/auto_apply_percamera_presets</name>
     <type>bool</type>

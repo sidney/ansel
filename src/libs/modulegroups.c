@@ -1566,8 +1566,7 @@ void init_presets(dt_lib_module_t *self)
             echo "AM(\"${BN:0:16}\");" ; done
   */
 
-  const gboolean is_modern =
-    dt_conf_is_equal("plugins/darkroom/chromatic-adaptation", "modern");
+  const gboolean is_modern = TRUE;
   const gboolean is_scene_referred = TRUE;
 
   // all modules
@@ -1900,7 +1899,7 @@ void init_presets(dt_lib_module_t *self)
 
 static gchar *_presets_get_minimal(dt_lib_module_t *self)
 {
-  const gboolean is_modern = dt_conf_is_equal("plugins/darkroom/chromatic-adaptation", "modern");
+  const gboolean is_modern = TRUE;
   const gboolean is_scene_referred = TRUE;
 
   // all modules

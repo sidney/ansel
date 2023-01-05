@@ -1439,6 +1439,10 @@ void reload_defaults(dt_iop_module_t *module)
 
   const gboolean is_raw = dt_image_is_matrix_correction_supported(&module->dev->image_storage);
   const gboolean monochrome = dt_image_is_monochrome(&module->dev->image_storage);
+
+  // Note : this is not an user param anymore, and is set to modern by default
+  // except for old histories using temperature without having an history entry for it.
+  // see develop/develop.c/_dev_auto_apply_presets()
   const gboolean is_modern =
     dt_conf_is_equal("plugins/darkroom/chromatic-adaptation", "modern");
 

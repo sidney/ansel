@@ -1226,8 +1226,10 @@ static gboolean _dev_auto_apply_presets(dt_develop_t *dev)
   if(!(image->flags & DT_IMAGE_AUTO_PRESETS_APPLIED)) run = TRUE;
 
   const gboolean is_raw = dt_image_is_raw(image);
-  const gboolean is_modern_chroma =
-    dt_conf_is_equal("plugins/darkroom/chromatic-adaptation", "modern");
+
+  // Force-reload modern chromatic adaptation
+  // Will be overriden below if we have no history for temperature
+  dt_conf_set_string("plugins/darkroom/chromatic-adaptation", "modern");
 
   // flag was already set? only apply presets once in the lifetime of a history stack.
   // (the flag will be cleared when removing it).
@@ -1244,7 +1246,7 @@ static gboolean _dev_auto_apply_presets(dt_develop_t *dev)
 
     // So if the current mode is the modern chromatic-adaptation, do check the history.
 
-    if(is_modern_chroma && is_raw)
+    if(is_raw)
     {
       // loop over all modules and display a message for default-enabled modules that
       // are not found on the history.
@@ -1294,10 +1296,10 @@ static gboolean _dev_auto_apply_presets(dt_develop_t *dev)
   //  (see reload_default routine in filmicrgb.c)
 
   const gboolean has_matrix = dt_image_is_matrix_correction_supported(image);
-  const gboolean auto_apply_cat = has_matrix && is_modern_chroma;
+  const gboolean auto_apply_cat = has_matrix;
   const gboolean auto_apply_sharpen = dt_conf_get_bool("plugins/darkroom/sharpen/auto_apply");
 
-  if(is_raw || auto_apply_sharpen || auto_apply_cat)
+  if(is_raw || auto_apply_sharpen)
   {
     for(GList *modules = dev->iop; modules; modules = g_list_next(modules))
     {

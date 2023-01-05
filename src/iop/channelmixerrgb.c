@@ -3494,6 +3494,9 @@ void reload_defaults(dt_iop_module_t *module)
   d->illuminant = module->get_f("illuminant")->Enum.Default;
   d->adaptation = module->get_f("adaptation")->Enum.Default;
 
+  // Note : this is not an user param anymore, and is set to modern by default
+  // except for old histories using temperature without having an history entry for it.
+  // see develop/develop.c/_dev_auto_apply_presets()
   const gboolean is_modern =
     dt_conf_is_equal("plugins/darkroom/chromatic-adaptation", "modern");
 
