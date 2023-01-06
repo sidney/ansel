@@ -884,15 +884,6 @@ dt_ioppr_set_pipe_output_profile_info(struct dt_develop_t *dev,
   return profile_info;
 }
 
-dt_iop_order_iccprofile_info_t *dt_ioppr_get_histogram_profile_info(struct dt_develop_t *dev)
-{
-  dt_colorspaces_color_profile_type_t histogram_profile_type;
-  const char *histogram_profile_filename;
-  dt_ioppr_get_histogram_profile_type(&histogram_profile_type, &histogram_profile_filename);
-  return dt_ioppr_add_profile_info_to_list(dev, histogram_profile_type, histogram_profile_filename,
-                                           DT_INTENT_RELATIVE_COLORIMETRIC);
-}
-
 dt_iop_order_iccprofile_info_t *dt_ioppr_get_pipe_work_profile_info(struct dt_dev_pixelpipe_t *pipe)
 {
   return pipe->work_profile_info;
@@ -1021,33 +1012,6 @@ void dt_ioppr_get_export_profile_type(struct dt_develop_t *dev,
   else
     fprintf(stderr, "[dt_ioppr_get_export_profile_type] can't find colorout iop\n");
 }
-
-void dt_ioppr_get_histogram_profile_type(dt_colorspaces_color_profile_type_t *profile_type,
-                                         const char **profile_filename)
-{
-  const dt_colorspaces_color_mode_t mode = darktable.color_profiles->mode;
-
-  // if in gamut check use soft proof
-  if(mode != DT_PROFILE_NORMAL || darktable.color_profiles->histogram_type == DT_COLORSPACE_SOFTPROOF)
-  {
-    *profile_type = darktable.color_profiles->softproof_type;
-    *profile_filename = darktable.color_profiles->softproof_filename;
-  }
-  else if(darktable.color_profiles->histogram_type == DT_COLORSPACE_WORK)
-  {
-    dt_ioppr_get_work_profile_type(darktable.develop, profile_type, profile_filename);
-  }
-  else if(darktable.color_profiles->histogram_type == DT_COLORSPACE_EXPORT)
-  {
-    dt_ioppr_get_export_profile_type(darktable.develop, profile_type, profile_filename);
-  }
-  else
-  {
-    *profile_type = darktable.color_profiles->histogram_type;
-    *profile_filename = darktable.color_profiles->histogram_filename;
-  }
-}
-
 
 __DT_CLONE_TARGETS__
 void dt_ioppr_transform_image_colorspace(struct dt_iop_module_t *self, const float *const image_in,

@@ -754,7 +754,6 @@ error:
 static void _pixelpipe_pick_from_image(dt_iop_module_t *module,
                                        const float *const pixel, const dt_iop_roi_t *roi_in,
                                        const dt_iop_order_iccprofile_info_t *const display_profile,
-                                       const dt_iop_order_iccprofile_info_t *const histogram_profile,
                                        dt_colorpicker_sample_t *const sample)
 {
   if(sample->size == DT_LIB_COLORPICKER_SIZE_BOX)
@@ -796,9 +795,6 @@ static void _pixelpipe_pick_from_image(dt_iop_module_t *module,
     int converted_cst;
     dt_ioppr_transform_image_colorspace(module, picked_rgb[0], sample->lab[0], 3, 1, IOP_CS_RGB, IOP_CS_LAB,
                                         &converted_cst, display_profile);
-    if(display_profile && histogram_profile)
-      dt_ioppr_transform_image_colorspace_rgb(picked_rgb[0], sample->scope[0], 3, 1,
-                                              display_profile, histogram_profile, "primary picker");
   }
   else if(sample->size == DT_LIB_COLORPICKER_SIZE_POINT)
   {
@@ -809,9 +805,7 @@ static void _pixelpipe_pick_from_image(dt_iop_module_t *module,
     memcpy(sample->display[0], pixel + 4 * (roi_in->width * y + x), sizeof(dt_aligned_pixel_t));
     dt_ioppr_transform_image_colorspace(module, sample->display[0], sample->lab[0], 1, 1, IOP_CS_RGB, IOP_CS_LAB,
                                         &converted_cst, display_profile);
-    if(display_profile && histogram_profile)
-      dt_ioppr_transform_image_colorspace_rgb(sample->display[0], sample->scope[0], 1, 1,
-                                              display_profile, histogram_profile, "primary picker");
+
     for(dt_lib_colorpicker_statistic_t stat = 1; stat < DT_LIB_COLORPICKER_STATISTIC_N; stat++)
     {
       memcpy(sample->display[stat], sample->display[0], sizeof(dt_aligned_pixel_t));
@@ -824,7 +818,6 @@ static void _pixelpipe_pick_from_image(dt_iop_module_t *module,
 static void _pixelpipe_pick_samples(dt_develop_t *dev, dt_iop_module_t *module,
                                     const float *const input, const dt_iop_roi_t *roi_in)
 {
-  const dt_iop_order_iccprofile_info_t *const histogram_profile = dt_ioppr_get_histogram_profile_info(dev);
   const dt_iop_order_iccprofile_info_t *const display_profile
     = dt_ioppr_add_profile_info_to_list(dev, darktable.color_profiles->display_type,
                                         darktable.color_profiles->display_filename, INTENT_RELATIVE_COLORIMETRIC);
@@ -834,12 +827,12 @@ static void _pixelpipe_pick_samples(dt_develop_t *dev, dt_iop_module_t *module,
   {
     dt_colorpicker_sample_t *sample = samples->data;
     if(!sample->locked)
-      _pixelpipe_pick_from_image(module, input, roi_in, display_profile, histogram_profile, sample);
+      _pixelpipe_pick_from_image(module, input, roi_in, display_profile, sample);
     samples = g_slist_next(samples);
   }
 
   if(darktable.lib->proxy.colorpicker.picker_proxy)
-    _pixelpipe_pick_from_image(module, input, roi_in, display_profile, histogram_profile,
+    _pixelpipe_pick_from_image(module, input, roi_in, display_profile,
                                darktable.lib->proxy.colorpicker.primary_sample);
 }
 
@@ -2030,7 +2023,7 @@ static int dt_dev_pixelpipe_process_rec(dt_dev_pixelpipe_t *pipe, dt_develop_t *
     // benefit via a histogram.
     darktable.lib->proxy.histogram.process(darktable.lib->proxy.histogram.module, input,
                                            roi_in.width, roi_in.height,
-                                           display_profile, dt_ioppr_get_histogram_profile_info(dev));
+                                           display_profile, display_profile);
   }
 
   if(dt_atomic_get_int(&pipe->shutdown))

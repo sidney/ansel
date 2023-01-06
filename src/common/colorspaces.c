@@ -1490,13 +1490,10 @@ dt_colorspaces_t *dt_colorspaces_init()
   // init display profile and softproof/gama checking from conf
   res->display_type = dt_conf_get_int("ui_last/color/display_type");
   res->softproof_type = dt_conf_get_int("ui_last/color/softproof_type");
-  res->histogram_type = dt_conf_get_int("ui_last/color/histogram_type");
   const char *tmp = dt_conf_get_string_const("ui_last/color/display_filename");
   g_strlcpy(res->display_filename, tmp, sizeof(res->display_filename));
   tmp = dt_conf_get_string_const("ui_last/color/softproof_filename");
   g_strlcpy(res->softproof_filename, tmp, sizeof(res->softproof_filename));
-  tmp = dt_conf_get_string_const("ui_last/color/histogram_filename");
-  g_strlcpy(res->histogram_filename, tmp, sizeof(res->histogram_filename));
   res->display_intent = dt_conf_get_int("ui_last/color/display_intent");
   res->softproof_intent = dt_conf_get_int("ui_last/color/softproof_intent");
   res->mode = dt_conf_get_int("ui_last/color/mode");
@@ -1512,11 +1509,6 @@ dt_colorspaces_t *dt_colorspaces_init()
      || (res->softproof_type == DT_COLORSPACE_FILE
          && (!res->softproof_filename[0] || !g_file_test(res->softproof_filename, G_FILE_TEST_IS_REGULAR))))
     res->softproof_type = DT_COLORSPACE_SRGB;
-
-  if((unsigned int)res->histogram_type >= DT_COLORSPACE_LAST
-     || (res->histogram_type == DT_COLORSPACE_FILE
-         && (!res->histogram_filename[0] || !g_file_test(res->histogram_filename, G_FILE_TEST_IS_REGULAR))))
-    res->histogram_type = DT_COLORSPACE_SRGB;
 
   // temporary list of profiles to be added, we keep this separate to be able to sort it before adding
   GList *temp_profiles;
@@ -1559,20 +1551,6 @@ dt_colorspaces_t *dt_colorspaces_init()
                "output profile `%s' color space `%c%c%c%c' not supported for work or histogram profile\n",
                prof->name, (char)(color_space >> 24), (char)(color_space >> 16), (char)(color_space >> 8),
                (char)(color_space));
-
-      if(res->histogram_type == prof->type
-         && (prof->type != DT_COLORSPACE_FILE
-             || dt_colorspaces_is_profile_equal(prof->filename, res->histogram_filename)))
-      {
-        // bad histogram profile selected, we must reset it to sRGB
-        const char *name = dt_colorspaces_get_name(prof->type, prof->filename);
-        dt_control_log(_("profile `%s' not usable as histogram profile. it has been replaced by sRGB!"), name);
-        fprintf(stderr,
-                "[colorspaces] profile `%s' not usable as histogram profile. it has been replaced by sRGB!\n",
-                name);
-        res->histogram_type = DT_COLORSPACE_SRGB;
-        res->histogram_filename[0] = '\0';
-      }
     }
   }
   res->profiles = g_list_concat(res->profiles, temp_profiles);
@@ -1590,10 +1568,8 @@ void dt_colorspaces_cleanup(dt_colorspaces_t *self)
   // remember display profile and softproof/gama checking from conf
   dt_conf_set_int("ui_last/color/display_type", self->display_type);
   dt_conf_set_int("ui_last/color/softproof_type", self->softproof_type);
-  dt_conf_set_int("ui_last/color/histogram_type", self->histogram_type);
   dt_conf_set_string("ui_last/color/display_filename", self->display_filename);
   dt_conf_set_string("ui_last/color/softproof_filename", self->softproof_filename);
-  dt_conf_set_string("ui_last/color/histogram_filename", self->histogram_filename);
   dt_conf_set_int("ui_last/color/display_intent", self->display_intent);
   dt_conf_set_int("ui_last/color/softproof_intent", self->softproof_intent);
   dt_conf_set_int("ui_last/color/mode", self->mode);

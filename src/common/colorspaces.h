@@ -153,10 +153,8 @@ typedef struct dt_colorspaces_t
   // the current set of selected profiles
   dt_colorspaces_color_profile_type_t display_type;
   dt_colorspaces_color_profile_type_t softproof_type;
-  dt_colorspaces_color_profile_type_t histogram_type;
   char display_filename[512];
   char softproof_filename[512];
-  char histogram_filename[512];
   dt_iop_color_intent_t display_intent;
   dt_iop_color_intent_t softproof_intent;
 

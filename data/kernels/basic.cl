@@ -2657,7 +2657,7 @@ typedef enum dt_clipping_preview_mode_t
 } dt_clipping_preview_mode_t;
 
 kernel void
-overexposed (read_only image2d_t in, write_only image2d_t out, read_only image2d_t tmp, const int width, const int height,
+overexposed (read_only image2d_t in, write_only image2d_t out, const int width, const int height,
              const float lower, const float upper, const float4 lower_color, const float4 upper_color,
              constant dt_colorspaces_iccprofile_info_cl_t *profile_info,
             read_only image2d_t lut, const int use_work_profile, dt_clipping_preview_mode_t mode)
@@ -2668,14 +2668,13 @@ overexposed (read_only image2d_t in, write_only image2d_t out, read_only image2d
   if(x >= width || y >= height) return;
 
   float4 pixel = read_imagef(in, sampleri, (int2)(x, y));
-  float4 pixel_tmp = read_imagef(tmp, sampleri, (int2)(x, y));
 
   if(mode == DT_CLIPPING_PREVIEW_ANYRGB)
   {
-    if(pixel_tmp.x >= upper || pixel_tmp.y >= upper || pixel_tmp.z >= upper)
+    if(pixel.x >= upper || pixel.y >= upper || pixel.z >= upper)
       pixel.xyz = upper_color.xyz;
 
-    else if(pixel_tmp.x <= lower && pixel_tmp.y <= lower && pixel_tmp.z <= lower)
+    else if(pixel.x <= lower && pixel.y <= lower && pixel.z <= lower)
       pixel.xyz = lower_color.xyz;
 
   }
@@ -2694,14 +2693,14 @@ overexposed (read_only image2d_t in, write_only image2d_t out, read_only image2d
     else
     {
       float4 saturation = { 0.f, 0.f, 0.f, 0.f};
-      saturation = pixel_tmp - (float4)luminance;
-      saturation = native_sqrt(saturation * saturation / ((float4)(luminance * luminance) + pixel_tmp * pixel_tmp));
+      saturation = pixel - (float4)luminance;
+      saturation = native_sqrt(saturation * saturation / ((float4)(luminance * luminance) + pixel * pixel));
 
       if(saturation.x > upper || saturation.y > upper || saturation.z > upper ||
-         pixel_tmp.x >= upper || pixel_tmp.y >= upper || pixel_tmp.z >= upper)
+         pixel.x >= upper || pixel.y >= upper || pixel.z >= upper)
         pixel.xyz = upper_color.xyz;
 
-      else if(pixel_tmp.x <= lower && pixel_tmp.y <= lower && pixel_tmp.z <= lower)
+      else if(pixel.x <= lower && pixel.y <= lower && pixel.z <= lower)
         pixel.xyz = lower_color.xyz;
     }
   }
@@ -2722,14 +2721,14 @@ overexposed (read_only image2d_t in, write_only image2d_t out, read_only image2d
     if(luminance < upper && luminance > lower)
     {
       float4 saturation = { 0.f, 0.f, 0.f, 0.f};
-      saturation = pixel_tmp - (float4)luminance;
-      saturation = native_sqrt(saturation * saturation / ((float4)(luminance * luminance) + pixel_tmp * pixel_tmp));
+      saturation = pixel - (float4)luminance;
+      saturation = native_sqrt(saturation * saturation / ((float4)(luminance * luminance) + pixel * pixel));
 
       if(saturation.x > upper || saturation.y > upper || saturation.z > upper ||
-         pixel_tmp.x >= upper || pixel_tmp.y >= upper || pixel_tmp.z >= upper)
+         pixel.x >= upper || pixel.y >= upper || pixel.z >= upper)
         pixel.xyz = upper_color.xyz;
 
-      else if(pixel_tmp.x <= lower && pixel_tmp.y <= lower && pixel_tmp.z <= lower)
+      else if(pixel.x <= lower && pixel.y <= lower && pixel.z <= lower)
         pixel.xyz = lower_color.xyz;
     }
   }
