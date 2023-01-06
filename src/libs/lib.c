@@ -902,13 +902,10 @@ static gboolean _lib_plugin_header_button_press(GtkWidget *w, GdkEventButton *e,
 
     // make gtk scroll to the module once it updated its allocation size
     uint32_t container = module->container(module);
-    if(dt_conf_get_bool("lighttable/ui/scroll_to_module"))
-    {
-      if(container == DT_UI_CONTAINER_PANEL_LEFT_CENTER)
-        darktable.gui->scroll_to[0] = module->expander;
-      else if(container == DT_UI_CONTAINER_PANEL_RIGHT_CENTER)
-        darktable.gui->scroll_to[1] = module->expander;
-    }
+    if(container == DT_UI_CONTAINER_PANEL_LEFT_CENTER)
+      darktable.gui->scroll_to[0] = module->expander;
+    else if(container == DT_UI_CONTAINER_PANEL_RIGHT_CENTER)
+      darktable.gui->scroll_to[1] = module->expander;
 
     /* handle shiftclick on expander, hide all except this */
     if(dt_modifier_is(e->state, GDK_SHIFT_MASK))
@@ -958,13 +955,10 @@ static void show_module_callback(dt_lib_module_t *module)
 
   // make gtk scroll to the module once it updated its allocation size
   uint32_t container = module->container(module);
-  if(dt_conf_get_bool("lighttable/ui/scroll_to_module"))
-  {
-    if(container == DT_UI_CONTAINER_PANEL_LEFT_CENTER)
-      darktable.gui->scroll_to[0] = module->expander;
-    else if(container == DT_UI_CONTAINER_PANEL_RIGHT_CENTER)
-      darktable.gui->scroll_to[1] = module->expander;
-  }
+  if(container == DT_UI_CONTAINER_PANEL_LEFT_CENTER)
+    darktable.gui->scroll_to[0] = module->expander;
+  else if(container == DT_UI_CONTAINER_PANEL_RIGHT_CENTER)
+    darktable.gui->scroll_to[1] = module->expander;
 
   dt_lib_gui_set_expanded(module, !dtgtk_expander_get_expanded(DTGTK_EXPANDER(module->expander)));
 }
