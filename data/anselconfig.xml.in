@@ -1067,20 +1067,6 @@
     <shortdescription>delimiters for size categories</shortdescription>
     <longdescription>size categories are used to be able to set different overlays and css values depending of the size of the thumbnail, separated by |. for example, 120|400 means 3 categories of thumbnails: 0px->120px, 120px->400px and >400px</longdescription>
   </dtconfig>
-  <dtconfig prefs="lighttable" section="thumbs">
-    <name>plugins/lighttable/extended_pattern</name>
-    <type>longstring</type>
-    <default>$(FILE_NAME).$(FILE_EXTENSION)$(NL)$(EXIF_EXPOSURE) • f/$(EXIF_APERTURE) • $(EXIF_FOCAL_LENGTH)mm • $(EXIF_ISO) ISO $(SIDECAR_TXT)</default>
-    <shortdescription>pattern for the thumbnail extended overlay text</shortdescription>
-    <longdescription>see manual to know all the tags you can use.</longdescription>
-  </dtconfig>
-  <dtconfig prefs="lighttable" section="thumbs">
-    <name>plugins/lighttable/thumbnail_tooltip_pattern</name>
-    <type>longstring</type>
-    <default>&lt;b&gt;$(FILE_NAME).$(FILE_EXTENSION)&lt;/b&gt;$(NL)$(EXIF_DAY)/$(EXIF_MONTH)/$(EXIF_YEAR) $(EXIF_HOUR):$(EXIF_MINUTE):$(EXIF_SECOND)$(NL)$(EXIF_EXPOSURE) • f/$(EXIF_APERTURE) • $(EXIF_FOCAL_LENGTH) mm • $(EXIF_ISO) ISO</default>
-    <shortdescription>pattern for the thumbnail tooltip (empty to disable)</shortdescription>
-    <longdescription>see manual to know all the tags you can use.</longdescription>
-  </dtconfig>
   <dtconfig prefs="darkroom" section="general">
     <name>pressure_sensitivity</name>
     <type>
