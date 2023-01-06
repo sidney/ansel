@@ -293,15 +293,6 @@ typedef struct dt_view_manager_t
       void (*change_offset)(struct dt_view_t *view, gboolean reset, gint imgid);
     } lighttable;
 
-    /* tethering view proxy object */
-    struct
-    {
-      struct dt_view_t *view;
-      const char *(*get_job_code)(const dt_view_t *view);
-      void (*set_job_code)(const dt_view_t *view, const char *name);
-      int32_t (*get_selected_imgid)(const dt_view_t *view);
-    } tethering;
-
 /* map view proxy object */
 #ifdef HAVE_MAP
     struct

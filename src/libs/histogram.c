@@ -1751,15 +1751,6 @@ void gui_init(dt_lib_module_t *self)
   dt_action_register(ac, NULL, _lib_histogram_change_type_callback, 0, 0);
   gtk_box_pack_start(GTK_BOX(d->button_box), d->scope_view_button, FALSE, FALSE, 0);
 
-  dt_action_t *teth = &darktable.view_manager->proxy.tethering.view->actions;
-  if(teth)
-  {
-    dt_action_register(teth, N_("cycle histogram modes"), _lib_histogram_cycle_mode_callback, 0, 0);
-    dt_action_register(teth, N_("hide histogram"), _lib_histogram_collapse_callback, GDK_KEY_H, GDK_CONTROL_MASK | GDK_SHIFT_MASK);
-    dt_action_register(teth, N_("switch histogram mode"), _lib_histogram_change_mode_callback, 0, 0);
-    dt_action_register(teth, N_("switch histogram type"), _lib_histogram_change_type_callback, 0, 0);
-  }
-
   // the red togglebutton turns into colorspace button in vectorscope
   d->button_stack = gtk_stack_new();
   gtk_box_pack_start(GTK_BOX(d->button_box), d->button_stack, FALSE, FALSE, 0);
