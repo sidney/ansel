@@ -1225,20 +1225,6 @@ static void _darkroom_ui_pipe_finish_signal_callback(gpointer instance, gpointer
   dt_control_queue_redraw_center();
 }
 
-static void _darkroom_ui_favorite_presets_popupmenu(GtkWidget *w, gpointer user_data)
-{
-  /* create favorites menu and popup */
-  dt_gui_favorite_presets_menu_show();
-
-  /* if we got any styles, lets popup menu for selection */
-  if(darktable.gui->presets_popup_menu)
-  {
-    dt_gui_menu_popup(darktable.gui->presets_popup_menu, w, GDK_GRAVITY_SOUTH_WEST, GDK_GRAVITY_NORTH_WEST);
-  }
-  else
-    dt_control_log(_("no userdefined presets for favorite modules were found"));
-}
-
 static void _darkroom_ui_apply_style_activate_callback(gchar *name)
 {
   dt_control_log(_("applied style `%s' on current image"), name);
@@ -2028,14 +2014,6 @@ void gui_init(dt_view_t *self)
   /*
    * Add view specific tool buttons
    */
-
-  /* create favorite plugin preset popup tool */
-  GtkWidget *favorite_presets = dtgtk_button_new(dtgtk_cairo_paint_presets, 0, NULL);
-  gtk_widget_set_tooltip_text(favorite_presets, _("quick access to presets"));
-  g_signal_connect(G_OBJECT(favorite_presets), "clicked", G_CALLBACK(_darkroom_ui_favorite_presets_popupmenu),
-                   NULL);
-  dt_gui_add_help_link(favorite_presets, dt_get_help_url("favorite_presets"));
-  dt_view_manager_view_toolbox_add(darktable.view_manager, favorite_presets, DT_VIEW_DARKROOM);
 
   /* create quick styles popup menu tool */
   GtkWidget *styles = dtgtk_button_new(dtgtk_cairo_paint_styles, 0, NULL);
