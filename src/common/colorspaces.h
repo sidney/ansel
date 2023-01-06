@@ -46,9 +46,7 @@ typedef enum dt_colorspaces_profile_type_t
   DT_COLORSPACES_PROFILE_TYPE_WORK = 2,
   DT_COLORSPACES_PROFILE_TYPE_EXPORT = 3,
   DT_COLORSPACES_PROFILE_TYPE_DISPLAY = 4,
-  DT_COLORSPACES_PROFILE_TYPE_SOFTPROOF = 5,
-  DT_COLORSPACES_PROFILE_TYPE_HISTOGRAM = 6,
-  DT_COLORSPACES_PROFILE_TYPE_DISPLAY2 = 7
+  DT_COLORSPACES_PROFILE_TYPE_SOFTPROOF = 5
 } dt_colorspaces_profile_type_t;
 
 typedef enum dt_colorspaces_color_profile_type_t
@@ -284,6 +282,16 @@ void dt_colorspaces_cygm_to_rgb(float *out, int num, double CAM_to_RGB[3][4]);
 
 /** convert RGB buffer to CYGM */
 void dt_colorspaces_rgb_to_cygm(float *out, int num, double RGB_to_CAM[4][3]);
+
+
+static inline dt_colorspaces_color_profile_type_t sanitize_colorspaces(dt_colorspaces_color_profile_type_t colorspace)
+{
+  // Remap unused colorspaces to valid ones
+  if(colorspace == DT_COLORSPACE_DISPLAY2)
+    return DT_COLORSPACE_DISPLAY;
+  else
+    return (dt_colorspaces_color_profile_type_t)MIN(colorspace, DT_COLORSPACE_LAST - 1);
+}
 
 // clang-format off
 // modelines: These editor modelines have been set for all relevant files by tools/update_modelines.py
