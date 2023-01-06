@@ -1624,15 +1624,6 @@ static void _preference_changed(gpointer instance, gpointer user_data)
   dt_configure_ppd_dpi(darktable.gui);
 }
 
-static void _preference_prev_downsample_change(gpointer instance, gpointer user_data)
-{
-  if(user_data != NULL)
-  {
-    float *ds_value = user_data;
-    *ds_value = dt_dev_get_preview_downsampling();
-  }
-}
-
 static void _preference_changed_button_hide(gpointer instance, dt_develop_t *dev)
 {
   for(const GList *modules = dev->iop; modules; modules = g_list_next(modules))
@@ -2203,8 +2194,6 @@ void gui_init(dt_view_t *self)
 
     _update_softproof_gamut_checking(dev);
 
-    DT_DEBUG_CONTROL_SIGNAL_CONNECT(darktable.signals, DT_SIGNAL_PREFERENCES_CHANGE,
-                              G_CALLBACK(_preference_prev_downsample_change), &(dev->preview_downsampling));
     // update the gui when the preferences changed (i.e. show intent when using lcms2)
     DT_DEBUG_CONTROL_SIGNAL_CONNECT(darktable.signals, DT_SIGNAL_PREFERENCES_CHANGE,
                               G_CALLBACK(_preference_changed), (gpointer)display_intent);

@@ -76,7 +76,6 @@ void dt_dev_init(dt_develop_t *dev, int32_t gui_attached)
   dt_pthread_mutex_init(&dev->preview_pipe_mutex, NULL);
   dev->histogram_pre_tonecurve = NULL;
   dev->histogram_pre_levels = NULL;
-  dev->preview_downsampling = dt_dev_get_preview_downsampling();
   dev->forms = NULL;
   dev->form_visible = NULL;
   dev->form_gui = NULL;
@@ -181,16 +180,6 @@ void dt_dev_cleanup(dt_develop_t *dev)
   dt_conf_set_int("darkroom/ui/overexposed/colorscheme", dev->overexposed.colorscheme);
   dt_conf_set_float("darkroom/ui/overexposed/lower", dev->overexposed.lower);
   dt_conf_set_float("darkroom/ui/overexposed/upper", dev->overexposed.upper);
-}
-
-float dt_dev_get_preview_downsampling()
-{
-  const char *preview_downsample = dt_conf_get_string_const("preview_downsampling");
-  const float downsample = (g_strcmp0(preview_downsample, "original") == 0) ? 1.0f
-        : (g_strcmp0(preview_downsample, "to 1/2")==0) ? 0.5f
-        : (g_strcmp0(preview_downsample, "to 1/3")==0) ? 1/3.0f
-        : 0.25f;
-  return downsample;
 }
 
 void dt_dev_process_image(dt_develop_t *dev)
@@ -298,8 +287,8 @@ restart:
   dt_get_times(&start);
   dt_dev_pixelpipe_change(dev->preview_pipe, dev);
   if(dt_dev_pixelpipe_process(
-         dev->preview_pipe, dev, 0, 0, dev->preview_pipe->processed_width * dev->preview_downsampling,
-         dev->preview_pipe->processed_height * dev->preview_downsampling, dev->preview_downsampling))
+         dev->preview_pipe, dev, 0, 0, dev->preview_pipe->processed_width,
+         dev->preview_pipe->processed_height, 1.f))
   {
     if(dev->preview_loading || dev->preview_input_changed)
     {
@@ -534,7 +523,6 @@ float dt_dev_get_zoom_scale(dt_develop_t *dev, dt_dev_zoom_t zoom, int closeup_f
       if(preview) zoom_scale *= ps;
       break;
   }
-  if (preview) zoom_scale /= dev->preview_downsampling;
 
   return zoom_scale;
 }
@@ -2024,7 +2012,7 @@ void dt_dev_get_processed_size(const dt_develop_t *dev, int *procw, int *proch)
   // fallback on preview pipe
   if(dev->preview_pipe && dev->preview_pipe->processed_width)
   {
-    const float scale = (dev->preview_pipe->iscale / dev->preview_downsampling);
+    const float scale = dev->preview_pipe->iscale;
     *procw = scale * dev->preview_pipe->processed_width;
     *proch = scale * dev->preview_pipe->processed_height;
     return;
@@ -2459,16 +2447,7 @@ int dt_dev_distort_transform_plus(dt_develop_t *dev, dt_dev_pixelpipe_t *pipe, c
                                   float *points, size_t points_count)
 {
   dt_pthread_mutex_lock(&dev->history_mutex);
-  const int success = dt_dev_distort_transform_locked(dev,pipe,iop_order,transf_direction,points,points_count);
-
-  if (success
-      && (dev->preview_downsampling != 1.0f)
-      && (transf_direction == DT_DEV_TRANSFORM_DIR_ALL
-          || transf_direction == DT_DEV_TRANSFORM_DIR_FORW_EXCL
-          || transf_direction == DT_DEV_TRANSFORM_DIR_FORW_INCL))
-    for(size_t idx=0; idx < 2 * points_count; idx++)
-      points[idx] *= dev->preview_downsampling;
-
+  dt_dev_distort_transform_locked(dev, pipe, iop_order, transf_direction, points, points_count);
   dt_pthread_mutex_unlock(&dev->history_mutex);
   return 1;
 }
@@ -2508,12 +2487,6 @@ int dt_dev_distort_backtransform_plus(dt_develop_t *dev, dt_dev_pixelpipe_t *pip
                                       float *points, size_t points_count)
 {
   dt_pthread_mutex_lock(&dev->history_mutex);
-  if ((dev->preview_downsampling != 1.0f) && (transf_direction == DT_DEV_TRANSFORM_DIR_ALL
-    || transf_direction == DT_DEV_TRANSFORM_DIR_FORW_EXCL
-    || transf_direction == DT_DEV_TRANSFORM_DIR_FORW_INCL))
-      for(size_t idx=0; idx < 2 * points_count; idx++)
-        points[idx] /= dev->preview_downsampling;
-
   const int success = dt_dev_distort_backtransform_locked(dev, pipe, iop_order, transf_direction, points, points_count);
   dt_pthread_mutex_unlock(&dev->history_mutex);
   return success;

@@ -572,9 +572,6 @@ static int pixelpipe_picker_helper(dt_iop_module_t *module, const dt_iop_roi_t *
   const float ht = darktable.develop->preview_pipe->backbuf_height;
   const int width = roi->width;
   const int height = roi->height;
-  const dt_image_t image = darktable.develop->image_storage;
-  const int op_after_demosaic = dt_ioppr_is_iop_before(darktable.develop->preview_pipe->iop_order_list,
-                                                       module->op, "demosaic", 0);
   const dt_colorpicker_sample_t *const sample = darktable.lib->proxy.colorpicker.primary_sample;
 
   dt_boundingbox_t fbox = { 0.0f };
@@ -596,8 +593,6 @@ static int pixelpipe_picker_helper(dt_iop_module_t *module, const dt_iop_roi_t *
                                ((picker_source == PIXELPIPE_PICKER_INPUT) ? DT_DEV_TRANSFORM_DIR_FORW_INCL
                                : DT_DEV_TRANSFORM_DIR_FORW_EXCL),fbox, 2);
 
-  if (op_after_demosaic || !dt_image_is_rawprepare_supported(&image))
-    for(int idx = 0; idx < 4; idx++) fbox[idx] *= darktable.develop->preview_downsampling;
   fbox[0] -= roi->x;
   fbox[1] -= roi->y;
   fbox[2] -= roi->x;

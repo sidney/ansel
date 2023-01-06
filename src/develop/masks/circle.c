@@ -799,7 +799,6 @@ static void _circle_events_post_expose(cairo_t *cr, float zoom_scale, dt_masks_f
   // draw the source if any
   if(gpt->source_count > 6)
   {
-    const float pr_d = darktable.develop->preview_downsampling;
     const float radius = fabs(gpt->points[2] - gpt->points[0]);
 
     // compute the dest inner circle intersection with the line from source center to dest center.
@@ -825,7 +824,7 @@ static void _circle_events_post_expose(cairo_t *cr, float zoom_scale, dt_masks_f
       cairo_move_to(cr, gpt->source[0], gpt->source[1]); // source center
       cairo_line_to(cr, arrowx, arrowy);                 // dest border
       // then draw to line for the arrow itself
-      const float arrow_scale = 6.0f * pr_d;
+      const float arrow_scale = 6.0f;
       cairo_move_to(cr, arrowx + arrow_scale * cosf(cangle + (0.4f)),
                     arrowy + arrow_scale * sinf(cangle + (0.4f)));
       cairo_line_to(cr, arrowx, arrowy);
@@ -1412,4 +1411,3 @@ const dt_masks_functions_t dt_masks_functions_circle = {
 // vim: shiftwidth=2 expandtab tabstop=2 cindent
 // kate: tab-indents: off; indent-width 2; replace-tabs on; indent-mode cstyle; remove-trailing-spaces modified;
 // clang-format on
-
