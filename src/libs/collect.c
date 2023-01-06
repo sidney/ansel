@@ -72,7 +72,6 @@ typedef struct dt_lib_collect_t
   GtkTreeModel *treefilter;
   GtkTreeModel *listfilter;
 
-  gboolean singleclick;
   struct dt_lib_collect_params_t *params;
 #ifdef _WIN32
   GVolumeMonitor *vmonitor;
@@ -639,8 +638,7 @@ static gboolean view_onButtonPressed(GtkWidget *treeview, GdkEventButton *event,
   if(((d->view_rule == DT_COLLECTION_PROP_FOLDERS
        || d->view_rule == DT_COLLECTION_PROP_FILMROLL)
       && event->type == GDK_BUTTON_PRESS && event->button == 3)
-     || (!d->singleclick && event->type == GDK_2BUTTON_PRESS && event->button == 1)
-     || (d->singleclick && event->type == GDK_BUTTON_PRESS && event->button == 1)
+     || (event->type == GDK_2BUTTON_PRESS && event->button == 1)
      || ((d->view_rule == DT_COLLECTION_PROP_FOLDERS || d->view_rule == DT_COLLECTION_PROP_FILMROLL)
           && (event->type == GDK_BUTTON_PRESS && event->button == 1 &&
               (dt_modifier_is(event->state, GDK_SHIFT_MASK) || dt_modifier_is(event->state, GDK_CONTROL_MASK)))))
@@ -649,34 +647,8 @@ static gboolean view_onButtonPressed(GtkWidget *treeview, GdkEventButton *event,
 
     if(get_path)
     {
-      if(d->singleclick && dt_modifier_is(event->state, GDK_SHIFT_MASK)
-         && gtk_tree_selection_count_selected_rows(selection) > 0
-         && (d->view_rule == DT_COLLECTION_PROP_DAY
-             || is_time_property(d->view_rule)
-             || d->view_rule == DT_COLLECTION_PROP_APERTURE
-             || d->view_rule == DT_COLLECTION_PROP_FOCAL_LENGTH
-             || d->view_rule == DT_COLLECTION_PROP_ISO
-             || d->view_rule == DT_COLLECTION_PROP_EXPOSURE
-             || d->view_rule == DT_COLLECTION_PROP_ASPECT_RATIO
-             || d->view_rule == DT_COLLECTION_PROP_RATING
-            )
-         )
-      {
-        // range selection
-        GList *sels = gtk_tree_selection_get_selected_rows(selection, NULL);
-        GtkTreePath *path2 = (GtkTreePath *)sels->data;
-        gtk_tree_selection_unselect_all(selection);
-        if(gtk_tree_path_compare(path, path2) > 0)
-          gtk_tree_selection_select_range(selection, path, path2);
-        else
-          gtk_tree_selection_select_range(selection, path2, path);
-        g_list_free_full(sels, (GDestroyNotify)gtk_tree_path_free);
-      }
-      else
-      {
-        gtk_tree_selection_unselect_all(selection);
-        gtk_tree_selection_select_path(selection, path);
-      }
+      gtk_tree_selection_unselect_all(selection);
+      gtk_tree_selection_select_path(selection, path);
     }
 
     /* single click on folder with the right mouse button? */
@@ -2885,13 +2857,6 @@ static gboolean popup_button_callback(GtkWidget *widget, GdkEventButton *event, 
   return TRUE;
 }
 
-static void view_set_click(gpointer instance, gpointer user_data)
-{
-  dt_lib_module_t *self = (dt_lib_module_t *)user_data;
-  dt_lib_collect_t *d = (dt_lib_collect_t *)self->data;
-  d->singleclick = dt_conf_get_bool("plugins/lighttable/collect/single-click");
-}
-
 static void _populate_collect_combo(GtkWidget *w)
 {
 #define ADD_COLLECT_ENTRY(value)                                                              \
@@ -3019,7 +2984,6 @@ void gui_init(dt_lib_module_t *self)
   d->active_rule = 0;
   d->nb_rules = 0;
   d->params = (dt_lib_collect_params_t *)malloc(sizeof(dt_lib_collect_params_t));
-  view_set_click(NULL, self);
 
   GtkBox *box = NULL;
   GtkWidget *w = NULL;
@@ -3146,7 +3110,6 @@ void gui_init(dt_lib_module_t *self)
 
   DT_DEBUG_CONTROL_SIGNAL_CONNECT(darktable.signals, DT_SIGNAL_METADATA_CHANGED, G_CALLBACK(metadata_changed), self);
 
-  DT_DEBUG_CONTROL_SIGNAL_CONNECT(darktable.signals, DT_SIGNAL_PREFERENCES_CHANGE, G_CALLBACK(view_set_click), self);
 }
 
 void gui_cleanup(dt_lib_module_t *self)
@@ -3160,7 +3123,6 @@ void gui_cleanup(dt_lib_module_t *self)
   DT_DEBUG_CONTROL_SIGNAL_DISCONNECT(darktable.signals, G_CALLBACK(filmrolls_removed), self);
   DT_DEBUG_CONTROL_SIGNAL_DISCONNECT(darktable.signals, G_CALLBACK(tag_changed), self);
   DT_DEBUG_CONTROL_SIGNAL_DISCONNECT(darktable.signals, G_CALLBACK(_geotag_changed), self);
-  DT_DEBUG_CONTROL_SIGNAL_DISCONNECT(darktable.signals, G_CALLBACK(view_set_click), self);
   darktable.view_manager->proxy.module_collect.module = NULL;
   free(d->params);
 
