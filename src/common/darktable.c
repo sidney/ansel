@@ -558,12 +558,6 @@ int dt_init(int argc, char *argv[], const gboolean init_gui, const gboolean load
                "  Colord support disabled\n"
 #endif
 
-#ifdef HAVE_GPHOTO2
-               "  gPhoto2 support enabled\n"
-#else
-               "  gPhoto2 support disabled\n"
-#endif
-
 #ifdef HAVE_GRAPHICSMAGICK
                "  GraphicsMagick support enabled\n"
 #else
@@ -759,7 +753,6 @@ int dt_init(int argc, char *argv[], const gboolean init_gui, const gboolean load
         CHKSIGDBG(DT_SIGNAL_IMAGE_EXPORT_TMPFILE);
         CHKSIGDBG(DT_SIGNAL_IMAGEIO_STORAGE_CHANGE);
         CHKSIGDBG(DT_SIGNAL_PREFERENCES_CHANGE);
-        CHKSIGDBG(DT_SIGNAL_CAMERA_DETECTED);
         CHKSIGDBG(DT_SIGNAL_CONTROL_NAVIGATION_REDRAW);
         CHKSIGDBG(DT_SIGNAL_CONTROL_LOG_REDRAW);
         CHKSIGDBG(DT_SIGNAL_CONTROL_TOAST_REDRAW);
@@ -1207,12 +1200,6 @@ int dt_init(int argc, char *argv[], const gboolean init_gui, const gboolean load
 
   if(init_gui)
   {
-#ifdef HAVE_GPHOTO2
-    // Initialize the camera control.
-    // this is done late so that the gui can react to the signal sent but before switching to lighttable!
-    darktable.camctl = dt_camctl_new();
-#endif
-
     darktable.lib = (dt_lib_t *)calloc(1, sizeof(dt_lib_t));
     dt_lib_init(darktable.lib);
 
@@ -1431,10 +1418,6 @@ void dt_cleanup()
   darktable.iop_order_rules = NULL;
   dt_opencl_cleanup(darktable.opencl);
   free(darktable.opencl);
-#ifdef HAVE_GPHOTO2
-  dt_camctl_destroy((dt_camctl_t *)darktable.camctl);
-  darktable.camctl = NULL;
-#endif
   dt_pwstorage_destroy(darktable.pwstorage);
 
 #ifdef HAVE_GRAPHICSMAGICK

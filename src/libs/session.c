@@ -74,9 +74,6 @@ static void create_callback(GtkButton *button, gpointer user_data)
   dt_lib_session_t *lib = self->data;
 
   dt_conf_set_string("plugins/session/jobcode", gtk_entry_get_text(lib->gui.entry1));
-#ifdef HAVE_GPHOTO2
-  dt_view_tethering_set_job_code(darktable.view_manager, gtk_entry_get_text(lib->gui.entry1));
-#endif
 }
 
 void gui_init(dt_lib_module_t *self)
@@ -127,4 +124,3 @@ void gui_cleanup(dt_lib_module_t *self)
 // vim: shiftwidth=2 expandtab tabstop=2 cindent
 // kate: tab-indents: off; indent-width 2; replace-tabs on; indent-mode cstyle; remove-trailing-spaces modified;
 // clang-format on
-
