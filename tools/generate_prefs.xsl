@@ -261,6 +261,15 @@ gboolean restart_required = FALSE;
 
   <xsl:value-of select="$tab_end" />
 
+  <!-- other views -->
+
+  <xsl:text>&#xA;static void&#xA;init_tab_otherviews</xsl:text><xsl:value-of select="$tab_start"/><xsl:text>  gtk_stack_add_titled(GTK_STACK(stack), scroll, _("other views"), _("other views"));&#xA;</xsl:text>
+  <xsl:for-each select="./dtconfiglist/dtconfig[@prefs='otherviews' and @section='views']">
+    <xsl:apply-templates select="." mode="tab_block"/>
+  </xsl:for-each>
+  <xsl:value-of select="$tab_end" />
+
+
   <!-- processing -->
 
   <xsl:text>&#xA;static void&#xA;init_tab_processing</xsl:text><xsl:value-of select="$tab_start"/><xsl:text>  gtk_stack_add_titled(GTK_STACK(stack), scroll, _("processing"), _("processing"));&#xA;</xsl:text>
@@ -506,7 +515,7 @@ gboolean restart_required = FALSE;
   <xsl:text>    gtk_event_box_set_visible_window(GTK_EVENT_BOX(labelev), FALSE);</xsl:text>
   <xsl:if test="longdescription != ''">
     <xsl:if test="contains(longdescription,'%')">
-      <xsl:text>    
+      <xsl:text>
     /* xgettext:no-c-format */</xsl:text>
     </xsl:if>
     <xsl:text>&#xA;    g_object_set(widget, "tooltip-text", _("</xsl:text><xsl:value-of select="longdescription"/><xsl:text>"), (gchar *)0);</xsl:text>

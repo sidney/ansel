@@ -7,6 +7,27 @@
     <default>false</default>
     <shortdescription>modify theme with user tweaks</shortdescription>
   </dtconfig>
+  <dtconfig prefs="otherviews" section="views" restart="true">
+    <name>/views/print/enable</name>
+    <type>bool</type>
+    <default>false</default>
+    <shortdescription>Enable the print view</shortdescription>
+    <longdescription>Check to enable the global printing view. If you don't print yourself, keep disabled to save some resources. (needs a restart)</longdescription>
+  </dtconfig>
+  <dtconfig prefs="otherviews" section="views" restart="true">
+    <name>/views/map/enable</name>
+    <type>bool</type>
+    <default>false</default>
+    <shortdescription>Enable the map view</shortdescription>
+    <longdescription>Check to enable the global map view. If you don't print yourself, keep disabled to save some resources. (needs a restart)</longdescription>
+  </dtconfig>
+  <dtconfig prefs="otherviews" section="views" restart="true">
+    <name>/views/slideshow/enable</name>
+    <type>bool</type>
+    <default>false</default>
+    <shortdescription>Enable the slideshow view</shortdescription>
+    <longdescription>Check to enable the global slideshow view. If you don't print yourself, keep disabled to save some resources. (needs a restart)</longdescription>
+  </dtconfig>
   <dtconfig prefs="misc" section="accel">
     <name>accel/prefer_focused</name>
     <type>bool</type>

@@ -132,7 +132,7 @@ void gui_init(dt_lib_module_t *self)
         gtk_box_pack_start(GTK_BOX(self->widget), sep, FALSE, FALSE, 0);
       }
     }
-    else
+    else if(view)
     {
       // only create the dropdown when needed, in case someone runs dt with just lt + dr
       if(!d->dropdown)
@@ -192,10 +192,13 @@ static void _lib_viewswitcher_view_cannot_change_callback(gpointer instance, dt_
   dt_lib_module_t *self = (dt_lib_module_t *)user_data;
   dt_lib_viewswitcher_t *d = (dt_lib_viewswitcher_t *)self->data;
 
-  g_signal_handlers_block_by_func(d->dropdown, _dropdown_changed, d);
-  gtk_combo_box_set_active(GTK_COMBO_BOX(d->dropdown), 0);
-  gtk_widget_set_state_flags(d->dropdown, GTK_STATE_FLAG_SELECTED, FALSE);
-  g_signal_handlers_unblock_by_func(d->dropdown, _dropdown_changed, d);
+  if(d->dropdown)
+  {
+    g_signal_handlers_block_by_func(d->dropdown, _dropdown_changed, d);
+    gtk_combo_box_set_active(GTK_COMBO_BOX(d->dropdown), 0);
+    gtk_widget_set_state_flags(d->dropdown, GTK_STATE_FLAG_SELECTED, FALSE);
+    g_signal_handlers_unblock_by_func(d->dropdown, _dropdown_changed, d);
+  }
 }
 
 static void _lib_viewswitcher_view_changed_callback(gpointer instance, dt_view_t *old_view,
@@ -219,34 +222,36 @@ static void _lib_viewswitcher_view_changed_callback(gpointer instance, dt_view_t
       gtk_widget_set_state_flags(label, GTK_STATE_FLAG_NORMAL, TRUE);
   }
 
-  g_signal_handlers_block_by_func(d->dropdown, _dropdown_changed, d);
+  if(d->dropdown)
+  {
+    g_signal_handlers_block_by_func(d->dropdown, _dropdown_changed, d);
 
-  if(found)
-  {
-    gtk_combo_box_set_active(GTK_COMBO_BOX(d->dropdown), 0);
-    gtk_widget_set_state_flags(d->dropdown, GTK_STATE_FLAG_NORMAL, TRUE);
-  }
-  else
-  {
-    GtkTreeModel *model = gtk_combo_box_get_model(GTK_COMBO_BOX(d->dropdown));
-    GtkTreeIter iter;
-    uint32_t index = 0;
-    if(gtk_tree_model_get_iter_first(model, &iter) == TRUE) do
+    if(found)
     {
-      gchar *str;
-      gtk_tree_model_get(model, &iter, TEXT_COLUMN, &str, -1);
-      if(!g_strcmp0(str, name))
+      gtk_combo_box_set_active(GTK_COMBO_BOX(d->dropdown), 0);
+      gtk_widget_set_state_flags(d->dropdown, GTK_STATE_FLAG_NORMAL, TRUE);
+    }
+    else
+    {
+      GtkTreeModel *model = gtk_combo_box_get_model(GTK_COMBO_BOX(d->dropdown));
+      GtkTreeIter iter;
+      uint32_t index = 0;
+      if(gtk_tree_model_get_iter_first(model, &iter) == TRUE) do
       {
-        gtk_combo_box_set_active(GTK_COMBO_BOX(d->dropdown), index);
-        gtk_widget_set_state_flags(d->dropdown, GTK_STATE_FLAG_SELECTED, TRUE);
-        break;
-      }
-      g_free(str);
-      index++;
-    } while(gtk_tree_model_iter_next(model, &iter) == TRUE);
+        gchar *str;
+        gtk_tree_model_get(model, &iter, TEXT_COLUMN, &str, -1);
+        if(!g_strcmp0(str, name))
+        {
+          gtk_combo_box_set_active(GTK_COMBO_BOX(d->dropdown), index);
+          gtk_widget_set_state_flags(d->dropdown, GTK_STATE_FLAG_SELECTED, TRUE);
+          break;
+        }
+        g_free(str);
+        index++;
+      } while(gtk_tree_model_iter_next(model, &iter) == TRUE);
+    }
+    g_signal_handlers_unblock_by_func(d->dropdown, _dropdown_changed, d);
   }
-
-  g_signal_handlers_unblock_by_func(d->dropdown, _dropdown_changed, d);
 }
 
 static GtkWidget *_lib_viewswitcher_create_label(dt_view_t *view)
@@ -295,4 +300,3 @@ static gboolean _lib_viewswitcher_button_press_callback(GtkWidget *w, GdkEventBu
 // vim: shiftwidth=2 expandtab tabstop=2 cindent
 // kate: tab-indents: off; indent-width 2; replace-tabs on; indent-mode cstyle; remove-trailing-spaces modified;
 // clang-format on
-
