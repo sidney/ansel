@@ -911,7 +911,7 @@ static gboolean _lib_plugin_header_button_press(GtkWidget *w, GdkEventButton *e,
     }
 
     /* handle shiftclick on expander, hide all except this */
-    if(!dt_conf_get_bool("lighttable/ui/single_module") != !dt_modifier_is(e->state, GDK_SHIFT_MASK))
+    if(dt_modifier_is(e->state, GDK_SHIFT_MASK))
     {
       const dt_view_t *v = dt_view_manager_get_current_view(darktable.view_manager);
       gboolean all_other_closed = TRUE;
@@ -966,30 +966,7 @@ static void show_module_callback(dt_lib_module_t *module)
       darktable.gui->scroll_to[1] = module->expander;
   }
 
-  if(dt_conf_get_bool("lighttable/ui/single_module"))
-  {
-    const dt_view_t *v = dt_view_manager_get_current_view(darktable.view_manager);
-    gboolean all_other_closed = TRUE;
-    for(const GList *it = darktable.lib->plugins; it; it = g_list_next(it))
-    {
-      dt_lib_module_t *m = (dt_lib_module_t *)it->data;
-
-      if(m != module && container == m->container(m) && m->expandable(m) && dt_lib_is_visible_in_view(m, v))
-      {
-        all_other_closed = all_other_closed && !dtgtk_expander_get_expanded(DTGTK_EXPANDER(m->expander));
-        dt_lib_gui_set_expanded(m, FALSE);
-      }
-    }
-    if(all_other_closed)
-      dt_lib_gui_set_expanded(module, !dtgtk_expander_get_expanded(DTGTK_EXPANDER(module->expander)));
-    else
-      dt_lib_gui_set_expanded(module, TRUE);
-  }
-  else
-  {
-    /* else just toggle */
-    dt_lib_gui_set_expanded(module, !dtgtk_expander_get_expanded(DTGTK_EXPANDER(module->expander)));
-  }
+  dt_lib_gui_set_expanded(module, !dtgtk_expander_get_expanded(DTGTK_EXPANDER(module->expander)));
 }
 
 static gboolean _header_enter_notify_callback(GtkWidget *eventbox, GdkEventCrossing *event, gpointer user_data)
