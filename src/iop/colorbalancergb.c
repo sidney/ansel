@@ -474,7 +474,7 @@ void reload_defaults(dt_iop_module_t *module)
   p->saturation_highlights = -0.25f;
 
   // Auto-enable so people find their default JPEG look by default
-  module->default_enabled = TRUE;
+  module->default_enabled = FALSE;
 }
 
 

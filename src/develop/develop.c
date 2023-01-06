@@ -1291,8 +1291,10 @@ static gboolean _dev_auto_apply_presets(dt_develop_t *dev)
     {
       dt_iop_module_t *module = (dt_iop_module_t *)modules->data;
 
-      if(((strcmp(module->op, "filmicrgb") == 0)
-          || (has_matrix && strcmp(module->op, "channelmixerrgb") == 0))
+      if((   (strcmp(module->op, "filmicrgb") == 0)
+          || (strcmp(module->op, "colorbalancergb") == 0)
+          || (strcmp(module->op, "lens") == 0)
+          || (has_matrix && strcmp(module->op, "channelmixerrgb") == 0) )
          && !dt_history_check_module_exists(imgid, module->op, FALSE)
          && !(module->flags() & IOP_FLAGS_NO_HISTORY_STACK))
       {

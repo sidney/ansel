@@ -1403,10 +1403,6 @@ void reload_defaults(dt_iop_module_t *module)
         }
 
         d->target_geom = lens[lens_i]->Type;
-
-        // We found a lens : enable the module by default
-        module->default_enabled = 1;
-
         lf_free(lens);
       }
 
