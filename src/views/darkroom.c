@@ -181,63 +181,6 @@ static cairo_filter_t _get_filtering_level(dt_develop_t *dev, dt_dev_zoom_t zoom
     return darktable.gui->dr_filter_image;
 }
 
-void _display_module_trouble_message_callback(gpointer instance,
-                                              dt_iop_module_t *module,
-                                              const char *const trouble_msg,
-                                              const char *const trouble_tooltip)
-{
-  GtkWidget *label_widget = NULL;
-
-  if(module && module->has_trouble && module->widget)
-  {
-    label_widget = dt_gui_container_first_child(GTK_CONTAINER(gtk_widget_get_parent(module->widget)));
-    if(g_strcmp0(gtk_widget_get_name(label_widget), "iop-plugin-warning"))
-      label_widget = NULL;
-  }
-
-  if(trouble_msg && *trouble_msg)
-  {
-    if(module && module->widget)
-    {
-      if(label_widget)
-      {
-        // set the warning message in the module's message area just below the header
-        gtk_label_set_text(GTK_LABEL(label_widget), trouble_msg);
-      }
-      else
-      {
-        label_widget = gtk_label_new(trouble_msg);;
-        gtk_label_set_line_wrap(GTK_LABEL(label_widget), TRUE);
-        gtk_label_set_xalign(GTK_LABEL(label_widget), 0.0);
-        gtk_widget_set_name(label_widget, "iop-plugin-warning");
-        dt_gui_add_class(label_widget, "dt_warning");
-
-        GtkWidget *iopw = gtk_widget_get_parent(module->widget);
-        gtk_box_pack_start(GTK_BOX(iopw), label_widget, TRUE, TRUE, 0);
-        gtk_box_reorder_child(GTK_BOX(iopw), label_widget, 0);
-        gtk_widget_show(label_widget);
-      }
-
-      gtk_widget_set_tooltip_text(GTK_WIDGET(label_widget), trouble_tooltip);
-
-      // set the module's trouble flag
-      module->has_trouble = TRUE;
-
-      dt_iop_gui_update_header(module);
-    }
-  }
-  else if(module && module->has_trouble)
-  {
-    // no more trouble, so clear the trouble flag and remove the message area
-    module->has_trouble = FALSE;
-
-    dt_iop_gui_update_header(module);
-
-    if(label_widget) gtk_widget_destroy(label_widget);
-  }
-}
-
-
 static void _darkroom_pickers_draw(dt_view_t *self, cairo_t *cri,
                                    int32_t width, int32_t height,
                                    dt_dev_zoom_t zoom, int closeup, float zoom_x, float zoom_y,
@@ -2690,10 +2633,6 @@ void enter(dt_view_t *self)
   DT_DEBUG_CONTROL_SIGNAL_CONNECT(darktable.signals, DT_SIGNAL_DEVELOP_UI_PIPE_FINISHED,
                             G_CALLBACK(_darkroom_ui_pipe_finish_signal_callback), (gpointer)self);
 
-  DT_DEBUG_CONTROL_SIGNAL_CONNECT(darktable.signals, DT_SIGNAL_TROUBLE_MESSAGE,
-                                  G_CALLBACK(_display_module_trouble_message_callback),
-                                  (gpointer)self);
-
   dt_print(DT_DEBUG_CONTROL, "[run_job+] 11 %f in darkroom mode\n", dt_get_wtime());
   dt_develop_t *dev = (dt_develop_t *)self->data;
   if(!dev->form_gui)
@@ -2834,10 +2773,6 @@ void leave(dt_view_t *self)
   /* disconnect from pipe finish signal */
   DT_DEBUG_CONTROL_SIGNAL_DISCONNECT(darktable.signals, G_CALLBACK(_darkroom_ui_pipe_finish_signal_callback),
                                (gpointer)self);
-
-  DT_DEBUG_CONTROL_SIGNAL_DISCONNECT(darktable.signals,
-                                     G_CALLBACK(_display_module_trouble_message_callback),
-                                     (gpointer)self);
 
   // store groups for next time:
   dt_conf_set_int("plugins/darkroom/groups", dt_dev_modulegroups_get(darktable.develop));

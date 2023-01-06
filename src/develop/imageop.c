@@ -224,7 +224,6 @@ void dt_iop_default_init(dt_iop_module_t *module)
   module->default_params = (dt_iop_params_t *)calloc(1, param_size);
 
   module->default_enabled = 0;
-  module->has_trouble = FALSE;
   module->gui_data = NULL;
 
   dt_introspection_field_t *i = module->so->get_introspection_linear();
@@ -343,7 +342,6 @@ int dt_iop_load_module_by_so(dt_iop_module_t *module, dt_iop_module_so_t *so, dt
   module->header = NULL;
   module->off = NULL;
   module->hide_enable_button = 0;
-  module->has_trouble = FALSE;
   module->request_color_pick = DT_REQUEST_COLORPICK_OFF;
   module->request_histogram = DT_REQUEST_ONLY_IN_GUI;
   module->histogram_stats.bins_count = 0;
@@ -1052,13 +1050,6 @@ static void _iop_panel_label(dt_iop_module_t *module)
   gtk_widget_set_name(lab, "iop-panel-label");
   char *module_name = dt_history_item_get_name_html(module);
 
-  if((module->has_trouble && module->enabled))
-  {
-    char *saved_old_name = module_name;
-    module_name = dt_iop_warning_message(module_name);
-    g_free(saved_old_name);
-  }
-
   dt_capitalize_label(module_name);
   gtk_label_set_markup(GTK_LABEL(lab), module_name);
   g_free(module_name);
@@ -1106,23 +1097,6 @@ void dt_iop_gui_set_enable_button(dt_iop_module_t *module)
 
     dt_iop_gui_set_enable_button_icon(GTK_WIDGET(module->off), module);
   }
-}
-
-void dt_iop_set_module_trouble_message(dt_iop_module_t *const module,
-                                       const char* const trouble_msg,
-                                       const char* const trouble_tooltip,
-                                       const char *const stderr_message)
-{
-  //  first stderr message if any
-  if(stderr_message)
-  {
-    const char *name = module ? module->name() : "?";
-    fprintf(stderr, "[%s] %s\n", name, stderr_message ? stderr_message : trouble_msg);
-  }
-
-  if(!dt_iop_is_hidden(module) && module->gui_data && dt_conf_get_bool("plugins/darkroom/show_warnings"))
-    DT_DEBUG_CONTROL_SIGNAL_RAISE(darktable.signals, DT_SIGNAL_TROUBLE_MESSAGE,
-                                  module, trouble_msg, trouble_tooltip);
 }
 
 void dt_iop_gui_init(dt_iop_module_t *module)
@@ -1765,15 +1739,8 @@ void dt_iop_gui_update(dt_iop_module_t *module)
       dt_bauhaus_update_module(module);
 
       if(module->params && module->gui_update)
-      {
-        if(module->widget && dt_conf_get_bool("plugins/darkroom/show_warnings"))
-        {
-          GtkWidget *label_widget = dt_gui_container_first_child(GTK_CONTAINER(gtk_widget_get_parent(module->widget)));
-          if(!g_strcmp0(gtk_widget_get_name(label_widget), "iop-plugin-warning")) gtk_widget_destroy(label_widget);
-          module->has_trouble = FALSE;
-        }
         module->gui_update(module);
-      }
+
       dt_iop_gui_update_blending(module);
       dt_iop_gui_update_expanded(module);
     }
@@ -3057,14 +3024,6 @@ void dt_iop_cancel_history_update(dt_iop_module_t *module)
   }
 }
 
-char *dt_iop_warning_message(const char *message)
-{
-  if(dt_conf_get_bool("plugins/darkroom/show_warnings"))
-    return g_strdup_printf("<span foreground='red'>⚠</span> %s", message);
-  else
-    return g_strdup(message);
-}
-
 const char **dt_iop_set_description(dt_iop_module_t *module, const char *main_text, const char *purpose, const char *input, const char *process,
                              const char *output)
 {
@@ -3083,10 +3042,8 @@ gboolean dt_iop_have_required_input_format(const int req_ch, struct dt_iop_modul
                                            const void *const restrict ivoid, void *const restrict ovoid,
                                            const dt_iop_roi_t *const roi_in, const dt_iop_roi_t *const roi_out)
 {
-  if (ch == req_ch)
+  if(ch == req_ch)
   {
-    if (module)
-      dt_iop_set_module_trouble_message(module, NULL, NULL, NULL);
     return TRUE;
   }
   else
@@ -3095,12 +3052,8 @@ gboolean dt_iop_have_required_input_format(const int req_ch, struct dt_iop_modul
     dt_iop_copy_image_roi(ovoid, ivoid, ch, roi_in, roi_out, TRUE);
     // and set the module's trouble message
     if (module)
-      dt_iop_set_module_trouble_message(module, _("unsupported input"),
-                                        _("you have placed this module at\n"
-                                          "a position in the pipeline where\n"
-                                          "the data format does not match\n"
-                                          "its requirements."),
-                                        "unsupported data format at current pipeline position");
+      fprintf(stdout, "you have placed the module %s at a position in the pipeline where"
+                      "the data format does not match its requirements.", module->name());
     else
     {
       //TODO: pop up a toast message?

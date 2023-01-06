@@ -242,9 +242,6 @@ typedef enum dt_signal_t
   /* \brief This signal is raised when metadata view needs update */
   DT_SIGNAL_METADATA_UPDATE,
 
-  /* \brief This signal is raised when a module is in trouble and message is to be displayed */
-  DT_SIGNAL_TROUBLE_MESSAGE,
-
   /* \brief This signal is raised when the user choses a new location from map (module location)*/
   DT_SIGNAL_LOCATION_CHANGED,
 

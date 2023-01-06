@@ -278,8 +278,6 @@ typedef struct dt_iop_module_t
   GtkWidget *guides_toggle;
   GtkWidget *guides_combo;
 
-  /** flag in case the module has troubles (bad settings) - if TRUE, show a warning sign next to module label */
-  gboolean has_trouble;
   /** the corresponding SO object */
   dt_iop_module_so_t *so;
 
@@ -466,14 +464,6 @@ gboolean dt_iop_show_hide_header_buttons(dt_iop_module_t *module, GdkEventCrossi
 
 /** add/remove mask indicator to iop module header */
 void add_remove_mask_indicator(dt_iop_module_t *module, gboolean add);
-
-/** Set the trouble message for the module.  If non-empty, also flag the module as being in trouble; if empty
- ** or NULL, clear the trouble flag.  If 'toast_message' is non-NULL/non-empty, pop up a toast with that
- ** message when the module does not have a warning-label widget (use %s for the module's name).  **/
-void dt_iop_set_module_trouble_message(dt_iop_module_t *module,
-                                       const char *const trouble_msg,
-                                       const char *const trouble_tooltip,
-                                       const char *stderr_message);
 
 // format modules description going in tooltips
 const char **dt_iop_set_description(dt_iop_module_t *module, const char *main_text,
