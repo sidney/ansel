@@ -1602,7 +1602,6 @@ static void process_laplacian_bayer(struct dt_iop_module_t *self, dt_dev_pixelpi
   }
 
   // Upsample
-  interpolate_bilinear(ds_clipping_mask, ds_width, ds_height, clipping_mask, width, height, 4);
   interpolate_bilinear(ds_interpolated, ds_width, ds_height, interpolated, width, height, 4);
   _remosaic_and_replace(input, interpolated, clipping_mask, output, wb, filters, width, height);
 
@@ -1839,15 +1838,6 @@ static cl_int process_laplacian_bayer_cl(struct dt_iop_module_t *self, dt_dev_pi
   }
 
   // Upsample
-  dt_opencl_set_kernel_arg(devid, gd->kernel_interpolate_bilinear, 0, sizeof(cl_mem), (void *)&ds_clipping_mask);
-  dt_opencl_set_kernel_arg(devid, gd->kernel_interpolate_bilinear, 1, sizeof(int), (void *)&ds_width);
-  dt_opencl_set_kernel_arg(devid, gd->kernel_interpolate_bilinear, 2, sizeof(int), (void *)&ds_height);
-  dt_opencl_set_kernel_arg(devid, gd->kernel_interpolate_bilinear, 3, sizeof(cl_mem), (void *)&clipping_mask);
-  dt_opencl_set_kernel_arg(devid, gd->kernel_interpolate_bilinear, 4, sizeof(int), (void *)&width);
-  dt_opencl_set_kernel_arg(devid, gd->kernel_interpolate_bilinear, 5, sizeof(int), (void *)&height);
-  err = dt_opencl_enqueue_kernel_2d(devid, gd->kernel_interpolate_bilinear, sizes);
-  if(err != CL_SUCCESS) goto error;
-
   dt_opencl_set_kernel_arg(devid, gd->kernel_interpolate_bilinear, 0, sizeof(cl_mem), (void *)&ds_interpolated);
   dt_opencl_set_kernel_arg(devid, gd->kernel_interpolate_bilinear, 1, sizeof(int), (void *)&ds_width);
   dt_opencl_set_kernel_arg(devid, gd->kernel_interpolate_bilinear, 2, sizeof(int), (void *)&ds_height);
