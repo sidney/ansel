@@ -166,7 +166,7 @@ inline static void decompose_2D_Bspline(const float *const DT_ALIGNED_PIXEL rest
                                         const size_t width, const size_t height, const int mult,
                                         float *const tempbuf, size_t padded_size)
 {
-  // Blur and compute the decimated wavelet at once
+  // Blur and compute the wavelet at once
 #ifdef _OPENMP
 #pragma omp parallel for default(none) \
     dt_omp_firstprivate(width, height, mult, padded_size) \
