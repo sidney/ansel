@@ -24,6 +24,7 @@
    implemented also by Ingo Weyrich.
 */
 
+
 static float slider2contrast(float slider)
 {
   return 0.005f * powf(slider, 1.1f);
@@ -200,4 +201,3 @@ gboolean dual_demosaic_cl(struct dt_iop_module_t *self, dt_dev_pixelpipe_iop_t *
 // vim: shiftwidth=2 expandtab tabstop=2 cindent
 // kate: tab-indents: off; indent-width 2; replace-tabs on; indent-mode cstyle; remove-trailing-spaces modified;
 // clang-format on
-

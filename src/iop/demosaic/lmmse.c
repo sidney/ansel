@@ -44,6 +44,7 @@
    The default is now 2 times slower than RCD and 2 times faster than AMaZE
 */
 
+
 #ifndef LMMSE_GRP
   #define LMMSE_GRP 136
 #endif
@@ -280,7 +281,7 @@ static void lmmse_demosaic(dt_dev_pixelpipe_iop_t *piece, float *const restrict 
             float p8 = hlp[ 3];
             float p9 = hlp[ 4];
             float mu = (p1 + p2 + p3 + p4 + p5 + p6 + p7 + p8 + p9) / 9.0f;
-            float vx = 1e-7f + sqrf(p1 - mu) + sqrf(p2 - mu) + sqrf(p3 - mu) + sqrf(p4 - mu) + sqrf(p5 - mu) + sqrf(p6 - mu) + sqrf(p7 - mu) + sqrf(p8 - mu) + sqrf(p9 - mu);
+            float vx = 1e-7f + sqf(p1 - mu) + sqf(p2 - mu) + sqf(p3 - mu) + sqf(p4 - mu) + sqf(p5 - mu) + sqf(p6 - mu) + sqf(p7 - mu) + sqf(p8 - mu) + sqf(p9 - mu);
             p1 -= hdiff[-4];
             p2 -= hdiff[-3];
             p3 -= hdiff[-2];
@@ -290,7 +291,7 @@ static void lmmse_demosaic(dt_dev_pixelpipe_iop_t *piece, float *const restrict 
             p7 -= hdiff[ 2];
             p8 -= hdiff[ 3];
             p9 -= hdiff[ 4];
-            float vn = 1e-7f + sqrf(p1) + sqrf(p2) + sqrf(p3) + sqrf(p4) + sqrf(p5) + sqrf(p6) + sqrf(p7) + sqrf(p8) + sqrf(p9);
+            float vn = 1e-7f + sqf(p1) + sqf(p2) + sqf(p3) + sqf(p4) + sqf(p5) + sqf(p6) + sqf(p7) + sqf(p8) + sqf(p9);
             float xh = (hdiff[0] * vx + hlp[0] * vn) / (vx + vn);
             float vh = vx * vn / (vx + vn);
 
@@ -305,7 +306,7 @@ static void lmmse_demosaic(dt_dev_pixelpipe_iop_t *piece, float *const restrict 
             p8 = vlp[ w3];
             p9 = vlp[ w4];
             mu = (p1 + p2 + p3 + p4 + p5 + p6 + p7 + p8 + p9) / 9.0f;
-            vx = 1e-7f + sqrf(p1 - mu) + sqrf(p2 - mu) + sqrf(p3 - mu) + sqrf(p4 - mu) + sqrf(p5 - mu) + sqrf(p6 - mu) + sqrf(p7 - mu) + sqrf(p8 - mu) + sqrf(p9 - mu);
+            vx = 1e-7f + sqf(p1 - mu) + sqf(p2 - mu) + sqf(p3 - mu) + sqf(p4 - mu) + sqf(p5 - mu) + sqf(p6 - mu) + sqf(p7 - mu) + sqf(p8 - mu) + sqf(p9 - mu);
             p1 -= vdiff[-w4];
             p2 -= vdiff[-w3];
             p3 -= vdiff[-w2];
@@ -315,7 +316,7 @@ static void lmmse_demosaic(dt_dev_pixelpipe_iop_t *piece, float *const restrict 
             p7 -= vdiff[ w2];
             p8 -= vdiff[ w3];
             p9 -= vdiff[ w4];
-            vn = 1e-7f + sqrf(p1) + sqrf(p2) + sqrf(p3) + sqrf(p4) + sqrf(p5) + sqrf(p6) + sqrf(p7) + sqrf(p8) + sqrf(p9);
+            vn = 1e-7f + sqf(p1) + sqf(p2) + sqf(p3) + sqf(p4) + sqf(p5) + sqf(p6) + sqf(p7) + sqf(p8) + sqf(p9);
             float xv = (vdiff[0] * vx + vlp[0] * vn) / (vx + vn);
             float vv = vx * vn / (vx + vn);
             // interpolated G-R(B)
@@ -594,9 +595,9 @@ static void lmmse_demosaic(dt_dev_pixelpipe_iop_t *piece, float *const restrict 
 #undef w2
 #undef w3
 #undef w4
+
 // clang-format off
 // modelines: These editor modelines have been set for all relevant files by tools/update_modelines.py
 // vim: shiftwidth=2 expandtab tabstop=2 cindent
 // kate: tab-indents: off; indent-width 2; replace-tabs on; indent-mode cstyle; remove-trailing-spaces modified;
 // clang-format on
-
