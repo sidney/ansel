@@ -117,7 +117,7 @@ jobs:
           submodules: true
           path: src
       - name: Update lensfun data for root
-        if: ${{ success() }}
+        if: ${{ false }} #${{ success() }} re-enable when lensfun servers renew the SSL certificate
         run: |
           sudo lensfun-update-data
       - name: Build and Install
