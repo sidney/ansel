@@ -1991,6 +1991,10 @@ static void _accel_select_untouched(dt_action_t *action)
 {
   dt_selection_select_unaltered(darktable.selection);
 }
+static void _accel_select_range(dt_action_t *action)
+{
+  dt_selection_select_range(darktable.selection, dt_control_get_mouse_over_id());
+}
 
 // init all accels
 static void _thumbtable_init_accels()
@@ -2013,6 +2017,7 @@ static void _thumbtable_init_accels()
   dt_action_register(thumb_actions, N_("invert selection"), _accel_select_invert, GDK_KEY_i, GDK_CONTROL_MASK);
   dt_action_register(thumb_actions, N_("select film roll"), _accel_select_film, 0, 0);
   dt_action_register(thumb_actions, N_("select untouched"), _accel_select_untouched, 0, 0);
+  dt_action_register(thumb_actions, N_("select range"), _accel_select_range, GDK_BUTTON_PRESS, GDK_SHIFT_MASK);
 }
 
 static gboolean _filemanager_ensure_rowid_visibility(dt_thumbtable_t *table, int rowid)
