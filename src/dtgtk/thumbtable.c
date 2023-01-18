@@ -147,6 +147,7 @@ static int _thumb_get_imgid(int rowid)
   sqlite3_finalize(stmt);
   return id;
 }
+
 // get rowid from imgid
 static int _thumb_get_rowid(int imgid)
 {
@@ -404,11 +405,6 @@ static int _thumbs_load_needed(dt_thumbtable_t *table)
             sqlite3_column_int(stmt, 0), table->overlays,
             DT_THUMBNAIL_CONTAINER_LIGHTTABLE);
 
-        if(table->mode == DT_THUMBTABLE_MODE_FILMSTRIP)
-        {
-          thumb->single_click = TRUE;
-          thumb->sel_mode = DT_THUMBNAIL_SEL_MODE_MOD_ONLY;
-        }
         thumb->x = posx;
         thumb->y = posy;
         table->list = g_list_prepend(table->list, thumb);
@@ -459,11 +455,7 @@ static int _thumbs_load_needed(dt_thumbtable_t *table)
           (table->thumb_size, table->thumb_size, IMG_TO_FIT, sqlite3_column_int(stmt, 1),
            sqlite3_column_int(stmt, 0), table->overlays,
            DT_THUMBNAIL_CONTAINER_LIGHTTABLE);
-        if(table->mode == DT_THUMBTABLE_MODE_FILMSTRIP)
-        {
-          thumb->single_click = TRUE;
-          thumb->sel_mode = DT_THUMBNAIL_SEL_MODE_MOD_ONLY;
-        }
+
         thumb->x = posx;
         thumb->y = posy;
         table->list = g_list_append(table->list, thumb);
@@ -841,24 +833,12 @@ static gboolean _event_enter_notify(GtkWidget *widget, GdkEventCrossing *event, 
 
 static gboolean _event_button_press(GtkWidget *widget, GdkEventButton *event, gpointer user_data)
 {
-  dt_thumbtable_t *table = (dt_thumbtable_t *)user_data;
-  const dt_view_manager_t *vm = darktable.view_manager;
-  dt_view_t *view = vm->current_view;
   const int id = dt_control_get_mouse_over_id();
 
   if(id > 0 && event->button == 1
-     && (table->mode == DT_THUMBTABLE_MODE_FILEMANAGER)
      && event->type == GDK_2BUTTON_PRESS)
   {
     dt_view_manager_switch(darktable.view_manager, "darkroom");
-  }
-  else if(id > 0
-          && event->button == 1 &&
-          table->mode == DT_THUMBTABLE_MODE_FILMSTRIP
-          && event->type == GDK_BUTTON_PRESS
-          && strcmp(view->module_name, "map")
-          && dt_modifier_is(event->state, 0))
-  {
     DT_DEBUG_CONTROL_SIGNAL_RAISE(darktable.signals, DT_SIGNAL_VIEWMANAGER_THUMBTABLE_ACTIVATE, id);
   }
 
@@ -1736,11 +1716,6 @@ void dt_thumbtable_full_redraw(dt_thumbtable_t *table, gboolean force)
         dt_thumbnail_t *thumb
             = dt_thumbnail_new(table->thumb_size, table->thumb_size, IMG_TO_FIT, nid, nrow, table->overlays,
                                DT_THUMBNAIL_CONTAINER_LIGHTTABLE);
-        if(table->mode == DT_THUMBTABLE_MODE_FILMSTRIP)
-        {
-          thumb->single_click = TRUE;
-          thumb->sel_mode = DT_THUMBNAIL_SEL_MODE_MOD_ONLY;
-        }
         thumb->x = posx;
         thumb->y = posy;
         newlist = g_list_prepend(newlist, thumb);
@@ -1837,18 +1812,12 @@ void dt_thumbtable_set_parent(dt_thumbtable_t *table, GtkWidget *new_parent, dt_
     }
 
     // we set selection/activation properties of all thumbs
-    dt_thumbnail_selection_mode_t sel_mode = DT_THUMBNAIL_SEL_MODE_NORMAL;
-    gboolean single_click = FALSE;
-    if(mode == DT_THUMBTABLE_MODE_FILMSTRIP)
-    {
-      sel_mode = DT_THUMBNAIL_SEL_MODE_MOD_ONLY;
-      single_click = TRUE;
-    }
+    // In filmstrip view, the overlay controls are too small to be
+    // usable, so we remove actions on them to prevent accidents.
     for(const GList *l = table->list; l; l = g_list_next(l))
     {
-      dt_thumbnail_t *th = (dt_thumbnail_t *)l->data;
-      th->sel_mode = sel_mode;
-      th->single_click = single_click;
+      dt_thumbnail_t *thumb = (dt_thumbnail_t *)l->data;
+      thumb->disable_actions = (mode == DT_THUMBTABLE_MODE_FILMSTRIP);
     }
 
     table->mode = mode;

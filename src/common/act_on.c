@@ -113,22 +113,10 @@ static gboolean _test_cache(dt_act_on_cache_t *cache)
 gboolean _cache_update(const gboolean only_visible, const gboolean force, const gboolean ordered)
 {
   /** Here's how it works
-   *
-   *             mouse over| x | x | x |   |   |
-   *     mouse inside table| x | x |   |   |   |
-   * mouse inside selection| x |   |   |   |   |
-   *          active images| ? | ? | x |   | x |
-   *                       |   |   |   |   |   |
-   *                       | S | O | O | S | A |
-   *  S = selection ; O = mouseover ; A = active images
-   *  the mouse can be outside thumbtable in case of filmstrip + mouse in center widget
-   *
    *  if only_visible is FALSE, then it will add also not visible images because of grouping
-   *  force define if we try to use cache or not
+   *  force define if we try to use cache or force a refresh
    *  if ordered is TRUE, we return the list in the gui order. Otherwise the order is undefined (but quicker)
    **/
-
-  const int mouseover = dt_control_get_mouse_over_id();
 
   dt_act_on_cache_t *cache;
   if(only_visible)
@@ -136,18 +124,20 @@ gboolean _cache_update(const gboolean only_visible, const gboolean force, const 
   else
     cache = &darktable.view_manager->act_on_cache_all;
 
-  // if possible, we return the cached list
+  // Return the cached list if we don't force-refresh
   if(!force && cache->ordered == ordered && _test_cache(cache))
   {
     return FALSE;
   }
 
-  GList *l = NULL;
-  gboolean inside_sel = FALSE;
-  // column 4,5
+  // Selection are images having been toggled explicitly
+  GList *l = dt_selection_get_list(darktable.selection, only_visible, ordered);
+
+  // Active images are the single image being processed in darkroom
+  // or the images being culled in culling view. We don't always have them.
+  // Treat them as an higher level of selection.
   if(darktable.view_manager->active_images)
   {
-    // column 5
     for(GSList *ll = darktable.view_manager->active_images; ll; ll = g_slist_next(ll))
     {
       const int id = GPOINTER_TO_INT(ll->data);
@@ -157,17 +147,10 @@ gboolean _cache_update(const gboolean only_visible, const gboolean force, const 
       if(!only_visible) _insert_in_list(&l, id, TRUE);
     }
   }
-  else
-  {
-    // column 4
-    // we return the list of the selection
-    l = dt_selection_get_list(darktable.selection, only_visible, ordered);
-  }
 
   // let's register the new list as cached
-  cache->image_over_inside_sel = inside_sel;
   cache->ordered = ordered;
-  cache->image_over = mouseover;
+  cache->image_over = dt_control_get_mouse_over_id();
   GList *ltmp = cache->images;
   cache->images = l;
   g_list_free(ltmp);

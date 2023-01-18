@@ -714,10 +714,7 @@ static gboolean _event_main_motion(GtkWidget *widget, GdkEventMotion *event, gpo
 static gboolean _event_main_press(GtkWidget *widget, GdkEventButton *event, gpointer user_data)
 {
   dt_thumbnail_t *thumb = (dt_thumbnail_t *)user_data;
-  if(event->button == 1
-     && ((event->type == GDK_2BUTTON_PRESS && !thumb->single_click)
-         || (event->type == GDK_BUTTON_PRESS
-             && dt_modifier_is(event->state, 0) && thumb->single_click)))
+  if(event->button == 1 && event->type == GDK_2BUTTON_PRESS)
   {
     dt_control_set_mouse_over_id(thumb->imgid); // to ensure we haven't lost imgid during double-click
   }
@@ -727,11 +724,9 @@ static gboolean _event_main_release(GtkWidget *widget, GdkEventButton *event, gp
 {
   dt_thumbnail_t *thumb = (dt_thumbnail_t *)user_data;
 
-  if(event->button == 1 && !thumb->moved && thumb->sel_mode != DT_THUMBNAIL_SEL_MODE_DISABLED)
+  if(event->button == 1 && !thumb->moved)
   {
-    if(dt_modifier_is(event->state, 0) && thumb->sel_mode != DT_THUMBNAIL_SEL_MODE_MOD_ONLY)
-      dt_selection_select_single(darktable.selection, thumb->imgid);
-    else if(dt_modifier_is(event->state, GDK_MOD1_MASK))
+    if(dt_modifier_is(event->state, 0))
       dt_selection_select_single(darktable.selection, thumb->imgid);
     else if(dt_modifier_is(event->state, GDK_CONTROL_MASK))
       dt_selection_toggle(darktable.selection, thumb->imgid);

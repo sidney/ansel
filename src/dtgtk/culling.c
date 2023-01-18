@@ -1207,7 +1207,6 @@ static gboolean _thumbs_recreate_list_at(dt_culling_t *table, const int offset)
                                  DT_THUMBNAIL_CONTAINER_CULLING);
 
       thumb->display_focus = table->focus;
-      thumb->sel_mode = DT_THUMBNAIL_SEL_MODE_DISABLED;
       float aspect_ratio = sqlite3_column_double(stmt, 2);
       if(!aspect_ratio || aspect_ratio < 0.0001f)
       {
@@ -1285,7 +1284,6 @@ static gboolean _thumbs_recreate_list_at(dt_culling_t *table, const int offset)
                                      DT_THUMBNAIL_CONTAINER_CULLING);
 
           thumb->display_focus = table->focus;
-          thumb->sel_mode = DT_THUMBNAIL_SEL_MODE_DISABLED;
           float aspect_ratio = sqlite3_column_double(stmt, 2);
           if(!aspect_ratio || aspect_ratio < 0.0001f)
           {
