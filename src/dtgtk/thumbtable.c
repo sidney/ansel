@@ -834,12 +834,16 @@ static gboolean _event_enter_notify(GtkWidget *widget, GdkEventCrossing *event, 
 static gboolean _event_button_press(GtkWidget *widget, GdkEventButton *event, gpointer user_data)
 {
   const int id = dt_control_get_mouse_over_id();
+  dt_thumbtable_t *table = (dt_thumbtable_t *)user_data;
 
-  if(id > 0 && event->button == 1
-     && event->type == GDK_2BUTTON_PRESS)
+  if(id > 0 && event->button == 1 && event->type == GDK_2BUTTON_PRESS)
   {
-    dt_view_manager_switch(darktable.view_manager, "darkroom");
-    DT_DEBUG_CONTROL_SIGNAL_RAISE(darktable.signals, DT_SIGNAL_VIEWMANAGER_THUMBTABLE_ACTIVATE, id);
+    if(table->mode == DT_THUMBTABLE_MODE_FILEMANAGER)
+      dt_view_manager_switch(darktable.view_manager, "darkroom");
+    else if(table->mode == DT_THUMBTABLE_MODE_FILMSTRIP)
+      DT_DEBUG_CONTROL_SIGNAL_RAISE(darktable.signals, DT_SIGNAL_VIEWMANAGER_THUMBTABLE_ACTIVATE, id);
+    else
+      ; // shit happened, we should never reach that branch
   }
 
   if(event->button == 1 && event->type == GDK_BUTTON_PRESS)
