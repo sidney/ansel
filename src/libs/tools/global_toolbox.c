@@ -146,22 +146,6 @@ static char *get_help_url(GtkWidget *widget)
   return NULL;
 }
 
-static char *_get_base_url()
-{
-  const gboolean use_default_url =
-    dt_conf_get_bool("context_help/use_default_url");
-  const char *c_base_url = dt_confgen_get("context_help/url", DT_DEFAULT);
-  char *base_url = dt_conf_get_string("context_help/url");
-
-  if(use_default_url)
-  {
-    // want to use default URL, reset anselrc
-    dt_conf_set_string("context_help/url", c_base_url);
-    return g_strdup(c_base_url);
-  }
-  else
-    return base_url;
-}
 
 static void _main_do_event_help(GdkEvent *event, gpointer data)
 {
@@ -181,122 +165,33 @@ static void _main_do_event_help(GdkEvent *event, gpointer data)
           break;
 
         // TODO: When the widget doesn't have a help url set we should probably look at the parent(s)
+        // Note : help url contains the fully-formed URL adapted to current language
         gchar *help_url = get_help_url(event_widget);
         if(help_url && *help_url)
         {
           GtkWidget *win = dt_ui_main_window(darktable.gui->ui);
           dt_print(DT_DEBUG_CONTROL, "[context help] opening `%s'\n", help_url);
-          char *base_url = _get_base_url();
 
-          // The base_url is: docs.darktable.org/usermanual
-          // The full format for the documentation pages is:
-          //    <base-url>/<ver>/<lang>[/path/to/page]
-          // Where:
-          //   <ver>  = development | 3.6 | 3.8 ...
-          //   <lang> = en / fr ...              (default = en)
-
-          // in case of a standard release, append the dt version to the url
-          if(dt_is_dev_version())
-          {
-            base_url = dt_util_dstrcat(base_url, "development/");
-          }
-          else
-          {
-            char *ver = dt_version_major_minor();
-            base_url = dt_util_dstrcat(base_url, "%s/", ver);
-            g_free(ver);
-          }
-
-          char *last_base_url = dt_conf_get_string("context_help/last_url");
-
-          // if url is https://www.darktable.org/usermanual/,
-          // it is the old deprecated url and we need to update it
-          if(!last_base_url
-             || !*last_base_url
-             || (strcmp(base_url, last_base_url) != 0))
-          {
-            g_free(last_base_url);
-            last_base_url = base_url;
-
-            // ask the user if darktable.org may be accessed
-            GtkWidget *dialog = gtk_message_dialog_new
-              (GTK_WINDOW(win), GTK_DIALOG_DESTROY_WITH_PARENT,
-               GTK_MESSAGE_QUESTION, GTK_BUTTONS_YES_NO,
-               _("do you want to access `%s'?"), last_base_url);
+          // ask the user if the website may be accessed
+          GtkWidget *dialog = gtk_message_dialog_new
+            (GTK_WINDOW(win), GTK_DIALOG_DESTROY_WITH_PARENT,
+              GTK_MESSAGE_QUESTION, GTK_BUTTONS_YES_NO,
+              _("do you want to access ansel.photos ?"));
 #ifdef GDK_WINDOWING_QUARTZ
             dt_osx_disallow_fullscreen(dialog);
 #endif
 
-            gtk_window_set_title(GTK_WINDOW(dialog), _("access the online usermanual?"));
-            const gint res = gtk_dialog_run(GTK_DIALOG(dialog));
-            gtk_widget_destroy(dialog);
-            if(res == GTK_RESPONSE_YES)
-            {
-              dt_conf_set_string("context_help/last_url", last_base_url);
-            }
-            else
-            {
-              g_free(base_url);
-              base_url = NULL;
-            }
-          }
-          if(base_url)
+          gtk_window_set_title(GTK_WINDOW(dialog), _("access the online usermanual?"));
+          const gint res = gtk_dialog_run(GTK_DIALOG(dialog));
+          const gboolean open = (res == GTK_RESPONSE_YES);
+          gtk_widget_destroy(dialog);
+
+          if(open)
           {
-            char *lang = "en";
-            GError *error = NULL;
-
-            // array of languages the usermanual supports.
-            // NULL MUST remain the last element of the array
-            const char *supported_languages[] =
-              { "en", "fr", "de", "eo", "es", "gl", "it", "pl", "pt-br", "uk", NULL };
-            int lang_index = 0;
-            gboolean is_language_supported = FALSE;
-
-            if(darktable.l10n != NULL)
-            {
-              dt_l10n_language_t *language = NULL;
-              if(darktable.l10n->selected != -1)
-                  language = (dt_l10n_language_t *)g_list_nth(darktable.l10n->languages, darktable.l10n->selected)->data;
-              if (language != NULL)
-                lang = language->code;
-              while(supported_languages[lang_index])
-              {
-                gchar *nlang = g_strdup(lang);
-
-                // try lang as-is
-                if(!g_ascii_strcasecmp(nlang, supported_languages[lang_index]))
-                {
-                  is_language_supported = TRUE;
-                }
-
-                if(!is_language_supported)
-                {
-                  // keep only first part up to _
-                  for(gchar *p = nlang; *p; p++)
-                    if(*p == '_') *p = '\0';
-
-                  if(!g_ascii_strcasecmp(nlang, supported_languages[lang_index]))
-                  {
-                    is_language_supported = TRUE;
-                  }
-                }
-
-                g_free(nlang);
-                if(is_language_supported) break;
-
-                lang_index++;
-              }
-            }
-
-            // language not found, default to EN
-            if(!is_language_supported) lang_index = 0;
-
-            char *url = g_build_path("/", base_url, supported_languages[lang_index], help_url, NULL);
-
             // TODO: call the web browser directly so that file:// style base for local installs works
-            const gboolean uri_success = gtk_show_uri_on_window(GTK_WINDOW(win), url, gtk_get_current_event_time(), &error);
-            g_free(base_url);
-            g_free(url);
+            GError *error = NULL;
+            const gboolean uri_success = gtk_show_uri_on_window(GTK_WINDOW(win), help_url, gtk_get_current_event_time(), &error);
+
             if(uri_success)
             {
               dt_control_log(_("help url opened in web browser"));

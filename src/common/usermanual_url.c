@@ -17,6 +17,71 @@
 */
 
 #include "common/usermanual_url.h"
+#include "common/darktable.h"
+#include "common/l10n.h"
+
+
+// The base_url is: ansel.photos/
+// The full format for the documentation pages is:
+//    <base-url>/<lang>/doc[/path/to/page]
+// Where:
+//   <lang> = en / fr ...              (default = en)
+
+const char *base_url = "https://ansel.photos/";
+const char *doc_url = "doc/";
+
+
+const char *get_lang()
+{
+  char *lang = "en";
+
+  // array of languages the usermanual supports.
+  // NULL MUST remain the last element of the array
+  const char *supported_languages[] =
+    { "en", "fr", NULL };
+
+  int lang_index = 0;
+  gboolean is_language_supported = FALSE;
+
+  if(darktable.l10n != NULL)
+  {
+    dt_l10n_language_t *language = NULL;
+
+    if(darktable.l10n->selected != -1)
+        language = (dt_l10n_language_t *)g_list_nth(darktable.l10n->languages, darktable.l10n->selected)->data;
+
+    if (language != NULL)
+      lang = language->code;
+
+    while(supported_languages[lang_index])
+    {
+      gchar *nlang = g_strdup(lang);
+      is_language_supported = !g_ascii_strcasecmp(nlang, supported_languages[lang_index]);
+
+      if(!is_language_supported)
+      {
+        // keep only first part up to _
+        for(gchar *p = nlang; *p; p++)
+          if(*p == '_') *p = '\0';
+
+        if(!g_ascii_strcasecmp(nlang, supported_languages[lang_index]))
+        {
+          is_language_supported = TRUE;
+        }
+      }
+
+      g_free(nlang);
+      if(is_language_supported) break;
+
+      lang_index++;
+    }
+  }
+
+  // language not found, default to EN
+  if(!is_language_supported) lang_index = 0;
+
+  return supported_languages[lang_index];
+}
 
 typedef struct _help_url
 {
@@ -177,7 +242,8 @@ char *dt_get_help_url(char *name)
   if(name==NULL) return NULL;
 
   for(int k=0; k< sizeof(urls_db)/2/sizeof(char *); k++)
-    if(!strcmp(urls_db[k].name, name)) return urls_db[k].url;
+    if(!strcmp(urls_db[k].name, name))
+      return g_build_path("/", base_url, get_lang(), doc_url, urls_db[k].url, NULL);
 
   return NULL;
 }
