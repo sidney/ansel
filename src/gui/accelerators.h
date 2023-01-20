@@ -90,7 +90,6 @@ typedef enum dt_shortcut_flag_t
 {
   DT_SHORTCUT_LONG   = 1 << 0,
   DT_SHORTCUT_DOUBLE = 1 << 1,
-  DT_SHORTCUT_TRIPLE = 1 << 2,
   DT_SHORTCUT_LEFT   = 1 << 0,
   DT_SHORTCUT_MIDDLE = 1 << 1,
   DT_SHORTCUT_RIGHT  = 1 << 2,
@@ -195,4 +194,3 @@ GtkWidget *dt_action_button_new(dt_lib_module_t *self, const gchar *label, gpoin
 // vim: shiftwidth=2 expandtab tabstop=2 cindent
 // kate: tab-indents: off; indent-width 2; replace-tabs on; indent-mode cstyle; remove-trailing-spaces modified;
 // clang-format on
-

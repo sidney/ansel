@@ -532,7 +532,6 @@ static gchar *_shortcut_description(dt_shortcut_t *s)
 
   if(s->press & DT_SHORTCUT_LONG  ) add_hint(" %s", _("long"));
   if(s->press & DT_SHORTCUT_DOUBLE) add_hint(" %s", _("double-press")); else
-  if(s->press & DT_SHORTCUT_TRIPLE) add_hint(" %s", _("triple-press")); else
   if(s->press) add_hint(" %s", _("press"));
   if(s->button)
   {
@@ -541,9 +540,8 @@ static gchar *_shortcut_description(dt_shortcut_t *s)
     if(s->button & DT_SHORTCUT_RIGHT ) add_hint(" %s", C_("accel", "right"));
     if(s->button & DT_SHORTCUT_MIDDLE) add_hint(" %s", C_("accel", "middle"));
     if(s->click  & DT_SHORTCUT_LONG  ) add_hint(" %s", C_("accel", "long"));
-    if(s->click  & DT_SHORTCUT_DOUBLE) add_hint(" %s", C_("accel", "double-click")); else
-    if(s->click  & DT_SHORTCUT_TRIPLE) add_hint(" %s", C_("accel", "triple-click")); else
-      add_hint(" %s", _("click"));
+    if(s->click  & DT_SHORTCUT_DOUBLE) add_hint(" %s", C_("accel", "double-click"));
+    else add_hint(" %s", _("click"));
   }
 
   if(*move_name && (s->key_device || s->key))
@@ -2384,13 +2382,11 @@ static void _shortcuts_save(const gchar *shortcuts_file, const dt_input_device_t
       }
 
       if(s->press  & DT_SHORTCUT_DOUBLE ) fprintf(f, ";%s", "double");
-      if(s->press  & DT_SHORTCUT_TRIPLE ) fprintf(f, ";%s", "triple");
       if(s->press  & DT_SHORTCUT_LONG   ) fprintf(f, ";%s", "long");
       if(s->button & DT_SHORTCUT_LEFT   ) fprintf(f, ";%s", "left");
       if(s->button & DT_SHORTCUT_MIDDLE ) fprintf(f, ";%s", "middle");
       if(s->button & DT_SHORTCUT_RIGHT  ) fprintf(f, ";%s", "right");
       if(s->click  & DT_SHORTCUT_DOUBLE ) fprintf(f, ";%s", "double");
-      if(s->click  & DT_SHORTCUT_TRIPLE ) fprintf(f, ";%s", "triple");
       if(s->click  & DT_SHORTCUT_LONG   ) fprintf(f, ";%s", "long");
 
       fprintf(f, "=");
@@ -2590,13 +2586,11 @@ static void _shortcuts_load(const gchar *shortcuts_file, dt_input_device_t file_
             if(s.button)
             {
               if(!strcmp(token, "double")) { s.click |= DT_SHORTCUT_DOUBLE; continue; }
-              if(!strcmp(token, "triple")) { s.click |= DT_SHORTCUT_TRIPLE; continue; }
               if(!strcmp(token, "long"  )) { s.click |= DT_SHORTCUT_LONG  ; continue; }
             }
             else
             {
               if(!strcmp(token, "double")) { s.press |= DT_SHORTCUT_DOUBLE; continue; }
-              if(!strcmp(token, "triple")) { s.press |= DT_SHORTCUT_TRIPLE; continue; }
               if(!strcmp(token, "long"  )) { s.press |= DT_SHORTCUT_LONG  ; continue; }
             }
 
@@ -3452,8 +3446,7 @@ void dt_shortcut_key_press(dt_input_device_t id, guint time, guint key)
     if((id || key)
         && id == _sc.key_device
         && key == _sc.key
-        && time < _last_time + delay
-        && !(_sc.press & DT_SHORTCUT_TRIPLE))
+        && time < _last_time + delay)
     {
       _interrupt_delayed_release(FALSE);
       _sc.press += DT_SHORTCUT_DOUBLE;
@@ -3527,8 +3520,6 @@ static void _delay_for_double_triple(guint time, guint is_key)
     dt_control_log("short key press resets stuck keys");
     return;
   }
-  else if((is_key ? _sc.press : _sc.click) & DT_SHORTCUT_TRIPLE)
-    passed_time += delay;
   else if(!_sc.action) // in mapping mode always wait for double/triple
   {
     // detect if any double or triple press shortcuts exist for this key; otherwise skip delay
@@ -3807,9 +3798,6 @@ gboolean dt_shortcut_dispatcher(GtkWidget *w, GdkEvent *event, gpointer user_dat
     break;
   case GDK_DOUBLE_BUTTON_PRESS:
     _sc.click |= DT_SHORTCUT_DOUBLE;
-    break;
-  case GDK_TRIPLE_BUTTON_PRESS:
-    _sc.click |= DT_SHORTCUT_TRIPLE;
     break;
   case GDK_BUTTON_RELEASE:
     _pressed_button &= ~(1 << (event->button.button - 1));
