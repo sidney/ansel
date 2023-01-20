@@ -160,7 +160,12 @@ const dt_action_element_def_t _action_elements_button[]
 const dt_action_element_def_t _action_elements_value_fallback[]
   = { { NULL, dt_action_effect_value } };
 
-static float _action_process_toggle(gpointer target, dt_action_element_t element, dt_action_effect_t effect, float move_size)
+void _cleanup_mods(dt_shortcut_t *s, gint keycode, gint level);
+static GdkModifierType _mods_fix_primary(GdkModifierType mods);
+
+
+static float _action_process_toggle(gpointer target, dt_action_element_t element, dt_action_effect_t effect,
+                                    float move_size)
 {
   float value = gtk_toggle_button_get_active(target);
 
@@ -3681,14 +3686,56 @@ static guint _key_remap(guint keyval)
   return keyval;
 }
 
-static guint _fix_keyval(GdkEvent *event)
+static guint _fix_keyval(GdkEvent *event, guint *mods)
 {
   guint keyval = 0;
   GdkKeymap *keymap = gdk_keymap_get_for_display(gdk_display_get_default());
-  gdk_keymap_translate_keyboard_state(keymap, event->key.hardware_keycode,
-                                      event->key.state, event->key.group, // this ensures that numlock or shift are properly decoded
-                                      &keyval, NULL, NULL, NULL);
+  GdkModifierType consumed;
+  *mods = _mods_fix_primary(*mods);
+
+  // Use the system keymap to decode key + modifier to a character
+  gdk_keymap_translate_keyboard_state(keymap, event->key.hardware_keycode, event->key.state,
+                                      event->key.group, // this ensures that numlock or shift are properly decoded
+                                      &keyval, NULL, NULL, &consumed);
+
+  // Remove the consumed modifiers for numbers, typically Shift
+  // Note : for French keyboards, numbers are accessed through Shift. E.g Shift + & = 1
+  if(gdk_keyval_to_lower(keyval) == gdk_keyval_to_upper(keyval))
+    *mods &= ~consumed;
+
+  // Remap numpad keys to their regular equivalent because we don't care what actual key was pushed
   return _key_remap(keyval);
+}
+
+void _cleanup_mods(dt_shortcut_t *s, gint keycode, gint level)
+{
+  /*
+   * Decode the combination of key + modifiers using the system keymap
+   * Dispatch modifiers properly for later internal handling.
+   */
+
+  GdkKeymap *keymap = gdk_keymap_get_for_display(gdk_display_get_default());
+
+  // Remove the Ctrl modifier for some reason ???
+  s->mods = _mods_fix_primary(s->mods);
+
+  // For uppercase characters, we need to restore the shift mask
+  if(level & 1) s->mods |= GDK_SHIFT_MASK;
+
+  // For special characters, we need to restore the AltGr mask
+  if(level & 2) s->mods |= GDK_MOD5_MASK;
+
+  // Use the system keymap to decode key + modifier to a character
+  GdkModifierType consumed;
+  gdk_keymap_translate_keyboard_state(keymap, keycode, s->mods, 0, &s->key, NULL, NULL, &consumed);
+
+  // Remap numpad keys to their regular equivalent because we don't care what actual key was pushed
+  s->key = _key_remap(s->key);
+
+  // Remove the consumed modifiers for numbers, typically Shift
+  // Note : for French keyboards, numbers are accessed through Shift. E.g Shift + & = 1
+  if(gdk_keyval_to_lower(s->key) == gdk_keyval_to_upper(s->key))
+    s->mods &= ~consumed;
 }
 
 gboolean dt_shortcut_dispatcher(GtkWidget *w, GdkEvent *event, gpointer user_data)
@@ -3767,7 +3814,7 @@ gboolean dt_shortcut_dispatcher(GtkWidget *w, GdkEvent *event, gpointer user_dat
 
     _sc.mods = _key_modifiers_clean(event->key.state);
 
-    dt_shortcut_key_press(DT_SHORTCUT_DEVICE_KEYBOARD_MOUSE, event->key.time, _fix_keyval(event));
+    dt_shortcut_key_press(DT_SHORTCUT_DEVICE_KEYBOARD_MOUSE, event->key.time, _fix_keyval(event, &_sc.mods));
     break;
   case GDK_KEY_RELEASE:
     if(event->key.is_modifier || event->key.keyval == GDK_KEY_ISO_Level3_Shift)
@@ -3781,7 +3828,7 @@ gboolean dt_shortcut_dispatcher(GtkWidget *w, GdkEvent *event, gpointer user_dat
       return FALSE;
     }
 
-    dt_shortcut_key_release(DT_SHORTCUT_DEVICE_KEYBOARD_MOUSE, event->key.time, _fix_keyval(event));
+    dt_shortcut_key_release(DT_SHORTCUT_DEVICE_KEYBOARD_MOUSE, event->key.time, _fix_keyval(event, &_sc.mods));
     break;
   case GDK_GRAB_BROKEN:
     if(!event->grab_broken.implicit)
@@ -4120,11 +4167,6 @@ void dt_shortcut_register(dt_action_t *owner, guint element, guint effect, guint
     // find the first key in group 0, if any
     while(i < n_keys - 1 && (keys[i].group > 0 || keys[i].level > 1)) i++;
 
-    if(keys[i].level & 1) mods |= GDK_SHIFT_MASK;
-    if(keys[i].level & 2) mods |= GDK_MOD5_MASK;
-
-    mods = _mods_fix_primary(mods);
-
     dt_shortcut_t s = { .key_device = DT_SHORTCUT_DEVICE_KEYBOARD_MOUSE,
                         .mods = mods,
                         .speed = 1.0,
@@ -4132,11 +4174,7 @@ void dt_shortcut_register(dt_action_t *owner, guint element, guint effect, guint
                         .element = element,
                         .effect = effect };
 
-    GdkModifierType consumed;
-    gdk_keymap_translate_keyboard_state(keymap, keys[i].keycode, mods, 0, &s.key, NULL, NULL,  &consumed);
-    s.mods &= ~consumed;
-    s.key = _key_remap(s.key);
-
+    _cleanup_mods(&s, keys[i].keycode, keys[i].level);
     _insert_shortcut(&s, FALSE);
 
     g_free(keys);
