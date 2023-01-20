@@ -810,10 +810,11 @@ static void _accel_select_toggle(dt_action_t *action)
   dt_selection_toggle(darktable.selection, id);
 }
 
-static void _accel_select_single(dt_action_t *action)
+static void _accel_open_single(dt_action_t *action)
 {
   const int32_t id = dt_control_get_mouse_over_id();
   dt_selection_select_single(darktable.selection, id);
+  if(id > 0) dt_view_manager_switch(darktable.view_manager, "darkroom");
 }
 
 GSList *mouse_actions(const dt_view_t *self)
@@ -1072,7 +1073,7 @@ void gui_init(dt_view_t *self)
 
   dt_action_register(DT_ACTION(self), N_("reset first image offset"), _accel_reset_first_offset, 0, 0);
   dt_action_register(DT_ACTION(self), N_("select toggle image"), _accel_select_toggle, GDK_KEY_space, 0);
-  dt_action_register(DT_ACTION(self), N_("select single image"), _accel_select_single, GDK_KEY_Return, 0);
+  dt_action_register(DT_ACTION(self), N_("open single image in darkroom"), _accel_open_single, GDK_KEY_Return, 0);
 
   // undo/redo
   dt_action_register(DT_ACTION(self), N_("undo"), _lighttable_undo_callback, GDK_KEY_z, GDK_CONTROL_MASK);
