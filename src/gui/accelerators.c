@@ -3597,6 +3597,90 @@ gboolean dt_shortcut_key_active(dt_input_device_t id, guint key)
   return fmodf(value, 1) <= DT_VALUE_PATTERN_ACTIVE || fmodf(value, 2) > .5;
 }
 
+static guint _key_remap(guint keyval)
+{
+  // Force keypad alternatives to be treated based on their meaning instead of their position on keyboard.
+  // We don't care **where** the input is made, we care **what** input is made.
+  // This makes numeric keys and other keypad keys behave like the typical keys.
+  switch(keyval)
+  {
+    // Numbers
+    case(GDK_KEY_KP_0):
+      return GDK_KEY_0;
+    case(GDK_KEY_KP_1):
+      return GDK_KEY_1;
+    case(GDK_KEY_KP_2):
+      return GDK_KEY_2;
+    case(GDK_KEY_KP_3):
+      return GDK_KEY_3;
+    case(GDK_KEY_KP_4):
+      return GDK_KEY_4;
+    case(GDK_KEY_KP_5):
+      return GDK_KEY_5;
+    case(GDK_KEY_KP_6):
+      return GDK_KEY_6;
+    case(GDK_KEY_KP_7):
+      return GDK_KEY_7;
+    case(GDK_KEY_KP_8):
+      return GDK_KEY_8;
+    case(GDK_KEY_KP_9):
+      return GDK_KEY_9;
+
+    // Algebra
+    case(GDK_KEY_KP_Add):
+      return GDK_KEY_plus;
+    case(GDK_KEY_KP_Subtract):
+      return GDK_KEY_minus;
+    case(GDK_KEY_KP_Divide):
+      return GDK_KEY_slash;
+    case(GDK_KEY_KP_Multiply):
+      return GDK_KEY_asterisk;
+    case(GDK_KEY_KP_Equal):
+      return GDK_KEY_equal;
+    // Note : don't remap the decimal key because it can be interprated as . or ,
+    // depending on locale and it seems to be already decoded properly as dot by GDK.
+
+    // Controls
+    case(GDK_KEY_KP_Enter):
+      return GDK_KEY_Return;
+    case(GDK_KEY_KP_Insert):
+      return GDK_KEY_Insert;
+    case(GDK_KEY_KP_Delete):
+      return GDK_KEY_Delete;
+
+    // Navigation
+    case(GDK_KEY_KP_Begin):
+      return GDK_KEY_Begin;
+    case(GDK_KEY_KP_End):
+      return GDK_KEY_End;
+    case(GDK_KEY_KP_Home):
+      return GDK_KEY_Home;
+    case(GDK_KEY_KP_Page_Down):
+      return GDK_KEY_Page_Down;
+    case(GDK_KEY_KP_Page_Up):
+      return GDK_KEY_Page_Up;
+    case(GDK_KEY_KP_Left):
+      return GDK_KEY_Left;
+    case(GDK_KEY_KP_Right):
+      return GDK_KEY_Right;
+    case(GDK_KEY_KP_Up):
+      return GDK_KEY_Up;
+    case(GDK_KEY_KP_Down):
+      return GDK_KEY_Down;
+
+    // Spaces
+    case(GDK_KEY_KP_Tab):
+      return GDK_KEY_Tab;
+    case(GDK_KEY_KP_Space):
+      return GDK_KEY_space;
+
+    default:
+      return keyval;
+  }
+
+  return keyval;
+}
+
 static guint _fix_keyval(GdkEvent *event)
 {
   guint keyval = 0;
@@ -3604,7 +3688,7 @@ static guint _fix_keyval(GdkEvent *event)
   gdk_keymap_translate_keyboard_state(keymap, event->key.hardware_keycode,
                                       event->key.state, event->key.group, // this ensures that numlock or shift are properly decoded
                                       &keyval, NULL, NULL, NULL);
-  return keyval;
+  return _key_remap(keyval);
 }
 
 gboolean dt_shortcut_dispatcher(GtkWidget *w, GdkEvent *event, gpointer user_data)
@@ -4051,6 +4135,8 @@ void dt_shortcut_register(dt_action_t *owner, guint element, guint effect, guint
     GdkModifierType consumed;
     gdk_keymap_translate_keyboard_state(keymap, keys[i].keycode, mods, 0, &s.key, NULL, NULL,  &consumed);
     s.mods &= ~consumed;
+    s.key = _key_remap(s.key);
+
     _insert_shortcut(&s, FALSE);
 
     g_free(keys);

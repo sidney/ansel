@@ -1014,15 +1014,6 @@ int dt_gui_gtk_init(dt_gui_gtk_t *gui)
   dt_shortcut_register(ac, 5, 0, GDK_KEY_5, 0);
   dt_shortcut_register(ac, 6, 0, GDK_KEY_r, 0);
 
-  // Declare an alternative with keypad numbers because stupid Input NG treats numbers differently
-  dt_shortcut_register(ac, 0, 0, GDK_KEY_KP_0, 0);
-  dt_shortcut_register(ac, 1, 0, GDK_KEY_KP_1, 0);
-  dt_shortcut_register(ac, 2, 0, GDK_KEY_KP_2, 0);
-  dt_shortcut_register(ac, 3, 0, GDK_KEY_KP_3, 0);
-  dt_shortcut_register(ac, 4, 0, GDK_KEY_KP_4, 0);
-  dt_shortcut_register(ac, 5, 0, GDK_KEY_KP_5, 0);
-
-
   darktable.gui->reset = 0;
 
   // load theme
