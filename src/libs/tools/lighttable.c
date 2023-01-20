@@ -461,7 +461,7 @@ void gui_init(dt_lib_module_t *self)
 
   d->layout_preview = dtgtk_togglebutton_new(dtgtk_cairo_paint_lt_mode_fullpreview, 0, NULL);
   ac = dt_action_define(ltv, NULL, N_("toggle sticky preview mode"), d->layout_preview, NULL);
-  dt_action_register(ac, NULL, _lib_lighttable_key_accel_toggle_preview, GDK_KEY_f, 0);
+  dt_action_register(ac, NULL, _lib_lighttable_key_accel_toggle_preview, 0, 0);
   dt_gui_add_help_link(d->layout_preview, dt_get_help_url("layout_preview"));
   g_signal_connect(G_OBJECT(d->layout_preview), "button-release-event",
                    G_CALLBACK(_lib_lighttable_layout_btn_release), self);

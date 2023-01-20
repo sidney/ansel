@@ -2253,8 +2253,8 @@ void gui_init(dt_view_t *self)
   dt_action_register(DT_ACTION(self), N_("zoom out"), zoom_out_callback, GDK_KEY_minus, GDK_CONTROL_MASK);
 
   // Shortcut to skip images
-  dt_action_register(DT_ACTION(self), N_("image forward"), skip_f_key_accel_callback, GDK_KEY_space, 0);
-  dt_action_register(DT_ACTION(self), N_("image back"), skip_b_key_accel_callback, GDK_KEY_BackSpace, 0);
+  dt_action_register(DT_ACTION(self), N_("image forward"), skip_f_key_accel_callback, GDK_KEY_Right, GDK_CONTROL_MASK | GDK_SHIFT_MASK);
+  dt_action_register(DT_ACTION(self), N_("image back"), skip_b_key_accel_callback, GDK_KEY_Left, GDK_CONTROL_MASK | GDK_SHIFT_MASK);
 
   // cycle overlay colors
   dt_action_register(DT_ACTION(self), N_("cycle overlay colors"), _overlay_cycle_callback, GDK_KEY_o, GDK_CONTROL_MASK);
@@ -2279,7 +2279,7 @@ void gui_init(dt_view_t *self)
   dt_action_register(DT_ACTION(self), N_("redo"), _darkroom_redo_callback, GDK_KEY_y, GDK_CONTROL_MASK);
 
   // set focus to the search modules text box
-  dt_action_register(DT_ACTION(self), N_("search modules"), search_callback, 0, 0);
+  dt_action_register(DT_ACTION(self), N_("search modules"), search_callback, GDK_KEY_f, GDK_CONTROL_MASK);
 
   // change the precision for adjusting sliders with keyboard shortcuts
   dt_action_register(DT_ACTION(self), N_("change keyboard shortcut slider precision"), change_slider_accel_precision, 0, 0);

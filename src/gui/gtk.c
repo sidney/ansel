@@ -952,7 +952,7 @@ int dt_gui_gtk_init(dt_gui_gtk_t *gui)
   // specific top/bottom toggles
   dt_action_register(pnl, N_("all"), _toggle_side_borders_accel_callback, GDK_KEY_Tab, 0);
   dt_action_register(pnl, N_("header"), _toggle_header_accel_callback, GDK_KEY_h, GDK_CONTROL_MASK);
-  dt_action_register(pnl, N_("filmstrip"), _toggle_filmstrip_accel_callback, GDK_KEY_f, GDK_CONTROL_MASK);
+  dt_action_register(pnl, N_("filmstrip"), _toggle_filmstrip_accel_callback, GDK_KEY_f, GDK_CONTROL_MASK | GDK_SHIFT_MASK);
 
   dt_action_register(&darktable.control->actions_global, N_("reinitialise input devices"), dt_shortcuts_reinitialise, GDK_KEY_I, GDK_CONTROL_MASK | GDK_SHIFT_MASK | GDK_MOD1_MASK);
 
@@ -1009,7 +1009,7 @@ int dt_gui_gtk_init(dt_gui_gtk_t *gui)
   // toggle focus peaking everywhere
   ac = dt_action_define(&darktable.control->actions_global, NULL, N_("toggle focus peaking"),
                         darktable.gui->focus_peaking_button, &dt_action_def_toggle);
-  dt_shortcut_register(ac, 0, 0, GDK_KEY_f, GDK_CONTROL_MASK | GDK_SHIFT_MASK);
+  dt_shortcut_register(ac, 0, 0, GDK_KEY_p, GDK_CONTROL_MASK | GDK_SHIFT_MASK);
 
   return 0;
 }
