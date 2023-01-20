@@ -3244,7 +3244,7 @@ static guint _key_modifiers_clean(guint mods)
   GdkKeymap *keymap = gdk_keymap_get_for_display(gdk_display_get_default());
   mods &= GDK_SHIFT_MASK | GDK_CONTROL_MASK | GDK_MOD1_MASK | GDK_MOD5_MASK |
           gdk_keymap_get_modifier_mask(keymap, GDK_MODIFIER_INTENT_PRIMARY_ACCELERATOR);
-  return mods | dt_modifier_shortcuts;
+  return mods;
 }
 
 float dt_shortcut_move(dt_input_device_t id, guint time, guint move, double size)

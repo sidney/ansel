@@ -69,27 +69,12 @@ const dt_action_def_t dt_action_def_accels_show
       NULL, TRUE };
 
 
-GdkModifierType dt_modifier_shortcuts;
 
 static float _action_process_modifiers(gpointer target, dt_action_element_t element, dt_action_effect_t effect, float move_size)
 {
   GdkModifierType mask = 1;
   if(element) mask <<= element + 1; // ctrl = 4, alt = 8
-  if(!isnan(move_size))
-  {
-    if(dt_modifier_shortcuts & mask)
-    {
-      if(effect != DT_ACTION_EFFECT_ON)
-        dt_modifier_shortcuts &= ~mask;
-    }
-    else
-    {
-      if(effect != DT_ACTION_EFFECT_OFF)
-        dt_modifier_shortcuts |= mask;
-    }
-  }
-
-  return ((dt_modifier_shortcuts | dt_key_modifier_state()) & mask) != 0;
+  return (dt_key_modifier_state() & mask) != 0;
 }
 
 const dt_action_element_def_t _action_elements_modifiers[]
