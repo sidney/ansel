@@ -424,17 +424,6 @@ static void _lib_lighttable_key_accel_toggle_culling_zoom_mode(dt_action_t *acti
   _lib_lighttable_set_layout(self, DT_LIGHTTABLE_LAYOUT_CULLING_DYNAMIC);
 }
 
-static void _lib_lighttable_key_accel_exit_layout(dt_action_t *action)
-{
-  dt_lib_module_t *self = darktable.view_manager->proxy.lighttable.module;
-  dt_lib_tool_lighttable_t *d = (dt_lib_tool_lighttable_t *)self->data;
-
-  if(d->fullpreview)
-    _lib_lighttable_set_layout(self, d->layout);
-  else if(d->layout != d->base_layout)
-    _lib_lighttable_set_layout(self, d->base_layout);
-}
-
 void gui_init(dt_lib_module_t *self)
 {
   /* initialize ui widgets */
@@ -442,16 +431,8 @@ void gui_init(dt_lib_module_t *self)
   self->data = (void *)d;
 
   self->widget = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
-  d->layout = sanitize_lighttable_layout(dt_conf_get_int("plugins/lighttable/layout"));
-  d->base_layout = sanitize_lighttable_layout(dt_conf_get_int("plugins/lighttable/base_layout"));
-
-  if(d->layout == DT_LIGHTTABLE_LAYOUT_CULLING_DYNAMIC)
-  {
-    d->current_zoom = CLAMP(dt_collection_get_selected_count(darktable.collection), 1, DT_LIGHTTABLE_MAX_ZOOM);
-    if(d->current_zoom == 1) d->current_zoom = dt_conf_get_int("plugins/lighttable/culling_num_images");
-  }
-  else
-    d->current_zoom = dt_conf_get_int("plugins/lighttable/images_in_row");
+  d->layout = d->base_layout = sanitize_lighttable_layout(dt_conf_get_int("plugins/lighttable/base_layout"));
+  d->current_zoom = dt_conf_get_int("plugins/lighttable/images_in_row");
 
   // create the layouts icon list
   d->layout_box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
@@ -524,8 +505,6 @@ void gui_init(dt_lib_module_t *self)
                      GDK_KEY_less, 0);
   dt_action_register(ltv, N_("toggle sticky preview mode with focus detection"), _lib_lighttable_key_accel_toggle_preview_focus,
                      0, 0);
-  dt_action_register(ltv, N_("exit current layout"), _lib_lighttable_key_accel_exit_layout,
-                     GDK_KEY_Escape, 0);
 
    /* create the grouping button */
   d->grouping_button = dtgtk_togglebutton_new(dtgtk_cairo_paint_grouping, 0, NULL);
