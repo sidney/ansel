@@ -743,20 +743,6 @@ static gboolean _window_configure(GtkWidget *da, GdkEvent *event, gpointer user_
   return FALSE;
 }
 
-guint dt_gui_translated_key_state(GdkEventKey *event)
-{
-  if (gdk_keyval_to_lower(event->keyval) == gdk_keyval_to_upper(event->keyval) )
-  {
-    //not an alphabetic character
-    //find any modifiers consumed to produce keyval
-    guint consumed;
-    gdk_keymap_translate_keyboard_state(gdk_keymap_get_for_display(gdk_display_get_default()), event->hardware_keycode, event->state, event->group, NULL, NULL, NULL, &consumed);
-    return event->state & ~consumed & gtk_accelerator_get_default_mod_mask();
-  }
-  else
-    return event->state & gtk_accelerator_get_default_mod_mask();
-}
-
 static gboolean _button_pressed(GtkWidget *w, GdkEventButton *event, gpointer user_data)
 {
   /* Reset Gtk focus */
