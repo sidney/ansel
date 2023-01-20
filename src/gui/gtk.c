@@ -279,34 +279,14 @@ static void _panel_toggle(dt_ui_border_t border, dt_ui_t *ui)
 
     case DT_UI_BORDER_TOP: // top border
     {
-      const gboolean show_ct = _panel_is_visible(DT_UI_PANEL_CENTER_TOP);
-      const gboolean show_t = _panel_is_visible(DT_UI_PANEL_TOP);
-      // all visible => toolbar hidden => all hidden => toolbar visible => all visible
-      if(show_ct && show_t)
-        dt_ui_panel_show(ui, DT_UI_PANEL_CENTER_TOP, FALSE, TRUE);
-      else if(!show_ct && show_t)
-        dt_ui_panel_show(ui, DT_UI_PANEL_TOP, FALSE, TRUE);
-      else if(!show_ct && !show_t)
-        dt_ui_panel_show(ui, DT_UI_PANEL_CENTER_TOP, TRUE, TRUE);
-      else
-        dt_ui_panel_show(ui, DT_UI_PANEL_TOP, TRUE, TRUE);
+      dt_ui_panel_show(ui, DT_UI_PANEL_CENTER_TOP, !_panel_is_visible(DT_UI_PANEL_CENTER_TOP), TRUE);
     }
     break;
 
     case DT_UI_BORDER_BOTTOM: // bottom border
     default:
     {
-      const gboolean show_cb = _panel_is_visible(DT_UI_PANEL_CENTER_BOTTOM);
-      const gboolean show_b = _panel_is_visible(DT_UI_PANEL_BOTTOM);
-      // all visible => toolbar hidden => all hidden => toolbar visible => all visible
-      if(show_cb && show_b)
-        dt_ui_panel_show(ui, DT_UI_PANEL_CENTER_BOTTOM, FALSE, TRUE);
-      else if(!show_cb && show_b)
-        dt_ui_panel_show(ui, DT_UI_PANEL_BOTTOM, FALSE, TRUE);
-      else if(!show_cb && !show_b)
-        dt_ui_panel_show(ui, DT_UI_PANEL_CENTER_BOTTOM, TRUE, TRUE);
-      else
-        dt_ui_panel_show(ui, DT_UI_PANEL_BOTTOM, TRUE, TRUE);
+      dt_ui_panel_show(ui, DT_UI_PANEL_CENTER_BOTTOM, !_panel_is_visible(DT_UI_PANEL_CENTER_BOTTOM), TRUE);
     }
     break;
   }
@@ -350,18 +330,6 @@ static void _toggle_bottom_tool_accel_callback(dt_action_t *action)
 {
   dt_ui_panel_show(darktable.gui->ui, DT_UI_PANEL_CENTER_BOTTOM, !_panel_is_visible(DT_UI_PANEL_CENTER_BOTTOM),
                    TRUE);
-}
-static void _toggle_top_all_accel_callback(dt_action_t *action)
-{
-  const gboolean v = (_panel_is_visible(DT_UI_PANEL_CENTER_TOP) || _panel_is_visible(DT_UI_PANEL_TOP));
-  dt_ui_panel_show(darktable.gui->ui, DT_UI_PANEL_TOP, !v, TRUE);
-  dt_ui_panel_show(darktable.gui->ui, DT_UI_PANEL_CENTER_TOP, !v, TRUE);
-}
-static void _toggle_bottom_all_accel_callback(dt_action_t *action)
-{
-  const gboolean v = (_panel_is_visible(DT_UI_PANEL_CENTER_BOTTOM) || _panel_is_visible(DT_UI_PANEL_BOTTOM));
-  dt_ui_panel_show(darktable.gui->ui, DT_UI_PANEL_BOTTOM, !v, TRUE);
-  dt_ui_panel_show(darktable.gui->ui, DT_UI_PANEL_CENTER_BOTTOM, !v, TRUE);
 }
 
 gboolean dt_gui_ignore_scroll(GdkEventScroll *event)
@@ -1032,8 +1000,6 @@ int dt_gui_gtk_init(dt_gui_gtk_t *gui)
   dt_action_register(pnl, N_("filmstrip"), _toggle_filmstrip_accel_callback, GDK_KEY_f, GDK_CONTROL_MASK);
   dt_action_register(pnl, N_("top toolbar"), _toggle_top_tool_accel_callback, 0, 0);
   dt_action_register(pnl, N_("bottom toolbar"), _toggle_bottom_tool_accel_callback, 0, 0);
-  dt_action_register(pnl, N_("all top"), _toggle_top_all_accel_callback, 0, 0);
-  dt_action_register(pnl, N_("all bottom"), _toggle_bottom_all_accel_callback, 0, 0);
 
   dt_action_register(&darktable.control->actions_global, N_("toggle tooltip visibility"), _toggle_tooltip_visibility, GDK_KEY_T, GDK_SHIFT_MASK);
   dt_action_register(&darktable.control->actions_global, N_("reinitialise input devices"), dt_shortcuts_reinitialise, GDK_KEY_I, GDK_CONTROL_MASK | GDK_SHIFT_MASK | GDK_MOD1_MASK);
