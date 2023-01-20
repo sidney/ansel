@@ -166,28 +166,6 @@ static void _fullscreen_key_accel_callback(dt_action_t *action)
 #endif
 }
 
-static void _toggle_tooltip_visibility(dt_action_t *action)
-{
-  if(gdk_screen_is_composited(gdk_screen_get_default()))
-  {
-    gboolean tooltip_hidden = !dt_conf_get_bool("ui/hide_tooltips");
-    dt_conf_set_bool("ui/hide_tooltips", tooltip_hidden);
-    if(tooltip_hidden)
-      dt_toast_log(_("tooltips off"));
-    else
-      dt_toast_log(_("tooltips on"));
-  }
-  else
-  {
-    dt_conf_set_bool("ui/hide_tooltips", FALSE);
-    dt_control_log(_("tooltip visibility can only be toggled if compositing is enabled in your window manager"));
-  }
-
-  const char *theme = dt_conf_get_string_const("ui_last/theme");
-  dt_gui_load_theme(theme);
-  dt_bauhaus_load_theme();
-}
-
 static inline void _update_focus_peaking_button()
 {
   // read focus peaking global state and update toggle button accordingly
@@ -321,15 +299,6 @@ static void _toggle_header_accel_callback(dt_action_t *action)
 static void _toggle_filmstrip_accel_callback(dt_action_t *action)
 {
   dt_ui_panel_show(darktable.gui->ui, DT_UI_PANEL_BOTTOM, !_panel_is_visible(DT_UI_PANEL_BOTTOM), TRUE);
-}
-static void _toggle_top_tool_accel_callback(dt_action_t *action)
-{
-  dt_ui_panel_show(darktable.gui->ui, DT_UI_PANEL_CENTER_TOP, !_panel_is_visible(DT_UI_PANEL_CENTER_TOP), TRUE);
-}
-static void _toggle_bottom_tool_accel_callback(dt_action_t *action)
-{
-  dt_ui_panel_show(darktable.gui->ui, DT_UI_PANEL_CENTER_BOTTOM, !_panel_is_visible(DT_UI_PANEL_CENTER_BOTTOM),
-                   TRUE);
 }
 
 gboolean dt_gui_ignore_scroll(GdkEventScroll *event)
@@ -964,12 +933,12 @@ int dt_gui_gtk_init(dt_gui_gtk_t *gui)
   dt_action_register(&darktable.control->actions_global, N_("no-op"), _gui_noop_action_callback, 0, 0);
 
   ac = dt_action_section(&darktable.control->actions_global, N_("switch views"));
-  dt_action_register(ac, N_("tethering"), _gui_switch_view_key_accel_callback, GDK_KEY_t, 0);
-  dt_action_register(ac, N_("lighttable"), _gui_switch_view_key_accel_callback, GDK_KEY_l, 0);
-  dt_action_register(ac, N_("darkroom"), _gui_switch_view_key_accel_callback, GDK_KEY_d, 0);
-  dt_action_register(ac, N_("map"), _gui_switch_view_key_accel_callback, GDK_KEY_m, 0);
-  dt_action_register(ac, N_("slideshow"), _gui_switch_view_key_accel_callback, GDK_KEY_s, 0);
-  dt_action_register(ac, N_("print"), _gui_switch_view_key_accel_callback, GDK_KEY_p, 0);
+  dt_action_register(ac, N_("tethering"), _gui_switch_view_key_accel_callback, 0, 0);
+  dt_action_register(ac, N_("lighttable"), _gui_switch_view_key_accel_callback, GDK_KEY_Escape, 0);
+  dt_action_register(ac, N_("darkroom"), _gui_switch_view_key_accel_callback, 0, 0);
+  dt_action_register(ac, N_("map"), _gui_switch_view_key_accel_callback, 0, 0);
+  dt_action_register(ac, N_("slideshow"), _gui_switch_view_key_accel_callback, 0, 0);
+  dt_action_register(ac, N_("print"), _gui_switch_view_key_accel_callback, 0, 0);
 
   // register actions for applying styles via shortcuts
   dt_init_styles_actions();
@@ -984,10 +953,7 @@ int dt_gui_gtk_init(dt_gui_gtk_t *gui)
   dt_action_register(pnl, N_("all"), _toggle_side_borders_accel_callback, GDK_KEY_Tab, 0);
   dt_action_register(pnl, N_("header"), _toggle_header_accel_callback, GDK_KEY_h, GDK_CONTROL_MASK);
   dt_action_register(pnl, N_("filmstrip"), _toggle_filmstrip_accel_callback, GDK_KEY_f, GDK_CONTROL_MASK);
-  dt_action_register(pnl, N_("top toolbar"), _toggle_top_tool_accel_callback, 0, 0);
-  dt_action_register(pnl, N_("bottom toolbar"), _toggle_bottom_tool_accel_callback, 0, 0);
 
-  dt_action_register(&darktable.control->actions_global, N_("toggle tooltip visibility"), _toggle_tooltip_visibility, GDK_KEY_T, GDK_SHIFT_MASK);
   dt_action_register(&darktable.control->actions_global, N_("reinitialise input devices"), dt_shortcuts_reinitialise, GDK_KEY_I, GDK_CONTROL_MASK | GDK_SHIFT_MASK | GDK_MOD1_MASK);
 
   // Register global rating shortcut, with regular numbers
