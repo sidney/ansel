@@ -3601,7 +3601,8 @@ static guint _fix_keyval(GdkEvent *event)
 {
   guint keyval = 0;
   GdkKeymap *keymap = gdk_keymap_get_for_display(gdk_display_get_default());
-  gdk_keymap_translate_keyboard_state(keymap, event->key.hardware_keycode, 0, 0,
+  gdk_keymap_translate_keyboard_state(keymap, event->key.hardware_keycode,
+                                      event->key.state, event->key.group, // this ensures that numlock or shift are properly decoded
                                       &keyval, NULL, NULL, NULL);
   return keyval;
 }
@@ -4047,8 +4048,9 @@ void dt_shortcut_register(dt_action_t *owner, guint element, guint effect, guint
                         .element = element,
                         .effect = effect };
 
-    gdk_keymap_translate_keyboard_state(keymap, keys[i].keycode, 0, 0, &s.key, NULL, NULL, NULL);
-
+    GdkModifierType consumed;
+    gdk_keymap_translate_keyboard_state(keymap, keys[i].keycode, mods, 0, &s.key, NULL, NULL,  &consumed);
+    s.mods &= ~consumed;
     _insert_shortcut(&s, FALSE);
 
     g_free(keys);
