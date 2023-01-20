@@ -705,11 +705,11 @@ static void _metadata_view_update_values(dt_lib_module_t *self)
         break;
 
       case md_exif_model:
-        _metadata_update_value(md_exif_model, img->camera_alias, self);
+        _metadata_update_value(md_exif_model, img->exif_model, self);
         break;
 
       case md_exif_maker:
-        _metadata_update_value(md_exif_maker, img->camera_maker, self);
+        _metadata_update_value(md_exif_maker, img->exif_maker, self);
         break;
 
       case md_exif_lens:
