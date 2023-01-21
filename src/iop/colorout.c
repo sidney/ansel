@@ -99,7 +99,7 @@ int default_group()
 
 int flags()
 {
-  return IOP_FLAGS_ALLOW_TILING | IOP_FLAGS_ONE_INSTANCE | IOP_FLAGS_HIDDEN | IOP_FLAGS_NO_HISTORY_STACK;
+  return IOP_FLAGS_ALLOW_TILING | IOP_FLAGS_ONE_INSTANCE | IOP_FLAGS_NO_HISTORY_STACK;
 }
 
 int default_colorspace(dt_iop_module_t *self, dt_dev_pixelpipe_t *pipe, dt_dev_pixelpipe_iop_t *piece)
@@ -790,7 +790,21 @@ void init(dt_iop_module_t *module)
   module->default_enabled = 1;
 }
 
+typedef struct dt_iop_colorout_gui_data_t
+{ } dt_iop_colorout_gui_data_t;
 
+dt_iop_colorout_gui_data_t dummy;
+
+void gui_init(dt_iop_module_t *self)
+{
+  IOP_GUI_ALLOC(colorout);
+  self->widget = gtk_label_new(NULL);
+  gtk_label_set_markup(GTK_LABEL(self->widget),_("Convert images to the display or export RGB color space. "
+                                                 "The color profile is set in the export module or in the display preferences. "));
+  gtk_widget_set_halign(self->widget, GTK_ALIGN_START);
+  gtk_label_set_xalign (GTK_LABEL(self->widget), 0.0f);
+  gtk_label_set_line_wrap(GTK_LABEL(self->widget), TRUE);
+}
 
 
 // clang-format off
