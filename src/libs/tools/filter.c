@@ -275,6 +275,17 @@ static void _reset_text_entry(GtkButton *button, dt_lib_module_t *self)
   dt_collection_update_query(darktable.collection, DT_COLLECTION_CHANGE_RELOAD, DT_COLLECTION_PROP_SORT, NULL);
 }
 
+
+static void _focus_filter_search(dt_action_t *action)
+{
+  // set focus to the search text box
+  dt_lib_module_t *self = dt_action_lib(action);
+  dt_lib_tool_filter_t *d = (dt_lib_tool_filter_t *)self->data;
+  if(GTK_IS_ENTRY(d->text))
+    gtk_widget_grab_focus(GTK_WIDGET(d->text));
+}
+
+
 #define CPF_USER_DATA_INCLUDE CPF_USER_DATA
 #define CPF_USER_DATA_EXCLUDE CPF_USER_DATA << 1
 #define CL_AND_MASK 0x80000000
@@ -481,6 +492,8 @@ void gui_init(dt_lib_module_t *self)
   gtk_box_pack_end(GTK_BOX(hbox), d->text, TRUE, TRUE, 0);
   gtk_widget_set_name(hbox, "quickfilter-search-box");
   dt_gui_add_class(hbox, "quick_filter_box");
+
+  dt_action_register(DT_ACTION(self), N_("search images"), _focus_filter_search, GDK_KEY_f, GDK_CONTROL_MASK);
 
   /* initialize proxy */
   darktable.view_manager->proxy.filter.module = self;
