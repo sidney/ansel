@@ -460,23 +460,11 @@ void init_presets(dt_iop_module_so_t *self)
   p.saturation_midtones = 0.f;
   p.saturation_highlights = -0.25f;
   dt_gui_presets_add_generic(_("basic colorfulness: standard"), self->op, self->version(), &p, sizeof(p), 1, DEVELOP_BLEND_CS_RGB_SCENE);
+
+  // Duplicate and alias for auto-apply in develop.c
+  dt_gui_presets_add_generic(_("scene-referred default"), self->op, self->version(), &p, sizeof(p), 1, DEVELOP_BLEND_CS_RGB_SCENE);
+  dt_gui_presets_update_ldr(_("scene-referred default"), self->op, self->version(), FOR_RAW);
 }
-
-
-void reload_defaults(dt_iop_module_t *module)
-{
-  dt_iop_colorbalancergb_params_t *p = module->default_params;
-
-  // Basic colorfulness standard
-  p->saturation_global = 0.2f;
-  p->saturation_shadows = 0.25f;
-  p->saturation_midtones = 0.f;
-  p->saturation_highlights = -0.25f;
-
-  // Auto-enable so people find their default JPEG look by default
-  module->default_enabled = FALSE;
-}
-
 
 
 #ifdef _OPENMP
