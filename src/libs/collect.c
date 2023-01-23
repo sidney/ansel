@@ -657,7 +657,8 @@ static gboolean view_onButtonPressed(GtkWidget *treeview, GdkEventButton *event,
        && (event->type == GDK_BUTTON_PRESS && event->button == 3)
        && !(dt_modifier_is(event->state, GDK_SHIFT_MASK) || dt_modifier_is(event->state, GDK_CONTROL_MASK)))
     {
-      row_activated_with_event(GTK_TREE_VIEW(treeview), path, NULL, event, d);
+      // Don't open a collection on right click
+      // row_activated_with_event(GTK_TREE_VIEW(treeview), path, NULL, event, d);
       view_popup_menu(treeview, event, d);
     }
     else
