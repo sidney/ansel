@@ -185,6 +185,7 @@ const model_map_t modelMap[] = {
 
 /* LibRAW is expected to read only new canon CR3 files */
 
+/*
 static gboolean _supported_image(const gchar *filename)
 {
   const char *extensions_whitelist[] = { "cr3", NULL };
@@ -198,6 +199,7 @@ static gboolean _supported_image(const gchar *filename)
     }
   return FALSE;
 }
+*/
 
 gboolean dt_libraw_lookup_makermodel(const char *maker, const char *model,
                                      char *mk, int mk_len, char *md, int md_len,
@@ -222,7 +224,6 @@ dt_imageio_retval_t dt_imageio_open_libraw(dt_image_t *img, const char *filename
 {
   int err = DT_IMAGEIO_FILE_CORRUPTED;
   int libraw_err = LIBRAW_SUCCESS;
-  if(!_supported_image(filename)) return DT_IMAGEIO_FILE_CORRUPTED;
   if(!img->exif_inited) (void)dt_exif_read(img, filename);
 
   libraw_data_t *raw = libraw_init(0);
@@ -282,26 +283,14 @@ dt_imageio_retval_t dt_imageio_open_libraw(dt_image_t *img, const char *filename
   img->crop_width = raw->rawdata.sizes.raw_width - ric->cwidth - ric->cleft;
   img->crop_height = raw->rawdata.sizes.raw_height - ric->cheight - ric->ctop;
 
-  // We can reuse the libraw filters property, it's already well-handled in dt.
-  // It contains (for CR3) the Bayer pattern, but we have to undo some LibRaw logic.
-  if(raw->rawdata.iparams.colors == 3)
-  {
-    // Workaround for 3 color filters (ok for CR3) from LibRaw::pre_interpolate()
-    img->buf_dsc.filters = raw->rawdata.iparams.filters & ~((raw->rawdata.iparams.filters & 0x55555555U) << 1);
-  }
-  else
-  {
-    // In general we should run through entire post-processing to get corrected filters.
-    // This incurs a significant performance penalty.
-    libraw_err = libraw_dcraw_process(raw);
-    if(libraw_err != LIBRAW_SUCCESS) goto error;
-
-    img->buf_dsc.filters = raw->idata.filters;
-  }
+  // In general we should run through entire post-processing to get corrected filters.
+  // This incurs a significant performance penalty.
+  libraw_err = libraw_dcraw_process(raw);
+  if(libraw_err != LIBRAW_SUCCESS) goto error;
+  img->buf_dsc.filters = raw->idata.filters;
 
   // For CR3, we only have Bayer data and a single channel
   img->buf_dsc.channels = 1;
-
   img->buf_dsc.datatype = TYPE_UINT16;
   img->buf_dsc.cst = IOP_CS_RAW;
 
@@ -369,4 +358,3 @@ error:
 // vim: shiftwidth=2 expandtab tabstop=2 cindent
 // kate: tab-indents: off; indent-width 2; replace-tabs on; indent-mode cstyle; remove-trailing-spaces modified;
 // clang-format on
-

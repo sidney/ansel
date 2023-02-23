@@ -379,6 +379,27 @@
     <shortdescription>system library with OpenCL runtime</shortdescription>
     <longdescription>OpenCL runtime library is normally detected automatically by ansel. if your OpenCL runtime is at an unusual place and cannot be detected, enter the full pathname here. leave empty for default behavior.</longdescription>
   </dtconfig>
+  <dtconfig prefs="processing" section="libraw">
+    <name>libraw/extensions</name>
+    <type>string</type>
+    <default>cr3,</default>
+    <shortdescription>Raw file extensions to load through Libraw</shortdescription>
+    <longdescription>Force Libraw use to decode the defined coma-separated file extensions. Otherwise, they are loaded through Rawspeed if it supports them, which is better integrated into Ansel. Use this if your camera is not properly supported by Rawspeed.</longdescription>
+  </dtconfig>
+  <dtconfig prefs="processing" section="libraw">
+    <name>libraw/models</name>
+    <type>string</type>
+    <default></default>
+    <shortdescription>Camera models to load through Libraw</shortdescription>
+    <longdescription>Force Libraw use to decode the defined coma-separated camera models, described by the EXIF model field. Otherwise, they are loaded through Rawspeed if it supports them, which is better integrated into Ansel. Use this if your camera is not properly supported by Rawspeed.</longdescription>
+  </dtconfig>
+  <dtconfig prefs="processing" section="libraw">
+    <name>libraw/makers</name>
+    <type>string</type>
+    <default></default>
+    <shortdescription>Camera makers to load through Libraw</shortdescription>
+    <longdescription>Force Libraw use to decode the defined coma-separated camera vendors, described by the EXIF maker field. Otherwise, they are loaded through Rawspeed if it supports them, which is better integrated into Ansel. Use this if your camera is not properly supported by Rawspeed.</longdescription>
+  </dtconfig>
   <dtconfig prefs="security" section="general">
     <name>ask_before_remove</name>
     <type>bool</type>
@@ -2081,20 +2102,6 @@
     <name>plugins/imageio/storage/gallery/title</name>
     <type>string</type>
     <default>ansel gallery</default>
-    <shortdescription/>
-    <longdescription/>
-  </dtconfig>
-  <dtconfig>
-    <name>context_help/use_default_url</name>
-    <type>boolean</type>
-    <default>true</default>
-    <shortdescription/>
-    <longdescription/>
-  </dtconfig>
-  <dtconfig>
-    <name>context_help/url</name>
-    <type>string</type>
-    <default>https://docs.ansel.org/usermanual/</default>
     <shortdescription/>
     <longdescription/>
   </dtconfig>
