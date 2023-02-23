@@ -15,7 +15,7 @@ static inline float normalize_laplacian(const float sigma)
 {
   // Normalize the wavelet scale to approximate a laplacian
   // see https://eng.aurelienpierre.com/2021/03/rotation-invariant-laplacian-for-2d-grids/#Scaling-coefficient
-  return 2.f * M_PI_F / (sqrtf(M_PI_F) * sqf(sigma));
+  return 2.f / sqf(sigma);
 }
 
 // Normalization scaling of the wavelet to approximate a laplacian
@@ -59,11 +59,11 @@ static inline void sparse_scalar_product(const dt_aligned_pixel_t buf, const siz
 {
   // scalar product of 2 3×5 vectors stored as RGB planes and B-spline filter,
   // e.g. RRRRR - GGGGG - BBBBB
-  const float filter[BSPLINE_FSIZE] = { 1.0f / 16.0f,
-                                        4.0f / 16.0f,
-                                        6.0f / 16.0f,
-                                        4.0f / 16.0f,
-                                        1.0f / 16.0f };
+  static const float filter[BSPLINE_FSIZE] = { 1.0f / 16.0f,
+                                               4.0f / 16.0f,
+                                               6.0f / 16.0f,
+                                               4.0f / 16.0f,
+                                               1.0f / 16.0f };
 
   if(clip_negatives)
   {
