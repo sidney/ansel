@@ -444,7 +444,7 @@ void gui_init(dt_lib_module_t *self)
 
   d->layout_filemanager = dtgtk_togglebutton_new(dtgtk_cairo_paint_lt_mode_grid, 0, NULL);
   ac = dt_action_define(ltv, NULL, N_("toggle filemanager layout"), d->layout_filemanager, NULL);
-  dt_action_register(ac, NULL, _lib_lighttable_key_accel_toggle_filemanager, 0, 0);
+  dt_action_register(ac, NULL, _lib_lighttable_key_accel_toggle_filemanager, GDK_KEY_Escape, 0);
   dt_gui_add_help_link(d->layout_filemanager, dt_get_help_url("layout_filemanager"));
   gtk_widget_set_tooltip_text(d->layout_filemanager, _("click to enter filemanager layout."));
   g_signal_connect(G_OBJECT(d->layout_filemanager), "button-release-event",
