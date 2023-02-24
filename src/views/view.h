@@ -108,7 +108,7 @@ typedef struct dt_mouse_action_t
    DT_VIEW_PRINT)
 
 /* maximum zoom factor for the lighttable */
-#define DT_LIGHTTABLE_MAX_ZOOM 25
+#define DT_LIGHTTABLE_MAX_ZOOM 12
 
 /**
  * main dt view module (as lighttable or darkroom)
