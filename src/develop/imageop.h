@@ -111,15 +111,6 @@ typedef enum dt_iop_flags_t
   IOP_FLAGS_GUIDES_WIDGET = 1 << 15        // require the guides widget
 } dt_iop_flags_t;
 
-/** status of a module*/
-typedef enum dt_iop_module_state_t
-{
-  IOP_STATE_HIDDEN = 0, // keep first
-  IOP_STATE_ACTIVE,
-  IOP_STATE_FAVORITE,
-  IOP_STATE_LAST
-} dt_iop_module_state_t;
-
 typedef struct dt_iop_gui_data_t
 {
   // "base type" for all dt_iop_XXXX_gui_data_t types used by iops
@@ -167,8 +158,6 @@ typedef struct dt_iop_module_so_t
   /** gui is also only inited once at startup. */
 //  dt_iop_gui_data_t *gui_data;
   /** which results in this widget here, too. */
-  /** button used to show/hide this module in the plugin list. */
-  dt_iop_module_state_t state;
 
   void (*process_plain)(struct dt_iop_module_t *self, struct dt_dev_pixelpipe_iop_t *piece,
                       const void *const i, void *const o, const struct dt_iop_roi_t *const roi_in,
@@ -351,9 +340,6 @@ void dt_iop_gui_reset(dt_iop_module_t *module);
 void dt_iop_gui_set_expanded(dt_iop_module_t *module, gboolean expanded, gboolean collapse_others);
 /** refresh iop according to set expanded state */
 void dt_iop_gui_update_expanded(dt_iop_module_t *module);
-/** change module state */
-void dt_iop_so_gui_set_state(dt_iop_module_so_t *module, dt_iop_module_state_t state);
-void dt_iop_gui_set_state(dt_iop_module_t *module, dt_iop_module_state_t state);
 /* duplicate module and return new instance */
 dt_iop_module_t *dt_iop_gui_duplicate(dt_iop_module_t *base, gboolean copy_params);
 

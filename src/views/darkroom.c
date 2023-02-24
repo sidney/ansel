@@ -630,8 +630,7 @@ void expose(
 
   // display mask if we have a current module activated or if the masks manager module is expanded
 
-  const gboolean display_masks = (dev->gui_module && dev->gui_module->enabled
-                                  && dt_dev_modulegroups_get_activated(darktable.develop) != DT_MODULEGROUP_BASICS)
+  const gboolean display_masks = (dev->gui_module && dev->gui_module->enabled)
                                  || dt_lib_gui_get_expanded(dt_lib_get_module("masks"));
 
   // draw colorpicker for in focus module or execute module callback hook
@@ -647,8 +646,7 @@ void expose(
     if(dev->form_visible && display_masks)
       dt_masks_events_post_expose(dev->gui_module, cri, width, height, pointerx, pointery);
     // module
-    if(dev->gui_module && dev->gui_module->gui_post_expose
-       && dt_dev_modulegroups_get_activated(darktable.develop) != DT_MODULEGROUP_BASICS)
+    if(dev->gui_module && dev->gui_module->gui_post_expose)
       dev->gui_module->gui_post_expose(dev->gui_module, cri, width, height, pointerx, pointery);
   }
 
@@ -2997,8 +2995,7 @@ void mouse_moved(dt_view_t *self, double x, double y, double pressure, int which
   handled = dt_masks_events_mouse_moved(dev->gui_module, x, y, pressure, which);
   if(handled) return;
   // module
-  if(dev->gui_module && dev->gui_module->mouse_moved
-     && dt_dev_modulegroups_get_activated(darktable.develop) != DT_MODULEGROUP_BASICS)
+  if(dev->gui_module && dev->gui_module->mouse_moved)
     handled = dev->gui_module->mouse_moved(dev->gui_module, x, y, pressure, which);
   if(handled) return;
 
@@ -3054,8 +3051,7 @@ int button_released(dt_view_t *self, double x, double y, int which, uint32_t sta
   if(dev->form_visible) handled = dt_masks_events_button_released(dev->gui_module, x, y, which, state);
   if(handled) return handled;
   // module
-  if(dev->gui_module && dev->gui_module->button_released
-     && dt_dev_modulegroups_get_activated(darktable.develop) != DT_MODULEGROUP_BASICS)
+  if(dev->gui_module && dev->gui_module->button_released)
     handled = dev->gui_module->button_released(dev->gui_module, x, y, which, state);
   if(handled) return handled;
   if(which == 1) dt_control_change_cursor(GDK_LEFT_PTR);
@@ -3206,8 +3202,7 @@ int button_pressed(dt_view_t *self, double x, double y, double pressure, int whi
     handled = dt_masks_events_button_pressed(dev->gui_module, x, y, pressure, which, type, state);
   if(handled) return handled;
   // module
-  if(dev->gui_module && dev->gui_module->button_pressed
-     && dt_dev_modulegroups_get_activated(darktable.develop) != DT_MODULEGROUP_BASICS)
+  if(dev->gui_module && dev->gui_module->button_pressed)
     handled = dev->gui_module->button_pressed(dev->gui_module, x, y, pressure, which, type, state);
   if(handled) return handled;
 
@@ -3292,8 +3287,7 @@ void scrolled(dt_view_t *self, double x, double y, int up, int state)
   if(dev->form_visible) handled = dt_masks_events_mouse_scrolled(dev->gui_module, x, y, up, state);
   if(handled) return;
   // module
-  if(dev->gui_module && dev->gui_module->scrolled
-     && dt_dev_modulegroups_get_activated(darktable.develop) != DT_MODULEGROUP_BASICS)
+  if(dev->gui_module && dev->gui_module->scrolled)
     handled = dev->gui_module->scrolled(dev->gui_module, x, y, up, state);
   if(handled) return;
   // free zoom

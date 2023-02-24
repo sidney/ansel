@@ -3807,8 +3807,7 @@ error:
 // does this gui have focus?
 static int gui_has_focus(struct dt_iop_module_t *self)
 {
-  return (self->dev->gui_module == self
-          && dt_dev_modulegroups_get_activated(darktable.develop) != DT_MODULEGROUP_BASICS);
+  return (self->dev->gui_module == self);
 }
 
 /* this function replaces this sentence, it calls distort_transform() for this module on the pipe
