@@ -66,15 +66,6 @@ typedef enum dt_view_flags_t
   VIEW_FLAGS_HIDDEN = 1 << 0,       // Hide the view from userinterface
 } dt_view_flags_t;
 
-typedef enum dt_lighttable_layout_t
-{
-  DT_LIGHTTABLE_LAYOUT_FIRST = -1,
-  DT_LIGHTTABLE_LAYOUT_FILEMANAGER = 0,
-  DT_LIGHTTABLE_LAYOUT_CULLING_DYNAMIC = 1,
-  DT_LIGHTTABLE_LAYOUT_PREVIEW = 2,
-  DT_LIGHTTABLE_LAYOUT_LAST = 3
-} dt_lighttable_layout_t;
-
 typedef enum dt_darkroom_layout_t
 {
   DT_DARKROOM_LAYOUT_FIRST = -1,
@@ -282,14 +273,6 @@ typedef struct dt_view_manager_t
       struct dt_view_t *view;
       void (*set_zoom)(struct dt_lib_module_t *module, gint zoom);
       gint (*get_zoom)(struct dt_lib_module_t *module);
-      dt_lighttable_layout_t (*get_layout)(struct dt_lib_module_t *module);
-      void (*set_layout)(struct dt_lib_module_t *module, dt_lighttable_layout_t layout);
-      void (*culling_init_mode)(struct dt_view_t *view);
-      void (*culling_preview_refresh)(struct dt_view_t *view);
-      void (*culling_preview_reload_overlays)(struct dt_view_t *view);
-      gboolean (*get_preview_state)(struct dt_view_t *view);
-      void (*set_preview_state)(struct dt_view_t *view, gboolean state, gboolean focus);
-      void (*change_offset)(struct dt_view_t *view, gboolean reset, gint imgid);
     } lighttable;
 
 /* map view proxy object */
@@ -390,8 +373,6 @@ void dt_view_active_images_reset(gboolean raise);
 void dt_view_active_images_add(int imgid, gboolean raise);
 GSList *dt_view_active_images_get();
 
-/** get the lighttable current layout */
-dt_lighttable_layout_t dt_view_lighttable_get_layout(dt_view_manager_t *vm);
 /** get the darkroom current layout */
 dt_darkroom_layout_t dt_view_darkroom_get_layout(dt_view_manager_t *vm);
 /** get the lighttable full preview state */
@@ -402,14 +383,6 @@ void dt_view_lighttable_set_preview_state(dt_view_manager_t *vm, gboolean state,
 void dt_view_lighttable_set_zoom(dt_view_manager_t *vm, gint zoom);
 /** gets the lighttable image in row zoom */
 gint dt_view_lighttable_get_zoom(dt_view_manager_t *vm);
-/** reinit culling for new mode */
-void dt_view_lighttable_culling_init_mode(dt_view_manager_t *vm);
-/** force refresh of culling and/or preview */
-void dt_view_lighttable_culling_preview_refresh(dt_view_manager_t *vm);
-/** force refresh of culling and/or preview overlays */
-void dt_view_lighttable_culling_preview_reload_overlays(dt_view_manager_t *vm);
-/** sets the offset image (for culling and full preview) */
-void dt_view_lighttable_change_offset(dt_view_manager_t *vm, gboolean reset, gint imgid);
 
 /* accel window */
 void dt_view_accels_show(dt_view_manager_t *vm);
@@ -442,18 +415,8 @@ void dt_view_map_drag_set_icon(const dt_view_manager_t *vm, GdkDragContext *cont
 void dt_view_print_settings(const dt_view_manager_t *vm, dt_print_info_t *pinfo, dt_images_box *imgs);
 #endif
 
-/*
-* Sanitize lighttable layout for compat with darktablerc prefs
-*/
-
-static inline dt_lighttable_layout_t sanitize_lighttable_layout(dt_lighttable_layout_t layout)
-{
-  return (dt_lighttable_layout_t)MIN(layout, DT_LIGHTTABLE_LAYOUT_LAST - 1);
-}
-
-
-  // clang-format off
+// clang-format off
 // modelines: These editor modelines have been set for all relevant files by tools/update_modelines.py
 // vim: shiftwidth=2 expandtab tabstop=2 cindent
 // kate: tab-indents: off; indent-width 2; replace-tabs on; indent-mode cstyle; remove-trailing-spaces modified;
-  // clang-format on
+// clang-format on

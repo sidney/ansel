@@ -402,8 +402,7 @@ static int _thumbs_load_needed(dt_thumbtable_t *table)
       {
         dt_thumbnail_t *thumb = dt_thumbnail_new(
             table->thumb_size, table->thumb_size, IMG_TO_FIT, sqlite3_column_int(stmt, 1),
-            sqlite3_column_int(stmt, 0), table->overlays,
-            DT_THUMBNAIL_CONTAINER_LIGHTTABLE);
+            sqlite3_column_int(stmt, 0), table->overlays);
 
         thumb->x = posx;
         thumb->y = posy;
@@ -453,8 +452,7 @@ static int _thumbs_load_needed(dt_thumbtable_t *table)
       {
         dt_thumbnail_t *thumb = dt_thumbnail_new
           (table->thumb_size, table->thumb_size, IMG_TO_FIT, sqlite3_column_int(stmt, 1),
-           sqlite3_column_int(stmt, 0), table->overlays,
-           DT_THUMBNAIL_CONTAINER_LIGHTTABLE);
+           sqlite3_column_int(stmt, 0), table->overlays);
 
         thumb->x = posx;
         thumb->y = posy;
@@ -1176,46 +1174,6 @@ static void _dt_collection_changed_callback(gpointer instance, dt_collection_cha
         // if offset has changed, that means the offset img has moved. So we use the next untouched image as offset
         // but we have to ensure next is in the selection if we navigate inside sel.
         newid = next;
-        if(table->navigate_inside_selection)
-        {
-          sqlite3_stmt *stmt;
-          // clang-format off
-          gchar *query = g_strdup_printf(
-              "SELECT m.imgid"
-              " FROM memory.collected_images AS m, main.selected_images AS s"
-              " WHERE m.imgid=s.imgid"
-              "   AND m.rowid>=(SELECT rowid FROM memory.collected_images WHERE imgid=%d)"
-              " ORDER BY m.rowid LIMIT 1",
-              next);
-          // clang-format on
-          DT_DEBUG_SQLITE3_PREPARE_V2(dt_database_get(darktable.db), query, -1, &stmt, NULL);
-          if(sqlite3_step(stmt) == SQLITE_ROW)
-          {
-            newid = sqlite3_column_int(stmt, 0);
-          }
-          else
-          {
-            // no select image after, search before
-            g_free(query);
-            sqlite3_finalize(stmt);
-            // clang-format off
-            query = g_strdup_printf(
-                "SELECT m.imgid"
-                " FROM memory.collected_images AS m, main.selected_images AS s"
-                " WHERE m.imgid=s.imgid"
-                "   AND m.rowid<(SELECT rowid FROM memory.collected_images WHERE imgid=%d)"
-                " ORDER BY m.rowid DESC LIMIT 1",
-                next);
-            // clang-format on
-            DT_DEBUG_SQLITE3_PREPARE_V2(dt_database_get(darktable.db), query, -1, &stmt, NULL);
-            if(sqlite3_step(stmt) == SQLITE_ROW)
-            {
-              newid = sqlite3_column_int(stmt, 0);
-            }
-          }
-          g_free(query);
-          sqlite3_finalize(stmt);
-        }
       }
     }
 
@@ -1273,14 +1231,6 @@ static void _dt_collection_changed_callback(gpointer instance, dt_collection_cha
 
     dt_thumbtable_full_redraw(table, TRUE);
 
-    if(offset_changed)
-      dt_view_lighttable_change_offset(darktable.view_manager, FALSE, table->offset_imgid);
-    else
-    {
-      // if we are in culling or preview mode, ensure to refresh active images
-      dt_view_lighttable_culling_preview_refresh(darktable.view_manager);
-    }
-
     // if needed, we restore back the position of the filmstrip
     if(old_offset > 0 && old_offset != table->offset)
     {
@@ -1323,7 +1273,6 @@ static void _dt_collection_changed_callback(gpointer instance, dt_collection_cha
     dt_conf_set_int("lighttable/zoomable/last_pos_x", 0);
     dt_conf_set_int("lighttable/zoomable/last_pos_y", 0);
     dt_thumbtable_full_redraw(table, TRUE);
-    dt_view_lighttable_change_offset(darktable.view_manager, TRUE, table->offset_imgid);
   }
 }
 
@@ -1718,8 +1667,7 @@ void dt_thumbtable_full_redraw(dt_thumbtable_t *table, gboolean force)
       {
         // we create a completely new thumb
         dt_thumbnail_t *thumb
-            = dt_thumbnail_new(table->thumb_size, table->thumb_size, IMG_TO_FIT, nid, nrow, table->overlays,
-                               DT_THUMBNAIL_CONTAINER_LIGHTTABLE);
+            = dt_thumbnail_new(table->thumb_size, table->thumb_size, IMG_TO_FIT, nid, nrow, table->overlays);
         thumb->x = posx;
         thumb->y = posy;
         newlist = g_list_prepend(newlist, thumb);

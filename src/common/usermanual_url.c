@@ -94,7 +94,6 @@ dt_help_url urls_db[] =
   {"ratings",                    "views/lighttable/digital-asset-management/star-color/#star-ratings"},
   {"layout_filemanager",         "views/lighttable/lighttable-modes/filemanager/"},
   {"layout_zoomable",            "views/lighttable/lighttable-modes/zoomable-lighttable/"},
-  {"layout_culling",             "views/lighttable/lighttable-modes/culling/"},
   {"layout_preview",             "views/lighttable/lighttable-modes/full-preview/"},
   {"filter",                     NULL},
   {"colorlabels",                "views/lighttable/digital-asset-management/star-color/#color-labels"},

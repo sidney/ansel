@@ -994,51 +994,6 @@ gint dt_view_lighttable_get_zoom(dt_view_manager_t *vm)
     return 10;
 }
 
-void dt_view_lighttable_culling_init_mode(dt_view_manager_t *vm)
-{
-  if(vm->proxy.lighttable.module) vm->proxy.lighttable.culling_init_mode(vm->proxy.lighttable.view);
-}
-
-void dt_view_lighttable_culling_preview_refresh(dt_view_manager_t *vm)
-{
-  if(vm->proxy.lighttable.module)
-    vm->proxy.lighttable.culling_preview_refresh(vm->proxy.lighttable.view);
-}
-
-void dt_view_lighttable_culling_preview_reload_overlays(dt_view_manager_t *vm)
-{
-  if(vm->proxy.lighttable.module)
-    vm->proxy.lighttable.culling_preview_reload_overlays(vm->proxy.lighttable.view);
-}
-
-dt_lighttable_layout_t dt_view_lighttable_get_layout(dt_view_manager_t *vm)
-{
-  if(vm->proxy.lighttable.module)
-    return vm->proxy.lighttable.get_layout(vm->proxy.lighttable.module);
-  else
-    return DT_LIGHTTABLE_LAYOUT_FILEMANAGER;
-}
-
-gboolean dt_view_lighttable_preview_state(dt_view_manager_t *vm)
-{
-  if(vm->proxy.lighttable.module)
-    return vm->proxy.lighttable.get_preview_state(vm->proxy.lighttable.view);
-  else
-    return FALSE;
-}
-
-void dt_view_lighttable_set_preview_state(dt_view_manager_t *vm, gboolean state, gboolean focus)
-{
-  if(vm->proxy.lighttable.module)
-    vm->proxy.lighttable.set_preview_state(vm->proxy.lighttable.view, state, focus);
-}
-
-void dt_view_lighttable_change_offset(dt_view_manager_t *vm, gboolean reset, gint imgid)
-{
-  if(vm->proxy.lighttable.module)
-    vm->proxy.lighttable.change_offset(vm->proxy.lighttable.view, reset, imgid);
-}
-
 void dt_view_collection_update(const dt_view_manager_t *vm)
 {
   if(vm->proxy.module_collect.module)

@@ -43,20 +43,12 @@ typedef enum dt_thumbnail_overlay_t
   DT_THUMBNAIL_OVERLAYS_LAST
 } dt_thumbnail_overlay_t;
 
-typedef enum dt_thumbnail_container_t
-{
-  DT_THUMBNAIL_CONTAINER_LIGHTTABLE,
-  DT_THUMBNAIL_CONTAINER_CULLING,
-  DT_THUMBNAIL_CONTAINER_PREVIEW
-} dt_thumbnail_container_t;
-
 typedef struct
 {
   int imgid, rowid;
   int width, height;         // current thumb size (with the background and the border)
   int x, y;                  // current position at screen
   int img_width, img_height; // current image size (can be greater than the image box in case of zoom)
-  dt_thumbnail_container_t container; // type of container of the thumbnail
 
   gboolean mouse_over;
   gboolean selected;
@@ -113,10 +105,6 @@ typedef struct
 
   int expose_again_timeout_id;  // source id of the expose_again timeout
 
-  // specific for culling and preview
-  gboolean zoomable;   // can we zoom in/out the thumbnail (used for culling/preview)
-  float aspect_ratio;  // aspect ratio of the image
-
   // difference between the global zoom values and the value to apply to this specific thumbnail
   float zoom;     // zoom value. 1.0 is "image to fit" (the initial value)
   double zoomx;   // zoom panning of the image
@@ -129,8 +117,7 @@ typedef struct
   gboolean busy; // should we show the busy message ?
 } dt_thumbnail_t;
 
-dt_thumbnail_t *dt_thumbnail_new(int width, int height, float zoom_ratio, int imgid, int rowid, dt_thumbnail_overlay_t over,
-                                 dt_thumbnail_container_t container);
+dt_thumbnail_t *dt_thumbnail_new(int width, int height, float zoom_ratio, int imgid, int rowid, dt_thumbnail_overlay_t over);
 void dt_thumbnail_destroy(dt_thumbnail_t *thumb);
 GtkWidget *dt_thumbnail_create_widget(dt_thumbnail_t *thumb, float zoom_ratio);
 void dt_thumbnail_resize(dt_thumbnail_t *thumb, int width, int height, gboolean force, float zoom_ratio);

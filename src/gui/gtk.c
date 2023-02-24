@@ -205,10 +205,7 @@ static gchar *_panels_get_view_path(char *suffix)
   char lay[32] = "";
   if(g_strcmp0(cv->module_name, "lighttable") == 0)
   {
-    if(dt_view_lighttable_preview_state(darktable.view_manager))
-      g_snprintf(lay, sizeof(lay), "preview/");
-    else
-      g_snprintf(lay, sizeof(lay), "%d/", dt_view_lighttable_get_layout(darktable.view_manager));
+    g_snprintf(lay, sizeof(lay), "%d/", 0);
   }
   else if(g_strcmp0(cv->module_name, "darkroom") == 0)
   {
@@ -2388,13 +2385,6 @@ void dt_gui_load_theme(const char *theme)
     [DT_GUI_COLOR_THUMBNAIL_BORDER] = { "thumbnail_border_color", { 0.1, 0.1, 0.1, 1.0 } },
     [DT_GUI_COLOR_THUMBNAIL_SELECTED_BORDER] = { "thumbnail_selected_border_color", { 0.9, 0.9, 0.9, 1.0 } },
     [DT_GUI_COLOR_FILMSTRIP_BG] = { "filmstrip_bg_color", { 0.2, 0.2, 0.2, 1.0 } },
-    [DT_GUI_COLOR_TIMELINE_BG] = { "timeline_bg_color", { 0.4, 0.4, 0.4, 1.0 } },
-    [DT_GUI_COLOR_TIMELINE_FG] = { "timeline_fg_color", { 0.8, 0.8, 0.8, 1.0 } },
-    [DT_GUI_COLOR_TIMELINE_TEXT_BG] = { "timeline_text_bg_color", { 0., 0., 0., 0.8 } },
-    [DT_GUI_COLOR_TIMELINE_TEXT_FG] = { "timeline_text_fg_color", { 1., 1., 1., 0.9 } },
-    [DT_GUI_COLOR_CULLING_SELECTED_BORDER] = { "culling_selected_border_color", { 0.1, 0.1, 0.1, 1.0 } },
-    [DT_GUI_COLOR_CULLING_FILMSTRIP_SELECTED_BORDER]
-    = { "culling_filmstrip_selected_border_color", { 0.1, 0.1, 0.1, 1.0 } },
     [DT_GUI_COLOR_PREVIEW_HOVER_BORDER] = { "preview_hover_border_color", { 0.9, 0.9, 0.9, 1.0 } },
     [DT_GUI_COLOR_LOG_BG] = { "log_bg_color", { 0.1, 0.1, 0.1, 1.0 } },
     [DT_GUI_COLOR_LOG_FG] = { "log_fg_color", { 0.6, 0.6, 0.6, 1.0 } },
@@ -2404,11 +2394,6 @@ void dt_gui_load_theme(const char *theme)
     [DT_GUI_COLOR_MAP_LOC_SHAPE_HIGH] = { "map_count_circle_color_h", { 1.0, 1.0, 0.8, 1.0 } },
     [DT_GUI_COLOR_MAP_LOC_SHAPE_LOW] = { "map_count_circle_color_l", { 0.0, 0.0, 0.0, 1.0 } },
     [DT_GUI_COLOR_MAP_LOC_SHAPE_DEF] = { "map_count_circle_color_d", { 1.0, 0.0, 0.0, 1.0 } },
-    [DT_GUI_COLOR_RANGE_BG] = { "range_bg_color", { 1.0, 0.0, 0.0, 1.0 } },
-    [DT_GUI_COLOR_RANGE_GRAPH] = { "range_graph_color", { 1.0, 0.0, 0.0, 1.0 } },
-    [DT_GUI_COLOR_RANGE_SELECTION] = { "range_sel_color", { 1.0, 0.0, 0.0, 1.0 } },
-    [DT_GUI_COLOR_RANGE_CURSOR] = { "range_cursor_color", { 1.0, 0.0, 0.0, 1.0 } },
-    [DT_GUI_COLOR_RANGE_ICONS] = { "range_icon_color", { 1.0, 0.0, 0.0, 1.0 } },
   };
 
   // starting from 1 as DT_GUI_COLOR_BG is not part of this table
