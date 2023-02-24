@@ -176,20 +176,12 @@ static void _overlays_show_popup(GtkWidget *button, dt_lib_module_t *self)
   }
   else if(g_strcmp0(cv->module_name, "lighttable") == 0)
   {
-    if(dt_view_lighttable_preview_state(darktable.view_manager))
-    {
-      thumbs_state = dt_ui_panel_visible(darktable.gui->ui, DT_UI_PANEL_BOTTOM);
-    }
-    else
-    {
-      thumbs_state = TRUE;
-    }
+    thumbs_state = TRUE;
   }
   else
   {
     thumbs_state = dt_ui_panel_visible(darktable.gui->ui, DT_UI_PANEL_BOTTOM);
   }
-
 
   if(thumbs_state)
   {
