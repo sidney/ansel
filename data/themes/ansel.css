@@ -889,6 +889,10 @@ notebook tabs,
   padding: 0.3em;
 }
 
+#search-box entry placeholder {
+  color: @grey_25;
+}
+
 /* Set notebook tabs */
 notebook tab label
 {
@@ -912,6 +916,39 @@ notebook header /* add space between notebook tabs and options below */
 {
   margin-bottom: 0.42em;
 }
+
+#modules-tabs notebook tab label
+{
+  padding: 0.25em;
+  font-size: 1.25em;
+  color: @grey_85;
+}
+
+#modules-tabs notebook header, #modules-tabs notebook
+{
+  margin-bottom: 0;
+}
+
+#modules-tabs notebook tab:hover label
+{
+  border-bottom: 0.1em solid @grey_95;
+  color: @grey_95;
+}
+
+
+#modules-tabs notebook tab:checked label
+{
+  border-bottom: 0.1em solid @grey_100;
+  color: @grey_100;
+}
+
+#modules-tabs notebook:disabled tab:checked label
+{
+  border-bottom: none;
+  color: @grey_85;
+}
+
+
 
 /*--------------------------
   - GTK sliders and scales -
@@ -1209,30 +1246,6 @@ filechooser row:hover .sidebar-icon
   padding: 0.14em 0.84em;
 }
 
-/*--------------------
-  - Quick access tab -
-  --------------------*/
-#basics-header-box
-{
-  border-top: 0.07em solid @darkroom_bg_color;
-}
-
-#basics-header-box,
-#basics-module-hbox > box
-{
-  padding: 0.21em 0.7em;
-}
-
-#basics-box-labels #basics-header-box:first-child,
-#basics-box-labels .dt_section_label
-{
-  border: none;
-}
-
-#basics-widget #toneeqgraph
-{
-  min-height: 18em;
-}
 
 /*--------------------------------------------------
   - Collect module and quick filters on header bar -
