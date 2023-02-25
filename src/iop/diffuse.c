@@ -152,7 +152,7 @@ const char **description(struct dt_iop_module_t *self)
 
 int default_group()
 {
-  return IOP_GROUP_EFFECTS;
+  return IOP_GROUP_SHARPNESS;
 }
 
 int flags()
@@ -1582,7 +1582,7 @@ void gui_init(struct dt_iop_module_t *self)
   g->sharpness = dt_bauhaus_slider_from_params(self, "sharpness");
   dt_bauhaus_slider_set_format(g->sharpness, "%");
   gtk_widget_set_tooltip_text(g->sharpness,
-                              _("increase or decrease the sharpness of the highest frequencies.\n"                              
+                              _("increase or decrease the sharpness of the highest frequencies.\n"
                               "can be used to keep details after blooming,\n"
                               "for standalone sharpening set speed to negative values."));
 

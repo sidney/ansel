@@ -19,7 +19,6 @@
 #include "common/darktable.h"
 #include "common/debug.h"
 #include "common/image_cache.h"
-#include "common/iop_group.h"
 #include "control/conf.h"
 #include "control/control.h"
 #include "develop/develop.h"
@@ -57,10 +56,6 @@ static void _lib_modulegroups_update_visibility_proxy(dt_lib_module_t *self);
   \see dt_dev_modulegroups_get()
 */
 static uint32_t _lib_modulegroups_get(dt_lib_module_t *self);
-/* modulegroups proxy test function.
-   tests if iop module group flags matches modulegroup.
-*/
-static gboolean _lib_modulegroups_test(dt_lib_module_t *self, uint32_t group, uint32_t iop_group);
 /* modulegroups proxy switch group function.
    sets the active group which module belongs too.
 */
@@ -100,6 +95,11 @@ int expandable(dt_lib_module_t *self)
 int position()
 {
   return 999;
+}
+
+int dt_iop_get_group(const dt_iop_module_t *module)
+{
+  return 1 << (module->default_group());
 }
 
 static void _text_entry_changed_callback(GtkEntry *entry, dt_lib_module_t *self)
@@ -180,10 +180,22 @@ void gui_init(dt_lib_module_t *self)
 
   /* Tabs */
   d->notebook = GTK_WIDGET(gtk_notebook_new());
-  char *labels[DT_MODULEGROUP_SIZE] = { _("Enabled"),  _("Optics"), _("Grading"),
-                _("Corrections"), _("Effects"),  _("Scan") };
-  char *tooltips[DT_MODULEGROUP_SIZE] = { _("Enabled"),  _("Grading"), _("Effects"),
-                _("Effects"), _("Effects"),  _("Effects") };
+  char *labels[DT_MODULEGROUP_SIZE] = { _("Enabled"),
+                                        _("Tones"),
+                                        _("Film"),
+                                        _("Color"),
+                                        _("Repair"),
+                                        _("Sharpness"),
+                                        _("Effects"),
+                                        _("Technics")};
+  char *tooltips[DT_MODULEGROUP_SIZE] = { _("List all modules currently enabled in the reverse order of application in the pipeline."),
+                                          _("Modules destined to adjust brightness, contrast and dynamic range."),
+                                          _("Modules used when working with film scans."),
+                                          _("Modules destined to adjust white balance and perform color-grading."),
+                                          _("Modules destined to repair and reconstruct noisy or missing pixels."),
+                                          _("Modules destined to manipulate local contrast, sharpness and blur."),
+                                          _("Modules applying special effects."),
+                                          _("Technical modules that can be ignored in most situations.") };
 
   for(int i = 0; i < DT_MODULEGROUP_SIZE; i++)
   {
@@ -208,7 +220,6 @@ void gui_init(dt_lib_module_t *self)
   darktable.develop->proxy.modulegroups.set = _lib_modulegroups_set;
   darktable.develop->proxy.modulegroups.update_visibility = _lib_modulegroups_update_visibility_proxy;
   darktable.develop->proxy.modulegroups.get = _lib_modulegroups_get;
-  darktable.develop->proxy.modulegroups.test = _lib_modulegroups_test;
   darktable.develop->proxy.modulegroups.switch_group = _lib_modulegroups_switch_group;
   darktable.develop->proxy.modulegroups.search_text_focus = _lib_modulegroups_search_text_focus;
 
@@ -228,7 +239,6 @@ void gui_cleanup(dt_lib_module_t *self)
   darktable.develop->proxy.modulegroups.module = NULL;
   darktable.develop->proxy.modulegroups.set = NULL;
   darktable.develop->proxy.modulegroups.get = NULL;
-  darktable.develop->proxy.modulegroups.test = NULL;
   darktable.develop->proxy.modulegroups.switch_group = NULL;
 
   g_free(self->data);
@@ -238,28 +248,6 @@ void gui_cleanup(dt_lib_module_t *self)
 static void _lib_modulegroups_viewchanged_callback(gpointer instance, dt_view_t *old_view,
                                                    dt_view_t *new_view, gpointer data)
 {
-}
-
-static gboolean _lib_modulegroups_test_internal(dt_lib_module_t *self, uint32_t group, uint32_t iop_group)
-{
-  if(iop_group & IOP_SPECIAL_GROUP_ACTIVE_PIPE && group == DT_MODULEGROUP_ACTIVE_PIPE)
-    return TRUE;
-  else if(iop_group & IOP_GROUP_BASIC && group == DT_MODULEGROUP_BASIC)
-    return TRUE;
-  else if(iop_group & IOP_GROUP_TONE && group == DT_MODULEGROUP_TONE)
-    return TRUE;
-  else if(iop_group & IOP_GROUP_COLOR && group == DT_MODULEGROUP_COLOR)
-    return TRUE;
-  else if(iop_group & IOP_GROUP_CORRECT && group == DT_MODULEGROUP_CORRECT)
-    return TRUE;
-  else if(iop_group & IOP_GROUP_EFFECT && group == DT_MODULEGROUP_EFFECT)
-    return TRUE;
-  return FALSE;
-}
-
-static gboolean _lib_modulegroups_test(dt_lib_module_t *self, uint32_t group, uint32_t iop_group)
-{
-  return _lib_modulegroups_test_internal(self, group, iop_group);
 }
 
 static void _lib_modulegroups_update_iop_visibility(dt_lib_module_t *self)
@@ -348,8 +336,7 @@ static void _lib_modulegroups_update_iop_visibility(dt_lib_module_t *self)
 
         default:
         {
-          if(_lib_modulegroups_test_internal(self, d->current, dt_iop_get_group(module))
-             && (!(module->flags() & IOP_FLAGS_DEPRECATED) || module->enabled))
+          if(d->current == module->default_group() && (!(module->flags() & IOP_FLAGS_DEPRECATED) || module->enabled))
           {
             if(w) gtk_widget_show(w);
           }
@@ -467,27 +454,14 @@ static void _lib_modulegroups_search_text_focus(dt_lib_module_t *self)
 
 static void _lib_modulegroups_switch_group(dt_lib_module_t *self, dt_iop_module_t *module)
 {
-  /* lets find the group which is not favorite/active pipe */
-  for(int k = DT_MODULEGROUP_BASIC; k < DT_MODULEGROUP_SIZE; k++)
-  {
-    if(_lib_modulegroups_test(self, k, dt_iop_get_group(module)))
-    {
-      _lib_modulegroups_set(self, k);
-      return;
-    }
-  }
+  _lib_modulegroups_set(self, module->default_group());
 }
 
 static uint32_t _lib_modulegroups_get(dt_lib_module_t *self)
 {
   dt_lib_modulegroups_t *d = (dt_lib_modulegroups_t *)self->data;
 
-  for(int k = 0; k < DT_MODULEGROUP_SIZE; k++)
-  {
-    if (d->current == k)
-      return k;
-  }
-  return DT_MODULEGROUP_NONE;
+  return (d->current < DT_MODULEGROUP_SIZE) ? d->current : DT_MODULEGROUP_NONE;
 }
 
 // modelines: These editor modelines have been set for all relevant files by tools/update_modelines.sh

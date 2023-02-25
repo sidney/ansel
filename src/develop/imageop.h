@@ -60,18 +60,14 @@ typedef enum dt_iop_module_header_icons_t
 typedef enum dt_iop_group_t
 {
   IOP_GROUP_NONE = 0,
-  // pre 3.4 layout
-  IOP_GROUP_BASIC = 1 << 0,
-  IOP_GROUP_TONE = 1 << 1,
-  IOP_GROUP_COLOR = 1 << 2,
-  IOP_GROUP_CORRECT = 1 << 3,
-  IOP_GROUP_EFFECT = 1 << 4,
-  // post 3.4 default layout
-  IOP_GROUP_TECHNICAL = 1 << 5,
-  IOP_GROUP_GRADING = 1 << 6,
-  IOP_GROUP_EFFECTS = 1 << 7,
-  // special group
-  IOP_SPECIAL_GROUP_ACTIVE_PIPE = 1 << 8
+  IOP_GROUP_TONES = 1,
+  IOP_GROUP_FILM = 2,
+  IOP_GROUP_COLOR = 3,
+  IOP_GROUP_REPAIR = 4,
+  IOP_GROUP_SHARPNESS = 5,
+  IOP_GROUP_EFFECTS = 6,
+  IOP_GROUP_TECHNICAL= 7,
+  IOP_GROUP_LAST
 } dt_iop_group_t;
 
 /** module tags */
@@ -314,8 +310,6 @@ void dt_iop_init_pipe(struct dt_iop_module_t *module, struct dt_dev_pixelpipe_t 
 /** checks if iop do have an ui */
 gboolean dt_iop_so_is_hidden(dt_iop_module_so_t *module);
 gboolean dt_iop_is_hidden(dt_iop_module_t *module);
-/** checks whether iop is shown in specified group */
-gboolean dt_iop_shown_in_group(dt_iop_module_t *module, uint32_t group);
 /** enter a GUI critical section by acquiring gui_data->lock **/
 static inline void dt_iop_gui_enter_critical_section(dt_iop_module_t *const module)
   ACQUIRE(&module->gui_lock)

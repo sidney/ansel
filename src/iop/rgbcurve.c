@@ -123,7 +123,7 @@ const char *name()
 
 int default_group()
 {
-  return IOP_GROUP_TONE | IOP_GROUP_GRADING | IOP_FLAGS_DEPRECATED;
+  return IOP_GROUP_COLOR;
 }
 
 int flags()

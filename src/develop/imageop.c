@@ -26,7 +26,6 @@
 #include "common/imagebuf.h"
 #include "common/imageio_rawspeed.h"
 #include "common/interpolation.h"
-#include "common/iop_group.h"
 #include "common/module.h"
 #include "common/opencl.h"
 #include "common/usermanual_url.h"
@@ -102,7 +101,7 @@ static void _iop_modify_roi_out(struct dt_iop_module_t *self, struct dt_dev_pixe
 /* default group for modules which do not implement the default_group() function */
 static int default_default_group(void)
 {
-  return IOP_GROUP_BASIC;
+  return IOP_GROUP_TECHNICAL;
 }
 
 /* default flags for modules which does not implement the flags() function */
@@ -1021,13 +1020,6 @@ gboolean dt_iop_is_hidden(dt_iop_module_t *module)
   return dt_iop_so_is_hidden(module->so);
 }
 
-gboolean dt_iop_shown_in_group(dt_iop_module_t *module, uint32_t group)
-{
-  if(group == DT_MODULEGROUP_NONE) return TRUE;
-
-  return dt_dev_modulegroups_test(module->dev, group, module->default_group());
-}
-
 static void _iop_panel_label(dt_iop_module_t *module)
 {
   GtkWidget *lab = dt_gui_container_nth_child(GTK_CONTAINER(module->header), IOP_MODULE_LABEL);
@@ -1910,14 +1902,14 @@ void dt_iop_gui_set_expanded(dt_iop_module_t *module, gboolean expanded, gboolea
   /* handle shiftclick on expander, hide all except this */
   if(collapse_others)
   {
-    const int current_group = dt_dev_modulegroups_get_activated(module->dev);
+    const int current_group = dt_dev_modulegroups_get(module->dev);
 
     GList *iop = module->dev->iop;
     gboolean all_other_closed = TRUE;
     while(iop)
     {
       dt_iop_module_t *m = (dt_iop_module_t *)iop->data;
-      if(m != module && dt_iop_shown_in_group(m, current_group))
+      if(m != module && (m->default_group() == current_group || current_group == DT_MODULEGROUP_ACTIVE_PIPE))
       {
         all_other_closed = all_other_closed && !m->expanded;
         _gui_set_single_expanded(m, FALSE);
@@ -2580,7 +2572,7 @@ static void _show_module_callback(dt_iop_module_t *module)
   // Showing the module, if it isn't already visible
   const uint32_t current_group = dt_dev_modulegroups_get(module->dev);
 
-  if(!dt_iop_shown_in_group(module, current_group))
+  if(module->default_group() != current_group)
   {
     dt_dev_modulegroups_switch(darktable.develop, module);
   }

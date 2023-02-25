@@ -394,10 +394,6 @@ void dt_dev_modulegroups_search_text_focus(dt_develop_t *dev);
 void dt_dev_modulegroups_set(dt_develop_t *dev, uint32_t group);
 /** get the active modulegroup */
 uint32_t dt_dev_modulegroups_get(dt_develop_t *dev);
-/** get the activated modulegroup */
-uint32_t dt_dev_modulegroups_get_activated(dt_develop_t *dev);
-/** test if iop group flags matches modulegroup */
-gboolean dt_dev_modulegroups_test(dt_develop_t *dev, uint32_t group, uint32_t iop_group);
 /** reorder the module list */
 void dt_dev_reorder_gui_module_list(dt_develop_t *dev);
 /** test if the iop is visible in current groups layout **/
