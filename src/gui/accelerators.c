@@ -693,21 +693,6 @@ gboolean dt_shortcut_tooltip_callback(GtkWidget *widget, gint x, gint y, gboolea
       action = g_hash_table_lookup(darktable.control->widgets, widget);
       show_element = -1;
     }
-
-    if(darktable.control->mapping_widget == widget)
-    {
-      const int add_remove_qap = darktable.develop
-        ? dt_dev_modulegroups_basics_module_toggle(darktable.develop, widget, FALSE)
-        : 0;
-
-      markup_text = g_markup_printf_escaped("%s\n%s\n%s%s\n%s",
-                                            _("press keys with mouse click and scroll or move combinations to create a shortcut"),
-                                            _("click to open shortcut configuration"),
-                                            add_remove_qap > 0 ? _("ctrl+click to add to quick access panel\n") :
-                                            add_remove_qap < 0 ? _("ctrl+click to remove from quick access panel\n")  : "",
-                                            _("scroll to change default speed"),
-                                            _("right click to exit mapping mode"));
-    }
   }
 
   const dt_action_def_t *def = _action_find_definition(action);

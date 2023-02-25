@@ -398,8 +398,6 @@ uint32_t dt_dev_modulegroups_get(dt_develop_t *dev);
 void dt_dev_reorder_gui_module_list(dt_develop_t *dev);
 /** test if the iop is visible in current groups layout **/
 gboolean dt_dev_modulegroups_is_visible(dt_develop_t *dev, gchar *module);
-/** add or remove module or widget in current quick access list **/
-int dt_dev_modulegroups_basics_module_toggle(dt_develop_t *dev, GtkWidget *widget, gboolean doit);
 
 /** request snapshot */
 void dt_dev_snapshot_request(dt_develop_t *dev, const char *filename);

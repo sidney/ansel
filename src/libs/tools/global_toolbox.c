@@ -271,16 +271,8 @@ static void _set_mapping_mode_cursor(GtkWidget *widget)
 
   if(widget && !strcmp(gtk_widget_get_name(widget), "module-header"))
     cursor = GDK_BASED_ARROW_DOWN;
-  else if(g_hash_table_lookup(darktable.control->widgets, darktable.control->mapping_widget)
-          && darktable.develop)
-  {
-    switch(dt_dev_modulegroups_basics_module_toggle(darktable.develop, widget, FALSE))
-    {
-    case  1: cursor = GDK_SB_UP_ARROW; break;
-    case -1: cursor = GDK_SB_DOWN_ARROW; break;
-    default: cursor = GDK_BOX_SPIRAL;
-    }
-  }
+  else if(g_hash_table_lookup(darktable.control->widgets, darktable.control->mapping_widget))
+    cursor = GDK_BOX_SPIRAL;
 
   dt_control_allow_change_cursor();
   dt_control_change_cursor(cursor);
@@ -353,11 +345,7 @@ static void _main_do_event_keymap(GdkEvent *event, gpointer data)
       break;
     else if(dt_modifier_is(event->button.state, GDK_CONTROL_MASK))
     {
-      if(darktable.develop)
-      {
-        dt_dev_modulegroups_basics_module_toggle(darktable.develop, event_widget, TRUE);
-        _set_mapping_mode_cursor(event_widget);
-      }
+      _set_mapping_mode_cursor(event_widget);
     }
     else
     {
