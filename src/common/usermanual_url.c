@@ -155,6 +155,7 @@ dt_help_url urls_db[] =
   {"overexposed",                "modules/utility-modules/darkroom/clipping/"},
   {"softproof",                  "modules/utility-modules/darkroom/soft-proof/"},
   {"gamut",                      "modules/utility-modules/darkroom/gamut/"},
+  {"focuspeaking",               "modules/utility-modules/shared/focus-peaking/"},
 
   // iop links
   {"ashift",                     "modules/processing-modules/rotate-perspective/"},
@@ -238,11 +239,11 @@ dt_help_url urls_db[] =
 
 char *dt_get_help_url(char *name)
 {
-  if(name==NULL) return NULL;
+  if(name == NULL) return NULL;
 
   for(int k=0; k< sizeof(urls_db)/2/sizeof(char *); k++)
     if(!strcmp(urls_db[k].name, name))
-      return g_build_path("/", base_url, get_lang(), doc_url, urls_db[k].url, NULL);
+        return g_build_path("/", base_url, get_lang(), doc_url, urls_db[k].url, NULL);
 
   return NULL;
 }

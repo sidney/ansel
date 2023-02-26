@@ -1001,6 +1001,7 @@ int dt_gui_gtk_init(dt_gui_gtk_t *gui)
   darktable.gui->focus_peaking_button = dtgtk_togglebutton_new(dtgtk_cairo_paint_focus_peaking, 0, NULL);
   gtk_widget_set_tooltip_text(darktable.gui->focus_peaking_button, _("toggle focus-peaking mode"));
   g_signal_connect(G_OBJECT(darktable.gui->focus_peaking_button), "clicked", G_CALLBACK(_focuspeaking_switch_button_callback), NULL);
+  dt_gui_add_help_link(darktable.gui->focus_peaking_button, dt_get_help_url("focuspeaking"));
   _update_focus_peaking_button();
 
   // toggle focus peaking everywhere
