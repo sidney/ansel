@@ -1,6 +1,6 @@
 /*
     This file is part of darktable,
-    Copyright (C) 2021 darktable developers.
+    Copyright (C) 2021-2023 darktable developers.
 
     darktable is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -83,6 +83,20 @@ const model_map_t modelMap[] = {
   },
   {
     .exif_make = "Canon",
+    .exif_model = "Canon EOS R7",
+    .clean_make = "Canon",
+    .clean_model = "EOS R7",
+    .clean_alias = "EOS R7"
+  },
+  {
+    .exif_make = "Canon",
+    .exif_model = "Canon EOS R10",
+    .clean_make = "Canon",
+    .clean_model = "EOS R10",
+    .clean_alias = "EOS R10"
+  },
+  {
+    .exif_make = "Canon",
     .exif_model = "Canon EOS M50",
     .clean_make = "Canon",
     .clean_model = "EOS M50",
@@ -113,8 +127,8 @@ const model_map_t modelMap[] = {
     .exif_make = "Canon",
     .exif_model = "Canon EOS M6 Mark II",
     .clean_make = "Canon",
-    .clean_model = "EOS M6",
-    .clean_alias = "EOS M6"
+    .clean_model = "EOS M6 Mark II",
+    .clean_alias = "EOS M6 Mark II"
   },
   {
     .exif_make = "Canon",
@@ -132,6 +146,13 @@ const model_map_t modelMap[] = {
   },
   {
     .exif_make = "Canon",
+    .exif_model = "Canon EOS Kiss X10",
+    .clean_make = "Canon",
+    .clean_model = "EOS 250D",
+    .clean_alias = "EOS Kiss X10"
+  },
+  {
+    .exif_make = "Canon",
     .exif_model = "Canon EOS Rebel SL3",
     .clean_make = "Canon",
     .clean_model = "EOS 250D",
@@ -139,10 +160,24 @@ const model_map_t modelMap[] = {
   },
   {
     .exif_make = "Canon",
+    .exif_model = "Canon EOS 200D II",
+    .clean_make = "Canon",
+    .clean_model = "EOS 250D",
+    .clean_alias = "EOS 200D Mark II"
+  },
+  {
+    .exif_make = "Canon",
     .exif_model = "Canon EOS 850D",
     .clean_make = "Canon",
     .clean_model = "EOS 850D",
     .clean_alias = "EOS 850D"
+  },
+  {
+    .exif_make = "Canon",
+    .exif_model = "Canon EOS Kiss X10i",
+    .clean_make = "Canon",
+    .clean_model = "EOS 850D",
+    .clean_alias = "EOS Kiss X10i"
   },
   {
     .exif_make = "Canon",
@@ -180,26 +215,6 @@ const model_map_t modelMap[] = {
     .clean_alias = "PowerShot G5 X Mark II"
   }
 };
-
-
-
-/* LibRAW is expected to read only new canon CR3 files */
-
-/*
-static gboolean _supported_image(const gchar *filename)
-{
-  const char *extensions_whitelist[] = { "cr3", NULL };
-  char *ext = g_strrstr(filename, ".");
-  if(!ext) return FALSE;
-  ext++;
-  for(const char **i = extensions_whitelist; *i != NULL; i++)
-    if(!g_ascii_strncasecmp(ext, *i, strlen(*i)))
-    {
-      return TRUE;
-    }
-  return FALSE;
-}
-*/
 
 gboolean dt_libraw_lookup_makermodel(const char *maker, const char *model,
                                      char *mk, int mk_len, char *md, int md_len,
@@ -255,6 +270,7 @@ dt_imageio_retval_t dt_imageio_open_libraw(dt_image_t *img, const char *filename
   img->raw_white_point = raw->rawdata.color.linear_max[0] ? raw->rawdata.color.linear_max[0] :raw->rawdata.color.maximum;
 
   // Copy black level
+  img->raw_black_level = raw->rawdata.color.black;
   for(size_t c = 0; c < 4; ++c)
     img->raw_black_level_separate[c] = raw->rawdata.color.black + raw->rawdata.color.cblack[c];
 
@@ -272,12 +288,7 @@ dt_imageio_retval_t dt_imageio_open_libraw(dt_image_t *img, const char *filename
   img->height = raw->rawdata.sizes.raw_height;
 
   // Apply crop parameters
-  libraw_raw_inset_crop_t *ric;
-#if LIBRAW_COMPILE_CHECK_VERSION_NOTLESS(0, 21)
-  ric = &raw->rawdata.sizes.raw_inset_crops[0];
-#else
-  ric = &raw->rawdata.sizes.raw_inset_crop;
-#endif
+  libraw_raw_inset_crop_t *ric = &raw->rawdata.sizes.raw_inset_crops[0];
   img->crop_x = ric->cleft;
   img->crop_y = ric->ctop;
   img->crop_width = raw->rawdata.sizes.raw_width - ric->cwidth - ric->cleft;
