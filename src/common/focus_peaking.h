@@ -179,7 +179,7 @@ schedule(static) collapse(2)
 #ifdef _OPENMP
 #pragma omp parallel for simd default(none) \
 dt_omp_firstprivate(luma, buf_height, buf_width) \
-schedule(static) collapse(2) aligned(luma_ds:64) reduction(+:TV_sum)
+schedule(static) collapse(2) aligned(luma:64) reduction(+:TV_sum)
 #endif
   for(size_t i = 2; i < buf_height - 2; ++i)
     for(size_t j = 2; j < buf_width - 2; ++j)
