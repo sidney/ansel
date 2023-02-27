@@ -415,6 +415,8 @@ gboolean dt_iop_is_raster_mask_used(dt_iop_module_t *module, int id);
 dt_iop_module_t *dt_iop_gui_get_previous_visible_module(dt_iop_module_t *module);
 /** returns the next visible module on the module list */
 dt_iop_module_t *dt_iop_gui_get_next_visible_module(dt_iop_module_t *module);
+/** check if current module is visible **/
+gboolean dt_iop_gui_module_is_visible(dt_iop_module_t *module);
 
 // initializes memory.darktable_iop_names
 void dt_iop_set_darktable_iop_table();

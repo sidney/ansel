@@ -1937,6 +1937,80 @@ void connect_button_press_release(GtkWidget *w, GtkWidget *p)
   g_signal_connect(w, "button-release-event", G_CALLBACK(_quickbutton_press_release), p);
 }
 
+static void _focus_module(dt_iop_module_t *module)
+{
+  if(module && dt_iop_gui_module_is_visible(module))
+  {
+    dt_iop_request_focus(module);
+    dt_iop_gui_set_expanded(module, TRUE, TRUE);
+  }
+  else
+  {
+    // we reached the extremity of the list.
+    dt_iop_request_focus(NULL);
+  }
+}
+
+static void _focus_next_module()
+{
+  dt_iop_module_t *focused = darktable.develop->gui_module;
+  if(focused == NULL)
+  {
+    // No focused module : give focus to the first visible module of the stack
+    GList *modules = darktable.develop->iop;
+    if(modules)
+    {
+      modules = g_list_last(modules);
+      dt_iop_module_t *module = NULL;
+      do
+      {
+        dt_iop_module_t *mod = (dt_iop_module_t *)modules->data;
+        if(mod && dt_iop_gui_module_is_visible(mod))
+        {
+          module = mod;
+          break;
+        }
+      } while((modules = g_list_previous(modules)) != NULL);
+      _focus_module(module);
+    }
+  }
+  else
+  {
+    dt_iop_gui_set_expanded(focused, FALSE, TRUE);
+    _focus_module(dt_iop_gui_get_previous_visible_module(focused));
+  }
+}
+
+static void _focus_previous_module()
+{
+  dt_iop_module_t *focused = darktable.develop->gui_module;
+  if(focused == NULL)
+  {
+    // No focused module : give focus to the last visible module of the stack
+    GList *modules = darktable.develop->iop;
+    if(modules)
+    {
+      modules = g_list_first(modules);
+      dt_iop_module_t *module = NULL;
+      do
+      {
+        dt_iop_module_t *mod = (dt_iop_module_t *)modules->data;
+        if(mod && dt_iop_gui_module_is_visible(mod))
+        {
+          module = mod;
+          break;
+        }
+      } while((modules = g_list_next(modules)) != NULL);
+      _focus_module(module);
+    }
+  }
+  else
+  {
+    dt_iop_gui_set_expanded(focused, FALSE, TRUE);
+    _focus_module(dt_iop_gui_get_next_visible_module(focused));
+  }
+}
+
 void gui_init(dt_view_t *self)
 {
   dt_develop_t *dev = (dt_develop_t *)self->data;
@@ -2281,6 +2355,10 @@ void gui_init(dt_view_t *self)
 
   // change the precision for adjusting sliders with keyboard shortcuts
   dt_action_register(DT_ACTION(self), N_("change keyboard shortcut slider precision"), change_slider_accel_precision, 0, 0);
+
+  // Focus on next/previous modules
+  dt_action_register(DT_ACTION(self), N_("focus on the next module"), _focus_next_module, GDK_KEY_Page_Down, 0);
+  dt_action_register(DT_ACTION(self), N_("focus on the previous module"), _focus_previous_module, GDK_KEY_Page_Up, 0);
 }
 
 enum

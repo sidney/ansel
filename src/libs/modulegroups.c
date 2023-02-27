@@ -155,14 +155,22 @@ void view_enter(dt_lib_module_t *self, dt_view_t *old_view, dt_view_t *new_view)
 
 void _modulegroups_switch_tab_next(dt_action_t *action)
 {
+  dt_iop_module_t *focused = darktable.develop->gui_module;
+  if(focused) dt_iop_gui_set_expanded(focused, FALSE, TRUE);
+
   uint32_t current = dt_dev_modulegroups_get(darktable.develop);
   dt_dev_modulegroups_set(darktable.develop, current + 1);
+  dt_iop_request_focus(NULL);
 }
 
 void _modulegroups_switch_tab_previous(dt_action_t *action)
 {
+  dt_iop_module_t *focused = darktable.develop->gui_module;
+  if(focused) dt_iop_gui_set_expanded(focused, FALSE, TRUE);
+
   uint32_t current = dt_dev_modulegroups_get(darktable.develop);
   dt_dev_modulegroups_set(darktable.develop, current - 1);
+  dt_iop_request_focus(NULL);
 }
 
 void gui_init(dt_lib_module_t *self)
@@ -313,7 +321,7 @@ static void _lib_modulegroups_update_iop_visibility(dt_lib_module_t *self)
      * iterate over iop modules and do various test to
      * detect if the modules should be shown or not.
      */
-    while((modules = g_list_next(modules)) != NULL)
+    do
     {
       dt_iop_module_t *module = (dt_iop_module_t *)modules->data;
       GtkWidget *w = module->expander;
@@ -375,7 +383,7 @@ static void _lib_modulegroups_update_iop_visibility(dt_lib_module_t *self)
           }
         }
       }
-    }
+    } while((modules = g_list_next(modules)) != NULL);
   }
   if (DT_IOP_ORDER_INFO) fprintf(stderr,"\nvvvvv\n");
   // now that visibility has been updated set multi-show

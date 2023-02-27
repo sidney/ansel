@@ -548,25 +548,22 @@ static void _gui_delete_callback(GtkButton *button, dt_iop_module_t *module)
   --darktable.gui->reset;
 }
 
+gboolean dt_iop_gui_module_is_visible(dt_iop_module_t *module)
+{
+  GtkWidget *expander = module->expander;
+  return (expander && gtk_widget_is_visible(expander) && !dt_iop_is_hidden(module));
+}
+
 dt_iop_module_t *dt_iop_gui_get_previous_visible_module(dt_iop_module_t *module)
 {
   dt_iop_module_t *prev = NULL;
-  for(GList *modules = module->dev->iop; modules; modules = g_list_next(modules))
+  for(GList *modules = g_list_first(module->dev->iop); modules; modules = g_list_next(modules))
   {
     dt_iop_module_t *mod = (dt_iop_module_t *)modules->data;
     if(mod == module)
-    {
       break;
-    }
-    else
-    {
-      // only for visible modules
-      GtkWidget *expander = mod->expander;
-      if(expander && gtk_widget_is_visible(expander))
-      {
-        prev = mod;
-      }
-    }
+    else if(dt_iop_gui_module_is_visible(mod))
+      prev = mod;
   }
   return prev;
 }
@@ -574,22 +571,13 @@ dt_iop_module_t *dt_iop_gui_get_previous_visible_module(dt_iop_module_t *module)
 dt_iop_module_t *dt_iop_gui_get_next_visible_module(dt_iop_module_t *module)
 {
   dt_iop_module_t *next = NULL;
-  for(const GList *modules = g_list_last(module->dev->iop); modules; modules = g_list_previous(modules))
+  for(GList *modules = g_list_last(module->dev->iop); modules; modules = g_list_previous(modules))
   {
     dt_iop_module_t *mod = (dt_iop_module_t *)modules->data;
     if(mod == module)
-    {
       break;
-    }
-    else
-    {
-      // only for visible modules
-      GtkWidget *expander = mod->expander;
-      if(expander && gtk_widget_is_visible(expander))
-      {
-        next = mod;
-      }
-    }
+    else if(dt_iop_gui_module_is_visible(mod))
+      next = mod;
   }
   return next;
 }
@@ -1796,6 +1784,7 @@ void dt_iop_request_focus(dt_iop_module_t *module)
       out_focus_module->gui_focus(out_focus_module, FALSE);
 
     dt_iop_color_picker_reset(out_focus_module, TRUE);
+    gtk_widget_grab_focus(dt_ui_center(darktable.gui->ui));
 
     gtk_widget_set_state_flags(dt_iop_gui_get_pluginui(out_focus_module), GTK_STATE_FLAG_NORMAL, TRUE);
 
@@ -1836,6 +1825,7 @@ void dt_iop_request_focus(dt_iop_module_t *module)
 
     /* redraw the expander */
     gtk_widget_queue_draw(module->expander);
+    gtk_widget_grab_focus(module->expander);
 
     // we also add the focus css class
     GtkWidget *iop_w = gtk_widget_get_parent(dt_iop_gui_get_pluginui(darktable.develop->gui_module));
