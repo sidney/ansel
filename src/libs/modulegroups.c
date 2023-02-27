@@ -284,8 +284,10 @@ static gboolean _lib_modulesgroups_search_active(const gchar *text_entered, dt_i
       const int is_match_name = (g_strstr_len(g_utf8_casefold(dt_iop_get_localized_name(module->op), -1), -1,
                                           g_utf8_casefold(text_entered, -1))
                                 != NULL);
-
-      if(is_match_name)
+      const int is_match_alias = (g_strstr_len(g_utf8_casefold(dt_iop_get_localized_aliases(module->op), -1), -1,
+                                          g_utf8_casefold(text_entered, -1))
+                                != NULL);
+      if(is_match_name || is_match_alias)
         gtk_widget_show(w);
       else
         gtk_widget_hide(w);
@@ -322,7 +324,7 @@ static void _lib_modulegroups_update_iop_visibility(dt_lib_module_t *self)
         if(dt_iop_is_hidden(module)) fprintf(stderr,", hidden");
       }
 
-      /* skip modules without an gui */
+      /* skip modules without a gui */
       if(dt_iop_is_hidden(module)) continue;
 
       /* if module search is active, we handle search results as a special case of group */
