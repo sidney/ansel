@@ -267,6 +267,35 @@ static void _lib_modulegroups_viewchanged_callback(gpointer instance, dt_view_t 
 {
 }
 
+static gboolean _lib_modulesgroups_search_active(const gchar *text_entered, dt_iop_module_t *module, GtkWidget *w)
+{
+  // if there's some search text show matching modules only
+  gboolean is_handled = FALSE;
+  if(text_entered && text_entered[0] != '\0')
+  {
+    /* don't show deprecated ones unless they are enabled */
+    if(module->flags() & IOP_FLAGS_DEPRECATED && !(module->enabled))
+    {
+      if(darktable.develop->gui_module == module) dt_iop_request_focus(NULL);
+      if(w) gtk_widget_hide(w);
+    }
+    else
+    {
+      const int is_match_name = (g_strstr_len(g_utf8_casefold(dt_iop_get_localized_name(module->op), -1), -1,
+                                          g_utf8_casefold(text_entered, -1))
+                                != NULL);
+
+      if(is_match_name)
+        gtk_widget_show(w);
+      else
+        gtk_widget_hide(w);
+    }
+    is_handled = TRUE;
+  }
+
+  return is_handled;
+}
+
 static void _lib_modulegroups_update_iop_visibility(dt_lib_module_t *self)
 {
   dt_lib_modulegroups_t *d = (dt_lib_modulegroups_t *)self->data;
@@ -282,7 +311,7 @@ static void _lib_modulegroups_update_iop_visibility(dt_lib_module_t *self)
      * iterate over iop modules and do various test to
      * detect if the modules should be shown or not.
      */
-    do
+    while((modules = g_list_next(modules)) != NULL)
     {
       dt_iop_module_t *module = (dt_iop_module_t *)modules->data;
       GtkWidget *w = module->expander;
@@ -296,28 +325,8 @@ static void _lib_modulegroups_update_iop_visibility(dt_lib_module_t *self)
       /* skip modules without an gui */
       if(dt_iop_is_hidden(module)) continue;
 
-      // if there's some search text show matching modules only
-      if(text_entered && text_entered[0] != '\0')
-      {
-        /* don't show deprecated ones unless they are enabled */
-        if(module->flags() & IOP_FLAGS_DEPRECATED && !(module->enabled))
-        {
-          if(darktable.develop->gui_module == module) dt_iop_request_focus(NULL);
-          if(w) gtk_widget_hide(w);
-        }
-        else
-        {
-          const int is_match = (g_strstr_len(g_utf8_casefold(dt_iop_get_localized_name(module->op), -1), -1,
-                                             g_utf8_casefold(text_entered, -1))
-                                != NULL);
-
-          if(is_match)
-            gtk_widget_show(w);
-          else
-            gtk_widget_hide(w);
-        }
-        continue;
-      }
+      /* if module search is active, we handle search results as a special case of group */
+      if(_lib_modulesgroups_search_active(text_entered, module, w)) continue;
 
       /* lets show/hide modules dependent on current group*/
       switch(d->current)
@@ -364,7 +373,7 @@ static void _lib_modulegroups_update_iop_visibility(dt_lib_module_t *self)
           }
         }
       }
-    } while((modules = g_list_next(modules)) != NULL);
+    }
   }
   if (DT_IOP_ORDER_INFO) fprintf(stderr,"\nvvvvv\n");
   // now that visibility has been updated set multi-show
