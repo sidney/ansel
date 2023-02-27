@@ -1161,7 +1161,7 @@ void gui_init(struct dt_iop_module_t *self)
   g_signal_connect(G_OBJECT(g->aspect_presets), "quad-pressed", G_CALLBACK(_event_aspect_flip), self);
   gtk_box_pack_start(GTK_BOX(box_enabled), g->aspect_presets, TRUE, TRUE, 0);
 
-  GtkWidget *commit = dt_action_button_new((dt_lib_module_t *)self, N_("commit"), _event_commit_clicked, self, _("commit changes"), GDK_KEY_Return, 0);
+  GtkWidget *commit = dt_action_button_new((dt_lib_module_t *)self, N_("commit"), _event_commit_clicked, self, _("commit changes"), 0, 0);
   gtk_box_pack_end(GTK_BOX(box_enabled), commit, TRUE, TRUE, 0);
 
   // we put margins values under an expander

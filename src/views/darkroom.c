@@ -2011,6 +2011,39 @@ static void _focus_previous_module()
   }
 }
 
+static void _enable_module()
+{
+  dt_iop_module_t *focused = darktable.develop->gui_module;
+  if(focused != NULL && dt_iop_gui_module_is_visible(focused))
+  {
+    if(!focused->enabled)
+    {
+      focused->enabled = TRUE;
+      dt_iop_gui_set_enable_button(focused);
+    }
+    // else : don't change the enabled status but still grab focus on the internal widget
+
+    gtk_widget_grab_focus(focused->widget);
+  }
+}
+
+static void _disable_module()
+{
+  dt_iop_module_t *focused = darktable.develop->gui_module;
+  if(focused != NULL && dt_iop_gui_module_is_visible(focused))
+  {
+    if(focused->enabled)
+    {
+      focused->enabled = FALSE;
+      dt_iop_gui_set_enable_button(focused);
+    }
+    // else : don't change the enabled status but still grab focus on the external widget
+
+    gtk_widget_grab_focus(focused->expander);
+  }
+}
+
+
 void gui_init(dt_view_t *self)
 {
   dt_develop_t *dev = (dt_develop_t *)self->data;
@@ -2359,6 +2392,9 @@ void gui_init(dt_view_t *self)
   // Focus on next/previous modules
   dt_action_register(DT_ACTION(self), N_("focus on the next module"), _focus_next_module, GDK_KEY_Page_Down, 0);
   dt_action_register(DT_ACTION(self), N_("focus on the previous module"), _focus_previous_module, GDK_KEY_Page_Up, 0);
+
+  dt_action_register(DT_ACTION(self), N_("enable focused module"), _enable_module, GDK_KEY_Return, 0);
+  dt_action_register(DT_ACTION(self), N_("disable focused module"), _disable_module, GDK_KEY_Return, GDK_SHIFT_MASK);
 }
 
 enum
