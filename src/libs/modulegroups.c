@@ -173,6 +173,22 @@ void _modulegroups_switch_tab_previous(dt_action_t *action)
   dt_iop_request_focus(NULL);
 }
 
+static gboolean _lib_modulegroups_scroll(GtkWidget *widget, GdkEventScroll *event, gpointer user_data)
+{
+  int delta_x, delta_y;
+  if(dt_gui_get_scroll_unit_deltas(event, &delta_x, &delta_y))
+  {
+    uint32_t current = dt_dev_modulegroups_get(darktable.develop);
+    if(delta_x > 0 || delta_y > 0)
+      dt_dev_modulegroups_set(darktable.develop, current + 1);
+    else if(delta_x < 0 || delta_y < 0)
+      dt_dev_modulegroups_set(darktable.develop, current - 1);
+    dt_iop_request_focus(NULL);
+  }
+
+  return TRUE;
+}
+
 void gui_init(dt_lib_module_t *self)
 {
   /* initialize ui widgets */
@@ -228,6 +244,8 @@ void gui_init(dt_lib_module_t *self)
   gtk_notebook_popup_enable(GTK_NOTEBOOK(d->notebook));
   gtk_notebook_set_scrollable(GTK_NOTEBOOK(d->notebook), TRUE);
   g_signal_connect(G_OBJECT(d->notebook), "switch_page", G_CALLBACK(_lib_modulegroups_toggle), self);
+  g_signal_connect(G_OBJECT(d->notebook), "scroll-event", G_CALLBACK(_lib_modulegroups_scroll), self);
+  gtk_widget_add_events(GTK_WIDGET(d->notebook), darktable.gui->scroll_mask);
 
   gtk_box_pack_start(GTK_BOX(self->widget), GTK_WIDGET(d->notebook), TRUE, TRUE, 0);
 
