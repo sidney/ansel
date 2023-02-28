@@ -714,7 +714,6 @@ static gboolean _button_pressed(GtkWidget *w, GdkEventButton *event, gpointer us
   /* Reset Gtk focus */
   gtk_window_set_focus(GTK_WINDOW(dt_ui_main_window(darktable.gui->ui)), NULL);
   darktable.gui->has_scroll_focus = NULL;
-  fprintf(stdout, "focus 2\n");
 
   double pressure = 1.0;
   GdkDevice *device = gdk_event_get_source_device((GdkEvent *)event);
