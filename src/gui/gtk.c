@@ -1633,12 +1633,6 @@ static GtkWidget *_ui_init_panel_container_top(GtkWidget *container)
   return w;
 }
 
-static gboolean _ui_init_panel_container_center_scroll_event(GtkWidget *widget, GdkEventScroll *event)
-{
-  // just make sure nothing happens unless ctrl-alt are pressed:
-  return (event->state & gtk_accelerator_get_default_mod_mask());
-}
-
 // this should work as long as everything happens in the gui thread
 static void _ui_panel_size_changed(GtkAdjustment *adjustment, GParamSpec *pspec, gpointer user_data)
 {
@@ -1692,14 +1686,10 @@ static GtkWidget *_ui_init_panel_container_center(GtkWidget *container, gboolean
   gtk_viewport_set_shadow_type(GTK_VIEWPORT(widget), GTK_SHADOW_NONE);
   gtk_container_add(GTK_CONTAINER(container), widget);
 
-  /* avoid scrolling with wheel, it's distracting (you'll end up over a control, and scroll it's value) */
-  g_signal_connect(G_OBJECT(widget), "scroll-event", G_CALLBACK(_ui_init_panel_container_center_scroll_event),
-                   NULL);
-
   /* create the container */
   container = widget;
   widget = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
-  gtk_widget_set_name(widget, "plugins_vbox_left");
+  gtk_widget_set_name(widget, "plugins_box");
   gtk_container_add(GTK_CONTAINER(container), widget);
 
   return widget;
