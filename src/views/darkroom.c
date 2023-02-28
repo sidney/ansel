@@ -1943,6 +1943,7 @@ static void _focus_module(dt_iop_module_t *module)
   {
     dt_iop_request_focus(module);
     dt_iop_gui_set_expanded(module, TRUE, TRUE);
+    darktable.gui->scroll_to[1] = module->expander;
   }
   else
   {
@@ -2023,6 +2024,7 @@ static void _enable_module()
     }
     // else : don't change the enabled status but still grab focus on the internal widget
 
+    darktable.gui->scroll_to[1] = focused->expander;
     gtk_widget_grab_focus(focused->widget);
   }
 }
