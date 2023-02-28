@@ -566,12 +566,6 @@ dialog .sidebar row:selected:hover label,
   background-color: @grey_55;
 }
 
-.dt_module_focus #blending-tabs,
-.dt_module_frame:focus #blending-tabs
-{
-  background-color: @grey_55;
-}
-
 /* Frame around blending boxes */
 #blending-tabs + #blending-box /* set top margin below blending tabs */
 {
@@ -625,16 +619,11 @@ dialog .sidebar row:selected:hover label,
 
 /* Labels of controls sections in modules */
 .dt_section_label,
-#blending-box .dt_section_label label  /* as those sections has icons on same line, we need to apply dt_section_label class on box above label and so separate what we apply on border and what we apply on box above */
+#blending-box .dt_section_label  /* as those sections has icons on same line, we need to apply dt_section_label class on box above label and so separate what we apply on border and what we apply on box above */
 {
   padding: 0.14em 0;
   color: @section_label;
-  font-family: sans-serif;
   font-weight: 500;
-}
-
-.dt_section_label
-{
   border-bottom: 0.05em solid @section_label;
   margin: 0.21em 0;
 }
@@ -944,27 +933,53 @@ notebook tabs,
   padding: 0.3em;
 }
 
+#blending-tabs button
+{
+  border-bottom: 3px solid @bg_color;
+  border-top: 3px solid transparent;
+}
+
+#blending-tabs button:active,
+#blending-tabs button:checked,
+#blending-tabs button:selected
+{
+  background-color: transparent;
+  border-bottom: 3px solid @grey_90;
+}
+
+#blending-tabs button:hover
+{
+  border-bottom: 3px solid @grey_100;
+}
+
+
 #search-box entry placeholder {
   color: @grey_25;
 }
 
 /* Set notebook tabs */
+notebook tab
+{
+  border: none;
+}
+
 notebook tab label
 {
-  color: shade(@field_selected_fg, 0.75);
+  color: @grey_80;
   padding: 0.28em 0.07em;
+  border-bottom: 3px solid @bg_color;
 }
 
 notebook tab:hover label
 {
-  border-bottom: 0.1em solid shade(@field_selected_fg, 0.7);
-  color: shade(@field_selected_fg, 0.9);
+  border-bottom: 3px solid @grey_100;
+  color: @grey_100;
 }
 
 notebook tab:checked label
 {
-  border-bottom: 0.1em solid @field_selected_fg;
-  color: @field_selected_fg;
+  border-bottom: 3px solid @grey_90;
+  color: @grey_95;
 }
 
 notebook header /* add space between notebook tabs and options below */
@@ -987,18 +1002,17 @@ notebook header /* add space between notebook tabs and options below */
 #modules-tabs notebook header, #modules-tabs notebook
 {
   margin-bottom: 0;
+  color: @grey_65;
 }
 
 #modules-tabs notebook tab:hover label
 {
-  border-bottom: 0.1em solid @grey_95;
-  color: @grey_95;
+  color: @grey_100;
 }
 
 
 #modules-tabs notebook tab:checked label
 {
-  border-bottom: 0.1em solid @grey_100;
   color: @grey_100;
 }
 
