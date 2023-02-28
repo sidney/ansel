@@ -31,6 +31,7 @@
 @define-color grey_25 #3b3b3b;
 @define-color grey_30 #474747;
 @define-color grey_35 #525252;
+@define-color grey_38 #595959;
 @define-color grey_40 #5e5e5e;
 @define-color grey_42 #636363;
 @define-color grey_44 #686868;
@@ -524,29 +525,57 @@ dialog .sidebar row:selected:hover label,
   border: none;
 }
 
-.dt_module_frame
+.dt_plugin_ui_main
 {
-  border-left: 3px solid @bg_color;
-  border-top: 0;
-  border-bottom: 0;
+  border-top: 2px solid @grey_46;
 }
 
-.dt_module_focus,
-.dt_module_frame:focus
+.dt_module_frame
 {
-  border-color: shade(@field_selected_fg, 0.85);
+  border-top: none;
+  border-bottom: none;
+  margin: 0;
+  padding: 0;
+}
+
+#right .dt_module_frame
+{
+  border-left: 3px solid @bg_color;
+}
+
+#left .dt_module_frame
+{
+  border-right: 3px solid @bg_color;
+}
+
+#right .dt_module_focus,
+#right .dt_module_frame:focus
+{
+  border-left-color: shade(@field_selected_fg, 0.85);
+}
+
+#left .dt_module_focus,
+#left .dt_module_frame:focus
+{
+  border-right-color: shade(@field_selected_fg, 0.85);
+}
+
+.dt_module_focus #module-header,
+.dt_module_frame:focus #module-header
+{
+  background-color: @grey_55;
+}
+
+.dt_module_focus #blending-tabs,
+.dt_module_frame:focus #blending-tabs
+{
+  background-color: @grey_55;
 }
 
 /* Frame around blending boxes */
 #blending-tabs + #blending-box /* set top margin below blending tabs */
 {
   margin-top: 0.14em;
-}
-
-/* Add some space to aerate if a notebook follows a widget (like for example in filmic rgb module */
-.dt_plugin_ui_main widget + notebook
-{
-  margin-top: 0.5em;
 }
 
 /* Gradient sliders */
@@ -573,15 +602,8 @@ dialog .sidebar row:selected:hover label,
 #module-header
 {
   padding: 0.33em 0.25em;
-  border-top-left-radius: 0.5em;
-  border-top-right-radius: 0.5em;
-  border-top-left-radius: 0.5em;
-  border-top-right-radius: 0.5em;
-}
-
-.dt_module_focus #module-header,
-.dt_module_frame:focus #module-header
-{
+  border-top: 2px solid @grey_38;
+  margin: 0;
 }
 
 /* Labels in modules */
@@ -948,6 +970,11 @@ notebook tab:checked label
 notebook header /* add space between notebook tabs and options below */
 {
   margin-bottom: 0.42em;
+}
+
+#modules-tabs notebook tab
+{
+  padding: 0;
 }
 
 #modules-tabs notebook tab label
