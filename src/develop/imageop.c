@@ -1068,6 +1068,7 @@ void dt_iop_gui_init(dt_iop_module_t *module)
 {
   ++darktable.gui->reset;
   --darktable.bauhaus->skip_accel;
+  module->focused = NULL;
   if(module->gui_init) module->gui_init(module);
   ++darktable.bauhaus->skip_accel;
   --darktable.gui->reset;
@@ -1785,6 +1786,7 @@ void dt_iop_request_focus(dt_iop_module_t *module)
 
     dt_iop_color_picker_reset(out_focus_module, TRUE);
     gtk_widget_grab_focus(dt_ui_center(darktable.gui->ui));
+    out_focus_module->focused = NULL;
 
     gtk_widget_set_state_flags(dt_iop_gui_get_pluginui(out_focus_module), GTK_STATE_FLAG_NORMAL, TRUE);
 
@@ -1826,8 +1828,10 @@ void dt_iop_request_focus(dt_iop_module_t *module)
     /* redraw the expander */
     gtk_widget_queue_draw(module->expander);
     gtk_widget_grab_focus(module->expander);
+    module->focused = NULL;
 
     // we also add the focus css class
+    // FIXME: focused CSS node have a :focus pseudo-class already, this is redundant
     GtkWidget *iop_w = gtk_widget_get_parent(dt_iop_gui_get_pluginui(darktable.develop->gui_module));
     dt_gui_add_class(iop_w, "dt_module_focus");
   }
