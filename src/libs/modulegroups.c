@@ -185,11 +185,11 @@ void gui_init(dt_lib_module_t *self)
 
   /* search box */
   d->hbox_search_box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
-  d->text_entry = gtk_entry_new();
+  d->text_entry = gtk_search_entry_new();
   gtk_entry_set_placeholder_text(GTK_ENTRY(d->text_entry), _("Search a module…"));
   gtk_widget_add_events(d->text_entry, GDK_FOCUS_CHANGE_MASK);
   gtk_widget_add_events(d->text_entry, GDK_KEY_PRESS_MASK);
-  g_signal_connect(G_OBJECT(d->text_entry), "changed", G_CALLBACK(_text_entry_changed_callback), self);
+  g_signal_connect(G_OBJECT(d->text_entry), "search-changed", G_CALLBACK(_text_entry_changed_callback), self);
   g_signal_connect(G_OBJECT(d->text_entry), "icon-press", G_CALLBACK(_text_entry_icon_press_callback), self);
   g_signal_connect(G_OBJECT(d->text_entry), "key-press-event", G_CALLBACK(_text_entry_key_press_callback), self);
   gtk_box_pack_start(GTK_BOX(d->hbox_search_box), d->text_entry, TRUE, TRUE, 0);

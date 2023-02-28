@@ -1016,10 +1016,10 @@ notebook header /* add space between notebook tabs and options below */
   color: @grey_100;
 }
 
-#modules-tabs notebook:disabled tab:checked label
+#modules-tabs notebook:disabled tab label
 {
   border-bottom: none;
-  color: @grey_85;
+  color: @grey_65;
 }
 
 
