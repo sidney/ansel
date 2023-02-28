@@ -853,6 +853,7 @@ void dt_lib_gui_set_expanded(dt_lib_module_t *module, gboolean expanded)
     /* register to receive draw events */
     darktable.lib->gui_module = module;
     darktable.gui->scroll_to[1] = module->expander;
+    gtk_widget_grab_focus(GTK_WIDGET(module->expander));
   }
   else
   {
@@ -862,6 +863,7 @@ void dt_lib_gui_set_expanded(dt_lib_module_t *module, gboolean expanded)
 
       dt_control_queue_redraw();
     }
+    gtk_widget_grab_focus(dt_ui_main_window(darktable.gui->ui));
   }
 
   /* store expanded state of module */
@@ -907,6 +909,8 @@ static gboolean _lib_plugin_header_button_press(GtkWidget *w, GdkEventButton *e,
     else if(container == DT_UI_CONTAINER_PANEL_RIGHT_CENTER)
       darktable.gui->scroll_to[1] = module->expander;
 
+    gtk_widget_grab_focus(GTK_WIDGET(module->expander));
+
     /* handle shiftclick on expander, hide all except this */
     if(dt_modifier_is(e->state, GDK_SHIFT_MASK))
     {
@@ -932,9 +936,6 @@ static gboolean _lib_plugin_header_button_press(GtkWidget *w, GdkEventButton *e,
       /* else just toggle */
       dt_lib_gui_set_expanded(module, !dtgtk_expander_get_expanded(DTGTK_EXPANDER(module->expander)));
     }
-
-    //ensure that any gtkentry fields lose focus
-    gtk_widget_grab_focus(dt_ui_center(darktable.gui->ui));
 
     return TRUE;
   }
@@ -988,9 +989,12 @@ GtkWidget *dt_lib_gui_get_expander(dt_lib_module_t *module)
   gtk_widget_set_name(GTK_WIDGET(header), "module-header");
 
   GtkWidget *expander = dtgtk_expander_new(header, module->widget);
+  dt_gui_add_class(expander, "dt_module_frame");
+
   GtkWidget *header_evb = dtgtk_expander_get_header_event_box(DTGTK_EXPANDER(expander));
   GtkWidget *body_evb = dtgtk_expander_get_body_event_box(DTGTK_EXPANDER(expander));
   GtkWidget *pluginui_frame = dtgtk_expander_get_frame(DTGTK_EXPANDER(expander));
+  dt_gui_add_class(pluginui_frame, "dt_plugin_ui");
 
   /* setup the header box */
   g_signal_connect(G_OBJECT(header_evb), "button-press-event", G_CALLBACK(_lib_plugin_header_button_press),
@@ -1047,7 +1051,6 @@ GtkWidget *dt_lib_gui_get_expander(dt_lib_module_t *module)
 
   gtk_widget_show_all(module->widget);
   dt_gui_add_class(module->widget, "dt_plugin_ui_main");
-  dt_gui_add_class(pluginui_frame, "dt_plugin_ui");
   module->expander = expander;
 
   gtk_widget_set_hexpand(module->widget, FALSE);
