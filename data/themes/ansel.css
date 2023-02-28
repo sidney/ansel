@@ -517,12 +517,18 @@ dialog .sidebar row:selected:hover label,
 }
 
 .dt_plugin_ui_main,
-#blending-box,
 #guides-module-combobox
 {
   padding: 1em 0.5em;
   margin: 0;
   border: none;
+}
+
+#blending-box
+{
+  padding: 0.5em;
+  border: none;
+  margin: 0;
 }
 
 .dt_plugin_ui_main
@@ -564,12 +570,6 @@ dialog .sidebar row:selected:hover label,
 .dt_module_frame:focus #module-header
 {
   background-color: @grey_55;
-}
-
-/* Frame around blending boxes */
-#blending-tabs + #blending-box /* set top margin below blending tabs */
-{
-  margin-top: 0.14em;
 }
 
 /* Gradient sliders */
