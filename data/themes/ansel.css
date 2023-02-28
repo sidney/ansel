@@ -566,12 +566,6 @@ dialog .sidebar row:selected:hover label,
   border-right-color: shade(@field_selected_fg, 0.85);
 }
 
-.dt_module_focus #module-header,
-.dt_module_frame:focus #module-header
-{
-  background-color: @grey_55;
-}
-
 /* Gradient sliders */
 .dt_gslider,
 .dt_gslider_multivalue
@@ -902,7 +896,7 @@ notebook tabs,
 
 #blending-tabs
 {
-  background-color: @grey_52;
+  background-color: @grey_50;
 }
 
 /* set sizes of "buttons" in modules and blending tabs ; and guides lines too */
@@ -990,6 +984,11 @@ notebook header /* add space between notebook tabs and options below */
 #modules-tabs notebook tab
 {
   padding: 0;
+}
+
+#modules-tabs notebook tabs arrow
+{
+  border-bottom: 3px solid @bg_color;
 }
 
 #modules-tabs notebook tab label
