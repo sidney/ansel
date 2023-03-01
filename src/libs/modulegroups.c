@@ -135,13 +135,33 @@ static gboolean _text_entry_key_press_callback(GtkWidget *widget, GdkEventKey *e
   return FALSE;
 }
 
+int _modulegroups_cycle_tabs(int user_set_group)
+{
+  int group;
+  if(user_set_group < 0)
+  {
+    // cycle to the end
+    group = DT_MODULEGROUP_SIZE - 1;
+  }
+  else if(user_set_group >= DT_MODULEGROUP_SIZE)
+  {
+    // cycle to the beginning
+    group = 0;
+  }
+  else
+  {
+    group = user_set_group;
+  }
+  return group;
+}
+
 void _modulegroups_switch_tab_next(dt_action_t *action)
 {
   dt_iop_module_t *focused = darktable.develop->gui_module;
   if(focused) dt_iop_gui_set_expanded(focused, FALSE, TRUE);
 
   uint32_t current = dt_dev_modulegroups_get(darktable.develop);
-  dt_dev_modulegroups_set(darktable.develop, current + 1);
+  dt_dev_modulegroups_set(darktable.develop, _modulegroups_cycle_tabs(current + 1));
   dt_iop_request_focus(NULL);
 }
 
@@ -151,7 +171,7 @@ void _modulegroups_switch_tab_previous(dt_action_t *action)
   if(focused) dt_iop_gui_set_expanded(focused, FALSE, TRUE);
 
   uint32_t current = dt_dev_modulegroups_get(darktable.develop);
-  dt_dev_modulegroups_set(darktable.develop, current - 1);
+  dt_dev_modulegroups_set(darktable.develop, _modulegroups_cycle_tabs(current - 1));
   dt_iop_request_focus(NULL);
 }
 
@@ -162,9 +182,9 @@ static gboolean _lib_modulegroups_scroll(GtkWidget *widget, GdkEventScroll *even
   {
     uint32_t current = dt_dev_modulegroups_get(darktable.develop);
     if(delta_x > 0 || delta_y > 0)
-      dt_dev_modulegroups_set(darktable.develop, current + 1);
+      dt_dev_modulegroups_set(darktable.develop, _modulegroups_cycle_tabs(current + 1));
     else if(delta_x < 0 || delta_y < 0)
-      dt_dev_modulegroups_set(darktable.develop, current - 1);
+      dt_dev_modulegroups_set(darktable.develop, _modulegroups_cycle_tabs(current - 1));
     dt_iop_request_focus(NULL);
   }
 
