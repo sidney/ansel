@@ -135,24 +135,6 @@ static gboolean _text_entry_key_press_callback(GtkWidget *widget, GdkEventKey *e
   return FALSE;
 }
 
-void view_leave(dt_lib_module_t *self, dt_view_t *old_view, dt_view_t *new_view)
-{
-  if(!strcmp(old_view->module_name, "darkroom"))
-  {
-    //dt_lib_modulegroups_t *d = (dt_lib_modulegroups_t *)self->data;
-    // FIXME: disconnect actions
-  }
-}
-
-void view_enter(dt_lib_module_t *self, dt_view_t *old_view, dt_view_t *new_view)
-{
-  if(!strcmp(new_view->module_name, "darkroom"))
-  {
-    //dt_lib_modulegroups_t *d = (dt_lib_modulegroups_t *)self->data;
-    // FIXME: connect actions
-  }
-}
-
 void _modulegroups_switch_tab_next(dt_action_t *action)
 {
   dt_iop_module_t *focused = darktable.develop->gui_module;
@@ -263,8 +245,8 @@ void gui_init(dt_lib_module_t *self)
   darktable.develop->proxy.modulegroups.search_text_focus = _lib_modulegroups_search_text_focus;
 
   /* Bloody accels from the great MIDI turducken */
-  dt_action_register(DT_ACTION(self), N_("move the next modules tab"), _modulegroups_switch_tab_next, GDK_KEY_Tab, GDK_CONTROL_MASK);
-  dt_action_register(DT_ACTION(self), N_("move the previous modules tab"), _modulegroups_switch_tab_previous, GDK_KEY_Tab, GDK_CONTROL_MASK | GDK_SHIFT_MASK);
+  dt_action_register(DT_ACTION(self), N_("move to the next modules tab"), _modulegroups_switch_tab_next, GDK_KEY_Tab, GDK_CONTROL_MASK);
+  dt_action_register(DT_ACTION(self), N_("move to the previous modules tab"), _modulegroups_switch_tab_previous, GDK_KEY_Tab, GDK_CONTROL_MASK | GDK_SHIFT_MASK);
 
   /* let's connect to view changed signal to set default group */
   dt_control_signal_connect(darktable.signals, DT_SIGNAL_VIEWMANAGER_VIEW_CHANGED,
@@ -273,10 +255,6 @@ void gui_init(dt_lib_module_t *self)
 
 void gui_cleanup(dt_lib_module_t *self)
 {
-  // dt_lib_modulegroups_t *d = (dt_lib_modulegroups_t *)self->data;
-  // FIXME : dt_gui_key_accel_block_on_focus_disconnect(d->text_entry);
-
-  /* let's not listen to signals anymore.. */
   dt_control_signal_disconnect(darktable.signals, G_CALLBACK(_lib_modulegroups_viewchanged_callback), self);
 
   darktable.develop->proxy.modulegroups.module = NULL;
@@ -313,10 +291,7 @@ static gboolean _lib_modulesgroups_search_active(const gchar *text_entered, dt_i
       const int is_match_alias = (g_strstr_len(g_utf8_casefold(dt_iop_get_localized_aliases(module->op), -1), -1,
                                           g_utf8_casefold(text_entered, -1))
                                 != NULL);
-      if(is_match_name || is_match_alias)
-        gtk_widget_show(w);
-      else
-        gtk_widget_hide(w);
+      gtk_widget_set_visible(w, (is_match_name || is_match_alias));
     }
     is_handled = TRUE;
   }
@@ -436,7 +411,6 @@ typedef struct _set_gui_thread_t
 static gboolean _lib_modulegroups_set_gui_thread(gpointer user_data)
 {
   _set_gui_thread_t *params = (_set_gui_thread_t *)user_data;
-
   dt_lib_modulegroups_t *d = (dt_lib_modulegroups_t *)params->self->data;
 
   /* set current group and update visibility */
@@ -454,9 +428,7 @@ static gboolean _lib_modulegroups_set_gui_thread(gpointer user_data)
 static gboolean _lib_modulegroups_upd_gui_thread(gpointer user_data)
 {
   _set_gui_thread_t *params = (_set_gui_thread_t *)user_data;
-
   _lib_modulegroups_update_iop_visibility(params->self);
-
   free(params);
   return FALSE;
 }
