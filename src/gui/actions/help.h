@@ -49,10 +49,17 @@ void open_donate_callback(GtkWidget *widget)
   gtk_show_uri_on_window(GTK_WINDOW(dt_ui_main_window(darktable.gui->ui)), "https://liberapay.com/aurelienpierre", GDK_CURRENT_TIME, NULL);
 }
 
+void open_chat_callback(GtkWidget *widget)
+{
+  gtk_show_uri_on_window(GTK_WINDOW(dt_ui_main_window(darktable.gui->ui)),
+  "https://app.element.io/#/room/#ansel:matrix.org", GDK_CURRENT_TIME, NULL);
+}
+
 void append_help(GtkWidget **menus, GList **lists, const dt_menus_t index)
 {
   add_sub_menu_entry(menus, lists, _("Online documentation"), index, NULL, open_doc_callback, NULL, NULL, NULL);
   add_sub_menu_entry(menus, lists, _("Book a training session"), index, NULL, open_booking_callback, NULL, NULL, NULL);
+  add_sub_menu_entry(menus, lists, _("Support chat"), index, NULL, open_chat_callback, NULL, NULL, NULL);
   add_menu_separator(menus[index]);
   add_sub_menu_entry(menus, lists, _("Donate"), index, NULL, open_donate_callback, NULL, NULL, NULL);
   add_sub_menu_entry(menus, lists, _("About"), index, NULL, show_about_dialog, NULL, NULL, NULL);
