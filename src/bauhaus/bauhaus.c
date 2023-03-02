@@ -65,11 +65,12 @@ static void dt_bauhaus_widget_accept(dt_bauhaus_widget_t *w);
 static void dt_bauhaus_widget_reject(dt_bauhaus_widget_t *w);
 static void _bauhaus_combobox_set(dt_bauhaus_widget_t *w, const int pos, const gboolean mute);
 
-static void bauhaus_request_focus(dt_bauhaus_widget_t *w)
+void bauhaus_request_focus(dt_bauhaus_widget_t *w)
 {
   if(w->module && w->module->type == DT_ACTION_TYPE_IOP_INSTANCE)
       dt_iop_request_focus((dt_iop_module_t *)w->module);
   gtk_widget_set_state_flags(GTK_WIDGET(w), GTK_STATE_FLAG_FOCUSED, FALSE);
+  gtk_widget_grab_focus(GTK_WIDGET(w));
   darktable.gui->has_scroll_focus = GTK_WIDGET(w);
 }
 
