@@ -158,3 +158,15 @@ void * get_custom_data(GtkWidget *widget)
   // Grab custom data optionnaly passed by pointer to the menuitem widget
   return g_object_get_data(G_OBJECT(widget), "custom-data");
 }
+
+GtkWidget * get_last_widget(GList **list)
+{
+  GList *last_entry = g_list_last(*list);
+  GtkWidget *w = NULL;
+  if(last_entry)
+  {
+    dt_menu_entry_t *entry = (dt_menu_entry_t *)(last_entry)->data;
+    if(entry && entry->widget) w = entry->widget;
+  }
+  return w;
+}
