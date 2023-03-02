@@ -23,7 +23,6 @@ add_custom_target(
 set(MODULES import export copy_history styles tagging image select collect recentcollect metadata metadata_view navigation histogram history snapshots modulegroups backgroundjobs colorpicker masks session duplicate ioporder)
 
 # The tools
-set(MODULES ${MODULES} viewswitcher)
 set(MODULES ${MODULES} darktable_label)
 set(MODULES ${MODULES} colorlabels)
 set(MODULES ${MODULES} filter)
@@ -34,6 +33,7 @@ set(MODULES ${MODULES} filmstrip)
 set(MODULES ${MODULES} hinter)
 set(MODULES ${MODULES} global_toolbox)
 set(MODULES ${MODULES} image_infos)
+set(MODULES ${MODULES} menu)
 
 if(BUILD_BATTERY_INDICATOR)
   set(MODULES ${MODULES} battery_indicator)
@@ -64,8 +64,6 @@ add_library(duplicate MODULE "duplicate.c")
 add_library(ioporder MODULE "ioporder.c")
 
 # tools
-add_library(viewswitcher MODULE "tools/viewswitcher.c")
-
 add_library(darktable_label MODULE "tools/darktable.c")
 add_dependencies(darktable_label generate_authors_h)
 
@@ -78,6 +76,7 @@ add_library(filmstrip MODULE "tools/filmstrip.c")
 add_library(hinter MODULE "tools/hinter.c")
 add_library(global_toolbox MODULE "tools/global_toolbox.c")
 add_library(image_infos MODULE "tools/image_infos.c")
+add_library(menu MODULE "tools/menu.c")
 
 find_path(PORTMIDI_INCLUDE_DIR NAMES portmidi.h
           DOC "The Portmidi include directory"

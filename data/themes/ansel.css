@@ -465,13 +465,37 @@ separator
 /*------------------------
   - Main header settings -
   ------------------------*/
-/* Labels in views */
-#view-label,
-#view-dropdown
+#top
 {
-  font-size: 1.5em;
-  border-radius: 0.14em;
-  color: @disabled_fg_color;
+  background-color: @grey_35;
+  border-bottom: 2px solid @grey_30;
+}
+
+#menu-bar menuitem
+{
+  padding: 0.5em;
+}
+
+#menu-bar menuitem label
+{
+  font-weight: 700;
+}
+
+#menu-bar menuitem menu menuitem label
+{
+  font-weight: normal;
+}
+
+#menu-bar menuitem menu menuitem.menu-active label
+{
+  font-weight: 900;
+  color: @grey_100;
+}
+
+menubar menuitem,
+menubar menuitem label
+{
+  border: none;
 }
 
 /*------------------------------
@@ -564,6 +588,11 @@ dialog .sidebar row:selected:hover label,
 #left .dt_module_frame:focus
 {
   border-right-color: shade(@field_selected_fg, 0.85);
+}
+
+.dt_module_frame:first-child #module-header
+{
+  border-top:none;
 }
 
 /* Gradient sliders */

@@ -1876,6 +1876,7 @@ static void _ui_init_panel_top(dt_ui_t *ui, GtkWidget *container)
 
   /* create the panel box */
   ui->panels[DT_UI_PANEL_TOP] = widget = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
+  gtk_widget_set_name(ui->panels[DT_UI_PANEL_TOP], "top");
   gtk_widget_set_hexpand(GTK_WIDGET(widget), TRUE);
   gtk_grid_attach(GTK_GRID(container), widget, 1, 0, 3, 1);
 

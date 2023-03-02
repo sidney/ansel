@@ -85,7 +85,7 @@ static void _dev_change_image(dt_develop_t *dev, const int32_t imgid);
 
 const char *name(const dt_view_t *self)
 {
-  return _("darkroom");
+  return _("Darkroom");
 }
 
 #ifdef USE_LUA

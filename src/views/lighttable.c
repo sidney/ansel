@@ -76,7 +76,7 @@ typedef struct dt_library_t
 
 const char *name(const dt_view_t *self)
 {
-  return _("lighttable");
+  return _("Lighttable");
 }
 
 
