@@ -23,7 +23,6 @@ add_custom_target(
 set(MODULES import export copy_history styles tagging image select collect recentcollect metadata metadata_view navigation histogram history snapshots modulegroups backgroundjobs colorpicker masks session duplicate ioporder)
 
 # The tools
-set(MODULES ${MODULES} darktable_label)
 set(MODULES ${MODULES} colorlabels)
 set(MODULES ${MODULES} filter)
 set(MODULES ${MODULES} lighttable_mode)
@@ -64,9 +63,6 @@ add_library(duplicate MODULE "duplicate.c")
 add_library(ioporder MODULE "ioporder.c")
 
 # tools
-add_library(darktable_label MODULE "tools/darktable.c")
-add_dependencies(darktable_label generate_authors_h)
-
 add_library(colorlabels MODULE "tools/colorlabels.c")
 add_library(filter MODULE "tools/filter.c")
 add_library(lighttable_mode MODULE "tools/lighttable.c")
@@ -77,6 +73,7 @@ add_library(hinter MODULE "tools/hinter.c")
 add_library(global_toolbox MODULE "tools/global_toolbox.c")
 add_library(image_infos MODULE "tools/image_infos.c")
 add_library(menu MODULE "tools/menu.c")
+add_dependencies(menu generate_authors_h)
 
 find_path(PORTMIDI_INCLUDE_DIR NAMES portmidi.h
           DOC "The Portmidi include directory"

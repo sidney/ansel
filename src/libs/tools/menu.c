@@ -24,6 +24,7 @@
 #include "gui/gtk.h"
 #include "gui/actions/global.h"
 #include "gui/actions/views.h"
+#include "gui/actions/help.h"
 #include "libs/lib.h"
 #include "libs/lib_api.h"
 #ifdef GDK_WINDOWING_QUARTZ
@@ -90,6 +91,9 @@ void gui_init(dt_lib_module_t *self)
 
   /* Populate ateliers menu */
   append_views(d->menus, &d->item_lists, DT_MENU_ATELIERS);
+
+  /* Populate help menu */
+  append_help(d->menus, &d->item_lists, DT_MENU_HELP);
 }
 
 void gui_cleanup(dt_lib_module_t *self)
