@@ -1989,19 +1989,6 @@
     <longdescription>adds a mode in denoiseprofile that allows to compute the variance after the generalized anscombe transform is performed</longdescription>
   </dtconfig>
   <dtconfig prefs="darkroom" section="general">
-    <name>plugins/darkroom/demosaic/quality</name>
-    <type>
-      <enum>
-        <option>always bilinear (fast)</option>
-        <option>at most RCD (reasonable)</option>
-        <option>full (possibly slow)</option>
-      </enum>
-    </type>
-    <default>at most RCD (reasonable)</default>
-    <shortdescription>demosaicing for zoomed out darkroom mode</shortdescription>
-    <longdescription>interpolation when not viewing 1:1 in darkroom mode: bilinear is fastest, but not as sharp. middle ground is using RCD + interpolation modes specified on the 'pixel interpolator' option (processing tab), full will use exactly the settings for full-size export. X-Trans sensors use VNG rather than RCD as middle ground.</longdescription>
-  </dtconfig>
-  <dtconfig prefs="darkroom" section="general">
     <name>darkroom/ui/loading_screen</name>
     <type>bool</type>
     <default>true</default>

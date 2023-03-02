@@ -234,74 +234,13 @@ typedef struct dt_iop_demosaic_gui_data_t
   gboolean visual_mask;
 } dt_iop_demosaic_gui_data_t;
 
-
-static dt_iop_demosaic_quality_t get_quality()
-{
-  dt_iop_demosaic_quality_t qual = DT_DEMOSAIC_FAIR;
-  const char *quality = dt_conf_get_string("plugins/darkroom/demosaic/quality");
-  if(quality)
-  {
-    if(!strcmp(quality, "always bilinear (fast)"))
-      qual = DT_DEMOSAIC_FAST;
-    else if(!strcmp(quality, "full (possibly slow)"))
-      qual = DT_DEMOSAIC_BEST;
-  }
-  return qual;
-}
-
 // set flags for demosaic quality based on factors besides demosaic
 // method (e.g. config, scale, pixelpipe type)
 static int demosaic_qual_flags(const dt_dev_pixelpipe_iop_t *const piece,
                                const dt_image_t *const img,
                                const dt_iop_roi_t *const roi_out)
 {
-  int flags = 0;
-  switch (piece->pipe->type & DT_DEV_PIXELPIPE_ANY)
-  {
-    case DT_DEV_PIXELPIPE_FULL:
-    case DT_DEV_PIXELPIPE_THUMBNAIL:
-      {
-        const dt_iop_demosaic_quality_t qual = get_quality();
-        if(qual > DT_DEMOSAIC_FAST) flags |= DEMOSAIC_FULL_SCALE;
-        if(qual > DT_DEMOSAIC_FAIR) flags |= DEMOSAIC_XTRANS_FULL;
-        if((qual < DT_DEMOSAIC_BEST) && (roi_out->scale <= .99999f))
-          flags |= DEMOSAIC_MEDIUM_QUAL;
-      }
-      break;
-    case DT_DEV_PIXELPIPE_EXPORT:
-      flags |= DEMOSAIC_FULL_SCALE | DEMOSAIC_XTRANS_FULL;
-      break;
-    default: // make C not complain about missing enum members
-      break;
-  }
-
-  // For sufficiently small scaling, one or more repetitition of the
-  // CFA pattern can be merged into a single pixel, hence it is
-  // possible to skip the full demosaic and perform a quick downscale.
-  // Note even though the X-Trans CFA is 6x6, for this purposes we can
-  // see each 6x6 tile as four fairly similar 3x3 tiles
-  if(roi_out->scale > (piece->pipe->dsc.filters == 9u ? 0.333f : 0.5f))
-  {
-    flags |= DEMOSAIC_FULL_SCALE;
-  }
-  // half_size_f doesn't support 4bayer images
-  if(img->flags & DT_IMAGE_4BAYER) flags |= DEMOSAIC_FULL_SCALE;
-  // we use full Markesteijn demosaicing on xtrans sensors if maximum
-  // quality is required
-  if(roi_out->scale > 0.667f)
-  {
-    flags |= DEMOSAIC_XTRANS_FULL;
-  }
-
-  // we check if we can stop at the linear interpolation step in VNG
-  // instead of going the full way
-  if((flags & DEMOSAIC_FULL_SCALE) &&
-      (roi_out->scale < (piece->pipe->dsc.filters == 9u ? 0.5f : 0.667f)))
-  {
-    flags |= DEMOSAIC_ONLY_VNG_LINEAR;
-  }
-
-  return flags;
+  return DEMOSAIC_FULL_SCALE | DEMOSAIC_XTRANS_FULL;
 }
 
 // Implemented on amaze_demosaic_RT.cc
