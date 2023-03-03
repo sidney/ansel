@@ -155,7 +155,6 @@ src/develop/masks/masks.c
 src/develop/masks/path.c
 src/develop/pixelpipe_hb.c
 src/develop/tiling.c
-src/dtgtk/culling.c
 src/dtgtk/resetlabel.c
 src/dtgtk/thumbnail.c
 src/dtgtk/thumbnail_btn.c
@@ -163,6 +162,7 @@ src/dtgtk/thumbtable.c
 src/external/wb_presets.c
 src/generate-cache/main.c
 src/gui/accelerators.c
+src/gui/actions/help.h
 src/gui/gtk.c
 src/gui/gtkentry.c
 src/gui/guides.c
@@ -188,7 +188,11 @@ src/imageio/storage/email.c
 src/imageio/storage/gallery.c
 src/imageio/storage/latex.c
 src/imageio/storage/piwigo.c
-src/iop/amaze_demosaic_RT.cc
+src/iop/demosaic/dual.c
+src/iop/demosaic/lmmse.c
+src/iop/demosaic/rcd.c
+src/iop/restorescans.c
+src/libs/tools/menu.c
 src/iop/ashift.c
 src/iop/atrous.c
 src/iop/basecurve.c
@@ -225,7 +229,6 @@ src/iop/demosaic.c
 src/iop/denoiseprofile.c
 src/iop/diffuse.c
 src/iop/dither.c
-src/iop/dual_demosaic.c
 src/iop/equalizer.c
 src/iop/exposure.c
 src/iop/filmic.c
@@ -244,7 +247,6 @@ src/iop/invert.c
 src/iop/lens.cc
 src/iop/levels.c
 src/iop/liquify.c
-src/iop/lmmse_demosaic.c
 src/iop/lowlight.c
 src/iop/lowpass.c
 src/iop/lut3d.c
@@ -257,7 +259,6 @@ src/iop/profile_gamma.c
 src/iop/rawdenoise.c
 src/iop/rawoverexposed.c
 src/iop/rawprepare.c
-src/iop/rcd_demosaic.c
 src/iop/relight.c
 src/iop/retouch.c
 src/iop/rgbcurve.c
@@ -311,7 +312,6 @@ src/libs/styles.c
 src/libs/tagging.c
 src/libs/tools/battery_indicator.c
 src/libs/tools/colorlabels.c
-src/libs/tools/darktable.c
 src/libs/tools/filmstrip.c
 src/libs/tools/filter.c
 src/libs/tools/gamepad.c
@@ -322,7 +322,6 @@ src/libs/tools/lighttable.c
 src/libs/tools/midi.c
 src/libs/tools/module_toolbox.c
 src/libs/tools/view_toolbox.c
-src/libs/tools/viewswitcher.c
 src/lua/image.c
 src/lua/lualib.c
 src/lua/preferences.c
