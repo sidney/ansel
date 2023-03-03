@@ -219,7 +219,7 @@ void gui_init(dt_lib_module_t *self)
 
   /* Tabs */
   d->notebook = GTK_WIDGET(gtk_notebook_new());
-  char *labels[DT_MODULEGROUP_SIZE] = { _("Enabled"),
+  char *labels[DT_MODULEGROUP_SIZE] = { _("Pipeline"),
                                         _("Tones"),
                                         _("Film"),
                                         _("Color"),
