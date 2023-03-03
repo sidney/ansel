@@ -83,15 +83,20 @@ static void _main_do_event_keymap(GdkEvent *event, gpointer data)
   {
   case GDK_LEAVE_NOTIFY:
   case GDK_ENTER_NOTIFY:
+  {
     if(darktable.control->mapping_widget
        && event->crossing.mode == GDK_CROSSING_UNGRAB)
       break;
+  }
   case GDK_GRAB_BROKEN:
   case GDK_FOCUS_CHANGE:
+  {
     darktable.control->mapping_widget = event_widget;
     _set_mapping_mode_cursor(event_widget);
     break;
+  }
   case GDK_BUTTON_PRESS:
+  {
     GtkWidget *main_window = dt_ui_main_window(darktable.gui->ui);
     if(_cancel_key_mapping(event, event_widget, main_window))
     {
@@ -117,6 +122,7 @@ static void _main_do_event_keymap(GdkEvent *event, gpointer data)
       _show_shortcuts_prefs(event_widget);
     }
     return;
+  }
   default:
     break;
   }
