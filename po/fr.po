@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: darktable 3.9\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2023-03-03 01:01+0100\n"
-"PO-Revision-Date: 2023-03-03 01:09+0100\n"
+"PO-Revision-Date: 2023-03-03 01:12+0100\n"
 "Last-Translator: Aurélien PIERRE <contact@aurelienpierre.com>\n"
 "Language-Team: \n"
 "Language: fr_FR\n"
@@ -9107,12 +9107,6 @@ msgstr "et..."
 #: ../src/gui/actions/help.h:27
 msgid "translator-credits"
 msgstr ""
-"Pascal Obry\n"
-"\n"
-"Versions précédentes :\n"
-"Olivier Tribout\n"
-"Sébastien Delcoigne\n"
-"Nicolas Carlier"
 
 #: ../src/gui/actions/help.h:60
 msgid "Online documentation"
@@ -20489,11 +20483,11 @@ msgstr "Film"
 
 #: ../src/libs/modulegroups.c:225
 msgid "Color"
-msgstr "couleur"
+msgstr "Couleur"
 
 #: ../src/libs/modulegroups.c:226
 msgid "Repair"
-msgstr ""
+msgstr "Réparer"
 
 #: ../src/libs/modulegroups.c:227
 msgid "Sharpness"
@@ -22224,10 +22218,8 @@ msgid "select toggle image"
 msgstr "inverser sélection de l'image"
 
 #: ../src/views/lighttable.c:590
-#, fuzzy
-#| msgid "open image in darkroom"
 msgid "open single image in darkroom"
-msgstr "ouvrir l'image dans la chambre noire"
+msgstr "ouvrir une seule image en chambre noire"
 
 #: ../src/views/lighttable.c:598
 msgid "zoom max"
@@ -22256,7 +22248,7 @@ msgstr "déplacer la position des images"
 #: ../src/views/print.c:55
 msgctxt "view"
 msgid "Print"
-msgstr "impression"
+msgstr "Impression"
 
 #: ../src/views/slideshow.c:311
 msgid "end of images"
