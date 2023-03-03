@@ -2578,6 +2578,7 @@ static void _show_module_callback(dt_iop_module_t *module)
 
   dt_iop_gui_set_expanded(module, TRUE, TRUE);
   dt_iop_request_focus(module);
+  darktable.gui->scroll_to[1] = module->expander;
 
   dt_iop_connect_accels_multi(module->so);
 }
