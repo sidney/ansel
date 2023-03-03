@@ -192,56 +192,7 @@ GList *dt_act_on_get_images(const gboolean only_visible, const gboolean force, c
 // get the query to retrieve images to act on. this is useful to speedup actions if they already use sqlite queries
 gchar *dt_act_on_get_query(const gboolean only_visible)
 {
-  /** Here's how it works
-   *
-   *             mouse over| x | x | x |   |   |
-   *     mouse inside table| x | x |   |   |   |
-   * mouse inside selection| x |   |   |   |   |
-   *          active images| ? | ? | x |   | x |
-   *                       |   |   |   |   |   |
-   *                       | S | O | O | S | A |
-   *  S = selection ; O = mouseover ; A = active images
-   *  the mouse can be outside thumbtable in case of filmstrip + mouse in center widget
-   *
-   *  if only_visible is FALSE, then it will add also not visible images because of grouping
-   *  due to dt_selection_get_list_query limitation, order is always considered as undefined
-   **/
-
-  GList *l = NULL;
-  // column 4,5
-  if(darktable.view_manager->active_images)
-  {
-    // column 5
-    for(GSList *ll = darktable.view_manager->active_images; ll; ll = g_slist_next(ll))
-    {
-      const int id = GPOINTER_TO_INT(ll->data);
-      _insert_in_list(&l, id, only_visible);
-      // be absolutely sure we have the id in the list (in darkroom,
-      // the active image can be out of collection)
-      if(!only_visible) _insert_in_list(&l, id, TRUE);
-    }
-  }
-  else
-  {
-    // column 4
-    return dt_selection_get_list_query(darktable.selection, only_visible, FALSE);
-  }
-
-  // if we don't return the selection, we return the list of imgid separated by comma
-  // in the form it can be used inside queries
-  gchar *images = NULL;
-  for(; l; l = g_list_next(l))
-  {
-    images = dt_util_dstrcat(images, "%d,", GPOINTER_TO_INT(l->data));
-  }
-  if(images)
-  {
-    // remove trailing comma
-    images[strlen(images) - 1] = '\0';
-  }
-  else
-    images = g_strdup(" ");
-  return images;
+  return dt_selection_get_list_query(darktable.selection, only_visible, FALSE);
 }
 
 // get the main image to act on during global changes (libs, accels)

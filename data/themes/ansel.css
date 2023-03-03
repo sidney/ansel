@@ -1838,6 +1838,14 @@ Details :
   border: 2px solid @lighttable_bg_color;
 }
 
+/* set selected image and/or focus one */
+/* selection supersedes hover */
+.thumb-main:active .thumb-back
+{
+  background-color: @grey_45;
+  border-color: @grey_45;
+}
+
 /* set hover effect */
 .thumb-main:hover .thumb-back
 {
@@ -1845,14 +1853,12 @@ Details :
   border-color: @thumbnail_hover_bg_color;
 }
 
-/* set selected image and/or focus one */
-/* selection supersedes hover */
-.thumb-main:active .thumb-back,
 .thumb-main:selected .thumb-back
 {
   background-color: @thumbnail_selected_bg_color;
   border-color: @thumbnail_selected_bg_color;
 }
+
 
 /*-----------------
   - Image options -
