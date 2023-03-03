@@ -1724,17 +1724,11 @@ static gboolean _panel_handle_button_callback(GtkWidget *w, GdkEventButton *e, g
     else if(e->type == GDK_2BUTTON_PRESS)
     {
       darktable.gui->widgets.panel_handle_dragging = FALSE;
-      // we hide the panel
-      if(strcmp(gtk_widget_get_name(w), "panel-handle-right") == 0)
-        dt_ui_panel_show(darktable.gui->ui, DT_UI_PANEL_RIGHT, FALSE, TRUE);
-      else if(strcmp(gtk_widget_get_name(w), "panel-handle-left") == 0)
-        dt_ui_panel_show(darktable.gui->ui, DT_UI_PANEL_LEFT, FALSE, TRUE);
-      else if(strcmp(gtk_widget_get_name(w), "panel-handle-bottom") == 0)
-        dt_ui_panel_show(darktable.gui->ui, DT_UI_PANEL_BOTTOM, FALSE, TRUE);
     }
   }
   return TRUE;
 }
+
 static gboolean _panel_handle_cursor_callback(GtkWidget *w, GdkEventCrossing *e, gpointer user_data)
 {
   if(strcmp(gtk_widget_get_name(w), "panel-handle-bottom") == 0)
@@ -1743,6 +1737,7 @@ static gboolean _panel_handle_cursor_callback(GtkWidget *w, GdkEventCrossing *e,
     dt_control_change_cursor((e->type == GDK_ENTER_NOTIFY) ? GDK_SB_H_DOUBLE_ARROW : GDK_LEFT_PTR);
   return TRUE;
 }
+
 static gboolean _panel_handle_motion_callback(GtkWidget *w, GdkEventButton *e, gpointer user_data)
 {
   GtkWidget *widget = (GtkWidget *)user_data;
