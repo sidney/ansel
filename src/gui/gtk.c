@@ -2617,7 +2617,7 @@ static gboolean _scroll_wrap_resize(GtkWidget *w, void *cr, const char *config_s
 
   gint height = dt_conf_get_int(config_str);
 
-  const gint max_height = DT_PIXEL_APPLY_DPI(1000);
+  const gint max_height = gtk_widget_get_allocated_height(sw);
 
   height = (height < 1) ? 1 : (height > max_height) ? max_height : height;
 
