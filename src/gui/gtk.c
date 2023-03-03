@@ -2617,7 +2617,9 @@ static gboolean _scroll_wrap_resize(GtkWidget *w, void *cr, const char *config_s
 
   gint height = dt_conf_get_int(config_str);
 
-  const gint max_height = gtk_widget_get_allocated_height(sw);
+  // Max height is 75% of window height
+  GtkWidget *container = dt_ui_main_window(darktable.gui->ui);
+  const gint max_height = (container) ? gtk_widget_get_allocated_height(container) * 3 / 4 : DT_PIXEL_APPLY_DPI(1000);
 
   height = (height < 1) ? 1 : (height > max_height) ? max_height : height;
 
@@ -2652,7 +2654,6 @@ static gboolean _scroll_wrap_resize(GtkWidget *w, void *cr, const char *config_s
     value -= value % increment;
     gtk_adjustment_set_value(adj, value);
   }
-
   return FALSE;
 }
 
