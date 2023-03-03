@@ -32,6 +32,8 @@ set(MODULES ${MODULES} filmstrip)
 set(MODULES ${MODULES} hinter)
 set(MODULES ${MODULES} image_infos)
 set(MODULES ${MODULES} menu)
+set(MODULES ${MODULES} menubuttons)
+
 
 if(BUILD_BATTERY_INDICATOR)
   set(MODULES ${MODULES} battery_indicator)
@@ -72,6 +74,7 @@ add_library(hinter MODULE "tools/hinter.c")
 add_library(image_infos MODULE "tools/image_infos.c")
 add_library(menu MODULE "tools/menu.c")
 add_dependencies(menu generate_authors_h)
+add_library(menubuttons MODULE "tools/menu_buttons.c")
 
 find_path(PORTMIDI_INCLUDE_DIR NAMES portmidi.h
           DOC "The Portmidi include directory"
