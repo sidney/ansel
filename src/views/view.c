@@ -1171,6 +1171,7 @@ void dt_view_accels_show(dt_view_manager_t *vm)
   vm->accels_window.prevent_refresh = FALSE;
   vm->accels_window.window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
   gtk_window_set_decorated(GTK_WINDOW(vm->accels_window.window), TRUE);
+  gtk_window_set_title(GTK_WINDOW(vm->accels_window.window), _("Shortcuts mapped to actions in Ansel"));
 
   dt_gui_add_class(vm->accels_window.window, "dt_accels_window");
 
