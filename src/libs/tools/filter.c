@@ -473,10 +473,11 @@ void gui_init(dt_lib_module_t *self)
   d->text = gtk_search_entry_new();
   char *text = _decode_text_filter(dt_collection_get_text_filter(darktable.collection));
   gtk_entry_set_text(GTK_ENTRY(d->text), text);
+  gtk_entry_set_placeholder_text(GTK_ENTRY(d->text), _("Search an image…"));
   g_free(text);
   g_signal_connect(G_OBJECT(d->text), "search-changed", G_CALLBACK(_text_entry_changed), self);
   g_signal_connect(G_OBJECT(d->text), "stop-search", G_CALLBACK(_reset_text_entry), self);
-  gtk_entry_set_width_chars(GTK_ENTRY(d->text), 14);
+  gtk_entry_set_width_chars(GTK_ENTRY(d->text), 24);
   gtk_widget_set_tooltip_text(d->text,
           /* xgettext:no-c-format */
                               _("filter by text from images metadata, tags, file path and name"
