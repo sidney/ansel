@@ -2576,11 +2576,8 @@ static void _show_module_callback(dt_iop_module_t *module)
     dt_dev_modulegroups_set(darktable.develop, current_group);
   }
 
-  dt_iop_gui_set_expanded(module, !module->expanded, FALSE);
-  if(module->expanded)
-  {
-    dt_iop_request_focus(module);
-  }
+  dt_iop_gui_set_expanded(module, TRUE, TRUE);
+  dt_iop_request_focus(module);
 
   dt_iop_connect_accels_multi(module->so);
 }
