@@ -1170,9 +1170,8 @@ void dt_view_accels_show(dt_view_manager_t *vm)
   vm->accels_window.sticky = FALSE;
   vm->accels_window.prevent_refresh = FALSE;
   vm->accels_window.window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
-#ifdef GDK_WINDOWING_QUARTZ
-  dt_osx_disallow_fullscreen(vm->accels_window.window);
-#endif
+  gtk_window_set_decorated(GTK_WINDOW(vm->accels_window.window), TRUE);
+
   dt_gui_add_class(vm->accels_window.window, "dt_accels_window");
 
   GtkWidget *sw = gtk_scrolled_window_new(NULL, NULL);
