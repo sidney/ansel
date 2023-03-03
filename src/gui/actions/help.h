@@ -183,6 +183,12 @@ static void contextual_help_callback(GtkWidget *widget)
   gdk_event_handler_set(_main_do_event_help, NULL, NULL);
 }
 
+static void show_accels_callback(GtkWidget *widget)
+{
+  dt_view_accels_show(darktable.view_manager);
+  darktable.view_manager->accels_window.window = NULL;
+}
+
 void append_help(GtkWidget **menus, GList **lists, const dt_menus_t index)
 {
   add_sub_menu_entry(menus, lists, _("Online documentation"), index, NULL, open_doc_callback, NULL, NULL, NULL);
@@ -190,6 +196,7 @@ void append_help(GtkWidget **menus, GList **lists, const dt_menus_t index)
   add_sub_menu_entry(menus, lists, _("Support chat"), index, NULL, open_chat_callback, NULL, NULL, NULL);
   add_menu_separator(menus[index]);
   add_sub_menu_entry(menus, lists, _("Open contextual help"), index, NULL, contextual_help_callback, NULL, NULL, NULL);
+  add_sub_menu_entry(menus, lists, _("Table of key shortcuts"), index, NULL, show_accels_callback, NULL, NULL, NULL);
   add_menu_separator(menus[index]);
   add_sub_menu_entry(menus, lists, _("Donate"), index, NULL, open_donate_callback, NULL, NULL, NULL);
   add_sub_menu_entry(menus, lists, _("About"), index, NULL, show_about_dialog, NULL, NULL, NULL);

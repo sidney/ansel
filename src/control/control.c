@@ -43,33 +43,6 @@
 #include <string.h>
 #include <strings.h>
 
-static float _action_process_accels_show(gpointer target, dt_action_element_t element, dt_action_effect_t effect, float move_size)
-{
-  if(!isnan(move_size))
-  {
-    if(darktable.view_manager->accels_window.window == NULL)
-    {
-      if(effect != DT_ACTION_EFFECT_OFF)
-        dt_view_accels_show(darktable.view_manager);
-    }
-    else
-    {
-      if(effect != DT_ACTION_EFFECT_ON)
-        dt_view_accels_hide(darktable.view_manager);
-    }
-  }
-
-  return darktable.view_manager->accels_window.window != NULL;
-}
-
-const dt_action_def_t dt_action_def_accels_show
-  = { N_("hold"),
-      _action_process_accels_show,
-      dt_action_elements_hold,
-      NULL, TRUE };
-
-
-
 static float _action_process_modifiers(gpointer target, dt_action_element_t element, dt_action_effect_t effect, float move_size)
 {
   GdkModifierType mask = 1;
@@ -114,9 +87,6 @@ void dt_control_init(dt_control_t *s)
   dt_action_define_fallback(DT_ACTION_TYPE_IOP, &dt_action_def_iop);
   dt_action_define_fallback(DT_ACTION_TYPE_LIB, &dt_action_def_lib);
   dt_action_define_fallback(DT_ACTION_TYPE_VALUE_FALLBACK, &dt_action_def_value);
-
-  dt_action_t *ac = dt_action_define(&s->actions_global, NULL, N_("show accels window"), NULL, &dt_action_def_accels_show);
-  dt_shortcut_register(ac, 0, DT_ACTION_EFFECT_HOLD, GDK_KEY_h, 0);
 
   s->actions_modifiers = dt_action_define(&s->actions_global, NULL, N_("modifiers"), NULL, &dt_action_def_modifiers);
 
