@@ -923,7 +923,13 @@ int dt_gui_gtk_init(dt_gui_gtk_t *gui)
   widget = dt_ui_main_window(darktable.gui->ui);
   g_signal_connect(G_OBJECT(widget), "configure-event", G_CALLBACK(_window_configure), NULL);
   g_signal_connect(G_OBJECT(widget), "event", G_CALLBACK(dt_shortcut_dispatcher), NULL);
-  g_signal_override_class_handler("query-tooltip", gtk_widget_get_type(), G_CALLBACK(dt_shortcut_tooltip_callback));
+
+  // This is utterly broken and deeply messed-up as it breaks tooltips positionning while being generally ugly.
+  // TODO: 1. implement API `const char * get_shortcut_for_widget(GtkWidget *w)` in accelerators.c
+  //       2. call it in the tooltip constructor where relevant
+  //       3. append the shortcut path as text to the tooltip text content __BEFORE__ initialization of the widget.
+  //       4. Find out where Diederik Ter Rahe lives and ensure he never writes another line of code.
+  // g_signal_override_class_handler("query-tooltip", gtk_widget_get_type(), G_CALLBACK(dt_shortcut_tooltip_callback));
 
   //an action that does nothing - used for overriding/removing default shortcuts
   dt_action_register(&darktable.control->actions_global, N_("no-op"), _gui_noop_action_callback, 0, 0);
