@@ -26,6 +26,7 @@
 #include "gui/actions/views.h"
 #include "gui/actions/edit.h"
 #include "gui/actions/help.h"
+#include "gui/actions/display.h"
 #include "libs/lib.h"
 #include "libs/lib_api.h"
 #ifdef GDK_WINDOWING_QUARTZ
@@ -92,6 +93,9 @@ void gui_init(dt_lib_module_t *self)
 
   /* Populate edit menu */
   append_edit(d->menus, &d->item_lists, DT_MENU_EDIT);
+
+  /* Populate display menu */
+  append_display(d->menus, &d->item_lists, DT_MENU_DISPLAY);
 
   /* Populate ateliers menu */
   append_views(d->menus, &d->item_lists, DT_MENU_ATELIERS);

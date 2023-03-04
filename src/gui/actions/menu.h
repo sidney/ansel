@@ -46,7 +46,7 @@ typedef struct dt_menu_entry_t
  *  will be updated automatically everytime a top-level menu is opened.
  **/
 
-static dt_menu_entry_t * set_menu_entry(GList **items_list, const gchar *label, gchar *shortcut,
+static dt_menu_entry_t * set_menu_entry(GList **items_list, const gchar *label, const gchar *shortcut,
                                         dt_menus_t menu_index,
                                         void *data,
                                         void (*action_callback)(GtkWidget *widget),
@@ -63,9 +63,13 @@ static dt_menu_entry_t * set_menu_entry(GList **items_list, const gchar *label, 
   else
     entry->widget = gtk_menu_item_new_with_label(label);
 
+  if(shortcut) gtk_menu_item_set_accel_path(GTK_MENU_ITEM(entry->widget), shortcut);
+
   // Store arbitrary data in the GtkWidget if needed
   if(data)
     g_object_set_data(G_OBJECT(entry->widget), "custom-data", data);
+
+  gtk_widget_show_all(entry->widget);
 
   entry->menu = menu_index;
   entry->action_callback = action_callback;
@@ -83,7 +87,13 @@ void update_entry(dt_menu_entry_t *entry)
 {
   // Use the callbacks functions to update the visual properties of the menu entry
   if(entry->checked_callback)
+  {
+    // Set the visible state of the checkbox without actually triggering the callback running on activation
+    // Gtk has no concept of "set costmetic active state" for checkboxes.
+    g_signal_handlers_block_matched(G_OBJECT(entry->widget), G_SIGNAL_MATCH_FUNC, 0, 0, NULL, entry->action_callback, NULL);
     gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(entry->widget), entry->checked_callback(entry->widget));
+    g_signal_handlers_unblock_matched(G_OBJECT(entry->widget), G_SIGNAL_MATCH_FUNC, 0, 0, NULL, entry->action_callback, NULL);
+  }
 
   if(entry->sensitive_callback)
     gtk_widget_set_sensitive(entry->widget, entry->sensitive_callback(entry->widget));
@@ -112,13 +122,23 @@ void update_menu_entries(GtkWidget *widget, gpointer user_data)
 
 void add_top_menu_entry(GtkWidget *menu_bar, GtkWidget **menus, GList **lists, const dt_menus_t index, gchar *label)
 {
+  // Top menus belong to menu bar : file, edit, display, etc.
   menus[index] = gtk_menu_new();
   GtkWidget *menu_label = gtk_menu_item_new_with_mnemonic(label);
   gtk_menu_item_set_submenu(GTK_MENU_ITEM(menu_label), menus[index]);
   gtk_menu_shell_append(GTK_MENU_SHELL(menu_bar), menu_label);
   dt_gui_add_class(menu_label, "top-level-item");
-  gtk_menu_item_set_use_underline(GTK_MENU_ITEM(menu_label), TRUE);
   g_signal_connect(G_OBJECT(menu_label), "activate", G_CALLBACK(update_menu_entries), lists);
+}
+
+void add_top_submenu_entry(GtkWidget **menus, GList **lists, const gchar *label, const dt_menus_t index)
+{
+  // Special submenus entries that only open a sub-submenu
+  GtkWidget *submenu = gtk_menu_new();
+  dt_menu_entry_t *entry = set_menu_entry(lists, label, NULL, index, NULL, NULL, NULL, NULL, NULL);
+  gtk_menu_item_set_submenu(GTK_MENU_ITEM(entry->widget), submenu);
+  gtk_menu_shell_append(GTK_MENU_SHELL(menus[index]), entry->widget);
+  // We don't take callbacks for top submenus, they do nothing more than opening sub-submenues.
 }
 
 void add_sub_menu_entry(GtkWidget **menus, GList **lists, const gchar *label, const dt_menus_t index,
@@ -128,17 +148,39 @@ void add_sub_menu_entry(GtkWidget **menus, GList **lists, const gchar *label, co
                         gboolean (*active_callback)(GtkWidget *widget),
                         gboolean (*sensitive_callback)(GtkWidget *widget))
 {
+  // Default submenu entries
   dt_menu_entry_t *entry = set_menu_entry(lists, label, NULL, index,
                                           data,
                                           action_callback, checked_callback,
                                           active_callback, sensitive_callback);
-  update_entry(entry);
+
   gtk_menu_shell_append(GTK_MENU_SHELL(menus[index]), entry->widget);
   gtk_menu_item_set_reserve_indicator(GTK_MENU_ITEM(entry->widget), TRUE);
 
   if(action_callback)
     g_signal_connect(G_OBJECT(entry->widget), "activate", G_CALLBACK(entry->action_callback), NULL);
 }
+
+void add_sub_sub_menu_entry(GtkWidget *parent, GList **lists, const gchar *label, const dt_menus_t index,
+                            void *data,
+                            void (*action_callback)(GtkWidget *widget),
+                            gboolean (*checked_callback)(GtkWidget *widget),
+                            gboolean (*active_callback)(GtkWidget *widget),
+                            gboolean (*sensitive_callback)(GtkWidget *widget))
+{
+  // Submenus of submenus entries
+  dt_menu_entry_t *entry = set_menu_entry(lists, label, NULL, index,
+                                          data,
+                                          action_callback, checked_callback,
+                                          active_callback, sensitive_callback);
+
+  gtk_menu_shell_append(GTK_MENU_SHELL(gtk_menu_item_get_submenu(GTK_MENU_ITEM(parent))), entry->widget);
+
+  if(action_callback)
+    g_signal_connect(G_OBJECT(entry->widget), "activate", G_CALLBACK(entry->action_callback), NULL);
+}
+
+// We don't go further than 3 levels of menus. This is not a Dassault Systems software.
 
 void add_menu_separator(GtkWidget *menu)
 {

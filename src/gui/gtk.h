@@ -20,6 +20,8 @@
 
 #include "common/darktable.h"
 #include "common/dtpthread.h"
+#include "dtgtk/thumbtable.h"
+
 
 #include <gtk/gtk.h>
 #include <stdint.h>
@@ -304,6 +306,28 @@ typedef enum dt_ui_border_t
 
   DT_UI_BORDER_SIZE
 } dt_ui_border_t;
+
+typedef struct dt_ui_t
+{
+  /* container widgets */
+  GtkWidget *containers[DT_UI_CONTAINER_SIZE];
+
+  /* panel widgets */
+  GtkWidget *panels[DT_UI_PANEL_SIZE];
+
+  /* center widget */
+  GtkWidget *center;
+  GtkWidget *center_base;
+
+  /* main widget */
+  GtkWidget *main_window;
+
+  /* thumb table */
+  dt_thumbtable_t *thumbtable;
+
+  /* log msg and toast labels */
+  GtkWidget *log_msg, *toast_msg;
+} dt_ui_t;
 
 /** \brief add's a widget to a defined container */
 void dt_ui_container_add_widget(struct dt_ui_t *ui, const dt_ui_container_t c, GtkWidget *w);
