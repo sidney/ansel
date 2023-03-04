@@ -2293,11 +2293,17 @@ gboolean _iop_tooltip_callback(GtkWidget *widget, gint x, gint y, gboolean keybo
   gtk_grid_set_column_spacing(GTK_GRID(grid), DT_PIXEL_APPLY_DPI(10));
   gtk_widget_set_hexpand(grid, FALSE);
 
-  GtkWidget *label = gtk_label_new(des[0]?des[0]:"");
-  gtk_label_set_justify(GTK_LABEL(label), GTK_JUSTIFY_CENTER);
+  GtkWidget *label = gtk_label_new(des[0] ? des[0] : "");
+  gtk_label_set_justify(GTK_LABEL(label), GTK_JUSTIFY_LEFT);
+  gtk_label_set_line_wrap(GTK_LABEL(label), TRUE);
+  gtk_label_set_max_width_chars(GTK_LABEL(label), 40);
   // if there is no more description, do not add a separator
   if(des[1]) dt_gui_add_class(label, "dt_section_label");
   gtk_box_pack_start(GTK_BOX(vbox), label, FALSE, FALSE, 0);
+
+  gtk_widget_set_size_request(label, DT_PIXEL_APPLY_DPI(300), -1);
+  gtk_widget_set_size_request(grid, DT_PIXEL_APPLY_DPI(300), -1);
+  gtk_widget_set_size_request(vbox, DT_PIXEL_APPLY_DPI(300), -1);
 
   const char *icon_purpose = "⟳";
   const char *icon_input   = "⇥";
@@ -2305,7 +2311,7 @@ gboolean _iop_tooltip_callback(GtkWidget *widget, gint x, gint y, gboolean keybo
   const char *icon_output  = "↦";
 
   const char *icons[4] = {icon_purpose, icon_input, icon_process, icon_output};
-  const char *ilabs[4] = {_("purpose"), _("input"), _("process"), _("output")};
+  const char *ilabs[4] = {_("Purpose"), _("Input"), _("Process"), _("Output")};
 
   for(int k=1; k<5; k++)
   {
@@ -2314,32 +2320,35 @@ gboolean _iop_tooltip_callback(GtkWidget *widget, gint x, gint y, gboolean keybo
       label = gtk_label_new(icons[k-1]);
       gtk_widget_set_halign(label, GTK_ALIGN_START);
       gtk_grid_attach(GTK_GRID(grid), label, 0, k, 1, 1);
+      gtk_label_set_line_wrap(GTK_LABEL(label), TRUE);
 
       label = gtk_label_new(ilabs[k-1]);
       gtk_widget_set_halign(label, GTK_ALIGN_START);
       gtk_grid_attach(GTK_GRID(grid), label, 1, k, 1, 1);
+      gtk_label_set_line_wrap(GTK_LABEL(label), TRUE);
 
       label = gtk_label_new(":");
       gtk_widget_set_halign(label, GTK_ALIGN_START);
       gtk_grid_attach(GTK_GRID(grid), label, 2, k, 1, 1);
+      gtk_label_set_line_wrap(GTK_LABEL(label), TRUE);
 
       label = gtk_label_new(des[k]);
       gtk_widget_set_halign(label, GTK_ALIGN_START);
       gtk_grid_attach(GTK_GRID(grid), label, 3, k, 1, 1);
+      gtk_label_set_line_wrap(GTK_LABEL(label), TRUE);
     }
   }
 
   gtk_box_pack_start(GTK_BOX(vbox), grid, FALSE, FALSE, 0);
-
   gtk_widget_show_all(vbox);
   gtk_tooltip_set_custom(tooltip, vbox);
 
-  //  Record the vbox into the widget to be able to retrieve it
-  //  for adding the shortcut (see accelerators.c).
+  // Fix bad positionning ?
+  GtkAllocation *alloc = NULL; // Note : GtkAllocation and GdkRectangle are type aliases
+  gtk_widget_get_allocation(widget, alloc);
+  gtk_tooltip_set_tip_area(tooltip, (GdkRectangle *)alloc);
 
-  g_object_set_data(G_OBJECT(widget), "iopdes", vbox);
-
-  return FALSE;
+  return TRUE;
 }
 
 void dt_iop_gui_set_expander(dt_iop_module_t *module)
