@@ -19,6 +19,8 @@
 #include "dtgtk/thumbnail.h"
 #include <gtk/gtk.h>
 
+#pragma once
+
 // number of images per row in zoomable mode
 #define DT_ZOOMABLE_NB_PER_ROW 13
 
