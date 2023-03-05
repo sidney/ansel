@@ -2342,11 +2342,6 @@ gboolean _iop_tooltip_callback(GtkWidget *widget, gint x, gint y, gboolean keybo
   gtk_widget_show_all(vbox);
   gtk_tooltip_set_custom(tooltip, vbox);
 
-  // Fix bad positionning ?
-  GtkAllocation *alloc = NULL; // Note : GtkAllocation and GdkRectangle are type aliases
-  gtk_widget_get_allocation(widget, alloc);
-  gtk_tooltip_set_tip_area(tooltip, (GdkRectangle *)alloc);
-
   return TRUE;
 }
 
