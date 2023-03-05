@@ -1,6 +1,7 @@
 /*
     This file is part of darktable,
     Copyright (C) 2012-2020 darktable developers.
+    Copyright (C) 2023 Aurélien Pierre.
 
     darktable is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -32,12 +33,23 @@ typedef enum dt_lib_modulegroup_t
   DT_MODULEGROUP_SHARPNESS = 5,
   DT_MODULEGROUP_EFFECTS = 6,
   DT_MODULEGROUP_TECHNICAL = 7,
+  DT_MODULEGROUP_NONE = 8,
 
   /* don't touch the following */
   DT_MODULEGROUP_SIZE,
-  DT_MODULEGROUP_NONE
-
 } dt_lib_modulegroup_t;
+
+gboolean is_module_group_global(dt_lib_modulegroup_t group)
+{
+  // Is group a special "global module group : enabled modules or "all" ?
+  return (group == DT_MODULEGROUP_ACTIVE_PIPE || group == DT_MODULEGROUP_NONE);
+}
+
+gboolean is_module_in_group(dt_iop_module_t *module, dt_lib_modulegroup_t group)
+{
+  // Does module belong to group ?
+  return (module->default_group() == group);
+}
 
 // modelines: These editor modelines have been set for all relevant files by tools/update_modelines.sh
 // vim: shiftwidth=2 expandtab tabstop=2 cindent

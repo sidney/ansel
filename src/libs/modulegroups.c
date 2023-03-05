@@ -226,7 +226,8 @@ void gui_init(dt_lib_module_t *self)
                                         _("Repair"),
                                         _("Sharpness"),
                                         _("Effects"),
-                                        _("Technics")};
+                                        _("Technics"),
+                                        _("All")};
   char *tooltips[DT_MODULEGROUP_SIZE] = { _("List all modules currently enabled in the reverse order of application in the pipeline."),
                                           _("Modules destined to adjust brightness, contrast and dynamic range."),
                                           _("Modules used when working with film scans."),
@@ -234,7 +235,8 @@ void gui_init(dt_lib_module_t *self)
                                           _("Modules destined to repair and reconstruct noisy or missing pixels."),
                                           _("Modules destined to manipulate local contrast, sharpness and blur."),
                                           _("Modules applying special effects."),
-                                          _("Technical modules that can be ignored in most situations.") };
+                                          _("Technical modules that can be ignored in most situations."),
+                                          _("All modules available in the software.") };
 
   for(int i = 0; i < DT_MODULEGROUP_SIZE; i++)
   {

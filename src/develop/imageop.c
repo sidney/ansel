@@ -1902,7 +1902,7 @@ void dt_iop_gui_set_expanded(dt_iop_module_t *module, gboolean expanded, gboolea
     while(iop)
     {
       dt_iop_module_t *m = (dt_iop_module_t *)iop->data;
-      if(m != module && (m->default_group() == current_group || current_group == DT_MODULEGROUP_ACTIVE_PIPE))
+      if(m != module && (is_module_in_group(m, current_group) || is_module_group_global(current_group)))
       {
         all_other_closed = all_other_closed && !m->expanded;
         _gui_set_single_expanded(m, FALSE);
