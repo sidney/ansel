@@ -40,7 +40,7 @@ typedef struct dt_lib_menu_t
 {
   GtkWidget *menu_bar;
   GtkWidget *menus[DT_MENU_LAST];
-  GList *item_lists;
+  GList *item_lists[DT_MENU_LAST];
 } dt_lib_menu_t;
 
 const char *name(dt_lib_module_t *self)
@@ -73,7 +73,6 @@ void gui_init(dt_lib_module_t *self)
 {
   dt_lib_menu_t *d = (dt_lib_menu_t *)g_malloc0(sizeof(dt_lib_menu_t));
   self->data = (void *)d;
-  d->item_lists = NULL;
 
   /* Init container widget */
   self->widget = gtk_box_new(FALSE, 0);
@@ -84,35 +83,37 @@ void gui_init(dt_lib_module_t *self)
   gchar *labels [DT_MENU_LAST] = { _("_File"), _("_Edit"), _("_Selection"), _("_Run"), _("_Display"), _("_Ateliers"), _("_Help") };
   for(int i = 0; i < DT_MENU_LAST; i++)
   {
-    add_top_menu_entry(d->menu_bar, d->menus, &d->item_lists, i, labels[i]);
+    d->item_lists[i] = NULL;
+    add_top_menu_entry(d->menu_bar, d->menus, &d->item_lists[i], i, labels[i]);
   }
 
   gtk_box_pack_start(GTK_BOX(self->widget), d->menu_bar, FALSE, FALSE, 0);
 
   /* Populate file menu */
-  add_sub_menu_entry(d->menus, &d->item_lists, _("Quit"), DT_MENU_FILE, NULL, quit_callback, NULL, NULL, NULL);
+  add_sub_menu_entry(d->menus, &d->item_lists[DT_MENU_FILE], _("Quit"), DT_MENU_FILE, NULL, quit_callback, NULL, NULL, NULL);
 
   /* Populate edit menu */
-  append_edit(d->menus, &d->item_lists, DT_MENU_EDIT);
+  append_edit(d->menus, &d->item_lists[DT_MENU_EDIT], DT_MENU_EDIT);
 
   /* Populate run menu */
-  append_run(d->menus, &d->item_lists, DT_MENU_RUN);
+  append_run(d->menus, &d->item_lists[DT_MENU_RUN], DT_MENU_RUN);
 
   /* Populate display menu */
-  append_display(d->menus, &d->item_lists, DT_MENU_DISPLAY);
+  append_display(d->menus, &d->item_lists[DT_MENU_DISPLAY], DT_MENU_DISPLAY);
 
   /* Populate ateliers menu */
-  append_views(d->menus, &d->item_lists, DT_MENU_ATELIERS);
+  append_views(d->menus, &d->item_lists[DT_MENU_ATELIERS], DT_MENU_ATELIERS);
 
   /* Populate help menu */
-  append_help(d->menus, &d->item_lists, DT_MENU_HELP);
+  append_help(d->menus, &d->item_lists[DT_MENU_HELP], DT_MENU_HELP);
 }
 
 void gui_cleanup(dt_lib_module_t *self)
 {
   dt_lib_menu_t *d = (dt_lib_menu_t *)self->data;
   // Free all the dt_menu_entry_t elements from the GList that stores them
-  g_list_free_full(d->item_lists, g_free);
+  for(int i = 0; i < DT_MENU_LAST; i++)
+    g_list_free_full(d->item_lists[i], g_free);
   g_free(self->data);
   self->data = NULL;
 }
