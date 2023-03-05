@@ -317,6 +317,7 @@ typedef struct dt_develop_t
 
   int mask_form_selected_id; // select a mask inside an iop
   gboolean darkroom_skip_mouse_events; // skip mouse events for masks
+  gboolean mask_lock;
 } dt_develop_t;
 
 void dt_dev_init(dt_develop_t *dev, int32_t gui_attached);
@@ -482,6 +483,12 @@ int dt_dev_sync_pixelpipe_hash_distort (dt_develop_t *dev, struct dt_dev_pixelpi
 /* all history change must be enclosed into a start / end call */
 void dt_dev_undo_start_record(dt_develop_t *dev);
 void dt_dev_undo_end_record(dt_develop_t *dev);
+
+// Getter and setter for global mask lock (GUI)
+// Can be overriden by key accels
+
+gboolean dt_masks_get_lock_mode(dt_develop_t *dev);
+void dt_masks_set_lock_mode(dt_develop_t *dev, gboolean mode);
 
 // clang-format off
 // modelines: These editor modelines have been set for all relevant files by tools/update_modelines.py

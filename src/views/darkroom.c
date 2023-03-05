@@ -1658,18 +1658,19 @@ static void change_slider_accel_precision(dt_action_t *action);
 
 static float _action_process_skip_mouse(gpointer target, dt_action_element_t element, dt_action_effect_t effect, float move_size)
 {
+  // The key shortcut inverts the global mask lock defined in GUI
   if(!isnan(move_size))
   {
     switch(effect)
     {
     case DT_ACTION_EFFECT_ON:
-      darktable.develop->darkroom_skip_mouse_events = TRUE;
+      darktable.develop->darkroom_skip_mouse_events = !dt_masks_get_lock_mode(darktable.develop);
       break;
     case DT_ACTION_EFFECT_OFF:
-      darktable.develop->darkroom_skip_mouse_events = FALSE;
+      darktable.develop->darkroom_skip_mouse_events = dt_masks_get_lock_mode(darktable.develop);
       break;
     default:
-      darktable.develop->darkroom_skip_mouse_events ^= TRUE;
+      darktable.develop->darkroom_skip_mouse_events ^= !dt_masks_get_lock_mode(darktable.develop);
     }
   }
 
@@ -2188,7 +2189,7 @@ void gui_init(dt_view_t *self)
   dt_shortcut_register(ac, 0, DT_ACTION_EFFECT_HOLD, GDK_KEY_w, 0);
 
   // add an option to allow skip mouse events while editing masks
-  ac = dt_action_define(sa, NULL, N_("allow to pan & zoom while editing masks"), NULL, &dt_action_def_skip_mouse);
+  ac = dt_action_define(sa, NULL, N_("temporarily override global masks lock"), NULL, &dt_action_def_skip_mouse);
   dt_shortcut_register(ac, 0, DT_ACTION_EFFECT_HOLD, GDK_KEY_a, 0);
 
   // move left/right/up/down

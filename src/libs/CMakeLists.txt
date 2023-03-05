@@ -33,6 +33,7 @@ set(MODULES ${MODULES} hinter)
 set(MODULES ${MODULES} image_infos)
 set(MODULES ${MODULES} menu)
 set(MODULES ${MODULES} menubuttons)
+set(MODULES ${MODULES} masktoolbar)
 
 
 if(BUILD_BATTERY_INDICATOR)
@@ -75,6 +76,7 @@ add_library(image_infos MODULE "tools/image_infos.c")
 add_library(menu MODULE "tools/menu.c")
 add_dependencies(menu generate_authors_h)
 add_library(menubuttons MODULE "tools/menu_buttons.c")
+add_library(masktoolbar MODULE "tools/mask_toolbar.c")
 
 find_path(PORTMIDI_INCLUDE_DIR NAMES portmidi.h
           DOC "The Portmidi include directory"

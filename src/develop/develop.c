@@ -121,6 +121,10 @@ void dt_dev_init(dt_develop_t *dev, int32_t gui_attached)
   dev->overexposed.upper = dt_conf_get_float("darkroom/ui/overexposed/upper");
 
   dev->iso_12646.enabled = FALSE;
+
+  // Init the mask lock state
+  dev->mask_lock = 0;
+  dev->darkroom_skip_mouse_events = 0;
 }
 
 void dt_dev_cleanup(dt_develop_t *dev)
@@ -2714,6 +2718,28 @@ void dt_dev_undo_end_record(dt_develop_t *dev)
   if(dev->gui_attached && cv->view((dt_view_t *)cv) == DT_VIEW_DARKROOM)
   {
     DT_DEBUG_CONTROL_SIGNAL_RAISE(darktable.signals, DT_SIGNAL_DEVELOP_HISTORY_CHANGE);
+  }
+}
+
+gboolean dt_masks_get_lock_mode(dt_develop_t *dev)
+{
+  if(dev->gui_attached)
+  {
+    dt_pthread_mutex_lock(&darktable.gui->mutex);
+    const gboolean state = dev->mask_lock;
+    dt_pthread_mutex_unlock(&darktable.gui->mutex);
+    return state;
+  }
+  return FALSE;
+}
+
+void dt_masks_set_lock_mode(dt_develop_t *dev, gboolean mode)
+{
+  if(dev->gui_attached)
+  {
+    dt_pthread_mutex_lock(&darktable.gui->mutex);
+    dev->mask_lock = mode;
+    dt_pthread_mutex_unlock(&darktable.gui->mutex);
   }
 }
 
