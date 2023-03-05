@@ -751,6 +751,10 @@ int dt_gui_gtk_init(dt_gui_gtk_t *gui)
 
   widget = dt_ui_center(darktable.gui->ui);
   gtk_widget_set_app_paintable(widget, TRUE);
+  gtk_widget_set_can_default(widget, TRUE);
+  gtk_widget_set_receives_default(widget, TRUE);
+  gtk_widget_grab_default(widget);
+  gtk_widget_grab_focus(widget);
 
   // TODO: make this work as: libgnomeui testgnome.c
   /*  GtkContainer *box = GTK_CONTAINER(darktable.gui->widgets.plugins_vbox);
@@ -762,6 +766,11 @@ int dt_gui_gtk_init(dt_gui_gtk_t *gui)
   // update the profile when the window is moved. resize is already handled in configure()
   widget = dt_ui_main_window(darktable.gui->ui);
   g_signal_connect(G_OBJECT(widget), "configure-event", G_CALLBACK(_window_configure), NULL);
+
+  // Init the shortcuts dispatcher
+  gtk_window_set_role(GTK_WINDOW(widget), "main-app");
+  darktable.gui->grab_window = widget;
+  darktable.gui->grab_widget = NULL;
   g_signal_connect(G_OBJECT(widget), "event", G_CALLBACK(dt_shortcut_dispatcher), NULL);
 
   // This is utterly broken and deeply messed-up as it breaks tooltips positionning while being generally ugly.

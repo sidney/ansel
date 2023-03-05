@@ -856,7 +856,6 @@ static dt_view_type_flags_t _find_views(dt_action_t *action)
 
 static GtkTreeStore *_shortcuts_store = NULL;
 static GtkTreeStore *_actions_store = NULL;
-static GtkWidget *_grab_widget = NULL, *_grab_window = NULL;
 
 #define NUM_CATEGORIES 4
 const gchar *category_label[NUM_CATEGORIES]
@@ -1424,18 +1423,18 @@ static void _instance_edited(GtkCellRendererText *cell, const gchar *path_string
 
 static void _grab_in_tree_view(GtkTreeView *tree_view)
 {
-  g_set_weak_pointer(&_grab_widget, gtk_widget_get_parent(gtk_widget_get_parent(GTK_WIDGET(tree_view)))); // static
-  gtk_widget_set_sensitive(_grab_widget, FALSE);
-  gtk_widget_set_tooltip_text(_grab_widget, _("define a shortcut by pressing a key, optionally combined with modifier keys (ctrl/shift/alt)\n"
+  g_set_weak_pointer(&darktable.gui->grab_widget, gtk_widget_get_parent(gtk_widget_get_parent(GTK_WIDGET(tree_view)))); // static
+  gtk_widget_set_sensitive(darktable.gui->grab_widget, FALSE);
+  gtk_widget_set_tooltip_text(darktable.gui->grab_widget, _("define a shortcut by pressing a key, optionally combined with modifier keys (ctrl/shift/alt)\n"
                                               "a key can be double or triple pressed, with a long last press\n"
                                               "while the key is held, a combination of mouse buttons can be (double/triple/long) clicked\n"
                                               "still holding the key (and modifiers and/or buttons) a scroll or mouse move can be added\n"
                                               "connected devices can send keys or moves using their physical controllers\n\n"
                                               "right-click to cancel"));
-  g_set_weak_pointer(&_grab_window, gtk_widget_get_toplevel(_grab_widget));
+  g_set_weak_pointer(&darktable.gui->grab_window, gtk_widget_get_toplevel(darktable.gui->grab_widget));
   if(_sc.action && _sc.action->type == DT_ACTION_TYPE_FALLBACK)
     dt_shortcut_key_press(DT_SHORTCUT_DEVICE_KEYBOARD_MOUSE, 0, 0);
-  g_signal_connect(_grab_window, "event", G_CALLBACK(dt_shortcut_dispatcher), NULL);
+  g_signal_connect(darktable.gui->grab_window, "event", G_CALLBACK(dt_shortcut_dispatcher), NULL);
 }
 
 static void _shortcut_row_activated(GtkTreeView *tree_view, GtkTreePath *path, GtkTreeViewColumn *column, gpointer user_data)
@@ -3088,18 +3087,19 @@ static void _ungrab_grab_widget()
   g_slist_free_full(_pressed_keys, g_free);
   _pressed_keys = NULL;
 
-  if(_grab_widget)
+  if(darktable.gui->grab_widget)
   {
-    gtk_widget_set_sensitive(_grab_widget, TRUE);
-    gtk_widget_set_tooltip_text(_grab_widget, NULL);
-    g_signal_handlers_disconnect_by_func(gtk_widget_get_toplevel(_grab_widget), G_CALLBACK(dt_shortcut_dispatcher), NULL);
-    _grab_widget = NULL;
+    gtk_widget_set_sensitive(darktable.gui->grab_widget, TRUE);
+    g_signal_handlers_disconnect_by_func(gtk_widget_get_toplevel(darktable.gui->grab_widget),
+                                         G_CALLBACK(dt_shortcut_dispatcher), NULL);
+    darktable.gui->grab_widget = NULL;
+
   }
 }
 
 static void _ungrab_at_focus_loss()
 {
-  _grab_window = NULL;
+  darktable.gui->grab_window = NULL;
   _focus_loss_key = _sc.key;
   _focus_loss_press = _sc.press;
   _ungrab_grab_widget();
@@ -3270,7 +3270,7 @@ float dt_shortcut_move(dt_input_device_t id, guint time, guint move, double size
     if(!key_or_button_released)
       _last_time = 0;
 
-    if(_grab_widget) // in mapping mode end grab immediately after first shortcut
+    if(darktable.gui->grab_widget) // in mapping mode end grab immediately after first shortcut
       _ungrab_grab_widget();
 
     dt_print(DT_DEBUG_INPUT,
@@ -3449,8 +3449,8 @@ void dt_shortcut_key_press(dt_input_device_t id, guint time, guint key)
       _lookup_mapping_widget();
 
       gdk_seat_grab(gdk_display_get_default_seat(gdk_display_get_default()),
-                    gtk_widget_get_window(_grab_window ? _grab_window
-                                                       : dt_ui_main_window(darktable.gui->ui)),
+                    gtk_widget_get_window(darktable.gui->grab_window ? darktable.gui->grab_window
+                                                                     : dt_ui_main_window(darktable.gui->ui)),
                     GDK_SEAT_CAPABILITY_ALL, FALSE, NULL, NULL, NULL, NULL);
     }
     else
@@ -3725,6 +3725,17 @@ void _cleanup_mods(dt_shortcut_t *s, gint keycode, gint level)
 
 gboolean dt_shortcut_dispatcher(GtkWidget *w, GdkEvent *event, gpointer user_data)
 {
+  // Init focus with default Gtk events
+  // WHY THE FUCK DOES THAT BREAK SHORCUTS AT ALL ???
+  // FIXME: when entering the app, shortcuts won't work until you click somewhere.
+  // Yes, key shortcuts need a mouse to work. Brilliant !!!
+  /*
+  if(!darktable.gui->grab_window)
+    darktable.gui->grab_window = dt_ui_main_window(darktable.gui->ui);
+
+  if(!darktable.gui->grab_widget)
+    darktable.gui->grab_widget = gtk_window_get_focus(GTK_WINDOW(darktable.gui->grab_window));
+  */
   if((event->type ==  GDK_BUTTON_PRESS || event->type ==  GDK_BUTTON_RELEASE ||
       event->type ==  GDK_DOUBLE_BUTTON_PRESS || event->type ==  GDK_TRIPLE_BUTTON_PRESS)
      && event->button.button > 7)
@@ -3758,7 +3769,7 @@ gboolean dt_shortcut_dispatcher(GtkWidget *w, GdkEvent *event, gpointer user_dat
       return TRUE;
     }
 
-    if(_grab_widget && event->type == GDK_BUTTON_PRESS)
+    if(darktable.gui->grab_widget && event->type == GDK_BUTTON_PRESS)
     {
       _ungrab_grab_widget();
       _sc = (dt_shortcut_t) { 0 };
@@ -3825,7 +3836,7 @@ gboolean dt_shortcut_dispatcher(GtkWidget *w, GdkEvent *event, gpointer user_dat
     return FALSE;
   case GDK_FOCUS_CHANGE: // dialog boxes and switch to other app release grab
     if(event->focus_change.in)
-      g_set_weak_pointer(&_grab_window, w);
+      g_set_weak_pointer(&darktable.gui->grab_window, w);
     else
       _ungrab_at_focus_loss();
     return FALSE;
