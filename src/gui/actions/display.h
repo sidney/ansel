@@ -1,6 +1,8 @@
 #include "common/darktable.h"
+#include "control/control.h"
 #include "gui/actions/menu.h"
 #include "gui/gtk.h"
+#include "gui/accelerators.h"
 
 #include <gtk/gtk.h>
 
@@ -239,6 +241,10 @@ static void _toggle_header_accel_callback(dt_action_t *action)
   // Don't map it in the menu because it makes the menu itself disappear,
   // so users who don't know the key shortcut to get it back will get stuck.
   // Force users to toggle this one from the keyboard so they can recover it the same way.
+  // TODO: use currently-defined shortcut
+  if(_panel_is_visible(DT_UI_PANEL_TOP))
+    dt_toast_log(_("To reactivate the header bar, use : Ctrl + H"));
+
   dt_ui_panel_show(darktable.gui->ui, DT_UI_PANEL_TOP, !_panel_is_visible(DT_UI_PANEL_TOP), TRUE);
 }
 

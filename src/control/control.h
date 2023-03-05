@@ -115,7 +115,7 @@ void dt_control_hinter_message(const struct dt_control_t *s, const char *message
 #define DT_CTL_LOG_TIMEOUT 5000
 #define DT_CTL_TOAST_SIZE 10
 #define DT_CTL_TOAST_MSG_SIZE 300
-#define DT_CTL_TOAST_TIMEOUT 1500
+#define DT_CTL_TOAST_TIMEOUT 3000
 /**
  * this manages everything time-consuming.
  * distributes the jobs on all processors,
