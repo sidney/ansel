@@ -15,6 +15,7 @@ typedef enum dt_menus_t
   DT_MENU_FILE = 0,
   DT_MENU_EDIT,
   DT_MENU_SELECTION,
+  DT_MENU_RUN,
   DT_MENU_DISPLAY,
   DT_MENU_ATELIERS,
   DT_MENU_HELP,
