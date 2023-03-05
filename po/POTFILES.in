@@ -86,6 +86,7 @@ build/lib64/ansel/plugins/introspection_vignette.c
 build/lib64/ansel/plugins/introspection_watermark.c
 build/lib64/ansel/plugins/introspection_zonesystem.c
 build/lib64/ansel/plugins/lighttable/tools/darktable_authors.h
+build/share/ansel/ansel.desktop.in
 data/build/ansel.desktop.in
 data/photos.ansel.app.appdata.xml.in
 data/ansel.desktop.in
@@ -163,6 +164,9 @@ src/external/wb_presets.c
 src/generate-cache/main.c
 src/gui/accelerators.c
 src/gui/actions/help.h
+src/gui/actions/display.h
+src/gui/actions/edit.h
+src/gui/actions/run.h
 src/gui/gtk.c
 src/gui/gtkentry.c
 src/gui/guides.c
@@ -171,6 +175,7 @@ src/gui/import_metadata.c
 src/gui/preferences.c
 src/gui/presets.c
 src/gui/styles_dialog.c
+src/libs/tools/menu_buttons.c
 src/imageio/format/avif.c
 src/imageio/format/copy.c
 src/imageio/format/exr.cc
@@ -315,7 +320,6 @@ src/libs/tools/colorlabels.c
 src/libs/tools/filmstrip.c
 src/libs/tools/filter.c
 src/libs/tools/gamepad.c
-src/libs/tools/global_toolbox.c
 src/libs/tools/hinter.c
 src/libs/tools/image_infos.c
 src/libs/tools/lighttable.c
