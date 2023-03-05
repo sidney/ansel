@@ -1493,36 +1493,6 @@ static void _update_softproof_gamut_checking(dt_develop_t *d)
   g_signal_handlers_unblock_by_func(d->profile.gamut_button, _gamut_quickbutton_clicked, d);
 }
 
-static void display_intent_callback(GtkWidget *combo, gpointer user_data)
-{
-  dt_develop_t *d = (dt_develop_t *)user_data;
-  const int pos = dt_bauhaus_combobox_get(combo);
-
-  dt_iop_color_intent_t new_intent = darktable.color_profiles->display_intent;
-
-  // we are not using the int value directly so it's robust against changes on lcms' side
-  switch(pos)
-  {
-    case 0:
-      new_intent = DT_INTENT_PERCEPTUAL;
-      break;
-    case 1:
-      new_intent = DT_INTENT_RELATIVE_COLORIMETRIC;
-      break;
-    case 2:
-      new_intent = DT_INTENT_SATURATION;
-      break;
-    case 3:
-      new_intent = DT_INTENT_ABSOLUTE_COLORIMETRIC;
-      break;
-  }
-
-  if(new_intent != darktable.color_profiles->display_intent)
-  {
-    darktable.color_profiles->display_intent = new_intent;
-    dt_dev_reprocess_all(d);
-  }
-}
 
 static void softproof_profile_callback(GtkWidget *combo, gpointer user_data)
 {
@@ -1562,62 +1532,9 @@ end:
   }
 }
 
-static void display_profile_callback(GtkWidget *combo, gpointer user_data)
-{
-  dt_develop_t *d = (dt_develop_t *)user_data;
-  gboolean profile_changed = FALSE;
-  const int pos = dt_bauhaus_combobox_get(combo);
-  for(GList *profiles = darktable.color_profiles->profiles; profiles; profiles = g_list_next(profiles))
-  {
-    dt_colorspaces_color_profile_t *pp = (dt_colorspaces_color_profile_t *)profiles->data;
-    if(pp->display_pos == pos)
-    {
-      if(darktable.color_profiles->display_type != pp->type
-        || (darktable.color_profiles->display_type == DT_COLORSPACE_FILE
-            && strcmp(darktable.color_profiles->display_filename, pp->filename)))
-      {
-        darktable.color_profiles->display_type = pp->type;
-        g_strlcpy(darktable.color_profiles->display_filename, pp->filename,
-                  sizeof(darktable.color_profiles->display_filename));
-        profile_changed = TRUE;
-      }
-      goto end;
-    }
-  }
-
-  // profile not found, fall back to system display profile. shouldn't happen
-  fprintf(stderr, "can't find display profile `%s', using system display profile instead\n", dt_bauhaus_combobox_get_text(combo));
-  profile_changed = darktable.color_profiles->display_type != DT_COLORSPACE_DISPLAY;
-  darktable.color_profiles->display_type = DT_COLORSPACE_DISPLAY;
-  darktable.color_profiles->display_filename[0] = '\0';
-
-end:
-  if(profile_changed)
-  {
-    pthread_rwlock_rdlock(&darktable.color_profiles->xprofile_lock);
-    dt_colorspaces_update_display_transforms();
-    pthread_rwlock_unlock(&darktable.color_profiles->xprofile_lock);
-    DT_DEBUG_CONTROL_SIGNAL_RAISE(darktable.signals, DT_SIGNAL_CONTROL_PROFILE_USER_CHANGED, DT_COLORSPACES_PROFILE_TYPE_DISPLAY);
-    dt_dev_reprocess_all(d);
-  }
-}
-
 // FIXME: turning off lcms2 in prefs hides the widget but leaves the window sized like before -> ugly-ish
 static void _preference_changed(gpointer instance, gpointer user_data)
 {
-  GtkWidget *display_intent = GTK_WIDGET(user_data);
-
-  const int force_lcms2 = dt_conf_get_bool("plugins/lighttable/export/force_lcms2");
-  if(force_lcms2)
-  {
-    gtk_widget_set_no_show_all(display_intent, FALSE);
-    gtk_widget_set_visible(display_intent, TRUE);
-  }
-  else
-  {
-    gtk_widget_set_no_show_all(display_intent, TRUE);
-    gtk_widget_set_visible(display_intent, FALSE);
-  }
   dt_get_sysresource_level();
   dt_configure_ppd_dpi(darktable.gui);
 }
@@ -1632,34 +1549,6 @@ static void _preference_changed_button_hide(gpointer instance, dt_develop_t *dev
       add_remove_mask_indicator(module, (module->blend_params->mask_mode != DEVELOP_MASK_DISABLED) &&
                                 (module->blend_params->mask_mode != DEVELOP_MASK_ENABLED));
   }
-}
-
-static void _update_display_profile_cmb(GtkWidget *cmb_display_profile)
-{
-  for(const GList *l = darktable.color_profiles->profiles; l; l = g_list_next(l))
-  {
-    dt_colorspaces_color_profile_t *prof = (dt_colorspaces_color_profile_t *)l->data;
-    if(prof->display_pos > -1)
-    {
-      if(prof->type == darktable.color_profiles->display_type
-         && (prof->type != DT_COLORSPACE_FILE
-             || !strcmp(prof->filename, darktable.color_profiles->display_filename)))
-      {
-        if(dt_bauhaus_combobox_get(cmb_display_profile) != prof->display_pos)
-        {
-          dt_bauhaus_combobox_set(cmb_display_profile, prof->display_pos);
-          break;
-        }
-      }
-    }
-  }
-}
-
-static void _display_profile_changed(gpointer instance, uint8_t profile_type, gpointer user_data)
-{
-  GtkWidget *cmb_display_profile = GTK_WIDGET(user_data);
-
-  _update_display_profile_cmb(cmb_display_profile);
 }
 
 /** end of toolbox */
@@ -2232,47 +2121,15 @@ void gui_init(dt_view_t *self)
     char confdir[PATH_MAX] = { 0 };
     dt_loc_get_user_config_dir(confdir, sizeof(confdir));
     dt_loc_get_datadir(datadir, sizeof(datadir));
-    const int force_lcms2 = dt_conf_get_bool("plugins/lighttable/export/force_lcms2");
 
-    GtkWidget *display_intent = dt_bauhaus_combobox_new_action(DT_ACTION(self));
-    dt_bauhaus_widget_set_label(display_intent, N_("profiles"), N_("intent"));
-    dt_bauhaus_combobox_add(display_intent, _("perceptual"));
-    dt_bauhaus_combobox_add(display_intent, _("relative colorimetric"));
-    dt_bauhaus_combobox_add(display_intent, C_("rendering intent", "saturation"));
-    dt_bauhaus_combobox_add(display_intent, _("absolute colorimetric"));
-
-    if(!force_lcms2)
-    {
-      gtk_widget_set_no_show_all(display_intent, TRUE);
-      gtk_widget_set_visible(display_intent, FALSE);
-    }
-
-    GtkWidget *display_profile = dt_bauhaus_combobox_new_action(DT_ACTION(self));
     GtkWidget *softproof_profile = dt_bauhaus_combobox_new_action(DT_ACTION(self));
-
-    dt_bauhaus_widget_set_label(display_profile, N_("profiles"), N_("display profile"));
     dt_bauhaus_widget_set_label(softproof_profile, N_("profiles"), N_("softproof profile"));
-
-    dt_bauhaus_combobox_set_entries_ellipsis(display_profile, PANGO_ELLIPSIZE_MIDDLE);
     dt_bauhaus_combobox_set_entries_ellipsis(softproof_profile, PANGO_ELLIPSIZE_MIDDLE);
-
-    gtk_box_pack_start(GTK_BOX(vbox), display_profile, TRUE, TRUE, 0);
-    gtk_box_pack_start(GTK_BOX(vbox), display_intent, TRUE, TRUE, 0);
     gtk_box_pack_start(GTK_BOX(vbox), softproof_profile, TRUE, TRUE, 0);
 
     for(const GList *l = darktable.color_profiles->profiles; l; l = g_list_next(l))
     {
       dt_colorspaces_color_profile_t *prof = (dt_colorspaces_color_profile_t *)l->data;
-      if(prof->display_pos > -1)
-      {
-        dt_bauhaus_combobox_add(display_profile, prof->name);
-        if(prof->type == darktable.color_profiles->display_type
-          && (prof->type != DT_COLORSPACE_FILE
-              || !strcmp(prof->filename, darktable.color_profiles->display_filename)))
-        {
-          dt_bauhaus_combobox_set(display_profile, prof->display_pos);
-        }
-      }
       // the system display profile is only suitable for display purposes
       if(prof->out_pos > -1)
       {
@@ -2286,27 +2143,19 @@ void gui_init(dt_view_t *self)
 
     char *system_profile_dir = g_build_filename(datadir, "color", "out", NULL);
     char *user_profile_dir = g_build_filename(confdir, "color", "out", NULL);
-    char *tooltip = g_strdup_printf(_("display ICC profiles in %s or %s"), user_profile_dir, system_profile_dir);
-    gtk_widget_set_tooltip_text(display_profile, tooltip);
-    g_free(tooltip);
-    tooltip = g_strdup_printf(_("softproof ICC profiles in %s or %s"), user_profile_dir, system_profile_dir);
+    char *tooltip = g_strdup_printf(_("softproof ICC profiles in %s or %s"), user_profile_dir, system_profile_dir);
     gtk_widget_set_tooltip_text(softproof_profile, tooltip);
     g_free(tooltip);
     g_free(system_profile_dir);
     g_free(user_profile_dir);
 
-    g_signal_connect(G_OBJECT(display_intent), "value-changed", G_CALLBACK(display_intent_callback), dev);
-    g_signal_connect(G_OBJECT(display_profile), "value-changed", G_CALLBACK(display_profile_callback), dev);
     g_signal_connect(G_OBJECT(softproof_profile), "value-changed", G_CALLBACK(softproof_profile_callback), dev);
 
     _update_softproof_gamut_checking(dev);
 
     // update the gui when the preferences changed (i.e. show intent when using lcms2)
     DT_DEBUG_CONTROL_SIGNAL_CONNECT(darktable.signals, DT_SIGNAL_PREFERENCES_CHANGE,
-                              G_CALLBACK(_preference_changed), (gpointer)display_intent);
-    // and when profiles change
-    DT_DEBUG_CONTROL_SIGNAL_CONNECT(darktable.signals, DT_SIGNAL_CONTROL_PROFILE_USER_CHANGED,
-                              G_CALLBACK(_display_profile_changed), (gpointer)display_profile);
+                                    G_CALLBACK(_preference_changed), NULL);
 
     gtk_widget_show_all(vbox);
   }

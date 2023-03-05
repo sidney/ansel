@@ -264,11 +264,123 @@ static gboolean filmstrip_sensitive_callback(GtkWidget *widget)
   return (view && strcmp(view->module_name, "lighttable"));
 }
 
+static gboolean profile_checked_callback(GtkWidget *widget)
+{
+  dt_colorspaces_color_profile_t *prof = (dt_colorspaces_color_profile_t *)get_custom_data(widget);
+  return (prof->type == darktable.color_profiles->display_type
+          && (prof->type != DT_COLORSPACE_FILE
+              || !strcmp(prof->filename, darktable.color_profiles->display_filename)));
+}
+
+static void profile_callback(GtkWidget *widget)
+{
+  dt_colorspaces_color_profile_t *pp = (dt_colorspaces_color_profile_t *)get_custom_data(widget);
+
+  gboolean profile_changed = FALSE;
+  if(darktable.color_profiles->display_type != pp->type
+      || (darktable.color_profiles->display_type == DT_COLORSPACE_FILE
+           && strcmp(darktable.color_profiles->display_filename, pp->filename)))
+  {
+    darktable.color_profiles->display_type = pp->type;
+    g_strlcpy(darktable.color_profiles->display_filename, pp->filename,
+              sizeof(darktable.color_profiles->display_filename));
+    profile_changed = TRUE;
+  }
+
+  if(!profile_changed)
+  {
+    // profile not found, fall back to system display profile. shouldn't happen
+    fprintf(stderr, "can't find display profile `%s', using system display profile instead\n", pp->filename);
+    profile_changed = darktable.color_profiles->display_type != DT_COLORSPACE_DISPLAY;
+    darktable.color_profiles->display_type = DT_COLORSPACE_DISPLAY;
+    darktable.color_profiles->display_filename[0] = '\0';
+  }
+
+  if(profile_changed)
+  {
+    pthread_rwlock_rdlock(&darktable.color_profiles->xprofile_lock);
+    dt_colorspaces_update_display_transforms();
+    pthread_rwlock_unlock(&darktable.color_profiles->xprofile_lock);
+    DT_DEBUG_CONTROL_SIGNAL_RAISE(darktable.signals, DT_SIGNAL_CONTROL_PROFILE_USER_CHANGED, DT_COLORSPACES_PROFILE_TYPE_DISPLAY);
+    dt_dev_reprocess_all(darktable.develop);
+  }
+}
+
+dt_iop_color_intent_t string_to_color_intent(const char *string)
+{
+  if(!strcmp(string, "perceptual"))
+    return DT_INTENT_PERCEPTUAL;
+  else if(!strcmp(string, "relative colorimetric"))
+    return DT_INTENT_RELATIVE_COLORIMETRIC;
+  else if(!strcmp(string, "saturation"))
+    return DT_INTENT_SATURATION;
+  else if(!strcmp(string, "absolute colorimetric"))
+    return DT_INTENT_ABSOLUTE_COLORIMETRIC;
+  else
+    return DT_INTENT_PERCEPTUAL;
+
+  // Those seem to make no difference with most ICC profiles anyway.
+  // Perceptual needs A_to_B and B_to_A LUT defined in the .icc profile to work.
+  // Since most profiles don't have them, it falls back to something close to relative colorimetric.
+  // Really not sure if it's our implementation or if it's LittleCMS2 that is faulty here.
+  // This option just makes it look like pRoFESsional CoLoR mAnAgeMEnt®©.
+  // ICC intents are pretty much bogus in the first place… (gamut mapping by RGB clipping…)
+}
+
+static void intent_callback(GtkWidget *widget)
+{
+  dt_iop_color_intent_t old_intent = darktable.color_profiles->display_intent;
+  dt_iop_color_intent_t new_intent = string_to_color_intent(get_custom_data(widget));
+  if(new_intent != old_intent)
+  {
+    darktable.color_profiles->display_intent = new_intent;
+    pthread_rwlock_rdlock(&darktable.color_profiles->xprofile_lock);
+    dt_colorspaces_update_display_transforms();
+    pthread_rwlock_unlock(&darktable.color_profiles->xprofile_lock);
+    dt_dev_reprocess_all(darktable.develop);
+  }
+}
+
+static gboolean intent_checked_callback(GtkWidget *widget)
+{
+  return darktable.color_profiles->display_intent == string_to_color_intent(get_custom_data(widget));
+}
+
+
 void append_display(GtkWidget **menus, GList **lists, const dt_menus_t index)
 {
+  // Parent sub-menu color profile
+  add_top_submenu_entry(menus, lists, _("Color profile"), index);
+  GtkWidget *parent = get_last_widget(lists);
+
+  // Add available color profiles to the sub-menu
+  for(const GList *l = darktable.color_profiles->profiles; l; l = g_list_next(l))
+  {
+    dt_colorspaces_color_profile_t *prof = (dt_colorspaces_color_profile_t *)l->data;
+    if(prof->display_pos > -1)
+    {
+      add_sub_sub_menu_entry(parent, lists, prof->name, index, prof, profile_callback, profile_checked_callback, NULL, NULL);
+      //gtk_check_menu_item_set_draw_as_radio(GTK_CHECK_MENU_ITEM(get_last_widget(lists)), TRUE);
+    }
+  }
+
+  // Parent sub-menu profile intent
+  add_top_submenu_entry(menus, lists, _("Color intent"), index);
+  parent = get_last_widget(lists);
+
+  const char *intents[4] = { _("Perceptual"), _("Relative colorimetric"), C_("rendering intent", "Saturation"),
+                             _("Absolute colorimetric") };
+  // non-translatable strings to store in menu items for later mapping with dt_iop_color_intent_t
+  const char *data[4] = { "perceptual", "relative colorimetric", "saturation", "absolute colorimetric" };
+
+  for(int i = 0; i < 4; i++)
+    add_sub_sub_menu_entry(parent, lists, intents[i], index, (void *)data[i], intent_callback, intent_checked_callback, NULL, NULL);
+
+  add_menu_separator(menus[index]);
+
   // Parent sub-menu panels
   add_top_submenu_entry(menus, lists, _("Panels"), index);
-  GtkWidget *parent = get_last_widget(lists);
+  parent = get_last_widget(lists);
 
   // Children of sub-menu panels
   add_sub_sub_menu_entry(parent, lists, _("Left"), index, NULL,
