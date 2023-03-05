@@ -62,6 +62,7 @@ void gui_init(dt_lib_module_t *self)
   self->widget = gtk_box_new(FALSE, 0);
   d->mask_lock = gtk_check_button_new_with_label(_("Lock masks"));
   gtk_box_pack_start(GTK_BOX(self->widget), d->mask_lock, FALSE, FALSE, 0);
+  gtk_widget_set_tooltip_text(d->mask_lock, _("Prevent accidental masks displacement when moving the view"));
   g_signal_connect(G_OBJECT(d->mask_lock), "toggled", G_CALLBACK(mask_lock_callback), self);
 }
 
