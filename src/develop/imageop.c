@@ -65,7 +65,6 @@ enum
 {
   DT_ACTION_ELEMENT_SHOW = 0,
   DT_ACTION_ELEMENT_ENABLE = 1,
-  DT_ACTION_ELEMENT_FOCUS = 2,
   DT_ACTION_ELEMENT_INSTANCE = 3,
   DT_ACTION_ELEMENT_RESET = 4,
   DT_ACTION_ELEMENT_PRESETS = 5,
@@ -2592,11 +2591,6 @@ static void _show_module_callback(dt_iop_module_t *module)
   dt_iop_connect_accels_multi(module->so);
 }
 
-static void _request_module_focus_callback(dt_iop_module_t * module)
-{
-  dt_iop_request_focus(darktable.develop->gui_module == module ? NULL : module);
-}
-
 static void _enable_module_callback(dt_iop_module_t *module)
 {
   //cannot toggle module if there's no enable button
@@ -3001,9 +2995,6 @@ static float _action_process(gpointer target, dt_action_element_t element, dt_ac
   {
     switch(element)
     {
-    case DT_ACTION_ELEMENT_FOCUS:
-      _request_module_focus_callback(module);
-      break;
     case DT_ACTION_ELEMENT_ENABLE:
       _enable_module_callback(module);
       break;
@@ -3042,8 +3033,7 @@ static float _action_process(gpointer target, dt_action_element_t element, dt_ac
     g_free(text);
   }
 
-  return element == DT_ACTION_ELEMENT_FOCUS ? darktable.develop->gui_module == module
-       : element == DT_ACTION_ELEMENT_ENABLE ? module->off &&
+  return element == DT_ACTION_ELEMENT_ENABLE ? module->off &&
                                                gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(module->off))
        : element == DT_ACTION_ELEMENT_SHOW ? module->expanded
        : 0;
@@ -3062,7 +3052,6 @@ const gchar *dt_action_effect_instance[]
 static const dt_action_element_def_t _action_elements[]
   = { { N_("show"), dt_action_effect_toggle },
       { N_("enable"), dt_action_effect_toggle },
-      { N_("focus"), dt_action_effect_toggle },
       { N_("instance"), dt_action_effect_instance },
       { N_("reset"), dt_action_effect_activate },
       { N_("presets"), dt_action_effect_presets },
@@ -3070,7 +3059,6 @@ static const dt_action_element_def_t _action_elements[]
 
 static const dt_shortcut_fallback_t _action_fallbacks[]
   = { { .element = DT_ACTION_ELEMENT_ENABLE, .button = DT_SHORTCUT_LEFT },
-      { .element = DT_ACTION_ELEMENT_FOCUS, .button = DT_SHORTCUT_LEFT, .click = DT_SHORTCUT_LONG },
       { .element = DT_ACTION_ELEMENT_INSTANCE, .button = DT_SHORTCUT_RIGHT, .click = DT_SHORTCUT_DOUBLE },
       { .element = DT_ACTION_ELEMENT_RESET, .button = DT_SHORTCUT_LEFT, .click = DT_SHORTCUT_DOUBLE },
       { .element = DT_ACTION_ELEMENT_PRESETS, .button = DT_SHORTCUT_RIGHT },
