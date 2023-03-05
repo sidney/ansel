@@ -6,6 +6,7 @@
 #include "develop/develop.h"
 #include "gui/gtk.h"
 #include "gui/accelerators.h"
+#include "gui/actions/menu.h"
 
 
 gboolean views_active_callback(GtkWidget *menu_item)

@@ -22,8 +22,8 @@
 #include "control/control.h"
 #include "develop/develop.h"
 #include "gui/gtk.h"
-#include "gui/actions/global.h"
 #include "gui/actions/views.h"
+#include "gui/actions/file.h"
 #include "gui/actions/edit.h"
 #include "gui/actions/help.h"
 #include "gui/actions/run.h"
@@ -90,7 +90,7 @@ void gui_init(dt_lib_module_t *self)
   gtk_box_pack_start(GTK_BOX(self->widget), d->menu_bar, FALSE, FALSE, 0);
 
   /* Populate file menu */
-  add_sub_menu_entry(d->menus, &d->item_lists[DT_MENU_FILE], _("Quit"), DT_MENU_FILE, NULL, quit_callback, NULL, NULL, NULL);
+  append_file(d->menus, &d->item_lists[DT_MENU_FILE], DT_MENU_FILE);
 
   /* Populate edit menu */
   append_edit(d->menus, &d->item_lists[DT_MENU_EDIT], DT_MENU_EDIT);
