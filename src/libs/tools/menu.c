@@ -80,7 +80,7 @@ void gui_init(dt_lib_module_t *self)
   gtk_widget_set_name(d->menu_bar, "menu-bar");
 
   /* Init top-level menus */
-  gchar *labels [DT_MENU_LAST] = { _("_File"), _("_Edit"), _("_Selection"), _("_Run"), _("_Display"), _("_Ateliers"), _("_Help") };
+  gchar *labels [DT_MENU_LAST] = { _("File"), _("Edit"), _("Selection"), _("Run"), _("Display"), _("Ateliers"), _("Help") };
   for(int i = 0; i < DT_MENU_LAST; i++)
   {
     d->item_lists[i] = NULL;

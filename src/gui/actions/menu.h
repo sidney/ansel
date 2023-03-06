@@ -125,7 +125,7 @@ void add_top_menu_entry(GtkWidget *menu_bar, GtkWidget **menus, GList **lists, c
 {
   // Top menus belong to menu bar : file, edit, display, etc.
   menus[index] = gtk_menu_new();
-  GtkWidget *menu_label = gtk_menu_item_new_with_mnemonic(label);
+  GtkWidget *menu_label = gtk_menu_item_new_with_label(label);
   gtk_menu_item_set_submenu(GTK_MENU_ITEM(menu_label), menus[index]);
   gtk_menu_shell_append(GTK_MENU_SHELL(menu_bar), menu_label);
   dt_gui_add_class(menu_label, "top-level-item");
