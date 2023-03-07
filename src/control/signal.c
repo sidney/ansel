@@ -192,6 +192,9 @@ static dt_signal_description _signal_description[DT_SIGNAL_COUNT] = {
   { "dt-location-changed", NULL, NULL, G_TYPE_NONE, g_cclosure_marshal_generic, 1, pointer_arg, NULL,
     TRUE }, // DT_SIGNAL_LOCATION_CHANGED
 
+  { "dt-mask-selection-changed", NULL, NULL, G_TYPE_NONE, g_cclosure_marshal_generic, 2, pointer_2arg, NULL,
+    TRUE }, // DT_SIGNAL_MASK_SELECTION_CHANGED
+
 };
 
 static GType _signal_type;

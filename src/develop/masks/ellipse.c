@@ -448,7 +448,8 @@ static int _ellipse_get_points_border(dt_develop_t *dev, struct dt_masks_form_t 
 
 static int _ellipse_events_mouse_scrolled(struct dt_iop_module_t *module, float pzx, float pzy, int up,
                                           uint32_t state, dt_masks_form_t *form, int parentid,
-                                          dt_masks_form_gui_t *gui, int index)
+                                          dt_masks_form_gui_t *gui, int index,
+                                          dt_masks_interaction_t interaction)
 {
   const float radius_limit = form->type & (DT_MASKS_CLONE | DT_MASKS_NON_CLONE) ? 0.5f : 1.0f;
   // add a preview when creating an ellipse

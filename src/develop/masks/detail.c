@@ -81,7 +81,7 @@
      as details mask)
   4. Thanks to rawfiner for pointing out how to use Y0 and scharr for better maths.
 
-  hanno@schwalm-bremen.de 21/04/29
+  hanno@schwalm-brmouseemen.de 21/04/29
 */
 
 void dt_masks_extend_border(float *const restrict mask, const int width, const int height, const int border)

@@ -1088,7 +1088,8 @@ static float _brush_get_position_in_segment(float x, float y, dt_masks_form_t *f
 
 static int _brush_events_mouse_scrolled(struct dt_iop_module_t *module, float pzx, float pzy, int up,
                                         uint32_t state, dt_masks_form_t *form, int parentid,
-                                        dt_masks_form_gui_t *gui, int index)
+                                        dt_masks_form_gui_t *gui, int index,
+                                        dt_masks_interaction_t interaction)
 {
   if(gui->creation)
   {

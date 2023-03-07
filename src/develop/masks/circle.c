@@ -73,7 +73,8 @@ static void _circle_get_distance(float x, float y, float as, dt_masks_form_gui_t
 
 static int _circle_events_mouse_scrolled(struct dt_iop_module_t *module, float pzx, float pzy, int up,
                                          uint32_t state, dt_masks_form_t *form, int parentid,
-                                         dt_masks_form_gui_t *gui, int index)
+                                         dt_masks_form_gui_t *gui, int index,
+                                         dt_masks_interaction_t interaction)
 {
   const float max_mask_border = form->type & (DT_MASKS_CLONE | DT_MASKS_NON_CLONE) ? 0.5f : 1.0f;
   const float max_mask_size = form->type & (DT_MASKS_CLONE | DT_MASKS_NON_CLONE) ? 0.5f : 1.0f;

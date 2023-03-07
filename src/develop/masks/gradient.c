@@ -86,7 +86,8 @@ static void _gradient_get_distance(float x, float y, float as, dt_masks_form_gui
 
 static int _gradient_events_mouse_scrolled(struct dt_iop_module_t *module, float pzx, float pzy, int up,
                                            uint32_t state, dt_masks_form_t *form, int parentid,
-                                           dt_masks_form_gui_t *gui, int index)
+                                           dt_masks_form_gui_t *gui, int index,
+                                           dt_masks_interaction_t interaction)
 {
   if(gui->creation)
   {
