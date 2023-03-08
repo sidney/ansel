@@ -94,8 +94,28 @@ only accepts code I personaly understand and have the skills to maintain. KISS.
 
 ## Build and test
 
+If you plan on contributing, you way want to clone the whole Git repository with history, using:
+
+```bash
+git clone --recurse-submodules https://github.com/aurelienpierreeng/ansel.git
+```
+
+If you just want the current code without plan on contributing, the following command should save
+you a lot of bandwidth by discarding 12 years of history:
+
+```bash
+git clone --recurse-submodules --depth 1 https://github.com/aurelienpierreeng/ansel.git
+```
+
+If you already have cloned the code, and just want to update it with latest changes,
+such that it already download the changes (that might save lots of bandwidth), run:
+
+```bash
+git pull --recurse-submodules
+```
+
 The list of dependencies you need depends on your OS. The most straightforward way is to start a test build,
-using the script provided here :
+using the Mac/Linux script provided here :
 
 ```bash
 sh build.sh --build-type Release --install --sudo --clean-all
