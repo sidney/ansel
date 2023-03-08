@@ -23,6 +23,7 @@
 #include "common/metadata.h"
 #include "common/tags.h"
 #include "common/datetime.h"
+#include "common/selection.h"
 #include "control/conf.h"
 #include "control/control.h"
 #include "develop/develop.h"
@@ -479,7 +480,7 @@ static void _metadata_view_update_values(dt_lib_module_t *self)
     }
     else
     {
-      images = dt_act_on_get_query(FALSE);
+      images = dt_selection_get_list_query(darktable.selection, FALSE, FALSE);
       sqlite3_stmt *stmt;
       // clang-format off
       gchar *query = g_strdup_printf("SELECT id, COUNT(id) "
@@ -512,7 +513,7 @@ static void _metadata_view_update_values(dt_lib_module_t *self)
 
   if(count > 1)
   {
-    if(!images) images = dt_act_on_get_query(FALSE);
+    if(!images) images = dt_selection_get_list_query(darktable.selection, FALSE, FALSE);;
     sqlite3_stmt *stmt = NULL;
     // clang-format off
     gchar *query = g_strdup_printf("SELECT COUNT(DISTINCT film_id), "

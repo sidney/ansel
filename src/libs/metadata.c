@@ -181,7 +181,7 @@ static void _update(dt_lib_module_t *self)
 
   // using dt_metadata_get() is not possible here. we want to do all this in a single pass, everything else
   // takes ages.
-  gchar *images = dt_act_on_get_query(FALSE);
+  gchar *images = dt_selection_get_list_query(darktable.selection, FALSE, FALSE);
   const uint32_t imgs_count = g_list_length((GList *)imgs);
 
   if(images)

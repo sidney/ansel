@@ -189,12 +189,6 @@ GList *dt_act_on_get_images(const gboolean only_visible, const gboolean force, c
   return l;
 }
 
-// get the query to retrieve images to act on. this is useful to speedup actions if they already use sqlite queries
-gchar *dt_act_on_get_query(const gboolean only_visible)
-{
-  return dt_selection_get_list_query(darktable.selection, only_visible, FALSE);
-}
-
 // get the main image to act on during global changes (libs, accels)
 int dt_act_on_get_main_image()
 {
