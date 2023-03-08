@@ -1171,7 +1171,7 @@ static void _style_updated(GtkWidget *widget)
   // Thing is Gtk CSS doesn't support min-width so this is how it should be done.
   if(w->type == DT_BAUHAUS_COMBOBOX)
   {
-    gtk_widget_set_size_request(widget, DT_PIXEL_APPLY_DPI(180),
+    gtk_widget_set_size_request(widget, DT_PIXEL_APPLY_DPI(50),
                                 w->margin->top + w->padding->top + w->margin->bottom + w->padding->bottom
                                     + darktable.bauhaus->line_height);
   }
