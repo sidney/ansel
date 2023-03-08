@@ -17,7 +17,8 @@ only from (broken) keyboard shortcuts known only by the hardcore geeks that made
 3. to sanitize the code base in order to reduce the cost of maintenance, now and in the future,
 4. to make the general UI nicer to people who don't have a master's in computer science and
 more efficient to use for people actually interested in photography, especially for folks
-using Wacom (and other brands) graphic tablets.
+using Wacom (and other brands) graphic tablets,
+5. optimize the GUI to streamline the scene-referred workflow and make it feel more natural.
 
 Ultimately, the future of Darktable is [vkdt](https://github.com/hanatos/vkdt/), but
 this will be available only for computers with GPU and is a prototype that will not be usable by a general
