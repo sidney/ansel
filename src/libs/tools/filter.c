@@ -42,6 +42,7 @@ typedef struct dt_lib_tool_filter_t
   GtkWidget *culling;
   int time_out;
   double last_key_time;
+  int zoom_level;
 } dt_lib_tool_filter_t;
 
 #ifdef USE_LUA
@@ -356,24 +357,34 @@ static gboolean _colorlabel_clicked(GtkWidget *w, GdkEventButton *e, dt_lib_modu
 
 static void _culling_mode(GtkWidget *widget, gpointer data)
 {
+  dt_lib_module_t *self = (dt_lib_module_t *)data;
+  dt_lib_tool_filter_t *d = (dt_lib_tool_filter_t *)self->data;
+
   if(gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(widget)))
   {
     darktable.gui->culling_mode = TRUE;
-    // The following should not be needed here, see below :
-    // dt_selection_to_culling_mode();
+    d->zoom_level = dt_view_lighttable_get_zoom(darktable.view_manager);
+
+    // Adjust lighttable zoom level
+    const uint32_t selected_pictures = MAX(dt_collection_get_selected_count(darktable.collection), 1);
+    int zoom_level;
+    if(selected_pictures < 7)
+      zoom_level = selected_pictures;
+    else if(selected_pictures < 9)
+      zoom_level = 4;
+    else
+      zoom_level = 6;
+
+    dt_view_lighttable_set_zoom(darktable.view_manager, zoom_level);
   }
   else
   {
     darktable.gui->culling_mode = FALSE;
     dt_culling_mode_to_selection();
+    dt_view_lighttable_set_zoom(darktable.view_manager, d->zoom_level);
   }
 
-  DT_DEBUG_CONTROL_SIGNAL_RAISE(darktable.signals, DT_SIGNAL_COLLECTION_CHANGED, DT_COLLECTION_CHANGE_RELOAD,
-                                DT_COLLECTION_PROP_UNDEF, (GList *)NULL, -1);
-  // The previous will call : 
-  // dt_collection_update_query(darktable.collection, DT_COLLECTION_CHANGE_RELOAD, DT_COLLECTION_PROP_COLORLABEL, NULL);
-  // that will call dt_collection_update(), which calls dt_selection_to_culling_mode()
-
+  dt_collection_update_query(darktable.collection, DT_COLLECTION_CHANGE_RELOAD, DT_COLLECTION_PROP_UNDEF, NULL);
   DT_DEBUG_CONTROL_SIGNAL_RAISE(darktable.signals, DT_SIGNAL_SELECTION_CHANGED);
 }
 
