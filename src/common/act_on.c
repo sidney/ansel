@@ -198,6 +198,10 @@ int dt_act_on_get_main_image()
   {
     ret = GPOINTER_TO_INT(darktable.view_manager->active_images->data);
   }
+  else if(darktable.gui->anchor_imgid)
+  {
+    ret = darktable.gui->anchor_imgid;
+  }
   else
   {
     sqlite3_stmt *stmt;

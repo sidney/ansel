@@ -2578,6 +2578,11 @@ static void _create_memory_schema(dt_database_t *db)
       db->handle,
       "CREATE TABLE memory.collected_images (rowid INTEGER PRIMARY KEY AUTOINCREMENT, imgid INTEGER)", NULL,
       NULL, NULL);
+  sqlite3_exec(
+      db->handle,
+      "CREATE TABLE memory.collected_backup (rowid INTEGER PRIMARY KEY AUTOINCREMENT, imgid INTEGER)", NULL,
+      NULL, NULL);  sqlite3_exec(db->handle, "CREATE TABLE memory.selected_backup (imgid INTEGER PRIMARY KEY)", NULL, NULL, NULL);
+  sqlite3_exec(db->handle, "CREATE TABLE memory.selected_backup (imgid INTEGER PRIMARY KEY)", NULL, NULL, NULL);
   sqlite3_exec(db->handle, "CREATE TABLE memory.tmp_selection (imgid INTEGER PRIMARY KEY)", NULL, NULL, NULL);
   sqlite3_exec(db->handle, "CREATE TABLE memory.taglist "
                            "(tmpid INTEGER PRIMARY KEY, id INTEGER UNIQUE ON CONFLICT IGNORE, "

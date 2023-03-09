@@ -17,6 +17,7 @@
 */
 
 #include "common/collection.h"
+#include "common/selection.h"
 #include "common/darktable.h"
 #include "control/conf.h"
 #include "control/control.h"
@@ -38,6 +39,7 @@ typedef struct dt_lib_tool_filter_t
   GtkWidget *reverse;
   GtkWidget *text;
   GtkWidget *colors[6];
+  GtkWidget *culling;
   int time_out;
   double last_key_time;
 } dt_lib_tool_filter_t;
@@ -352,6 +354,29 @@ static gboolean _colorlabel_clicked(GtkWidget *w, GdkEventButton *e, dt_lib_modu
   return FALSE;
 }
 
+static void _culling_mode(GtkWidget *widget, gpointer data)
+{
+  if(gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(widget)))
+  {
+    darktable.gui->culling_mode = TRUE;
+    // The following should not be needed here, see below :
+    // dt_selection_to_culling_mode();
+  }
+  else
+  {
+    darktable.gui->culling_mode = FALSE;
+    dt_culling_mode_to_selection();
+  }
+
+  DT_DEBUG_CONTROL_SIGNAL_RAISE(darktable.signals, DT_SIGNAL_COLLECTION_CHANGED, DT_COLLECTION_CHANGE_RELOAD,
+                                DT_COLLECTION_PROP_UNDEF, (GList *)NULL, -1);
+  // The previous will call : 
+  // dt_collection_update_query(darktable.collection, DT_COLLECTION_CHANGE_RELOAD, DT_COLLECTION_PROP_COLORLABEL, NULL);
+  // that will call dt_collection_update(), which calls dt_selection_to_culling_mode()
+
+  DT_DEBUG_CONTROL_SIGNAL_RAISE(darktable.signals, DT_SIGNAL_SELECTION_CHANGED);
+}
+
 #undef CPF_USER_DATA_INCLUDE
 #undef CPF_USER_DATA_EXCLUDE
 #undef CL_AND_MASK
@@ -464,7 +489,7 @@ void gui_init(dt_lib_module_t *self)
 
   // text filter
   hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
-  gtk_box_pack_end(GTK_BOX(self->widget), hbox, TRUE, TRUE, 0);
+  gtk_box_pack_start(GTK_BOX(self->widget), hbox, TRUE, TRUE, 0);
 
   label = gtk_label_new(C_("quickfilter", "Find"));
   gtk_box_pack_start(GTK_BOX(hbox), label, TRUE, TRUE, 0);
@@ -495,6 +520,16 @@ void gui_init(dt_lib_module_t *self)
   dt_gui_add_class(hbox, "quick_filter_box");
 
   dt_action_register(DT_ACTION(self), N_("search images"), _focus_filter_search, GDK_KEY_f, GDK_CONTROL_MASK);
+
+  // Culling mode
+  hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
+  gtk_box_pack_start(GTK_BOX(self->widget), hbox, TRUE, TRUE, 0);
+  d->culling = gtk_toggle_button_new_with_label(_("Selected"));
+  gtk_widget_set_tooltip_text(d->culling, _("Restrict the current view to only selected pictures"));
+  g_signal_connect(G_OBJECT(d->culling), "toggled", G_CALLBACK(_culling_mode), (gpointer)self);
+  gtk_box_pack_start(GTK_BOX(GTK_BOX(hbox)), d->culling, FALSE, FALSE, 0);
+  gtk_widget_set_name(d->culling, "quickfilter-culling");
+  dt_gui_add_class(hbox, "quick_filter_box");
 
   /* initialize proxy */
   darktable.view_manager->proxy.filter.module = self;
