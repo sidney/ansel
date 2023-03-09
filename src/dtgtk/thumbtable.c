@@ -623,7 +623,12 @@ static void _filemanager_zoom(dt_thumbtable_t *table, int oldzoom, int newzoom)
   if(!thumb)
   {
     // otherwise we use the classic retrieving method
-    const int id = dt_act_on_get_main_image();
+    int id = 0;
+    if(darktable.gui->anchor_imgid)
+      id = darktable.gui->anchor_imgid;
+    else
+      id = dt_act_on_get_main_image();
+
     thumb = _thumbtable_get_thumb(table, id);
     if(thumb)
     {
