@@ -1365,6 +1365,11 @@ filechooser row:hover .sidebar-icon
   margin-right: 1.5em;
 }
 
+.quick_filter_box #quickfilter-culling label
+{
+  margin: 0;
+}
+
 #quickfilter-search-box,
 #lib-label-colors
 {
