@@ -178,13 +178,36 @@ void _modulegroups_switch_tab_previous(dt_action_t *action)
 static gboolean _lib_modulegroups_scroll(GtkWidget *widget, GdkEventScroll *event, gpointer user_data)
 {
   int delta_x, delta_y;
+
+  // We will accumulate scrolls here
+  static int scrolls = 0;
+
   if(dt_gui_get_scroll_unit_deltas(event, &delta_x, &delta_y))
   {
-    uint32_t current = dt_dev_modulegroups_get(darktable.develop);
-    if(delta_x > 0 || delta_y > 0)
-      dt_dev_modulegroups_set(darktable.develop, _modulegroups_cycle_tabs(current + 1));
-    else if(delta_x < 0 || delta_y < 0)
-      dt_dev_modulegroups_set(darktable.develop, _modulegroups_cycle_tabs(current - 1));
+    int current = dt_dev_modulegroups_get(darktable.develop);
+    int future = 0;
+    if(delta_x > 0. || delta_y > 0.)
+      future = current + 1;
+    else if(delta_x < 0. || delta_y < 0.)
+      future = current - 1;
+
+    if(future < 0 || future > DT_MODULEGROUP_SIZE - 1)
+    {
+      // We reached the end of tabs. Allow cycling through, but add a little inertia to fight.
+      // This is to ensure user really wants to cycle through.
+      if(scrolls > 4)
+      {
+        scrolls = 0;
+      }
+      else
+      {
+        // Do nothing but increment
+        scrolls++;
+        return FALSE;
+      }
+    }
+
+    dt_dev_modulegroups_set(darktable.develop, _modulegroups_cycle_tabs(future));
     dt_iop_request_focus(NULL);
   }
 
