@@ -31,6 +31,7 @@
 #include "control/control.h"
 #include "control/jobs.h"
 #include "dtgtk/button.h"
+#include "gui/accelerators.h"
 #include "gui/gtk.h"
 #include "gui/preferences_dialogs.h"
 #include "libs/lib.h"
@@ -58,11 +59,15 @@ typedef struct dt_lib_collect_rule_t
   GtkWidget *button;
   gboolean typing;
   gchar *searchstring;
+  // Backreference the parent of the rule
+  void *lib_collect;
 } dt_lib_collect_rule_t;
 
 typedef struct dt_lib_collect_t
 {
   dt_lib_collect_rule_t rule[MAX_RULES];
+  GtkWidget *notebook;
+
   int active_rule;
   int nb_rules;
 
@@ -354,11 +359,7 @@ static void _lib_collect_update_params(dt_lib_collect_t *d)
     /* get string */
     snprintf(confname, sizeof(confname), "plugins/lighttable/collect/string%1d", i);
     const char *string = dt_conf_get_string_const(confname);
-    if(string != NULL)
-    {
-      g_strlcpy(p->rule[i].string, string, PARAM_STRING_SIZE);
-    }
-
+    if(string != NULL) g_strlcpy(p->rule[i].string, string, PARAM_STRING_SIZE);
     // fprintf(stderr,"[%i] %d,%d,%s\n",i, p->rule[i].item, p->rule[i].mode,  p->rule[i].string);
   }
 
@@ -697,8 +698,20 @@ static gboolean view_onPopupMenu(GtkWidget *treeview, dt_lib_collect_t *d)
 
 static dt_lib_collect_t *get_collect(dt_lib_collect_rule_t *r)
 {
-  dt_lib_collect_t *d = (dt_lib_collect_t *)(((char *)r) - r->num * sizeof(dt_lib_collect_rule_t));
+  dt_lib_collect_t *d = (dt_lib_collect_t *)r->lib_collect;
   return d;
+}
+
+static dt_lib_collect_rule_t * get_active_rule(dt_lib_collect_t *d)
+{
+  // Get the pointer to the currently active view
+  return d->rule + d->active_rule;
+}
+
+static void get_number_of_rules(dt_lib_collect_t *d)
+{
+  d->nb_rules = CLAMP(dt_conf_get_int("plugins/lighttable/collect/num_rules"), 1, MAX_RULES - 1);
+  d->active_rule = d->nb_rules - 1;
 }
 
 static gboolean list_select(GtkTreeModel *model, GtkTreePath *path, GtkTreeIter *iter, gpointer data)
@@ -1031,6 +1044,7 @@ static void _lib_folders_update_collection(const gchar *filmroll)
 
 static void set_properties(dt_lib_collect_rule_t *dr)
 {
+  // Store GUI params into conf keys
   const int property = _combo_get_active_collection(dr->combo);
   const gchar *text = gtk_entry_get_text(GTK_ENTRY(dr->text));
 
@@ -1039,6 +1053,23 @@ static void set_properties(dt_lib_collect_rule_t *dr)
   dt_conf_set_string(confname, text);
   snprintf(confname, sizeof(confname), "plugins/lighttable/collect/item%1d", dr->num);
   dt_conf_set_int(confname, property);
+}
+
+static void get_properties(dt_lib_collect_rule_t *dr)
+{
+  // Set GUI controls from conf keys
+  char confname[200] = { 0 };
+  snprintf(confname, sizeof(confname), "plugins/lighttable/collect/item%1d", dr->num);
+  _combo_set_active_collection(dr->combo, dt_conf_get_int(confname));
+  snprintf(confname, sizeof(confname), "plugins/lighttable/collect/string%1d", dr->num);
+  const char *text = dt_conf_get_string_const(confname);
+
+  if(text)
+  {
+    gtk_entry_set_text(GTK_ENTRY(dr->text), text);
+    gtk_editable_set_position(GTK_EDITABLE(dr->text), -1);
+    dr->typing = FALSE;
+  }
 }
 
 static GtkTreeModel *_create_filtered_model(GtkTreeModel *model, dt_lib_collect_rule_t *dr)
@@ -2194,6 +2225,175 @@ static void _set_tooltip(dt_lib_collect_rule_t *d)
   g_free(tip);
 }
 
+static void _set_rules_visibility(dt_lib_collect_rule_t *dr, gboolean last, gboolean active)
+{
+  gtk_widget_set_no_show_all(dr->hbox, FALSE);
+  gtk_widget_set_visible(dr->hbox, TRUE);
+  gtk_widget_show_all(dr->hbox);
+
+  get_properties(dr);
+
+  char confname[200] = { 0 };
+
+  if(last)
+  {
+    // only clear
+    gtk_button_set_label(GTK_BUTTON(dr->button), "-");
+    gtk_widget_set_tooltip_text(GTK_WIDGET(dr->button), _("clear this rule"));
+  }
+  else if(active)
+  {
+    gtk_button_set_label(GTK_BUTTON(dr->button), "+");
+    gtk_widget_set_tooltip_text(GTK_WIDGET(dr->button), _("clear this rule or add new rules"));
+  }
+  else
+  {
+    snprintf(confname, sizeof(confname), "plugins/lighttable/collect/mode%1d", dr->num + 1);
+    const int mode = dt_conf_get_int(confname);
+    if(mode == DT_LIB_COLLECT_MODE_AND) gtk_button_set_label(GTK_BUTTON(dr->button), _("AND"));
+    if(mode == DT_LIB_COLLECT_MODE_OR) gtk_button_set_label(GTK_BUTTON(dr->button), _("OR"));
+    if(mode == DT_LIB_COLLECT_MODE_AND_NOT) gtk_button_set_label(GTK_BUTTON(dr->button), _("AND NOT"));
+    gtk_widget_set_tooltip_text(GTK_WIDGET(dr->button), _("clear this rule"));
+  }
+
+  _set_tooltip(dr);
+}
+
+static gboolean _is_folder_collection(int i)
+{
+  /*
+  * The historical design of collections sucks. The thing is wired as a general
+  * but complex SQL querying tool. Most users just want the content of a folder and find
+  * the SQL GUI overwhelming and cryptic. Many complain that dt doesn't even have a filemanager
+  * because they didn't understand that querying folders is only one option of a more
+  * general feature.
+  *
+  * But it turns out that folders are called "folders" only when they are in hierarchical
+  * tree view, otherwise they are "filmrolls" in list view, but it's the same content. This is highly misleading
+  * but it doesn't stop there. Indeed, the name of the filmroll is actually the name of the
+  * filesystem folder, and cannot be changed, while people may think of it as an abitrary collection
+  * with a customizable name à la Lightroom. This is all a problem of GUI and calling folders
+  * something else while still having something actually called folder.
+  *
+  * We re-interface here the simple case of querying a filesystem folder, with no additional constrain,
+  * with a lite GUI calling folder folder, and having a "view" option for tree or list.
+  */
+
+  char confname[200] = { 0 };
+  snprintf(confname, sizeof(confname), "plugins/lighttable/collect/item%1d", i);
+  const int result = dt_conf_get_int(confname);
+  return result == DT_COLLECTION_PROP_FILMROLL || result == DT_COLLECTION_PROP_FOLDERS;
+}
+
+static gboolean _is_tag_collection(int i)
+{
+  char confname[200] = { 0 };
+  snprintf(confname, sizeof(confname), "plugins/lighttable/collect/item%1d", i);
+  const int result = dt_conf_get_int(confname);
+  return result == DT_COLLECTION_PROP_TAG;
+}
+
+static void combo_changed(GtkWidget *combo, dt_lib_collect_rule_t *d);
+
+static void _depopulate_combo(GtkWidget *combo)
+{
+  // De-populate the combobox and restrict to folder/filmroll options
+  dt_bauhaus_combobox_clear(combo);
+  dt_bauhaus_combobox_remove_at(combo, 0); // remove section title
+  dt_bauhaus_widget_set_label(combo, NULL, _("View"));
+  dt_bauhaus_combobox_set_selected_text_align(combo, DT_BAUHAUS_COMBOBOX_ALIGN_RIGHT);
+  dt_bauhaus_combobox_add_full(combo, _("List"), DT_BAUHAUS_COMBOBOX_ALIGN_RIGHT,
+                                GUINT_TO_POINTER(DT_COLLECTION_PROP_FILMROLL + 1), NULL, TRUE);
+  dt_bauhaus_combobox_add_full(combo, _("Tree"), DT_BAUHAUS_COMBOBOX_ALIGN_RIGHT,
+                                  GUINT_TO_POINTER(DT_COLLECTION_PROP_FOLDERS + 1), NULL, TRUE);
+}
+
+static void _repopulate_combo(GtkWidget *combo)
+{
+  // Re-populate the comboboxes with the full set of options
+  dt_bauhaus_combobox_clear(combo);
+  dt_bauhaus_widget_set_label(combo, NULL, NULL);
+  dt_bauhaus_combobox_set_selected_text_align(combo, DT_BAUHAUS_COMBOBOX_ALIGN_RIGHT);
+  _populate_collect_combo(combo);
+}
+
+static void _hide_all_rules(dt_lib_collect_t *d)
+{
+  // Reset everything to hidden
+  gtk_widget_set_no_show_all(GTK_WIDGET(d->view), TRUE);
+  for(int i = 0; i < MAX_RULES; i++)
+  {
+    gtk_widget_set_no_show_all(d->rule[i].hbox, TRUE);
+    gtk_widget_set_visible(d->rule[i].hbox, FALSE);
+  }
+}
+
+static void _refresh_rules_visibility(dt_lib_collect_t *d)
+{
+  // Show active rule(s)
+  get_number_of_rules(d); // refresh d->active_rule
+  for(int i = 0; i <= d->active_rule; i++)
+    _set_rules_visibility(d->rule + i, i == MAX_RULES - 1, i == d->active_rule);
+}
+
+static void _lib_collect_mode(GtkNotebook *notebook, GtkWidget *page, guint page_num, gpointer user_data)
+{
+  dt_lib_module_t *self = (dt_lib_module_t *)user_data;
+  dt_lib_collect_t *d = (dt_lib_collect_t *)self->data;
+
+  ++darktable.gui->reset;
+  if(page_num == 0)
+  {
+    dt_conf_set_int("plugins/lighttable/collect/num_rules", 1);
+
+    // Ensure the property is either folder or filmstrio
+    dt_collection_properties_t prop = MAX(dt_conf_get_int("plugins/lighttable/collect/item0"), DT_COLLECTION_PROP_FOLDERS);
+    dt_conf_set_int("plugins/lighttable/collect/item0", prop);
+
+    // Rebuild the combobox list and remap the property to the new entry
+    _depopulate_combo(d->rule[0].combo);
+    _combo_set_active_collection(d->rule[0].combo, prop);
+
+    gtk_entry_set_placeholder_text(GTK_ENTRY(d->rule[0].text), _("Search a folder…"));
+  }
+  else if(page_num == 1)
+  {
+    dt_conf_set_int("plugins/lighttable/collect/num_rules", 1);
+    dt_conf_set_int("plugins/lighttable/collect/item0", DT_COLLECTION_PROP_TAG);
+
+    // Depopulate combo
+    dt_bauhaus_combobox_clear(d->rule[0].combo);
+    dt_bauhaus_combobox_remove_at(d->rule[0].combo, 0); // remove section title
+    dt_bauhaus_widget_set_label(d->rule[0].combo, NULL, _("View"));
+    dt_bauhaus_combobox_set_selected_text_align(d->rule[0].combo, DT_BAUHAUS_COMBOBOX_ALIGN_RIGHT);
+    dt_bauhaus_combobox_add_full(d->rule[0].combo, _("Collections"), DT_BAUHAUS_COMBOBOX_ALIGN_RIGHT,
+                                GUINT_TO_POINTER(DT_COLLECTION_PROP_TAG + 1), NULL, TRUE);
+
+    // Remap the property to the new entry. Only one remaining.
+    _combo_set_active_collection(d->rule[0].combo, DT_COLLECTION_PROP_TAG);
+
+    gtk_entry_set_placeholder_text(GTK_ENTRY(d->rule[0].text), _("Search a collection…"));
+  }
+  else
+  {
+    // Rebuild the combobox list and remap the property to the new entry
+    dt_collection_properties_t prop = dt_conf_get_int("plugins/lighttable/collect/item0");
+    _repopulate_combo(d->rule[0].combo);
+    _combo_set_active_collection(d->rule[0].combo, prop);
+
+    gtk_entry_set_placeholder_text(GTK_ENTRY(d->rule[0].text), _("Search…"));
+  }
+
+  _hide_all_rules(d);
+  _refresh_rules_visibility(d);
+
+  if(page_num == 1) gtk_widget_hide(d->rule[0].combo); // only 1 option to show, so hide it
+
+  // Update the tree view content
+  update_view(get_active_rule(d));
+  dt_conf_set_int("plugins/lighttable/collect/tab", page_num);
+  --darktable.gui->reset;
+}
 
 static void _lib_collect_gui_update(dt_lib_module_t *self)
 {
@@ -2203,65 +2403,27 @@ static void _lib_collect_gui_update(dt_lib_module_t *self)
   if(d->view_rule != -1) return;
 
   ++darktable.gui->reset;
-  const int _a = dt_conf_get_int("plugins/lighttable/collect/num_rules") - 1;
-  const int active = CLAMP(_a, 0, (MAX_RULES - 1));
-  d->nb_rules = active + 1;
-  char confname[200] = { 0 };
-
-  gtk_widget_set_no_show_all(GTK_WIDGET(d->view), TRUE);
-
-  for(int i = 0; i < MAX_RULES; i++)
-  {
-    gtk_widget_set_no_show_all(d->rule[i].hbox, TRUE);
-    gtk_widget_set_visible(d->rule[i].hbox, FALSE);
-  }
-  for(int i = 0; i <= active; i++)
-  {
-    gtk_widget_set_no_show_all(d->rule[i].hbox, FALSE);
-    gtk_widget_set_visible(d->rule[i].hbox, TRUE);
-    gtk_widget_show_all(d->rule[i].hbox);
-    snprintf(confname, sizeof(confname), "plugins/lighttable/collect/item%1d", i);
-    _combo_set_active_collection(d->rule[i].combo, dt_conf_get_int(confname));
-    snprintf(confname, sizeof(confname), "plugins/lighttable/collect/string%1d", i);
-    const char *text = dt_conf_get_string_const(confname);
-    if(text)
-    {
-      g_signal_handlers_block_matched(d->rule[i].text, G_SIGNAL_MATCH_FUNC, 0, 0, NULL, entry_changed, NULL);
-      gtk_entry_set_text(GTK_ENTRY(d->rule[i].text), text);
-      gtk_editable_set_position(GTK_EDITABLE(d->rule[i].text), -1);
-      g_signal_handlers_unblock_matched(d->rule[i].text, G_SIGNAL_MATCH_FUNC, 0, 0, NULL, entry_changed, NULL);
-      d->rule[i].typing = FALSE;
-    }
-
-    GtkDarktableButton *button = DTGTK_BUTTON(d->rule[i].button);
-    if(i == MAX_RULES - 1)
-    {
-      // only clear
-      button->icon = dtgtk_cairo_paint_cancel;
-      gtk_widget_set_tooltip_text(GTK_WIDGET(button), _("clear this rule"));
-    }
-    else if(i == active)
-    {
-      gtk_widget_set_tooltip_text(GTK_WIDGET(button), _("clear this rule or add new rules"));
-      dtgtk_button_set_paint(button, dtgtk_cairo_paint_solid_arrow, CPF_DIRECTION_DOWN, NULL);
-    }
-    else
-    {
-      snprintf(confname, sizeof(confname), "plugins/lighttable/collect/mode%1d", i + 1);
-      const int mode = dt_conf_get_int(confname);
-      if(mode == DT_LIB_COLLECT_MODE_AND) button->icon = dtgtk_cairo_paint_and;
-      if(mode == DT_LIB_COLLECT_MODE_OR) button->icon = dtgtk_cairo_paint_or;
-      if(mode == DT_LIB_COLLECT_MODE_AND_NOT) button->icon = dtgtk_cairo_paint_andnot;
-      gtk_widget_set_tooltip_text(GTK_WIDGET(button), _("clear this rule"));
-    }
-
-    _set_tooltip(d->rule + i);
-  }
-
-  // update list of proposals
-  d->active_rule = active;
-  update_view(d->rule + d->active_rule);
+  _hide_all_rules(d);
+  _refresh_rules_visibility(d);
   --darktable.gui->reset;
+
+  // Enable simplified tab view if using one single folder or tag rule
+  //const int num_page = dt_conf_get_int("plugins/lighttable/collect/tab");
+  if(_is_folder_collection(0) && d->nb_rules == 1)
+  {
+    gtk_notebook_set_current_page(GTK_NOTEBOOK(d->notebook), 0);
+    // fprintf(stdout, "folder case\n");
+  }
+  else if(_is_tag_collection(0) && d->nb_rules == 1)
+  {
+    gtk_notebook_set_current_page(GTK_NOTEBOOK(d->notebook), 1);
+    // fprintf(stdout, "tag case\n");
+  }
+  else
+  {
+    gtk_notebook_set_current_page(GTK_NOTEBOOK(d->notebook), 2);
+    // fprintf(stdout, "general case\n");
+  }
 }
 
 void gui_reset(dt_lib_module_t *self)
@@ -2280,9 +2442,8 @@ void gui_reset(dt_lib_module_t *self)
 static void combo_changed(GtkWidget *combo, dt_lib_collect_rule_t *d)
 {
   if(darktable.gui->reset) return;
-  g_signal_handlers_block_matched(d->text, G_SIGNAL_MATCH_FUNC, 0, 0, NULL, entry_changed, NULL);
   gtk_entry_set_text(GTK_ENTRY(d->text), "");
-  g_signal_handlers_unblock_matched(d->text, G_SIGNAL_MATCH_FUNC, 0, 0, NULL, entry_changed, NULL);
+
   dt_lib_collect_t *c = get_collect(d);
   c->active_rule = d->num;
   const int property = _combo_get_active_collection(d->combo);
@@ -2322,6 +2483,7 @@ static void combo_changed(GtkWidget *combo, dt_lib_collect_rule_t *d)
   }
 
   set_properties(d);
+  update_view(d);
   c->view_rule = -1;
   if(order_request)
     DT_DEBUG_CONTROL_SIGNAL_RAISE(darktable.signals, DT_SIGNAL_IMAGES_ORDER_CHANGE, order);
@@ -2347,12 +2509,13 @@ static void row_activated_with_event(GtkTreeView *view, GtkTreePath *path, GtkTr
   gboolean order_request = FALSE;
   int order;
 
-  const int active = d->active_rule;
-  d->rule[active].typing = FALSE;
+  get_number_of_rules(d);
+  dt_lib_collect_rule_t *active_rule = get_active_rule(d);
+  active_rule->typing = FALSE;
 
   gboolean force_update_view = FALSE;
 
-  const int item = _combo_get_active_collection(d->rule[active].combo);
+  const int item = _combo_get_active_collection(active_rule->combo);
   gtk_tree_model_get(model, &iter, DT_LIB_COLLECT_COL_PATH, &text, -1);
 
   if(text && strlen(text) > 0)
@@ -2362,12 +2525,12 @@ static void row_activated_with_event(GtkTreeView *view, GtkTreePath *path, GtkTr
       if(item == DT_COLLECTION_PROP_FILMROLL)
       {
         // go to corresponding folder collection
-        _combo_set_active_collection(d->rule[active].combo, DT_COLLECTION_PROP_FOLDERS);
+        _combo_set_active_collection(active_rule->combo, DT_COLLECTION_PROP_FOLDERS);
       }
       else if(item == DT_COLLECTION_PROP_FOLDERS)
       {
         // go to corresponding filmroll collection
-        _combo_set_active_collection(d->rule[active].combo, DT_COLLECTION_PROP_FILMROLL);
+        _combo_set_active_collection(active_rule->combo, DT_COLLECTION_PROP_FILMROLL);
         force_update_view = TRUE;
       }
     }
@@ -2421,7 +2584,7 @@ static void row_activated_with_event(GtkTreeView *view, GtkTreePath *path, GtkTr
           text = n_text;
         }
       }
-      else if(active == 0 && g_strcmp0(text, _("not tagged")))
+      else if(active_rule == d->rule && g_strcmp0(text, _("not tagged")))
       {
         // first filter is tag and the row is a leave
         uint32_t sort = DT_COLLECTION_SORT_NONE;
@@ -2449,10 +2612,10 @@ static void row_activated_with_event(GtkTreeView *view, GtkTreePath *path, GtkTr
   }
   g_list_free_full(sels, (GDestroyNotify)gtk_tree_path_free);
 
-  g_signal_handlers_block_matched(d->rule[active].text, G_SIGNAL_MATCH_FUNC, 0, 0, NULL, entry_changed, NULL);
-  gtk_entry_set_text(GTK_ENTRY(d->rule[active].text), text);
-  gtk_editable_set_position(GTK_EDITABLE(d->rule[active].text), -1);
-  g_signal_handlers_unblock_matched(d->rule[active].text, G_SIGNAL_MATCH_FUNC, 0, 0, NULL, entry_changed, NULL);
+  g_signal_handlers_block_matched(active_rule->text, G_SIGNAL_MATCH_FUNC, 0, 0, NULL, entry_changed, NULL);
+  gtk_entry_set_text(GTK_ENTRY(active_rule->text), text);
+  gtk_editable_set_position(GTK_EDITABLE(active_rule->text), -1);
+  g_signal_handlers_unblock_matched(active_rule->text, G_SIGNAL_MATCH_FUNC, 0, 0, NULL, entry_changed, NULL);
   g_free(text);
 
   if(item == DT_COLLECTION_PROP_TAG
@@ -2465,10 +2628,10 @@ static void row_activated_with_event(GtkTreeView *view, GtkTreePath *path, GtkTr
      || item == DT_COLLECTION_PROP_LOCAL_COPY
      || item == DT_COLLECTION_PROP_GROUPING)
   {
-    set_properties(d->rule + active); // we just have to set the selection
+    set_properties(active_rule); // we just have to set the selection
   }
   else
-    update_view(d->rule + active); // we have to update visible items too
+    update_view(active_rule); // we have to update visible items too
 
   dt_control_signal_block_by_func(darktable.signals, G_CALLBACK(collection_updated),
                                   darktable.view_manager->proxy.module_collect.module);
@@ -2545,12 +2708,8 @@ int position()
 static gboolean entry_focus_in_callback(GtkWidget *w, GdkEventFocus *event, dt_lib_collect_rule_t *d)
 {
   dt_lib_collect_t *c = get_collect(d);
-  if(c->active_rule != d->num)
-  {
-    c->active_rule = d->num;
-    update_view(c->rule + c->active_rule);
-  }
-
+  dt_lib_collect_rule_t *active_rule = get_active_rule(c);
+  update_view(active_rule);
   return FALSE;
 }
 
@@ -2599,33 +2758,18 @@ static void collection_updated(gpointer instance, dt_collection_change_t query_c
 
   // update tree
   d->view_rule = -1;
-  d->rule[d->active_rule].typing = FALSE;
-
-  // determine if we want to refresh the tree or not
-  gboolean refresh = TRUE;
-  if(query_change == DT_COLLECTION_CHANGE_RELOAD && changed_property != DT_COLLECTION_PROP_UNDEF)
-  {
-    // if we only reload the collection, that means that we don't change the query itself
-    // so we only rebuild the treeview if a used property has changed
-    refresh = FALSE;
-    for(int i = 0; i <= d->active_rule; i++)
-    {
-      const int item = _combo_get_active_collection(d->rule[i].combo);
-      if(item == changed_property)
-      {
-        refresh = TRUE;
-        break;
-      }
-    }
-  }
-
-  if(refresh) _lib_collect_gui_update(self);
+  dt_lib_collect_rule_t *active_rule = get_active_rule(d);
+  active_rule->typing = FALSE;
+  _lib_collect_gui_update(self);
 }
 
 
 static void filmrolls_updated(gpointer instance, gpointer self)
 {
   // TODO: We should update the count of images here
+  dt_lib_module_t *dm = (dt_lib_module_t *)self;
+  dt_lib_collect_t *d = (dt_lib_collect_t *)dm->data;
+  d->view_rule = -1;
   _lib_collect_gui_update(self);
 }
 
@@ -2636,7 +2780,8 @@ static void filmrolls_imported(gpointer instance, int film_id, gpointer self)
 
   // update tree
   d->view_rule = -1;
-  d->rule[d->active_rule].typing = FALSE;
+  dt_lib_collect_rule_t *active_rule = get_active_rule(d);
+  active_rule->typing = FALSE;
   _lib_collect_gui_update(self);
 }
 
@@ -2655,7 +2800,8 @@ static void filmrolls_removed(gpointer instance, gpointer self)
   {
     d->view_rule = -1;
   }
-  d->rule[d->active_rule].typing = FALSE;
+  dt_lib_collect_rule_t *active_rule = get_active_rule(d);
+  active_rule->typing = FALSE;
   _lib_collect_gui_update(self);
 }
 
@@ -2663,11 +2809,12 @@ static void tag_changed(gpointer instance, gpointer self)
 {
   dt_lib_module_t *dm = (dt_lib_module_t *)self;
   dt_lib_collect_t *d = (dt_lib_collect_t *)dm->data;
+  dt_lib_collect_rule_t *active_rule = get_active_rule(d);
   // update tree
-  if(_combo_get_active_collection(d->rule[d->active_rule].combo) == DT_COLLECTION_PROP_TAG)
+  if(_combo_get_active_collection(active_rule->combo) == DT_COLLECTION_PROP_TAG)
   {
     d->view_rule = -1;
-    d->rule[d->active_rule].typing = FALSE;
+    active_rule->typing = FALSE;
 
     //need to reload collection since we have tags as active collection filter
     dt_control_signal_block_by_func(darktable.signals, G_CALLBACK(collection_updated),
@@ -2696,18 +2843,20 @@ static void tag_changed(gpointer instance, gpointer self)
   }
 }
 
-static void _geotag_changed(gpointer instance, GList *imgs, const int locid, gpointer self)
+static void geotag_changed(gpointer instance, GList *imgs, const int locid, gpointer self)
 {
   // if locid <> NULL this event doesn't concern collect module
   if(!locid)
   {
     dt_lib_module_t *dm = (dt_lib_module_t *)self;
     dt_lib_collect_t *d = (dt_lib_collect_t *)dm->data;
+    dt_lib_collect_rule_t *active_rule = get_active_rule(d);
+
     // update tree
-    if(_combo_get_active_collection(d->rule[d->active_rule].combo) == DT_COLLECTION_PROP_GEOTAGGING)
+    if(_combo_get_active_collection(active_rule->combo) == DT_COLLECTION_PROP_GEOTAGGING)
     {
       d->view_rule = -1;
-      d->rule[d->active_rule].typing = FALSE;
+      active_rule->typing = FALSE;
       _lib_collect_gui_update(self);
 
       //need to reload collection since we have geotags as active collection filter
@@ -2748,8 +2897,10 @@ static void metadata_changed(gpointer instance, int type, gpointer self)
     }
   }
 
+  dt_lib_collect_rule_t *active_rule = get_active_rule(d);
+
   // update collection if metadata have been hidden or a metadata collection is active
-  const int prop = _combo_get_active_collection(d->rule[d->active_rule].combo);
+  const int prop = _combo_get_active_collection(active_rule->combo);
   if(type == DT_METADATA_SIGNAL_HIDDEN
      || (prop >= DT_COLLECTION_PROP_METADATA
          && prop < DT_COLLECTION_PROP_METADATA + DT_METADATA_NUMBER))
@@ -2959,17 +3110,17 @@ void _mount_changed(GUnixMountMonitor *monitor, dt_lib_module_t *self)
   dt_film_set_folder_status();
   // very rough update (rebuild the view). As these events are not too many that remains acceptable
   // adding film_id to treeview and listview would be cleaner to update just the parameter "reachable"
-  dt_lib_collect_rule_t *dr = d->rule + d->active_rule;
+  dt_lib_collect_rule_t *dr = get_active_rule(d);
   const int property = _combo_get_active_collection(dr->combo);
   if(property == DT_COLLECTION_PROP_FOLDERS)
   {
-    d->rule[d->active_rule].typing = FALSE;
+    dr->typing = FALSE;
     d->view_rule = -1;
     tree_view(dr);
   }
   else if(property == DT_COLLECTION_PROP_FILMROLL)
   {
-    d->rule[d->active_rule].typing = FALSE;
+    dr->typing = FALSE;
     d->view_rule = -1;
     list_view(dr);
   }
@@ -2989,29 +3140,47 @@ void gui_init(dt_lib_module_t *self)
   GtkBox *box = NULL;
   GtkWidget *w = NULL;
 
-  gboolean has_iop_name_rule = FALSE;
+  // Main notebook
+  static struct dt_action_def_t notebook_def = { };
+  d->notebook = GTK_WIDGET(dt_ui_notebook_new(&notebook_def));
+  dt_action_define(DT_ACTION(self), NULL, N_("page"), GTK_WIDGET(self->widget), &notebook_def);
+
+  dt_ui_notebook_page(GTK_NOTEBOOK(d->notebook), _("Folders"), _("Browse the content of folders known to Ansel"));
+  dt_ui_notebook_page(GTK_NOTEBOOK(d->notebook), _("Collections"), _("Query files by hierarchical tags"));
+  dt_ui_notebook_page(GTK_NOTEBOOK(d->notebook), _("Queries"), _("Perform advanced queries into Ansel library"));
+  gtk_widget_show_all(d->notebook); // needed to be able to switch pages programmatically
+
+  gtk_box_pack_start(GTK_BOX(self->widget), d->notebook, TRUE, TRUE, 0);
+  gtk_notebook_set_scrollable(GTK_NOTEBOOK(d->notebook), TRUE);
+  g_signal_connect(G_OBJECT(d->notebook), "switch_page", G_CALLBACK(_lib_collect_mode), self);
+
   for(int i = 0; i < MAX_RULES; i++)
   {
     d->rule[i].num = i;
     d->rule[i].typing = FALSE;
+    d->rule[i].lib_collect = (void *)d;
 
-    box = GTK_BOX(gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0));
+    box = GTK_BOX(gtk_box_new(GTK_ORIENTATION_VERTICAL, 0));
     d->rule[i].hbox = GTK_WIDGET(box);
     gtk_box_pack_start(GTK_BOX(self->widget), GTK_WIDGET(box), TRUE, TRUE, 0);
     gtk_widget_set_name(GTK_WIDGET(box), "lib-dtbutton");
 
     d->rule[i].combo = dt_bauhaus_combobox_new(NULL);
-    dt_bauhaus_combobox_set_selected_text_align(d->rule[i].combo, DT_BAUHAUS_COMBOBOX_ALIGN_LEFT);
+    dt_bauhaus_combobox_set_selected_text_align(d->rule[i].combo, DT_BAUHAUS_COMBOBOX_ALIGN_RIGHT);
     _populate_collect_combo(d->rule[i].combo);
+
     dt_bauhaus_combobox_mute_scrolling(d->rule[i].combo);
-    if(_combo_get_active_collection(d->rule[i].combo) == DT_COLLECTION_PROP_MODULE) has_iop_name_rule = TRUE;
 
     g_signal_connect(G_OBJECT(d->rule[i].combo), "value-changed", G_CALLBACK(combo_changed), d->rule + i);
     gtk_box_pack_start(box, d->rule[i].combo, FALSE, FALSE, 0);
 
-    w = gtk_entry_new();
+    GtkBox *hbox = GTK_BOX(gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0));
+    gtk_box_pack_start(box, GTK_WIDGET(hbox), FALSE, FALSE, 0);
+
+    w = gtk_search_entry_new();
     d->rule[i].text = w;
     gtk_widget_add_events(w, GDK_FOCUS_CHANGE_MASK);
+    gtk_entry_set_placeholder_text(GTK_ENTRY(d->rule[i].text), _("Search…"));
     g_signal_connect(G_OBJECT(w), "focus-in-event", G_CALLBACK(entry_focus_in_callback), d->rule + i);
 
     /* xgettext:no-c-format */
@@ -3019,15 +3188,13 @@ void gui_init(dt_lib_module_t *self)
     g_signal_connect(G_OBJECT(w), "changed", G_CALLBACK(entry_changed), d->rule + i);
     g_signal_connect(G_OBJECT(w), "activate", G_CALLBACK(entry_activated), d->rule + i);
     gtk_widget_set_name(GTK_WIDGET(w), "lib-collect-entry");
-    gtk_box_pack_start(box, w, TRUE, TRUE, 0);
+    gtk_box_pack_start(hbox, w, TRUE, TRUE, 0);
     gtk_entry_set_width_chars(GTK_ENTRY(w), 5);
 
-    w = dtgtk_button_new(dtgtk_cairo_paint_presets, 0, NULL);
-
-    d->rule[i].button = w;
-    gtk_widget_set_events(w, GDK_BUTTON_PRESS_MASK);
-    g_signal_connect(G_OBJECT(w), "button-press-event", G_CALLBACK(popup_button_callback), d->rule + i);
-    gtk_box_pack_start(box, w, FALSE, FALSE, 0);
+    d->rule[i].button = gtk_button_new();
+    gtk_widget_set_events(d->rule[i].button, GDK_BUTTON_PRESS_MASK);
+    g_signal_connect(G_OBJECT(d->rule[i].button), "button-press-event", G_CALLBACK(popup_button_callback), d->rule + i);
+    gtk_box_pack_start(hbox, d->rule[i].button, FALSE, FALSE, 0);
   }
 
   GtkTreeView *view = GTK_TREE_VIEW(gtk_tree_view_new());
@@ -3061,19 +3228,13 @@ void gui_init(dt_lib_module_t *self)
   g_object_unref(treemodel);
 
   gtk_box_pack_start(GTK_BOX(self->widget),
-                     dt_ui_scroll_wrap(GTK_WIDGET(view), 200, "plugins/lighttable/collect/windowheight"), TRUE, TRUE, 0);
+                     dt_ui_scroll_wrap(GTK_WIDGET(view), 400, "plugins/lighttable/collect/windowheight"), TRUE, TRUE, 0);
 
   /* setup proxy */
   darktable.view_manager->proxy.module_collect.module = self;
   darktable.view_manager->proxy.module_collect.update = _lib_collect_gui_update;
 
   _lib_collect_gui_update(self);
-
-  if(_combo_get_active_collection(d->rule[0].combo) == DT_COLLECTION_PROP_TAG)
-  {
-    const char *tag = dt_conf_get_string_const("plugins/lighttable/collect/string0");
-    dt_collection_set_tag_id((dt_collection_t *)darktable.collection, dt_tag_get_tag_id_by_name(tag));
-  }
 
 #ifdef _WIN32
   d->vmonitor = g_volume_monitor_get();
@@ -3083,10 +3244,6 @@ void gui_init(dt_lib_module_t *self)
   d->vmonitor = g_unix_mount_monitor_get();
   g_signal_connect(G_OBJECT(d->vmonitor), "mounts-changed", G_CALLBACK(_mount_changed), self);
 #endif
-
-  // force redraw collection images because of late update of the table memory.darktable_iop_names
-  if(has_iop_name_rule)
-    dt_collection_update_query(darktable.collection, DT_COLLECTION_CHANGE_RELOAD, DT_COLLECTION_PROP_MODULE, NULL);
 
   DT_DEBUG_CONTROL_SIGNAL_CONNECT(darktable.signals, DT_SIGNAL_COLLECTION_CHANGED, G_CALLBACK(collection_updated),
                             self);
@@ -3106,7 +3263,7 @@ void gui_init(dt_lib_module_t *self)
   DT_DEBUG_CONTROL_SIGNAL_CONNECT(darktable.signals, DT_SIGNAL_TAG_CHANGED, G_CALLBACK(tag_changed),
                             self);
 
-  DT_DEBUG_CONTROL_SIGNAL_CONNECT(darktable.signals, DT_SIGNAL_GEOTAG_CHANGED, G_CALLBACK(_geotag_changed),
+  DT_DEBUG_CONTROL_SIGNAL_CONNECT(darktable.signals, DT_SIGNAL_GEOTAG_CHANGED, G_CALLBACK(geotag_changed),
                             self);
 
   DT_DEBUG_CONTROL_SIGNAL_CONNECT(darktable.signals, DT_SIGNAL_METADATA_CHANGED, G_CALLBACK(metadata_changed), self);
@@ -3123,7 +3280,7 @@ void gui_cleanup(dt_lib_module_t *self)
   DT_DEBUG_CONTROL_SIGNAL_DISCONNECT(darktable.signals, G_CALLBACK(preferences_changed), self);
   DT_DEBUG_CONTROL_SIGNAL_DISCONNECT(darktable.signals, G_CALLBACK(filmrolls_removed), self);
   DT_DEBUG_CONTROL_SIGNAL_DISCONNECT(darktable.signals, G_CALLBACK(tag_changed), self);
-  DT_DEBUG_CONTROL_SIGNAL_DISCONNECT(darktable.signals, G_CALLBACK(_geotag_changed), self);
+  DT_DEBUG_CONTROL_SIGNAL_DISCONNECT(darktable.signals, G_CALLBACK(geotag_changed), self);
   darktable.view_manager->proxy.module_collect.module = NULL;
   free(d->params);
 
