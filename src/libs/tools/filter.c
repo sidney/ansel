@@ -467,6 +467,16 @@ void gui_init(dt_lib_module_t *self)
   dt_gui_add_class(hbox, "quick_filter_box");
   _update_colors_filter(self);
 
+    // Culling mode
+  hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
+  gtk_box_pack_start(GTK_BOX(self->widget), hbox, TRUE, TRUE, 0);
+  d->culling = gtk_toggle_button_new_with_label(_("Selected"));
+  gtk_widget_set_tooltip_text(d->culling, _("Restrict the current view to only selected pictures"));
+  g_signal_connect(G_OBJECT(d->culling), "toggled", G_CALLBACK(_culling_mode), (gpointer)self);
+  gtk_box_pack_start(GTK_BOX(GTK_BOX(hbox)), d->culling, FALSE, FALSE, 0);
+  gtk_widget_set_name(d->culling, "quickfilter-culling");
+  dt_gui_add_class(hbox, "quick_filter_box");
+
   /* sort combobox */
   hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
   gtk_box_pack_start(GTK_BOX(self->widget), hbox, TRUE, TRUE, 0);
@@ -531,16 +541,6 @@ void gui_init(dt_lib_module_t *self)
   dt_gui_add_class(hbox, "quick_filter_box");
 
   dt_action_register(DT_ACTION(self), N_("search images"), _focus_filter_search, GDK_KEY_f, GDK_CONTROL_MASK);
-
-  // Culling mode
-  hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
-  gtk_box_pack_start(GTK_BOX(self->widget), hbox, TRUE, TRUE, 0);
-  d->culling = gtk_toggle_button_new_with_label(_("Selected"));
-  gtk_widget_set_tooltip_text(d->culling, _("Restrict the current view to only selected pictures"));
-  g_signal_connect(G_OBJECT(d->culling), "toggled", G_CALLBACK(_culling_mode), (gpointer)self);
-  gtk_box_pack_start(GTK_BOX(GTK_BOX(hbox)), d->culling, FALSE, FALSE, 0);
-  gtk_widget_set_name(d->culling, "quickfilter-culling");
-  dt_gui_add_class(hbox, "quick_filter_box");
 
   /* initialize proxy */
   darktable.view_manager->proxy.filter.module = self;

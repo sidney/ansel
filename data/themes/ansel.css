@@ -1360,14 +1360,27 @@ filechooser row:hover .sidebar-icon
 --------------------------------------------------*/
 
 /* and adjust label and color buttons, especially in header bar */
-.quick_filter_box label
+.quick_filter_box
 {
   margin-right: 1.5em;
 }
 
 .quick_filter_box #quickfilter-culling label
 {
-  margin: 0;
+  margin-left: 0.5em;
+  margin-right: 0.5em;
+}
+
+#quickfilter-culling
+{
+  background-color: @grey_45;
+}
+
+#quickfilter-culling:selected,
+#quickfilter-culling:active,
+#quickfilter-culling:checked
+{
+  background-color: @grey_65;
 }
 
 #quickfilter-search-box,
