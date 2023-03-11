@@ -2340,65 +2340,81 @@ static void _refresh_rules_visibility(dt_lib_collect_t *d)
     _set_rules_visibility(d->rule + i, i == MAX_RULES - 1, i == d->active_rule);
 }
 
+static void _update_collect_modes(dt_lib_collect_t *d, int variant)
+{
+  switch(variant)
+  {
+    case 0:
+    {
+      // Ensure the property is either folder or filmstrip
+      dt_collection_properties_t prev_prop = dt_conf_get_int("plugins/lighttable/collect/item0");
+      dt_collection_properties_t prop = (_is_folder_collection(0)) ? prev_prop : DT_COLLECTION_PROP_FOLDERS;
+      dt_conf_set_int("plugins/lighttable/collect/item0", prop);
+      _clear_text_entry(prev_prop, prop, d->rule);
+
+      // Rebuild the combobox list and remap the property to the new entry
+      _depopulate_combo(d->rule[0].combo);
+      _combo_set_active_collection(d->rule[0].combo, prop);
+
+      gtk_entry_set_placeholder_text(GTK_ENTRY(d->rule[0].text), _("Search a folder…"));
+
+      break;
+    }
+    case 1:
+    {
+      dt_collection_properties_t prev_prop = dt_conf_get_int("plugins/lighttable/collect/item0");
+      dt_collection_properties_t prop = DT_COLLECTION_PROP_TAG;
+      _clear_text_entry(prev_prop, prop, d->rule);
+      dt_conf_set_int("plugins/lighttable/collect/item0", DT_COLLECTION_PROP_TAG);
+
+      // Depopulate combo
+      dt_bauhaus_combobox_clear(d->rule[0].combo);
+      dt_bauhaus_combobox_remove_at(d->rule[0].combo, 0); // remove section title
+      dt_bauhaus_widget_set_label(d->rule[0].combo, NULL, _("View"));
+      dt_bauhaus_combobox_set_selected_text_align(d->rule[0].combo, DT_BAUHAUS_COMBOBOX_ALIGN_RIGHT);
+      dt_bauhaus_combobox_add_full(d->rule[0].combo, _("Collections"), DT_BAUHAUS_COMBOBOX_ALIGN_RIGHT,
+                                  GUINT_TO_POINTER(DT_COLLECTION_PROP_TAG + 1), NULL, TRUE);
+
+      // Remap the property to the new entry. Only one remaining.
+      _combo_set_active_collection(d->rule[0].combo, prop);
+
+      gtk_entry_set_placeholder_text(GTK_ENTRY(d->rule[0].text), _("Search a collection…"));
+
+      break;
+    }
+    case 2:
+    default:
+    {
+      // Rebuild the combobox list and remap the property to the new entry
+      dt_collection_properties_t prop = dt_conf_get_int("plugins/lighttable/collect/item0");
+      _repopulate_combo(d->rule[0].combo);
+      _combo_set_active_collection(d->rule[0].combo, prop);
+
+      gtk_entry_set_placeholder_text(GTK_ENTRY(d->rule[0].text), _("Search…"));
+    }
+  }
+}
+
 static void _lib_collect_mode(GtkNotebook *notebook, GtkWidget *page, guint page_num, gpointer user_data)
 {
   dt_lib_module_t *self = (dt_lib_module_t *)user_data;
   dt_lib_collect_t *d = (dt_lib_collect_t *)self->data;
 
+  if(page_num == 0 || page_num == 1) dt_conf_set_int("plugins/lighttable/collect/num_rules", 1);
+  dt_conf_set_int("plugins/lighttable/collect/tab", page_num);
+
   ++darktable.gui->reset;
-  if(page_num == 0)
-  {
-    dt_conf_set_int("plugins/lighttable/collect/num_rules", 1);
-
-    // Ensure the property is either folder or filmstrip
-    dt_collection_properties_t prev_prop = dt_conf_get_int("plugins/lighttable/collect/item0");
-    dt_collection_properties_t prop
-        = MAX(_combo_get_active_collection(d->rule[0].combo), DT_COLLECTION_PROP_FOLDERS);
-    dt_conf_set_int("plugins/lighttable/collect/item0", prop);
-    _clear_text_entry(prev_prop, prop, d->rule);
-
-    // Rebuild the combobox list and remap the property to the new entry
-    _depopulate_combo(d->rule[0].combo);
-    _combo_set_active_collection(d->rule[0].combo, prop);
-
-    gtk_entry_set_placeholder_text(GTK_ENTRY(d->rule[0].text), _("Search a folder…"));
-  }
-  else if(page_num == 1)
-  {
-    dt_conf_set_int("plugins/lighttable/collect/num_rules", 1);
-    dt_conf_set_int("plugins/lighttable/collect/item0", DT_COLLECTION_PROP_TAG);
-
-    // Depopulate combo
-    dt_bauhaus_combobox_clear(d->rule[0].combo);
-    dt_bauhaus_combobox_remove_at(d->rule[0].combo, 0); // remove section title
-    dt_bauhaus_widget_set_label(d->rule[0].combo, NULL, _("View"));
-    dt_bauhaus_combobox_set_selected_text_align(d->rule[0].combo, DT_BAUHAUS_COMBOBOX_ALIGN_RIGHT);
-    dt_bauhaus_combobox_add_full(d->rule[0].combo, _("Collections"), DT_BAUHAUS_COMBOBOX_ALIGN_RIGHT,
-                                GUINT_TO_POINTER(DT_COLLECTION_PROP_TAG + 1), NULL, TRUE);
-
-    // Remap the property to the new entry. Only one remaining.
-    _combo_set_active_collection(d->rule[0].combo, DT_COLLECTION_PROP_TAG);
-
-    gtk_entry_set_placeholder_text(GTK_ENTRY(d->rule[0].text), _("Search a collection…"));
-  }
-  else
-  {
-    // Rebuild the combobox list and remap the property to the new entry
-    dt_collection_properties_t prop = dt_conf_get_int("plugins/lighttable/collect/item0");
-    _repopulate_combo(d->rule[0].combo);
-    _combo_set_active_collection(d->rule[0].combo, prop);
-
-    gtk_entry_set_placeholder_text(GTK_ENTRY(d->rule[0].text), _("Search…"));
-  }
+  _update_collect_modes(d, page_num);
 
   _hide_all_rules(d);
   _refresh_rules_visibility(d);
 
-  if(page_num == 1) gtk_widget_hide(d->rule[0].combo); // only 1 option to show, so hide it
+  if(page_num == 1)
+    gtk_widget_hide(d->rule[0].combo); // only 1 option to show, so hide it
+  else
+    gtk_widget_show(d->rule[0].combo);
 
-  // Update the tree view content
   update_view(get_active_rule(d));
-  dt_conf_set_int("plugins/lighttable/collect/tab", page_num);
   --darktable.gui->reset;
 }
 
@@ -2412,25 +2428,41 @@ static void _lib_collect_gui_update(dt_lib_module_t *self)
   ++darktable.gui->reset;
   _hide_all_rules(d);
   _refresh_rules_visibility(d);
-  --darktable.gui->reset;
 
   // Enable simplified tab view if using one single folder or tag rule
   //const int num_page = dt_conf_get_int("plugins/lighttable/collect/tab");
+  int page_num;
   if(_is_folder_collection(0) && d->nb_rules == 1)
   {
-    gtk_notebook_set_current_page(GTK_NOTEBOOK(d->notebook), 0);
+    page_num = 0;
     // fprintf(stdout, "folder case\n");
   }
   else if(_is_tag_collection(0) && d->nb_rules == 1)
   {
-    gtk_notebook_set_current_page(GTK_NOTEBOOK(d->notebook), 1);
+    page_num = 1;
     // fprintf(stdout, "tag case\n");
   }
   else
   {
-    gtk_notebook_set_current_page(GTK_NOTEBOOK(d->notebook), 2);
+    page_num = 2;
     // fprintf(stdout, "general case\n");
   }
+
+  // Set notebook page without triggering the callback
+  g_signal_handlers_block_matched(d->notebook, G_SIGNAL_MATCH_FUNC, 0, 0, NULL, _lib_collect_mode, NULL);
+  gtk_notebook_set_current_page(GTK_NOTEBOOK(d->notebook), page_num);
+  g_signal_handlers_unblock_matched(d->notebook, G_SIGNAL_MATCH_FUNC, 0, 0, NULL, _lib_collect_mode, NULL);
+
+  _update_collect_modes(d, page_num);
+
+  if(page_num == 1)
+    gtk_widget_hide(d->rule[0].combo); // only 1 option to show, so hide it
+  else
+    gtk_widget_show(d->rule[0].combo);
+
+  // Update the treeviews
+  update_view(get_active_rule(d));
+  --darktable.gui->reset;
 }
 
 void gui_reset(dt_lib_module_t *self)
