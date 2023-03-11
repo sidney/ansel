@@ -1066,9 +1066,11 @@ static void get_properties(dt_lib_collect_rule_t *dr)
 
   if(text)
   {
+    g_signal_handlers_block_matched(dr->text, G_SIGNAL_MATCH_FUNC, 0, 0, NULL, entry_changed, NULL);
     gtk_entry_set_text(GTK_ENTRY(dr->text), text);
     gtk_editable_set_position(GTK_EDITABLE(dr->text), -1);
     dr->typing = FALSE;
+    g_signal_handlers_unblock_matched(dr->text, G_SIGNAL_MATCH_FUNC, 0, 0, NULL, entry_changed, NULL);
   }
 }
 
@@ -2442,7 +2444,9 @@ void gui_reset(dt_lib_module_t *self)
 static void combo_changed(GtkWidget *combo, dt_lib_collect_rule_t *d)
 {
   if(darktable.gui->reset) return;
+  g_signal_handlers_block_matched(d->text, G_SIGNAL_MATCH_FUNC, 0, 0, NULL, entry_changed, NULL);
   gtk_entry_set_text(GTK_ENTRY(d->text), "");
+  g_signal_handlers_unblock_matched(d->text, G_SIGNAL_MATCH_FUNC, 0, 0, NULL, entry_changed, NULL);
 
   dt_lib_collect_t *c = get_collect(d);
   c->active_rule = d->num;
@@ -2760,7 +2764,26 @@ static void collection_updated(gpointer instance, dt_collection_change_t query_c
   d->view_rule = -1;
   dt_lib_collect_rule_t *active_rule = get_active_rule(d);
   active_rule->typing = FALSE;
-  _lib_collect_gui_update(self);
+
+  // determine if we want to refresh the tree or not
+  gboolean refresh = TRUE;
+  if(query_change == DT_COLLECTION_CHANGE_RELOAD && changed_property != DT_COLLECTION_PROP_UNDEF)
+  {
+    // if we only reload the collection, that means that we don't change the query itself
+    // so we only rebuild the treeview if a used property has changed
+    refresh = FALSE;
+    for(int i = 0; i <= d->active_rule; i++)
+    {
+      const int item = _combo_get_active_collection(d->rule[i].combo);
+      if(item == changed_property)
+      {
+        refresh = TRUE;
+        break;
+      }
+    }
+  }
+
+  if(refresh) _lib_collect_gui_update(self);
 }
 
 
