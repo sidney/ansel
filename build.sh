@@ -425,3 +425,7 @@ fi
 
 # install the binaries
 eval "$cmd_install"
+
+if [ $DO_INSTALL ] ; then
+	$SUDO ln -s $INSTALL_PREFIX/bin/ansel /usr/local/bin/ansel
+fi
