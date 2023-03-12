@@ -2,8 +2,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: darktable 3.9\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-03-12 14:22+0100\n"
-"PO-Revision-Date: 2023-03-12 14:47+0100\n"
+"POT-Creation-Date: 2023-03-13 00:15+0100\n"
+"PO-Revision-Date: 2023-03-13 00:17+0100\n"
 "Last-Translator: Aurélien PIERRE <contact@aurelienpierre.com>\n"
 "Language-Team: \n"
 "Language: fr_FR\n"
@@ -7872,40 +7872,41 @@ msgid_plural "%s have been imported"
 msgstr[0] "%s a été importé"
 msgstr[1] "%s ont été importés"
 
-#: ../src/develop/masks/brush.c:1130 ../src/develop/masks/brush.c:1170
+#: ../src/develop/masks/brush.c:1118 ../src/develop/masks/brush.c:1175
 #, c-format
 msgid "hardness: %3.2f%%"
 msgstr "dureté : %3.2f%%"
 
-#: ../src/develop/masks/brush.c:1139 ../src/develop/masks/circle.c:123
+#: ../src/develop/masks/brush.c:1142 ../src/develop/masks/brush.c:1223
+#: ../src/develop/masks/brush.c:1230 ../src/develop/masks/circle.c:123
 #: ../src/develop/masks/circle.c:177 ../src/develop/masks/ellipse.c:556
 #: ../src/develop/masks/ellipse.c:643 ../src/develop/masks/path.c:1108
 #, c-format
 msgid "size: %3.2f%%"
 msgstr "taille : %3.2f%%"
 
-#: ../src/develop/masks/brush.c:2893
+#: ../src/develop/masks/brush.c:2936
 msgid "[BRUSH creation] change size"
 msgstr "[PINCEAU] changer taille"
 
-#: ../src/develop/masks/brush.c:2895
+#: ../src/develop/masks/brush.c:2938
 msgid "[BRUSH creation] change hardness"
 msgstr "[PINCEAU] changer dureté"
 
-#: ../src/develop/masks/brush.c:2896
+#: ../src/develop/masks/brush.c:2939
 msgid "[BRUSH] change opacity"
 msgstr "[PINCEAU] changer opacité"
 
-#: ../src/develop/masks/brush.c:2897
+#: ../src/develop/masks/brush.c:2940
 msgid "[BRUSH] change hardness"
 msgstr "[PINCEAU] changer dureté"
 
-#: ../src/develop/masks/brush.c:2908
+#: ../src/develop/masks/brush.c:2951
 #, c-format
 msgid "brush #%d"
 msgstr "pinceau #%d"
 
-#: ../src/develop/masks/brush.c:2917
+#: ../src/develop/masks/brush.c:2960
 #, c-format
 msgid ""
 "<b>size</b>: scroll, <b>hardness</b>: shift+scroll\n"
@@ -7914,7 +7915,7 @@ msgstr ""
 "<b>taille</b> : molette, <b>dureté</b> : maj+molette\n"
 "<b>opacité</b> : ctrl+molette (%d%%)"
 
-#: ../src/develop/masks/brush.c:2920
+#: ../src/develop/masks/brush.c:2963
 msgid "<b>size</b>: scroll"
 msgstr "<b>taille</b> : défiler"
 
@@ -8913,7 +8914,7 @@ msgstr ""
 "effacer tous les raccourcis récents\n"
 "(au lieu de restaurer ceux qui ont été modifiés)"
 
-#: ../src/gui/accelerators.c:1943 ../src/gui/actions/edit.h:45
+#: ../src/gui/accelerators.c:1943 ../src/gui/actions/edit.h:46
 #: ../src/gui/preferences.c:877
 msgid "shortcuts"
 msgstr "raccourcis"
@@ -9200,7 +9201,7 @@ msgstr "Perceptuel"
 
 #: ../src/gui/actions/display.h:377
 msgid "Relative colorimetric"
-msgstr "Ccolorimétrie relative"
+msgstr "Colorimétrie relative"
 
 #: ../src/gui/actions/display.h:377
 msgctxt "rendering intent"
@@ -9209,7 +9210,7 @@ msgstr "Saturation"
 
 #: ../src/gui/actions/display.h:378
 msgid "Absolute colorimetric"
-msgstr "Ccolorimétrie absolue"
+msgstr "Colorimétrie absolue"
 
 #. Parent sub-menu panels
 #: ../src/gui/actions/display.h:388
@@ -9257,11 +9258,19 @@ msgstr "tête de groupe"
 msgid "filmstrip"
 msgstr "bandeau"
 
-#: ../src/gui/actions/edit.h:145
+#: ../src/gui/actions/edit.h:209
+msgid "Undo"
+msgstr "Annuler"
+
+#: ../src/gui/actions/edit.h:210
+msgid "Redo"
+msgstr "Rétablir"
+
+#: ../src/gui/actions/edit.h:212
 msgid "Key shortcuts"
 msgstr "Raccourcis"
 
-#: ../src/gui/actions/edit.h:146
+#: ../src/gui/actions/edit.h:213
 msgid "Preferences"
 msgstr "Préférences"
 
@@ -18684,8 +18693,8 @@ msgid "background jobs"
 msgstr "tâches d'arrière-plan"
 
 #: ../src/libs/collect.c:135
-msgid "collect"
-msgstr "collecter"
+msgid "Library"
+msgstr "Bibliothèque"
 
 #: ../src/libs/collect.c:303
 msgid "imported: today"
@@ -19315,7 +19324,7 @@ msgstr "profils ICC de sortie dans %s ou %s"
 #: ../src/libs/export.c:1249 ../src/libs/print_settings.c:2325
 #: ../src/libs/print_settings.c:2653
 msgid "perceptual"
-msgstr "perceptif"
+msgstr "perceptuel"
 
 #: ../src/libs/export.c:1250 ../src/libs/print_settings.c:2326
 #: ../src/libs/print_settings.c:2654
@@ -19353,7 +19362,7 @@ msgid ""
 msgstr ""
 "• perceptuel : permet de faire passer progressivement les couleurs hors "
 "gamut dans le gamut, en préservant les dégradés, mais en affectant les "
-"couleurs dans le gamut au cours du processus. notez que le rendu perceptif "
+"couleurs dans le gamut au cours du processus. notez que le rendu perceptuel "
 "est souvent une LUT propriétaire qui dépend de l'espace de destination.\n"
 "\n"
 "• colorimétrie relative : conserve la luminance tout en réduisant le moins "
@@ -22590,6 +22599,9 @@ msgstr "double-cliquer pour réinitialiser à « %.03f »"
 msgctxt "preferences"
 msgid "</xsl:text><xsl:value-of select="
 msgstr "</xsl:text><xsl:value-of select="
+
+#~ msgid "collect"
+#~ msgstr "collecter"
 
 #~ msgid "focus"
 #~ msgstr "focus"

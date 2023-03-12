@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-03-12 14:22+0100\n"
+"POT-Creation-Date: 2023-03-13 00:15+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -7425,47 +7425,48 @@ msgid_plural "%s have been imported"
 msgstr[0] ""
 msgstr[1] ""
 
-#: ../src/develop/masks/brush.c:1130 ../src/develop/masks/brush.c:1170
+#: ../src/develop/masks/brush.c:1118 ../src/develop/masks/brush.c:1175
 #, c-format
 msgid "hardness: %3.2f%%"
 msgstr ""
 
-#: ../src/develop/masks/brush.c:1139 ../src/develop/masks/circle.c:123
+#: ../src/develop/masks/brush.c:1142 ../src/develop/masks/brush.c:1223
+#: ../src/develop/masks/brush.c:1230 ../src/develop/masks/circle.c:123
 #: ../src/develop/masks/circle.c:177 ../src/develop/masks/ellipse.c:556
 #: ../src/develop/masks/ellipse.c:643 ../src/develop/masks/path.c:1108
 #, c-format
 msgid "size: %3.2f%%"
 msgstr ""
 
-#: ../src/develop/masks/brush.c:2893
+#: ../src/develop/masks/brush.c:2936
 msgid "[BRUSH creation] change size"
 msgstr ""
 
-#: ../src/develop/masks/brush.c:2895
+#: ../src/develop/masks/brush.c:2938
 msgid "[BRUSH creation] change hardness"
 msgstr ""
 
-#: ../src/develop/masks/brush.c:2896
+#: ../src/develop/masks/brush.c:2939
 msgid "[BRUSH] change opacity"
 msgstr ""
 
-#: ../src/develop/masks/brush.c:2897
+#: ../src/develop/masks/brush.c:2940
 msgid "[BRUSH] change hardness"
 msgstr ""
 
-#: ../src/develop/masks/brush.c:2908
+#: ../src/develop/masks/brush.c:2951
 #, c-format
 msgid "brush #%d"
 msgstr ""
 
-#: ../src/develop/masks/brush.c:2917
+#: ../src/develop/masks/brush.c:2960
 #, c-format
 msgid ""
 "<b>size</b>: scroll, <b>hardness</b>: shift+scroll\n"
 "<b>opacity</b>: ctrl+scroll (%d%%)"
 msgstr ""
 
-#: ../src/develop/masks/brush.c:2920
+#: ../src/develop/masks/brush.c:2963
 msgid "<b>size</b>: scroll"
 msgstr ""
 
@@ -8390,7 +8391,7 @@ msgid ""
 "(instead of just restoring changed ones)"
 msgstr ""
 
-#: ../src/gui/accelerators.c:1943 ../src/gui/actions/edit.h:45
+#: ../src/gui/accelerators.c:1943 ../src/gui/actions/edit.h:46
 #: ../src/gui/preferences.c:877
 msgid "shortcuts"
 msgstr ""
@@ -8720,11 +8721,19 @@ msgstr ""
 msgid "filmstrip"
 msgstr ""
 
-#: ../src/gui/actions/edit.h:145
+#: ../src/gui/actions/edit.h:209
+msgid "Undo"
+msgstr ""
+
+#: ../src/gui/actions/edit.h:210
+msgid "Redo"
+msgstr ""
+
+#: ../src/gui/actions/edit.h:212
 msgid "Key shortcuts"
 msgstr ""
 
-#: ../src/gui/actions/edit.h:146
+#: ../src/gui/actions/edit.h:213
 msgid "Preferences"
 msgstr ""
 
@@ -17153,7 +17162,7 @@ msgid "background jobs"
 msgstr ""
 
 #: ../src/libs/collect.c:135
-msgid "collect"
+msgid "Library"
 msgstr ""
 
 #: ../src/libs/collect.c:303
