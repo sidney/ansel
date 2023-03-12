@@ -1,5 +1,6 @@
 #include "gui/actions/menu.h"
 #include "gui/preferences.h"
+#include "common/undo.h"
 
 
 // Don't save across sessions (window managers role)
@@ -140,8 +141,74 @@ static void preferences_callback(GtkWidget *widget)
   dt_gui_preferences_show();
 }
 
+static void undo_callback(GtkWidget *widget)
+{
+  if(!darktable.view_manager) return;
+  const dt_view_t *cv = dt_view_manager_get_current_view(darktable.view_manager);
+  if(!cv) return;
+
+  if(!strcmp(cv->module_name, "lighttable"))
+    dt_undo_do_undo(darktable.undo, DT_UNDO_LIGHTTABLE);
+  else if(!strcmp(cv->module_name, "darkroom"))
+    dt_undo_do_undo(darktable.undo, DT_UNDO_DEVELOP);
+  // else if(!strcmp(cv->module_name, "map"))
+  //   dt_undo_do_undo(darktable.undo, DT_UNDO_MAP);
+  // not handled here since it needs to block callbacks declared in view, which may not be loaded.
+  // Another piece of shitty peculiar design that doesn't comply with the logic of the rest of the soft.
+  // That's what you get from ignoring modularity principles.
+}
+
+static void redo_callback(GtkWidget *widget)
+{
+  if(!darktable.view_manager) return;
+  const dt_view_t *cv = dt_view_manager_get_current_view(darktable.view_manager);
+  if(!cv) return;
+
+  if(!strcmp(cv->module_name, "lighttable"))
+    dt_undo_do_redo(darktable.undo, DT_UNDO_LIGHTTABLE);
+  else if(!strcmp(cv->module_name, "darkroom"))
+    dt_undo_do_redo(darktable.undo, DT_UNDO_DEVELOP);
+  // else if(!strcmp(cv->module_name, "map"))
+  //   see undo_callback()
+}
+
+static gboolean undo_sensitive_callback(GtkWidget *w)
+{
+  if(!darktable.view_manager) return FALSE;
+  const dt_view_t *cv = dt_view_manager_get_current_view(darktable.view_manager);
+  if(!cv) return FALSE;
+
+  gboolean sensitive = FALSE;
+
+  if(!strcmp(cv->module_name, "lighttable"))
+    sensitive = dt_is_undo_list_populated(darktable.undo, DT_UNDO_LIGHTTABLE);
+  else if(!strcmp(cv->module_name, "darkroom"))
+    sensitive = dt_is_undo_list_populated(darktable.undo, DT_UNDO_DEVELOP);
+
+  return sensitive;
+}
+
+static gboolean redo_sensitive_callback(GtkWidget *w)
+{
+  if(!darktable.view_manager) return FALSE;
+  const dt_view_t *cv = dt_view_manager_get_current_view(darktable.view_manager);
+  if(!cv) return FALSE;
+
+  gboolean sensitive = FALSE;
+
+  if(!strcmp(cv->module_name, "lighttable"))
+    sensitive = dt_is_redo_list_populated(darktable.undo, DT_UNDO_LIGHTTABLE);
+  else if(!strcmp(cv->module_name, "darkroom"))
+    sensitive = dt_is_redo_list_populated(darktable.undo, DT_UNDO_DEVELOP);
+
+  return sensitive;
+}
+
 void append_edit(GtkWidget **menus, GList **lists, const dt_menus_t index)
 {
+  add_sub_menu_entry(menus, lists, _("Undo"), index, NULL, undo_callback, NULL, NULL, undo_sensitive_callback);
+  add_sub_menu_entry(menus, lists, _("Redo"), index, NULL, redo_callback, NULL, NULL, redo_sensitive_callback);
+  add_menu_separator(menus[index]);
   add_sub_menu_entry(menus, lists, _("Key shortcuts"), index, NULL, define_keymap_callback, NULL, NULL, NULL);
   add_sub_menu_entry(menus, lists, _("Preferences"), index, NULL, preferences_callback, NULL, NULL, NULL);
 }
