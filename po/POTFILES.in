@@ -86,8 +86,8 @@ build/lib64/ansel/plugins/introspection_vignette.c
 build/lib64/ansel/plugins/introspection_watermark.c
 build/lib64/ansel/plugins/introspection_zonesystem.c
 build/lib64/ansel/plugins/lighttable/tools/darktable_authors.h
-build/share/ansel/ansel.desktop.in
 data/photos.ansel.app.appdata.xml.in
+data/build/ansel.desktop.in
 data/ansel.desktop.in
 data/anselconfig.dtd
 data/anselconfig.xml.in
@@ -162,6 +162,7 @@ src/dtgtk/thumbtable.c
 src/external/wb_presets.c
 src/generate-cache/main.c
 src/gui/accelerators.c
+src/gui/actions/file.h
 src/gui/actions/help.h
 src/gui/actions/display.h
 src/gui/actions/edit.h
@@ -188,15 +189,15 @@ src/imageio/format/tiff.c
 src/imageio/format/webp.c
 src/imageio/format/xcf.c
 src/imageio/storage/disk.c
-src/imageio/storage/email.c
 src/imageio/storage/gallery.c
-src/imageio/storage/latex.c
 src/imageio/storage/piwigo.c
+src/imageio/storage/example.c
 src/iop/demosaic/dual.c
 src/iop/demosaic/lmmse.c
 src/iop/demosaic/rcd.c
 src/iop/restorescans.c
 src/libs/tools/menu.c
+src/libs/tools/mask_toolbar.c
 src/iop/ashift.c
 src/iop/atrous.c
 src/iop/basecurve.c

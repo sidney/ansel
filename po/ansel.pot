@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-03-10 14:56+0800\n"
+"POT-Creation-Date: 2023-03-12 14:22+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -1175,8 +1175,7 @@ msgstr ""
 #: ../src/control/jobs/control_jobs.c:1741 ../src/gui/preferences.c:1035
 #: ../src/gui/presets.c:373 ../src/imageio/storage/disk.c:121
 #: ../src/imageio/storage/disk.c:188 ../src/imageio/storage/gallery.c:108
-#: ../src/imageio/storage/gallery.c:172 ../src/imageio/storage/latex.c:107
-#: ../src/imageio/storage/latex.c:171 ../src/libs/import.c:1274
+#: ../src/imageio/storage/gallery.c:172 ../src/libs/import.c:1274
 #: ../src/libs/import.c:1378 ../src/libs/import.c:1432 ../src/libs/styles.c:376
 #: ../src/lua/preferences.c:667 ../tools/generate_prefs.xsl:715
 msgid "select directory"
@@ -1933,7 +1932,7 @@ msgstr ""
 #: ../src/gui/guides.c:709 ../src/iop/basecurve.c:2082
 #: ../src/iop/channelmixerrgb.c:4187 ../src/iop/clipping.c:1917
 #: ../src/iop/clipping.c:2110 ../src/iop/clipping.c:2125
-#: ../src/iop/lens.cc:2235 ../src/iop/retouch.c:460 ../src/libs/collect.c:1882
+#: ../src/iop/lens.cc:2235 ../src/iop/retouch.c:460 ../src/libs/collect.c:1915
 #: ../src/libs/colorpicker.c:51 ../src/libs/export.c:1026
 #: ../src/libs/print_settings.c:2668
 msgid "none"
@@ -2213,7 +2212,7 @@ msgstr ""
 #: ../src/iop/channelmixer.c:625 ../src/iop/channelmixer.c:635
 #: ../src/iop/channelmixerrgb.c:4139 ../src/iop/colorzones.c:2302
 #: ../src/iop/temperature.c:1786 ../src/iop/temperature.c:1950
-#: ../src/libs/collect.c:1766
+#: ../src/libs/collect.c:1799
 msgid "red"
 msgstr ""
 
@@ -2225,7 +2224,7 @@ msgstr ""
 #: ../src/iop/channelmixer.c:626 ../src/iop/channelmixer.c:641
 #: ../src/iop/channelmixerrgb.c:4140 ../src/iop/colorzones.c:2305
 #: ../src/iop/temperature.c:1770 ../src/iop/temperature.c:1788
-#: ../src/iop/temperature.c:1951 ../src/libs/collect.c:1766
+#: ../src/iop/temperature.c:1951 ../src/libs/collect.c:1799
 msgid "green"
 msgstr ""
 
@@ -2237,7 +2236,7 @@ msgstr ""
 #: ../src/iop/channelmixer.c:627 ../src/iop/channelmixer.c:647
 #: ../src/iop/channelmixerrgb.c:4141 ../src/iop/colorzones.c:2307
 #: ../src/iop/temperature.c:1790 ../src/iop/temperature.c:1952
-#: ../src/libs/collect.c:1766
+#: ../src/libs/collect.c:1799
 msgid "blue"
 msgstr ""
 
@@ -3007,7 +3006,7 @@ msgstr ""
 
 #: ../build/lib64/ansel/plugins/introspection_demosaic.c:232
 #: ../src/common/collection.c:1686 ../src/common/collection.c:1694
-#: ../src/libs/collect.c:1720
+#: ../src/libs/collect.c:1753
 msgid "basic"
 msgstr ""
 
@@ -4161,19 +4160,10 @@ msgstr ""
 msgid "LibRaw contributors"
 msgstr ""
 
-#: ../build/share/ansel/ansel.desktop.in.h:1 ../data/ansel.desktop.in.h:1
-msgid "Virtual Lighttable and Darkroom"
-msgstr ""
-
-#: ../build/share/ansel/ansel.desktop.in.h:2
-#: ../data/photos.ansel.app.appdata.xml.in.h:1 ../data/ansel.desktop.in.h:2
+#: ../data/photos.ansel.app.appdata.xml.in.h:1
+#: ../data/build/ansel.desktop.in.h:2 ../data/ansel.desktop.in.h:2
 #: ../src/gui/actions/help.h:18
 msgid "Organize and develop images from digital cameras"
-msgstr ""
-
-#. TRANSLATORS: Search terms to find this application. Do NOT translate or localize the semicolons! The list MUST also end with a semicolon!
-#: ../build/share/ansel/ansel.desktop.in.h:4 ../data/ansel.desktop.in.h:4
-msgid "graphics;photography;raw;"
 msgstr ""
 
 #: ../data/photos.ansel.app.appdata.xml.in.h:2
@@ -4185,6 +4175,15 @@ msgstr ""
 
 #: ../data/photos.ansel.app.appdata.xml.in.h:3
 msgid "Virtual light table, showing a collection"
+msgstr ""
+
+#: ../data/build/ansel.desktop.in.h:1 ../data/ansel.desktop.in.h:1
+msgid "Virtual Lighttable and Darkroom"
+msgstr ""
+
+#. TRANSLATORS: Search terms to find this application. Do NOT translate or localize the semicolons! The list MUST also end with a semicolon!
+#: ../data/build/ansel.desktop.in.h:4 ../data/ansel.desktop.in.h:4
+msgid "graphics;photography;raw;"
 msgstr ""
 
 #: ../src/bauhaus/bauhaus.c:3200
@@ -4232,11 +4231,11 @@ msgstr ""
 #: ../src/gui/preferences.c:1036 ../src/gui/presets.c:374
 #: ../src/gui/presets.c:474 ../src/gui/styles_dialog.c:420
 #: ../src/imageio/storage/disk.c:122 ../src/imageio/storage/gallery.c:109
-#: ../src/imageio/storage/latex.c:108 ../src/iop/lut3d.c:1557
-#: ../src/libs/collect.c:462 ../src/libs/copy_history.c:107
-#: ../src/libs/geotagging.c:930 ../src/libs/import.c:1274
-#: ../src/libs/import.c:1378 ../src/libs/styles.c:377 ../src/libs/styles.c:512
-#: ../src/libs/tagging.c:2469 ../src/libs/tagging.c:2505
+#: ../src/iop/lut3d.c:1557 ../src/libs/collect.c:463
+#: ../src/libs/copy_history.c:107 ../src/libs/geotagging.c:930
+#: ../src/libs/import.c:1274 ../src/libs/import.c:1378 ../src/libs/styles.c:377
+#: ../src/libs/styles.c:512 ../src/libs/tagging.c:2469
+#: ../src/libs/tagging.c:2505
 msgid "_cancel"
 msgstr ""
 
@@ -4480,32 +4479,32 @@ msgstr ""
 #: ../src/common/collection.c:1663 ../src/common/colorlabels.c:330
 #: ../src/develop/lightroom.c:836 ../src/gui/guides.c:729
 #: ../src/iop/colorzones.c:2304 ../src/iop/temperature.c:1776
-#: ../src/libs/collect.c:1766
+#: ../src/libs/collect.c:1799
 msgid "yellow"
 msgstr ""
 
 #: ../src/common/collection.c:1669 ../src/common/color_vocabulary.c:339
 #: ../src/common/colorlabels.c:333 ../src/iop/colorzones.c:2308
-#: ../src/libs/collect.c:1766
+#: ../src/libs/collect.c:1799
 msgid "purple"
 msgstr ""
 
-#: ../src/common/collection.c:1688 ../src/libs/collect.c:1720
+#: ../src/common/collection.c:1688 ../src/libs/collect.c:1753
 msgid "auto applied"
 msgstr ""
 
-#: ../src/common/collection.c:1690 ../src/libs/collect.c:1720
+#: ../src/common/collection.c:1690 ../src/libs/collect.c:1753
 msgid "altered"
 msgstr ""
 
 #: ../src/common/collection.c:1703 ../src/common/collection.c:1792
-#: ../src/libs/collect.c:1181 ../src/libs/collect.c:1320
-#: ../src/libs/collect.c:1344 ../src/libs/collect.c:1463
-#: ../src/libs/collect.c:2424
+#: ../src/libs/collect.c:1214 ../src/libs/collect.c:1353
+#: ../src/libs/collect.c:1377 ../src/libs/collect.c:1496
+#: ../src/libs/collect.c:2657
 msgid "not tagged"
 msgstr ""
 
-#: ../src/common/collection.c:1704 ../src/libs/collect.c:1344
+#: ../src/common/collection.c:1704 ../src/libs/collect.c:1377
 #: ../src/libs/map_locations.c:765
 msgid "tagged"
 msgstr ""
@@ -4514,16 +4513,16 @@ msgstr ""
 msgid "tagged*"
 msgstr ""
 
-#: ../src/common/collection.c:1740 ../src/libs/collect.c:1734
+#: ../src/common/collection.c:1740 ../src/libs/collect.c:1767
 msgid "not copied locally"
 msgstr ""
 
 #. grouping
-#: ../src/common/collection.c:2033 ../src/libs/collect.c:1854
+#: ../src/common/collection.c:2033 ../src/libs/collect.c:1887
 msgid "group leaders"
 msgstr ""
 
-#: ../src/common/collection.c:2141 ../src/libs/collect.c:1935
+#: ../src/common/collection.c:2141 ../src/libs/collect.c:1968
 msgid "not defined"
 msgstr ""
 
@@ -5108,11 +5107,10 @@ msgstr ""
 msgid "error starting darktable"
 msgstr ""
 
-#: ../src/common/database.c:2745 ../src/libs/collect.c:2923
+#: ../src/common/database.c:2745 ../src/libs/collect.c:3170
 #: ../src/libs/export_metadata.c:288 ../src/libs/import.c:1470
 #: ../src/libs/metadata.c:490 ../src/libs/metadata_view.c:1187
-#: ../src/libs/recentcollect.c:305 ../src/libs/styles.c:423
-#: ../src/libs/styles.c:606 ../src/libs/tagging.c:1464
+#: ../src/libs/styles.c:423 ../src/libs/styles.c:606 ../src/libs/tagging.c:1464
 #: ../src/libs/tagging.c:1552 ../src/libs/tagging.c:1633
 #: ../src/libs/tagging.c:1763 ../src/libs/tagging.c:2037
 #: ../src/libs/tagging.c:3452
@@ -5574,8 +5572,8 @@ msgstr ""
 
 #. title
 #: ../src/common/metadata.c:48 ../src/imageio/format/pdf.c:573
-#: ../src/imageio/storage/gallery.c:178 ../src/imageio/storage/latex.c:178
-#: ../src/imageio/storage/piwigo.c:893 ../src/libs/tools/filter.c:110
+#: ../src/imageio/storage/gallery.c:178 ../src/imageio/storage/piwigo.c:893
+#: ../src/libs/tools/filter.c:110
 msgid "title"
 msgstr ""
 
@@ -8566,6 +8564,10 @@ msgstr ""
 msgid "%s assigned to %s"
 msgstr ""
 
+#: ../src/gui/actions/file.h:11
+msgid "Quit"
+msgstr ""
+
 #: ../src/gui/actions/help.h:14
 #, c-format
 msgid ""
@@ -9429,7 +9431,7 @@ msgstr ""
 msgid "select preset(s) to import"
 msgstr ""
 
-#: ../src/gui/preferences.c:997 ../src/libs/collect.c:462
+#: ../src/gui/preferences.c:997 ../src/libs/collect.c:463
 #: ../src/libs/copy_history.c:107 ../src/libs/geotagging.c:931
 #: ../src/libs/import.c:1274 ../src/libs/import.c:1378 ../src/libs/styles.c:512
 msgid "_open"
@@ -9505,7 +9507,7 @@ msgid "overwrite preset?"
 msgstr ""
 
 #: ../src/gui/presets.c:374 ../src/imageio/storage/disk.c:122
-#: ../src/imageio/storage/gallery.c:109 ../src/imageio/storage/latex.c:108
+#: ../src/imageio/storage/gallery.c:109
 msgid "_select as output destination"
 msgstr ""
 
@@ -9903,8 +9905,8 @@ msgid "invalid border size, using 0"
 msgstr ""
 
 #: ../src/imageio/format/pdf.c:256 ../src/imageio/storage/disk.c:327
-#: ../src/imageio/storage/email.c:137 ../src/imageio/storage/gallery.c:346
-#: ../src/imageio/storage/gallery.c:386 ../src/imageio/storage/piwigo.c:1019
+#: ../src/imageio/storage/gallery.c:346 ../src/imageio/storage/gallery.c:386
+#: ../src/imageio/storage/piwigo.c:1019 ../src/imageio/storage/example.c:137
 #, c-format
 msgid "could not export to file `%s'!"
 msgstr ""
@@ -9934,12 +9936,12 @@ msgid "page orientation"
 msgstr ""
 
 #: ../src/imageio/format/pdf.c:608 ../src/iop/borders.c:1042
-#: ../src/libs/collect.c:281 ../src/libs/print_settings.c:2366
+#: ../src/libs/collect.c:286 ../src/libs/print_settings.c:2366
 msgid "portrait"
 msgstr ""
 
 #: ../src/imageio/format/pdf.c:609 ../src/iop/borders.c:1043
-#: ../src/libs/collect.c:276 ../src/libs/print_settings.c:2367
+#: ../src/libs/collect.c:281 ../src/libs/print_settings.c:2367
 msgid "landscape"
 msgstr ""
 
@@ -10130,12 +10132,11 @@ msgstr ""
 msgid "xcf"
 msgstr ""
 
-#: ../src/imageio/storage/disk.c:70 ../src/libs/export.c:1043
-msgid "file on disk"
+#: ../src/imageio/storage/disk.c:70
+msgid "File on disk"
 msgstr ""
 
 #: ../src/imageio/storage/disk.c:182 ../src/imageio/storage/gallery.c:166
-#: ../src/imageio/storage/latex.c:165
 msgid ""
 "enter the path where to put exported images\n"
 "variables support bash like string manipulation\n"
@@ -10162,7 +10163,6 @@ msgid "skip"
 msgstr ""
 
 #: ../src/imageio/storage/disk.c:276 ../src/imageio/storage/gallery.c:268
-#: ../src/imageio/storage/latex.c:266
 #, c-format
 msgid "could not create directory `%s'!"
 msgstr ""
@@ -10179,8 +10179,8 @@ msgid_plural "%d/%d skipping `%s'"
 msgstr[0] ""
 msgstr[1] ""
 
-#: ../src/imageio/storage/disk.c:332 ../src/imageio/storage/email.c:144
-#: ../src/imageio/storage/gallery.c:394 ../src/imageio/storage/latex.c:355
+#: ../src/imageio/storage/disk.c:332 ../src/imageio/storage/gallery.c:394
+#: ../src/imageio/storage/example.c:144
 #, c-format
 msgid "%d/%d exported to `%s'"
 msgid_plural "%d/%d exported to `%s'"
@@ -10195,33 +10195,12 @@ msgid ""
 "do you really want to continue?"
 msgstr ""
 
-#: ../src/imageio/storage/email.c:52
-msgid "send as email"
-msgstr ""
-
-#: ../src/imageio/storage/email.c:198
-msgid "images exported from darktable"
-msgstr ""
-
-#: ../src/imageio/storage/email.c:251
-msgid "could not launch email client!"
-msgstr ""
-
 #: ../src/imageio/storage/gallery.c:72
-msgid "website gallery"
+msgid "Static HTML gallery"
 msgstr ""
 
 #: ../src/imageio/storage/gallery.c:182
 msgid "enter the title of the website"
-msgstr ""
-
-#: ../src/imageio/storage/latex.c:71
-msgid "LaTeX book template"
-msgstr ""
-
-#. TODO: support title, author, subject, keywords (collect tags?)
-#: ../src/imageio/storage/latex.c:184
-msgid "enter the title of the book"
 msgstr ""
 
 #: ../src/imageio/storage/piwigo.c:477
@@ -10250,7 +10229,7 @@ msgid "cannot refresh albums"
 msgstr ""
 
 #: ../src/imageio/storage/piwigo.c:769
-msgid "piwigo"
+msgid "Piwigo website"
 msgstr ""
 
 #: ../src/imageio/storage/piwigo.c:794
@@ -10349,6 +10328,18 @@ msgid_plural "%d/%d exported to piwigo webalbum"
 msgstr[0] ""
 msgstr[1] ""
 
+#: ../src/imageio/storage/example.c:52
+msgid "send as email"
+msgstr ""
+
+#: ../src/imageio/storage/example.c:198
+msgid "images exported from darktable"
+msgstr ""
+
+#: ../src/imageio/storage/example.c:251
+msgid "could not launch email client!"
+msgstr ""
+
 #: ../src/iop/demosaic/dual.c:51
 msgid "[dual demosaic] can't allocate internal buffers"
 msgstr ""
@@ -10397,6 +10388,28 @@ msgstr ""
 
 #: ../src/libs/tools/menu.c:83
 msgid "Help"
+msgstr ""
+
+#: ../src/libs/tools/mask_toolbar.c:23
+msgid "mask toolbar"
+msgstr ""
+
+#: ../src/libs/tools/mask_toolbar.c:107
+msgid "Mask opacity"
+msgstr ""
+
+#: ../src/libs/tools/mask_toolbar.c:114
+msgid ""
+"Control the opacity of the currently-selected mask form.\n"
+"This works only after a mask has been selected by click."
+msgstr ""
+
+#: ../src/libs/tools/mask_toolbar.c:118
+msgid "Lock masks"
+msgstr ""
+
+#: ../src/libs/tools/mask_toolbar.c:120
+msgid "Prevent accidental masks displacement when moving the view"
 msgstr ""
 
 #: ../src/iop/ashift.c:121
@@ -11244,7 +11257,7 @@ msgid "4:3"
 msgstr ""
 
 #: ../src/iop/borders.c:970 ../src/iop/clipping.c:2138 ../src/iop/crop.c:1050
-#: ../src/libs/collect.c:271
+#: ../src/libs/collect.c:276
 msgid "square"
 msgstr ""
 
@@ -11796,8 +11809,8 @@ msgstr ""
 #: ../src/iop/channelmixerrgb.c:3962 ../src/iop/clipping.c:2104
 #: ../src/iop/colorbalancergb.c:1807 ../src/iop/filmicrgb.c:4361
 #: ../src/iop/negadoctor.c:848 ../src/iop/toneequal.c:3109
-#: ../src/libs/image.c:457 ../src/libs/print_settings.c:2351
-#: ../src/views/lighttable.c:411
+#: ../src/libs/collect.c:3242 ../src/libs/image.c:457
+#: ../src/libs/print_settings.c:2351 ../src/views/lighttable.c:411
 msgid "page"
 msgstr ""
 
@@ -17139,86 +17152,86 @@ msgstr ""
 msgid "background jobs"
 msgstr ""
 
-#: ../src/libs/collect.c:130
+#: ../src/libs/collect.c:135
 msgid "collect"
 msgstr ""
 
-#: ../src/libs/collect.c:298
+#: ../src/libs/collect.c:303
 msgid "imported: today"
 msgstr ""
 
-#: ../src/libs/collect.c:303
+#: ../src/libs/collect.c:308
 msgid "imported: last 24h"
 msgstr ""
 
-#: ../src/libs/collect.c:308
+#: ../src/libs/collect.c:313
 msgid "imported: last 30 days"
 msgstr ""
 
-#: ../src/libs/collect.c:314
+#: ../src/libs/collect.c:319
 msgid "taken: today"
 msgstr ""
 
-#: ../src/libs/collect.c:319
+#: ../src/libs/collect.c:324
 msgid "taken: last 24h"
 msgstr ""
 
-#: ../src/libs/collect.c:324
+#: ../src/libs/collect.c:329
 msgid "taken: last 30 days"
 msgstr ""
 
-#: ../src/libs/collect.c:461
+#: ../src/libs/collect.c:462
 msgid "search filmroll"
 msgstr ""
 
-#: ../src/libs/collect.c:544
+#: ../src/libs/collect.c:545
 #, c-format
 msgid "problem selecting new path for the filmroll in %s"
 msgstr ""
 
-#: ../src/libs/collect.c:607
+#: ../src/libs/collect.c:608
 msgid "search filmroll..."
 msgstr ""
 
-#: ../src/libs/collect.c:611
+#: ../src/libs/collect.c:612
 msgid "remove..."
 msgstr ""
 
-#: ../src/libs/collect.c:1215
+#: ../src/libs/collect.c:1248
 msgid "uncategorized"
 msgstr ""
 
-#: ../src/libs/collect.c:1734
+#: ../src/libs/collect.c:1767
 msgid "copied locally"
 msgstr ""
 
-#: ../src/libs/collect.c:1854
+#: ../src/libs/collect.c:1887
 msgid "group followers"
 msgstr ""
 
-#: ../src/libs/collect.c:2129
+#: ../src/libs/collect.c:2162
 msgid "use <, <=, >, >=, <>, =, [;] as operators"
 msgstr ""
 
-#: ../src/libs/collect.c:2133
+#: ../src/libs/collect.c:2166
 msgid ""
 "use <, <=, >, >=, <>, =, [;] as operators\n"
 "star rating: 0-5\n"
 "rejected images: -1"
 msgstr ""
 
-#: ../src/libs/collect.c:2140
+#: ../src/libs/collect.c:2173
 msgid ""
 "use <, <=, >, >=, <>, =, [;] as operators\n"
 "type dates in the form: YYYY:MM:DD hh:mm:ss.sss (only the year is mandatory)"
 msgstr ""
 
-#: ../src/libs/collect.c:2147
+#: ../src/libs/collect.c:2180
 #, no-c-format
 msgid "use `%' as wildcard and `,' to separate values"
 msgstr ""
 
-#: ../src/libs/collect.c:2153
+#: ../src/libs/collect.c:2186
 #, no-c-format
 msgid ""
 "use `%' as wildcard\n"
@@ -17227,7 +17240,7 @@ msgid ""
 "ctrl+click to include only sub-hierarchies (suffix `|%')"
 msgstr ""
 
-#: ../src/libs/collect.c:2165
+#: ../src/libs/collect.c:2198
 #, no-c-format
 msgid ""
 "use `%' as wildcard\n"
@@ -17236,7 +17249,7 @@ msgid ""
 "ctrl+click to include only sub-locations (suffix `|%')"
 msgstr ""
 
-#: ../src/libs/collect.c:2177
+#: ../src/libs/collect.c:2210
 #, no-c-format
 msgid ""
 "use `%' as wildcard\n"
@@ -17245,82 +17258,142 @@ msgid ""
 "ctrl+click to include only sub-folders (suffix `|%')"
 msgstr ""
 
-#: ../src/libs/collect.c:2188
+#: ../src/libs/collect.c:2221
 #, no-c-format
 msgid "use `%' as wildcard"
 msgstr ""
 
-#: ../src/libs/collect.c:2241 ../src/libs/collect.c:2255
-#: ../src/libs/collect.c:2815
+#: ../src/libs/collect.c:2244 ../src/libs/collect.c:2258
+#: ../src/libs/collect.c:3062
 msgid "clear this rule"
 msgstr ""
 
-#: ../src/libs/collect.c:2245
+#: ../src/libs/collect.c:2249
 msgid "clear this rule or add new rules"
 msgstr ""
 
-#: ../src/libs/collect.c:2821
+#: ../src/libs/collect.c:2255
+msgid "AND"
+msgstr ""
+
+#: ../src/libs/collect.c:2256
+msgid "OR"
+msgstr ""
+
+#: ../src/libs/collect.c:2257
+msgid "AND NOT"
+msgstr ""
+
+#. remove section title
+#: ../src/libs/collect.c:2307 ../src/libs/collect.c:2373
+msgid "View"
+msgstr ""
+
+#: ../src/libs/collect.c:2309
+msgid "List"
+msgstr ""
+
+#: ../src/libs/collect.c:2311
+msgid "Tree"
+msgstr ""
+
+#: ../src/libs/collect.c:2359
+msgid "Search a folder…"
+msgstr ""
+
+#: ../src/libs/collect.c:2375 ../src/libs/collect.c:3245
+msgid "Collections"
+msgstr ""
+
+#: ../src/libs/collect.c:2381
+msgid "Search a collection…"
+msgstr ""
+
+#: ../src/libs/collect.c:2393 ../src/libs/collect.c:3279
+msgid "Search…"
+msgstr ""
+
+#: ../src/libs/collect.c:3068
 msgid "narrow down search"
 msgstr ""
 
-#: ../src/libs/collect.c:2826
+#: ../src/libs/collect.c:3073
 msgid "add more images"
 msgstr ""
 
-#: ../src/libs/collect.c:2831
+#: ../src/libs/collect.c:3078
 msgid "exclude images"
 msgstr ""
 
-#: ../src/libs/collect.c:2838
+#: ../src/libs/collect.c:3085
 msgid "change to: and"
 msgstr ""
 
-#: ../src/libs/collect.c:2843
+#: ../src/libs/collect.c:3090
 msgid "change to: or"
 msgstr ""
 
-#: ../src/libs/collect.c:2848
+#: ../src/libs/collect.c:3095
 msgid "change to: except"
 msgstr ""
 
-#: ../src/libs/collect.c:2867 ../src/libs/image.c:460
+#: ../src/libs/collect.c:3114 ../src/libs/image.c:460
 msgid "files"
 msgstr ""
 
-#: ../src/libs/collect.c:2872 ../src/libs/export_metadata.c:310
+#: ../src/libs/collect.c:3119 ../src/libs/export_metadata.c:310
 #: ../src/libs/image.c:461 ../src/libs/image.c:571 ../src/libs/image.c:579
 #: ../src/libs/metadata.c:531 ../src/libs/metadata_view.c:1219
 msgid "metadata"
 msgstr ""
 
-#: ../src/libs/collect.c:2891
+#: ../src/libs/collect.c:3138
 msgid "times"
 msgstr ""
 
-#: ../src/libs/collect.c:2899
+#: ../src/libs/collect.c:3146
 msgid "capture details"
 msgstr ""
 
-#: ../src/libs/collect.c:2908
+#: ../src/libs/collect.c:3155
 msgid "darktable"
 msgstr ""
 
-#: ../src/libs/collect.c:2921
+#: ../src/libs/collect.c:3168
 msgid "collections settings"
 msgstr ""
 
-#: ../src/libs/collect.c:2924 ../src/libs/export_metadata.c:288
+#: ../src/libs/collect.c:3171 ../src/libs/export_metadata.c:288
 #: ../src/libs/metadata.c:490 ../src/libs/metadata_view.c:1187
-#: ../src/libs/recentcollect.c:306 ../src/libs/tagging.c:1633
-#: ../src/libs/tagging.c:1763 ../src/libs/tagging.c:2037
-#: ../src/libs/tagging.c:3453
+#: ../src/libs/tagging.c:1633 ../src/libs/tagging.c:1763
+#: ../src/libs/tagging.c:2037 ../src/libs/tagging.c:3453
 msgid "save"
 msgstr ""
 
-#: ../src/libs/collect.c:2939 ../src/libs/export.c:1049
+#: ../src/libs/collect.c:3186 ../src/libs/export.c:1049
 #: ../src/libs/metadata.c:625 ../src/libs/metadata_view.c:1299
-#: ../src/libs/recentcollect.c:369 ../src/libs/tagging.c:3475
+#: ../src/libs/tagging.c:3475
 msgid "preferences..."
+msgstr ""
+
+#: ../src/libs/collect.c:3244
+msgid "Folders"
+msgstr ""
+
+#: ../src/libs/collect.c:3244
+msgid "Browse the content of folders known to Ansel"
+msgstr ""
+
+#: ../src/libs/collect.c:3245
+msgid "Query files by hierarchical tags"
+msgstr ""
+
+#: ../src/libs/collect.c:3246
+msgid "Queries"
+msgstr ""
+
+#: ../src/libs/collect.c:3246
+msgid "Perform advanced queries into Ansel library"
 msgstr ""
 
 #: ../src/libs/colorpicker.c:51
@@ -17545,6 +17618,10 @@ msgstr ""
 #: ../src/libs/export.c:523
 msgctxt "unit"
 msgid "in"
+msgstr ""
+
+#: ../src/libs/export.c:1043
+msgid "file on disk"
 msgstr ""
 
 #: ../src/libs/export.c:1061
@@ -18921,16 +18998,11 @@ msgstr ""
 msgid " or "
 msgstr ""
 
-#. case DT_LIB_COLLECT_MODE_AND_NOT:
-#: ../src/libs/recentcollect.c:128
+#: ../src/libs/recentcollect.c:129
 msgid " but not "
 msgstr ""
 
-#: ../src/libs/recentcollect.c:303
-msgid "recent collections settings"
-msgstr ""
-
-#: ../src/libs/recentcollect.c:420
+#: ../src/libs/recentcollect.c:346
 msgid "jump back to previous collection"
 msgstr ""
 
@@ -18938,94 +19010,94 @@ msgstr ""
 msgid "modulegroups"
 msgstr ""
 
-#: ../src/libs/modulegroups.c:207
+#: ../src/libs/modulegroups.c:230
 msgid "Search a module…"
 msgstr ""
 
-#: ../src/libs/modulegroups.c:216
+#: ../src/libs/modulegroups.c:239
 msgid "clear text"
 msgstr ""
 
-#: ../src/libs/modulegroups.c:222
+#: ../src/libs/modulegroups.c:245
 msgid "Pipeline"
 msgstr ""
 
-#: ../src/libs/modulegroups.c:223
+#: ../src/libs/modulegroups.c:246
 msgid "Tones"
 msgstr ""
 
-#: ../src/libs/modulegroups.c:224
+#: ../src/libs/modulegroups.c:247
 msgid "Film"
 msgstr ""
 
-#: ../src/libs/modulegroups.c:225
+#: ../src/libs/modulegroups.c:248
 msgid "Color"
 msgstr ""
 
-#: ../src/libs/modulegroups.c:226
+#: ../src/libs/modulegroups.c:249
 msgid "Repair"
 msgstr ""
 
-#: ../src/libs/modulegroups.c:227
+#: ../src/libs/modulegroups.c:250
 msgid "Sharpness"
 msgstr ""
 
-#: ../src/libs/modulegroups.c:228
+#: ../src/libs/modulegroups.c:251
 msgid "Effects"
 msgstr ""
 
-#: ../src/libs/modulegroups.c:229
+#: ../src/libs/modulegroups.c:252
 msgid "Technics"
 msgstr ""
 
-#: ../src/libs/modulegroups.c:230
+#: ../src/libs/modulegroups.c:253
 msgid "All"
 msgstr ""
 
-#: ../src/libs/modulegroups.c:231
+#: ../src/libs/modulegroups.c:254
 msgid ""
 "List all modules currently enabled in the reverse order of application in "
 "the pipeline."
 msgstr ""
 
-#: ../src/libs/modulegroups.c:232
+#: ../src/libs/modulegroups.c:255
 msgid "Modules destined to adjust brightness, contrast and dynamic range."
 msgstr ""
 
-#: ../src/libs/modulegroups.c:233
+#: ../src/libs/modulegroups.c:256
 msgid "Modules used when working with film scans."
 msgstr ""
 
-#: ../src/libs/modulegroups.c:234
+#: ../src/libs/modulegroups.c:257
 msgid "Modules destined to adjust white balance and perform color-grading."
 msgstr ""
 
-#: ../src/libs/modulegroups.c:235
+#: ../src/libs/modulegroups.c:258
 msgid "Modules destined to repair and reconstruct noisy or missing pixels."
 msgstr ""
 
-#: ../src/libs/modulegroups.c:236
+#: ../src/libs/modulegroups.c:259
 msgid "Modules destined to manipulate local contrast, sharpness and blur."
 msgstr ""
 
-#: ../src/libs/modulegroups.c:237
+#: ../src/libs/modulegroups.c:260
 msgid "Modules applying special effects."
 msgstr ""
 
-#: ../src/libs/modulegroups.c:238
+#: ../src/libs/modulegroups.c:261
 msgid "Technical modules that can be ignored in most situations."
 msgstr ""
 
-#: ../src/libs/modulegroups.c:239
+#: ../src/libs/modulegroups.c:262
 msgid "All modules available in the software."
 msgstr ""
 
 #. Bloody accels from the great MIDI turducken
-#: ../src/libs/modulegroups.c:270
+#: ../src/libs/modulegroups.c:293
 msgid "move to the next modules tab"
 msgstr ""
 
-#: ../src/libs/modulegroups.c:271
+#: ../src/libs/modulegroups.c:294
 msgid "move to the previous modules tab"
 msgstr ""
 
@@ -19842,29 +19914,37 @@ msgid ""
 "the gray button affects all color labels"
 msgstr ""
 
+#: ../src/libs/tools/filter.c:473
+msgid "Selected"
+msgstr ""
+
 #: ../src/libs/tools/filter.c:474
+msgid "Restrict the current view to only selected pictures"
+msgstr ""
+
+#: ../src/libs/tools/filter.c:484
 msgctxt "quickfilter"
 msgid "Sort"
 msgstr ""
 
-#: ../src/libs/tools/filter.c:479
+#: ../src/libs/tools/filter.c:489
 msgid "sort by"
 msgstr ""
 
-#: ../src/libs/tools/filter.c:480
+#: ../src/libs/tools/filter.c:490
 msgid "determine the sort order of shown images"
 msgstr ""
 
-#: ../src/libs/tools/filter.c:505
+#: ../src/libs/tools/filter.c:515
 msgctxt "quickfilter"
 msgid "Find"
 msgstr ""
 
-#: ../src/libs/tools/filter.c:512
+#: ../src/libs/tools/filter.c:522
 msgid "Search an image…"
 msgstr ""
 
-#: ../src/libs/tools/filter.c:519
+#: ../src/libs/tools/filter.c:529
 #, no-c-format
 msgid ""
 "filter by text from images metadata, tags, file path and name\n"
@@ -19874,16 +19954,8 @@ msgid ""
 "is dimmed during the search execution"
 msgstr ""
 
-#: ../src/libs/tools/filter.c:533
+#: ../src/libs/tools/filter.c:543
 msgid "search images"
-msgstr ""
-
-#: ../src/libs/tools/filter.c:538
-msgid "Selected"
-msgstr ""
-
-#: ../src/libs/tools/filter.c:539
-msgid "Restrict the current view to only selected pictures"
 msgstr ""
 
 #: ../src/libs/tools/filter.c:554
