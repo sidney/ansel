@@ -132,7 +132,7 @@ int last_state = 0;
 
 const char *name(dt_lib_module_t *self)
 {
-  return _("collect");
+  return _("Library");
 }
 
 void *legacy_params(struct dt_lib_module_t *self,
@@ -2782,6 +2782,13 @@ static gboolean entry_focus_in_callback(GtkWidget *w, GdkEventFocus *event, dt_l
   update_view(active_rule);
   return FALSE;
 }
+
+/*
+static void _focus_first_search_entry(dt_action_t *action)
+{
+  entry_focus_in_callback(action->owner, NULL,
+}
+*/
 
 static void menuitem_mode(GtkMenuItem *menuitem, dt_lib_collect_rule_t *d)
 {
