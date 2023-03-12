@@ -241,7 +241,7 @@ Why that? Just because it's a developer choice and most classes use underscore i
   color: @fg_color;
   font-size: 1em;
   font-family: sans-serif;
-  font-weight: normal;
+  font-weight: 400;
   box-shadow:none;
   outline-style:none;
   text-shadow:none;
@@ -349,7 +349,7 @@ textview,
   border: 0.07em solid @button_border;
   border-radius: 0.21em;
   background-color: @button_bg;
-  font-weight: normal;
+  font-weight: 400;
 }
 
 /* then set specific settings for all text zones and combo */
@@ -483,12 +483,12 @@ separator
 
 #menu-bar menuitem menu menuitem label
 {
-  font-weight: normal;
+  font-weight: 400;
 }
 
 #menu-bar menuitem menu menuitem.menu-active label
 {
-  font-weight: 900;
+  font-weight: 800;
   color: @grey_100;
 }
 
@@ -635,7 +635,7 @@ dialog .sidebar row:selected:hover label,
 {
   color: @plugin_label_color;
   padding: 0 0.14em 0.14em 0.45em;
-  font-weight: normal;
+  font-weight: 700;
   font-family: sans-serif;
   font-size: 1.1em;
 }
@@ -1123,7 +1123,7 @@ filechooser widget treeview
 
 treeview header label
 {
-  font-weight: bold;
+  font-weight: 700;
   padding: 0.14em;
 }
 
@@ -1177,7 +1177,7 @@ treeview header label
 #preferences-notebook scrolledwindow #pref_section > label  /* sub-category title in main content */
 {
   font-size: 1.2em;
-  font-weight: bold;
+  font-weight: 700;
 }
 
 /* Just add spacing between label settings and setting beside */
@@ -1231,7 +1231,7 @@ treeview header label
 #modulegroups-groups-title label,
 #modulegroups-header-center entry
 {
-  font-weight: bold;
+  font-weight: 700;
   margin-right: 0.28em;
 }
 
@@ -2350,9 +2350,9 @@ box *
                  "Ubuntu Light", "Ubuntu", "IPAPGothic",    /* Ubuntu default */
                  "Cantarell",                               /* Gnome default */
                   sans-serif;                                /* default default */
+    font-weight: 300;
 }
 
-button,
 .dt_section_label,
 .quickfilter-label,
 .dt_section_label *
@@ -2363,6 +2363,7 @@ button,
                  "Ubuntu Medium", "Ubuntu", "IPAPGothic",
                  "Cantarell",
                   sans-serif;
+    font-weight: 500;
 }
 
 #iop-panel-label,
@@ -2374,6 +2375,8 @@ button,
                  "Ubuntu Condensed", "Ubuntu", "IPAPGothic",
                  "Cantarell",
                   sans-serif;
+    font-weight: 400;
+    font-stretch: condensed;
 }
 
 notebook tabs,
@@ -2388,4 +2391,6 @@ tooltip label,
                  "Ubuntu", "IPAPGothic",
                  "Cantarell",
                   sans-serif;
+    font-weight: 400;
+    font-stretch: normal;
 }
