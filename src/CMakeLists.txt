@@ -611,9 +611,10 @@ if(NOT CUSTOM_CFLAGS)
   #endif()
 
   #-g MUST be set for ALL builds, or there will be no support for them when bugs happen
-  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${MARCH} ${DT_REQ_INSTRUCTIONS} -g")
+  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${MARCH} ${DT_REQ_INSTRUCTIONS} -g -Wfatal-errors")
   set(CMAKE_C_FLAGS_RELWITHDEBINFO "${CMAKE_C_FLAGS_RELWITHDEBINFO} -O2 -ftree-vectorize")
   set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -O3 -ffast-math -fno-finite-math-only")
+  set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -Werror -Wmaybe-uninitialized -Wuninitialized")
   if(CMAKE_COMPILER_IS_GNUCC)
     if(BUILD_SSE2_CODEPATHS)
       set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -mfpmath=sse")
@@ -737,10 +738,6 @@ endif(USE_LUA)
 find_package(Pugixml 1.2 REQUIRED)
 include_directories(SYSTEM ${Pugixml_INCLUDE_DIRS})
 list(APPEND LIBS ${Pugixml_LIBRARIES})
-
-if(NOT SOURCE_PACKAGE)
-  add_definitions(-Werror -Wfatal-errors )
-endif()
 
 if(CMAKE_CXX_COMPILER_ID STREQUAL "AppleClang" OR CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
   # do not error out on "loop not vectorized" clang OpenMP warnings
