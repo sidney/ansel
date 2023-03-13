@@ -1422,7 +1422,7 @@ dt_colorspaces_t *dt_colorspaces_init()
 
   res->profiles
       = g_list_append(res->profiles, _create_profile(DT_COLORSPACE_SRGB, dt_colorspaces_create_srgb_profile(),
-                                                     _("sRGB (web-safe)"), -1, ++out_pos, ++display_pos,
+                                                     _("sRGB"), -1, ++out_pos, ++display_pos,
                                                      ++category_pos, ++work_pos));
 
   res->profiles = g_list_append(res->profiles,
