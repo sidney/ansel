@@ -1,20 +1,3 @@
-/*
-    This file is part of darktable,
-    Copyright (C) 2011-2020 darktable developers.
-
-    darktable is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
-
-    darktable is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with darktable.  If not, see <http://www.gnu.org/licenses/>.
-*/
 
 #include "common/darktable.h"
 #include "common/debug.h"
@@ -27,6 +10,7 @@
 #include "gui/actions/edit.h"
 #include "gui/actions/help.h"
 #include "gui/actions/run.h"
+#include "gui/actions/select.h"
 #include "gui/actions/display.h"
 #include "libs/lib.h"
 #include "libs/lib_api.h"
@@ -94,6 +78,9 @@ void gui_init(dt_lib_module_t *self)
 
   /* Populate edit menu */
   append_edit(d->menus, &d->item_lists[DT_MENU_EDIT], DT_MENU_EDIT);
+
+  /* Populate selection menu */
+  append_select(d->menus, &d->item_lists[DT_MENU_SELECTION], DT_MENU_SELECTION);
 
   /* Populate run menu */
   append_run(d->menus, &d->item_lists[DT_MENU_RUN], DT_MENU_RUN);
