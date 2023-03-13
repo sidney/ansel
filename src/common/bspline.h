@@ -159,10 +159,12 @@ inline static void blur_2D_Bspline(const float *const restrict in, float *const 
   }
 }
 
-
-inline static void decompose_2D_Bspline(const float *const DT_ALIGNED_PIXEL restrict in,
-                                        float *const DT_ALIGNED_PIXEL restrict HF,
-                                        float *const DT_ALIGNED_PIXEL restrict LF,
+#ifdef _OPENMP
+#pragma omp declare simd aligned(in, HF, LF:64) aligned(tempbuf:16)
+#endif
+inline static void decompose_2D_Bspline(const float *const restrict in,
+                                        float *const restrict HF,
+                                        float *const restrict LF,
                                         const size_t width, const size_t height, const int mult,
                                         float *const tempbuf, size_t padded_size)
 {
