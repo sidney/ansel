@@ -476,6 +476,11 @@ separator
   padding: 0.25em 0.5em;
 }
 
+#menu-bar menuitem menu menuitem
+{
+  padding: 0.25em;
+}
+
 #menu-bar separator
 {
   margin: 0.25em 0;
