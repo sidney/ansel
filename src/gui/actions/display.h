@@ -356,7 +356,7 @@ static gboolean intent_checked_callback(GtkWidget *widget)
 void append_display(GtkWidget **menus, GList **lists, const dt_menus_t index)
 {
   // Parent sub-menu color profile
-  add_top_submenu_entry(menus, lists, _("Color profile"), index);
+  add_top_submenu_entry(menus, lists, _("Monitor color profile"), index);
   GtkWidget *parent = get_last_widget(lists);
 
   // Add available color profiles to the sub-menu

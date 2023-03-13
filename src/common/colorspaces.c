@@ -1411,7 +1411,7 @@ dt_colorspaces_t *dt_colorspaces_init()
   // init the display profile with srgb so some stupid code that runs before the real profile could be fetched has something to work with
   res->profiles = g_list_append(
       res->profiles, _create_profile(DT_COLORSPACE_DISPLAY, dt_colorspaces_create_srgb_profile(),
-                                     _("system display profile"), -1, -1, ++display_pos, ++category_pos, -1));
+                                     _("System display profile (recommended)"), -1, -1, ++display_pos, ++category_pos, -1));
 
   // we want a v4 with parametric curve for input and a v2 with point trc for output
   // see http://ninedegreesbelow.com/photography/lcms-make-icc-profiles.html#profile-variants-and-versions
@@ -1618,7 +1618,7 @@ const char *dt_colorspaces_get_name(dt_colorspaces_color_profile_type_t type,
      case DT_COLORSPACE_INFRARED:
        return _("linear infrared BGR");
      case DT_COLORSPACE_DISPLAY:
-       return _("system display profile");
+       return _("System display profile (recommended)");
      case DT_COLORSPACE_EMBEDDED_ICC:
        return _("embedded ICC profile");
      case DT_COLORSPACE_EMBEDDED_MATRIX:
