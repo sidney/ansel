@@ -14,11 +14,11 @@ gboolean full_screen_checked_callback(GtkWidget *w)
   return gdk_window_get_state(gtk_widget_get_window(widget)) & GDK_WINDOW_STATE_FULLSCREEN;
 }
 
-static void full_screen_callback(GtkWidget *w)
+static void full_screen_callback()
 {
   GtkWidget *widget = dt_ui_main_window(darktable.gui->ui);
 
-  if(full_screen_checked_callback(w))
+  if(full_screen_checked_callback(widget))
     gtk_window_unfullscreen(GTK_WINDOW(widget));
   else
     gtk_window_fullscreen(GTK_WINDOW(widget));
@@ -88,18 +88,6 @@ static void _toggle_side_borders_accel_callback(dt_action_t *action)
   /* trigger invalidation of centerview to reprocess pipe */
   dt_dev_invalidate(darktable.develop);
   gtk_widget_queue_draw(dt_ui_center(darktable.gui->ui));
-}
-
-static void _toggle_panel_accel_callback(dt_action_t *action)
-{
-  if(!strcmp(action->id, "left"))
-    dt_ui_panel_show(darktable.gui->ui, DT_UI_PANEL_LEFT, !_panel_is_visible(DT_UI_PANEL_LEFT), TRUE);
-  else if(!strcmp(action->id, "right"))
-    dt_ui_panel_show(darktable.gui->ui, DT_UI_PANEL_RIGHT, !_panel_is_visible(DT_UI_PANEL_RIGHT), TRUE);
-  else if(!strcmp(action->id, "top"))
-    dt_ui_panel_show(darktable.gui->ui, DT_UI_PANEL_CENTER_TOP, !_panel_is_visible(DT_UI_PANEL_CENTER_TOP), TRUE);
-  else
-    dt_ui_panel_show(darktable.gui->ui, DT_UI_PANEL_CENTER_BOTTOM, !_panel_is_visible(DT_UI_PANEL_CENTER_BOTTOM), TRUE);
 }
 
 void dt_ui_toggle_panels_visibility(struct dt_ui_t *ui)
@@ -196,7 +184,7 @@ gboolean dt_ui_panel_visible(dt_ui_t *ui, const dt_ui_panel_t p)
 }
 
 
-void panel_left_callback(GtkWidget *widget)
+void panel_left_callback()
 {
   dt_ui_panel_show(darktable.gui->ui, DT_UI_PANEL_LEFT, !_panel_is_visible(DT_UI_PANEL_LEFT), TRUE);
 }
@@ -206,7 +194,7 @@ static gboolean panel_left_checked_callback(GtkWidget *widget)
   return dt_ui_panel_visible(darktable.gui->ui, DT_UI_PANEL_LEFT);
 }
 
-void panel_right_callback(GtkWidget *widget)
+void panel_right_callback()
 {
   dt_ui_panel_show(darktable.gui->ui, DT_UI_PANEL_RIGHT, !_panel_is_visible(DT_UI_PANEL_RIGHT), TRUE);
 }
@@ -216,7 +204,7 @@ static gboolean panel_right_checked_callback(GtkWidget *widget)
   return dt_ui_panel_visible(darktable.gui->ui, DT_UI_PANEL_RIGHT);
 }
 
-void panel_top_callback(GtkWidget *widget)
+void panel_top_callback()
 {
   dt_ui_panel_show(darktable.gui->ui, DT_UI_PANEL_CENTER_TOP, !_panel_is_visible(DT_UI_PANEL_CENTER_TOP), TRUE);
 }
@@ -226,7 +214,7 @@ static gboolean panel_top_checked_callback(GtkWidget *widget)
   return dt_ui_panel_visible(darktable.gui->ui, DT_UI_PANEL_CENTER_TOP);
 }
 
-void panel_bottom_callback(GtkWidget *widget)
+void panel_bottom_callback()
 {
   dt_ui_panel_show(darktable.gui->ui, DT_UI_PANEL_CENTER_BOTTOM, !_panel_is_visible(DT_UI_PANEL_CENTER_BOTTOM), TRUE);
 }
@@ -248,12 +236,7 @@ static void _toggle_header_accel_callback(dt_action_t *action)
   dt_ui_panel_show(darktable.gui->ui, DT_UI_PANEL_TOP, !_panel_is_visible(DT_UI_PANEL_TOP), TRUE);
 }
 
-static void _toggle_filmstrip_accel_callback(dt_action_t *action)
-{
-  dt_ui_panel_show(darktable.gui->ui, DT_UI_PANEL_BOTTOM, !_panel_is_visible(DT_UI_PANEL_BOTTOM), TRUE);
-}
-
-static void filmstrip_callback(GtkWidget *widget)
+static void filmstrip_callback()
 {
   dt_ui_panel_show(darktable.gui->ui, DT_UI_PANEL_BOTTOM, !_panel_is_visible(DT_UI_PANEL_BOTTOM), TRUE);
 }
@@ -355,6 +338,9 @@ static gboolean intent_checked_callback(GtkWidget *widget)
 
 void append_display(GtkWidget **menus, GList **lists, const dt_menus_t index)
 {
+  dt_action_t *pnl = dt_action_section(&darktable.control->actions_global, N_("Display"));
+  dt_action_t *ac;
+
   // Parent sub-menu color profile
   add_top_submenu_entry(menus, lists, _("Monitor color profile"), index);
   GtkWidget *parent = get_last_widget(lists);
@@ -391,43 +377,37 @@ void append_display(GtkWidget **menus, GList **lists, const dt_menus_t index)
   // Children of sub-menu panels
   add_sub_sub_menu_entry(parent, lists, _("Left"), index, NULL,
                          panel_left_callback, panel_left_checked_callback, NULL, NULL);
+  ac = dt_action_define(pnl, NULL, N_("Toggle left panel visibility"), get_last_widget(lists), NULL);
+  dt_action_register(ac, NULL, panel_left_callback, GDK_KEY_L, GDK_CONTROL_MASK | GDK_SHIFT_MASK);
 
   add_sub_sub_menu_entry(parent, lists, _("Right"), index, NULL,
                          panel_right_callback, panel_right_checked_callback, NULL, NULL);
+  ac = dt_action_define(pnl, NULL, N_("Toggle right panel visibility"), get_last_widget(lists), NULL);
+  dt_action_register(ac, NULL, panel_right_callback, GDK_KEY_R, GDK_CONTROL_MASK | GDK_SHIFT_MASK);
 
   add_sub_sub_menu_entry(parent, lists, _("Top"), index, NULL,
                          panel_top_callback, panel_top_checked_callback, NULL, NULL);
+  ac = dt_action_define(pnl, NULL, N_("Toggle top bar visibility"), get_last_widget(lists), NULL);
+  dt_action_register(ac, NULL, panel_top_callback, GDK_KEY_T, GDK_CONTROL_MASK | GDK_SHIFT_MASK);
 
   add_sub_sub_menu_entry(parent, lists, _("Bottom"), index, NULL,
                          panel_bottom_callback, panel_bottom_checked_callback, NULL, NULL);
+  ac = dt_action_define(pnl, NULL, N_("Toggle bottom bar visibility"), get_last_widget(lists), NULL);
+  dt_action_register(ac, NULL, panel_bottom_callback, GDK_KEY_B, GDK_CONTROL_MASK | GDK_SHIFT_MASK);
 
   add_sub_sub_menu_entry(parent, lists, _("Filmstrip"), index, NULL,
                          filmstrip_callback, filmstrip_checked_callback, NULL, filmstrip_sensitive_callback);
+  ac = dt_action_define(pnl, NULL, N_("Toggle filmstrip visibility"), get_last_widget(lists), NULL);
+  dt_action_register(ac, NULL, filmstrip_callback, GDK_KEY_f, GDK_CONTROL_MASK | GDK_SHIFT_MASK);
 
   add_menu_separator(menus[index]);
 
   add_sub_menu_entry(menus, lists, _("Full screen"), index, NULL, full_screen_callback,
                      full_screen_checked_callback, NULL, NULL);
 
-  dt_action_register(&darktable.control->actions_global, N_("fullscreen"), full_screen_action, GDK_KEY_F11, 0);
-
-  dt_action_t *pnl = dt_action_section(&darktable.control->actions_global, N_("panels"));
-  dt_action_t *ac;
-
-  ac = dt_action_define(pnl, NULL, N_("left"), NULL, NULL);
-  dt_action_register(ac, NULL, _toggle_panel_accel_callback, GDK_KEY_L, GDK_CONTROL_MASK | GDK_SHIFT_MASK);
-
-  ac = dt_action_define(pnl, NULL, N_("right"), NULL, NULL);
-  dt_action_register(ac, NULL, _toggle_panel_accel_callback, GDK_KEY_R, GDK_CONTROL_MASK | GDK_SHIFT_MASK);
-
-  ac = dt_action_define(pnl, NULL, N_("top"), NULL, NULL);
-  dt_action_register(ac, NULL, _toggle_panel_accel_callback, GDK_KEY_T, GDK_CONTROL_MASK | GDK_SHIFT_MASK);
-
-  ac = dt_action_define(pnl, NULL, N_("bottom"), NULL, NULL);
-  dt_action_register(ac, NULL, _toggle_panel_accel_callback, GDK_KEY_B, GDK_CONTROL_MASK | GDK_SHIFT_MASK);
+  dt_action_register(&darktable.control->actions_global, N_("Fullscreen window"), full_screen_callback, GDK_KEY_F11, 0);
 
   // specific top/bottom toggles
-  dt_action_register(pnl, N_("all"), _toggle_side_borders_accel_callback, GDK_KEY_Tab, 0);
-  dt_action_register(pnl, N_("header"), _toggle_header_accel_callback, GDK_KEY_h, GDK_CONTROL_MASK);
-  dt_action_register(pnl, N_("filmstrip"), _toggle_filmstrip_accel_callback, GDK_KEY_f, GDK_CONTROL_MASK | GDK_SHIFT_MASK);
+  dt_action_register(pnl, N_("Toggle all panels visibility"), _toggle_side_borders_accel_callback, GDK_KEY_Tab, 0);
+  dt_action_register(pnl, N_("Toggle header menu bar visibility"), _toggle_header_accel_callback, GDK_KEY_h, GDK_CONTROL_MASK);
 }
