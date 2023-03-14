@@ -475,11 +475,6 @@ static void _gui_switch_view_key_accel_callback(dt_action_t *action)
   dt_ctl_switch_mode_to(action->id);
 }
 
-static void _quit_callback(dt_action_t *action)
-{
-  dt_control_quit();
-}
-
 #ifdef MAC_INTEGRATION
 #ifdef GTK_TYPE_OSX_APPLICATION
 static gboolean _osx_quit_callback(GtkOSXApplication *OSXapp, gpointer user_data)
@@ -789,9 +784,6 @@ int dt_gui_gtk_init(dt_gui_gtk_t *gui)
 
   // register actions for applying styles via shortcuts
   dt_init_styles_actions();
-
-  // register ctrl-q to quit:
-  dt_action_register(&darktable.control->actions_global, N_("quit"), _quit_callback, GDK_KEY_q, GDK_CONTROL_MASK);
 
   dt_action_register(&darktable.control->actions_global, N_("reinitialise input devices"), dt_shortcuts_reinitialise, GDK_KEY_I, GDK_CONTROL_MASK | GDK_SHIFT_MASK | GDK_MOD1_MASK);
 
