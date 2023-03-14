@@ -1651,15 +1651,10 @@ gboolean dt_history_copy(int imgid)
   if(imgid <= 0) return FALSE;
 
   darktable.view_manager->copy_paste.copied_imageid = imgid;
-  darktable.view_manager->copy_paste.full_copy = FALSE;
-
-  if(darktable.view_manager->copy_paste.selops)
-  {
-    g_list_free(darktable.view_manager->copy_paste.selops);
-    darktable.view_manager->copy_paste.selops = NULL;
-  }
+  darktable.view_manager->copy_paste.full_copy = TRUE;
 
   // check if images is currently loaded in darkroom
+  // is that really necessary ?
   if(dt_dev_is_current_image(darktable.develop, imgid)) dt_dev_write_history(darktable.develop);
 
   return TRUE;
