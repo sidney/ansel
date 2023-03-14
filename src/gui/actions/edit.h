@@ -1,6 +1,8 @@
 #include "gui/actions/menu.h"
 #include "gui/preferences.h"
 #include "common/undo.h"
+#include "common/selection.h"
+#include "common/collection.h"
 
 
 // Don't save across sessions (window managers role)
@@ -141,7 +143,7 @@ static void preferences_callback(GtkWidget *widget)
   dt_gui_preferences_show();
 }
 
-static void undo_callback(GtkWidget *widget)
+static void undo_callback()
 {
   if(!darktable.view_manager) return;
   const dt_view_t *cv = dt_view_manager_get_current_view(darktable.view_manager);
@@ -158,7 +160,7 @@ static void undo_callback(GtkWidget *widget)
   // That's what you get from ignoring modularity principles.
 }
 
-static void redo_callback(GtkWidget *widget)
+static void redo_callback()
 {
   if(!darktable.view_manager) return;
   const dt_view_t *cv = dt_view_manager_get_current_view(darktable.view_manager);
@@ -204,10 +206,41 @@ static gboolean redo_sensitive_callback(GtkWidget *w)
   return sensitive;
 }
 
+static gboolean copy_sensitive_callback()
+{
+  return dt_collection_get_selected_count(darktable.collection) == 1
+         && dt_selection_get_first_id(darktable.selection) != -1;
+}
+
+static void copy_callback()
+{
+  // Allow copy only when exactly one file is selected
+  if(copy_sensitive_callback())
+    dt_history_copy(dt_selection_get_first_id(darktable.selection));
+  else
+    dt_control_log(_("Copy is allowed only with exactly one image selected"));
+}
+
 void append_edit(GtkWidget **menus, GList **lists, const dt_menus_t index)
 {
+  dt_action_t *pnl = dt_action_section(&darktable.control->actions_global, N_("Edit"));
+  dt_action_t *ac;
+
   add_sub_menu_entry(menus, lists, _("Undo"), index, NULL, undo_callback, NULL, NULL, undo_sensitive_callback);
+  ac = dt_action_define(pnl, NULL, N_("Undo last action"), get_last_widget(lists), NULL);
+  dt_action_register(ac, NULL, undo_callback, GDK_KEY_z, GDK_CONTROL_MASK);
+
   add_sub_menu_entry(menus, lists, _("Redo"), index, NULL, redo_callback, NULL, NULL, redo_sensitive_callback);
+  ac = dt_action_define(pnl, NULL, N_("Redo last action"), get_last_widget(lists), NULL);
+  dt_action_register(ac, NULL, redo_callback, GDK_KEY_y, GDK_CONTROL_MASK);
+
+  add_menu_separator(menus[index]);
+
+  add_sub_menu_entry(menus, lists, _("Copy development"), index, NULL, copy_callback, NULL, NULL, copy_sensitive_callback);
+  ac = dt_action_define(pnl, NULL, N_("Copy development"), get_last_widget(lists), NULL);
+  dt_action_register(ac, NULL, copy_callback, GDK_KEY_c, GDK_CONTROL_MASK);
+
+
   add_menu_separator(menus[index]);
   add_sub_menu_entry(menus, lists, _("Key shortcuts"), index, NULL, define_keymap_callback, NULL, NULL, NULL);
   add_sub_menu_entry(menus, lists, _("Preferences"), index, NULL, preferences_callback, NULL, NULL, NULL);
