@@ -35,17 +35,24 @@ void select_unedited_callback()
 
 void append_select(GtkWidget **menus, GList **lists, const dt_menus_t index)
 {
+  dt_action_t *pnl = dt_action_section(&darktable.control->actions_global, N_("Selection"));
+  dt_action_t *ac;
+
   add_sub_menu_entry(menus, lists, _("Select all"), index, NULL, select_all_callback, NULL, NULL, select_all_sensitive_callback);
-  dt_action_register(&darktable.control->actions_global, N_("Select all"), select_all_callback, GDK_KEY_a, GDK_CONTROL_MASK);
+  ac = dt_action_define(pnl, NULL, N_("Select all"), get_last_widget(lists), NULL);
+  dt_action_register(ac, NULL, select_all_callback, GDK_KEY_a, GDK_CONTROL_MASK);
 
   add_sub_menu_entry(menus, lists, _("Clear selection"), index, NULL, clear_selection_callback, NULL, NULL, clear_selection_sensitive_callback);
-  dt_action_register(&darktable.control->actions_global, N_("Clear selection"), clear_selection_callback, GDK_KEY_a, GDK_CONTROL_MASK | GDK_SHIFT_MASK);
+  ac = dt_action_define(pnl, NULL, N_("Clear selection"), get_last_widget(lists), NULL);
+  dt_action_register(ac, NULL, clear_selection_callback, GDK_KEY_a, GDK_CONTROL_MASK | GDK_SHIFT_MASK);
 
   add_sub_menu_entry(menus, lists, _("Invert selection"), index, NULL, invert_selection_callback, NULL, NULL, clear_selection_sensitive_callback);
-  dt_action_register(&darktable.control->actions_global, N_("Invert selection"), invert_selection_callback, GDK_KEY_i, GDK_CONTROL_MASK);
+  ac = dt_action_define(pnl, NULL, N_("Invert selection"), get_last_widget(lists), NULL);
+  dt_action_register(ac, NULL, invert_selection_callback, GDK_KEY_i, GDK_CONTROL_MASK);
 
   add_sub_menu_entry(menus, lists, _("Selected unedited"), index, NULL, select_unedited_callback, NULL, NULL, NULL);
-  dt_action_register(&darktable.control->actions_global, N_("Select unedited"), select_unedited_callback, 0, 0);
+  ac = dt_action_define(pnl, NULL, N_("Select unedited"), get_last_widget(lists), NULL);
+  dt_action_register(ac, NULL, select_unedited_callback, 0, 0);
 
   //add_menu_separator(menus[index]);
 }

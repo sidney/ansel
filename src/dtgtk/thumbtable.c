@@ -1852,26 +1852,7 @@ static void _accel_duplicate(dt_action_t *action)
   dt_collection_update_query(darktable.collection, DT_COLLECTION_CHANGE_RELOAD, DT_COLLECTION_PROP_UNDEF, NULL);
   DT_DEBUG_CONTROL_SIGNAL_RAISE(darktable.signals, DT_SIGNAL_TAG_CHANGED);
 }
-static void _accel_select_all(dt_action_t *action)
-{
-  dt_selection_select_all(darktable.selection);
-}
-static void _accel_select_none(dt_action_t *action)
-{
-  dt_selection_clear(darktable.selection);
-}
-static void _accel_select_invert(dt_action_t *action)
-{
-  dt_selection_invert(darktable.selection);
-}
-static void _accel_select_film(dt_action_t *action)
-{
-  dt_selection_select_filmroll(darktable.selection);
-}
-static void _accel_select_untouched(dt_action_t *action)
-{
-  dt_selection_select_unaltered(darktable.selection);
-}
+
 static void _accel_select_range(dt_action_t *action)
 {
   dt_selection_select_range(darktable.selection, dt_control_get_mouse_over_id());
@@ -1887,11 +1868,6 @@ static void _thumbtable_init_accels()
   dt_action_register(thumb_actions, N_("duplicate image virgin"), _accel_duplicate, GDK_KEY_d, GDK_CONTROL_MASK | GDK_SHIFT_MASK);
 
   /* setup selection accelerators */
-  dt_action_register(thumb_actions, N_("select all"), _accel_select_all, GDK_KEY_a, GDK_CONTROL_MASK);
-  dt_action_register(thumb_actions, N_("select none"), _accel_select_none, GDK_KEY_a, GDK_CONTROL_MASK | GDK_SHIFT_MASK);
-  dt_action_register(thumb_actions, N_("invert selection"), _accel_select_invert, GDK_KEY_i, GDK_CONTROL_MASK);
-  dt_action_register(thumb_actions, N_("select film roll"), _accel_select_film, 0, 0);
-  dt_action_register(thumb_actions, N_("select untouched"), _accel_select_untouched, 0, 0);
   dt_action_register(thumb_actions, N_("select range"), _accel_select_range, GDK_BUTTON_PRESS, GDK_SHIFT_MASK);
 }
 
