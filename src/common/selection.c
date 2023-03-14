@@ -39,6 +39,11 @@ const dt_collection_t *dt_selection_get_collection(struct dt_selection_t *select
   return selection->collection;
 }
 
+uint32_t dt_selection_get_first_id(struct dt_selection_t *selection)
+{
+  return selection->last_single_id;
+}
+
 static void _selection_raise_signal()
 {
   // discard cached images_to_act_on list

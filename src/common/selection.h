@@ -26,6 +26,8 @@ struct dt_selection_t;
 struct dt_selection_t *dt_selection_new();
 void dt_selection_free(struct dt_selection_t *selection);
 
+/** Get the first imgid of a selection */
+uint32_t dt_selection_get_first_id(struct dt_selection_t *selection);
 /** inverts the current selection */
 void dt_selection_invert(struct dt_selection_t *selection);
 /** clears the selection */
