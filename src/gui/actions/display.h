@@ -35,11 +35,6 @@ static void full_screen_callback()
 #endif
 }
 
- void full_screen_action(dt_action_t *action)
-{
-  full_screen_callback(NULL);
-}
-
 /** SIDE PANELS COLLAPSE **/
 const char *_ui_panel_config_names[]
     = { "header", "toolbar_top", "toolbar_bottom", "left", "right", "bottom" };
