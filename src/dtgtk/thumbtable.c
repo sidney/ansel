@@ -1853,11 +1853,6 @@ static void _accel_duplicate(dt_action_t *action)
   DT_DEBUG_CONTROL_SIGNAL_RAISE(darktable.signals, DT_SIGNAL_TAG_CHANGED);
 }
 
-static void _accel_select_range(dt_action_t *action)
-{
-  dt_selection_select_range(darktable.selection, dt_control_get_mouse_over_id());
-}
-
 // init all accels
 static void _thumbtable_init_accels()
 {
@@ -1866,9 +1861,6 @@ static void _thumbtable_init_accels()
   /* setup history key accelerators */
   dt_action_register(thumb_actions, N_("duplicate image"), _accel_duplicate, GDK_KEY_d, GDK_CONTROL_MASK);
   dt_action_register(thumb_actions, N_("duplicate image virgin"), _accel_duplicate, GDK_KEY_d, GDK_CONTROL_MASK | GDK_SHIFT_MASK);
-
-  /* setup selection accelerators */
-  dt_action_register(thumb_actions, N_("select range"), _accel_select_range, GDK_BUTTON_PRESS, GDK_SHIFT_MASK);
 }
 
 static gboolean _filemanager_ensure_rowid_visibility(dt_thumbtable_t *table, int rowid)
