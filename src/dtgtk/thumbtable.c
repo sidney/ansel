@@ -1831,51 +1831,6 @@ gboolean dt_thumbtable_set_offset_image(dt_thumbtable_t *table, const int imgid,
   return dt_thumbtable_set_offset(table, _thumb_get_rowid(imgid), redraw);
 }
 
-static void _accel_copy(dt_action_t *action)
-{
-  dt_history_copy(dt_act_on_get_main_image());
-}
-static void _accel_copy_parts(dt_action_t *action)
-{
-  dt_history_copy_parts(dt_act_on_get_main_image());
-}
-static void _accel_paste(dt_action_t *action)
-{
-  GList *imgs = dt_act_on_get_images(TRUE, TRUE, FALSE);
-
-  dt_dev_undo_start_record(darktable.develop);
-
-  const gboolean ret = dt_history_paste_on_list(imgs, TRUE);
-  if(ret)
-    dt_collection_update_query(darktable.collection, DT_COLLECTION_CHANGE_RELOAD, DT_COLLECTION_PROP_UNDEF, imgs);
-  else
-    g_list_free(imgs);
-
-  dt_dev_undo_end_record(darktable.develop);
-}
-static void _accel_paste_parts(dt_action_t *action)
-{
-  GList *imgs = dt_act_on_get_images(TRUE, TRUE, FALSE);
-
-  dt_dev_undo_start_record(darktable.develop);
-
-  const gboolean ret = dt_history_paste_parts_on_list(imgs, TRUE);
-  if(ret)
-    dt_collection_update_query(darktable.collection, DT_COLLECTION_CHANGE_RELOAD, DT_COLLECTION_PROP_UNDEF, imgs);
-  else
-    g_list_free(imgs);
-
-  dt_dev_undo_end_record(darktable.develop);
-}
-static void _accel_hist_discard(dt_action_t *action)
-{
-  GList *imgs = dt_act_on_get_images(TRUE, TRUE, FALSE);
-  const gboolean ret = dt_history_delete_on_list(imgs, TRUE);
-  if(ret)
-    dt_collection_update_query(darktable.collection, DT_COLLECTION_CHANGE_RELOAD, DT_COLLECTION_PROP_UNDEF, imgs);
-  else
-    g_list_free(imgs);
-}
 static void _accel_duplicate(dt_action_t *action)
 {
   dt_undo_start_group(darktable.undo, DT_UNDO_DUPLICATE);
@@ -1928,12 +1883,6 @@ static void _thumbtable_init_accels()
   dt_action_t *thumb_actions = &darktable.control->actions_thumb;
 
   /* setup history key accelerators */
-  dt_action_register(thumb_actions, N_("copy history"), _accel_copy, GDK_KEY_c, GDK_CONTROL_MASK);
-  dt_action_register(thumb_actions, N_("copy history parts"), _accel_copy_parts, GDK_KEY_c, GDK_CONTROL_MASK | GDK_SHIFT_MASK);
-  dt_action_register(thumb_actions, N_("paste history"), _accel_paste, GDK_KEY_v, GDK_CONTROL_MASK);
-  dt_action_register(thumb_actions, N_("paste history parts"), _accel_paste_parts, GDK_KEY_v, GDK_CONTROL_MASK | GDK_SHIFT_MASK);
-  dt_action_register(thumb_actions, N_("discard history"), _accel_hist_discard, 0, 0);
-
   dt_action_register(thumb_actions, N_("duplicate image"), _accel_duplicate, GDK_KEY_d, GDK_CONTROL_MASK);
   dt_action_register(thumb_actions, N_("duplicate image virgin"), _accel_duplicate, GDK_KEY_d, GDK_CONTROL_MASK | GDK_SHIFT_MASK);
 
