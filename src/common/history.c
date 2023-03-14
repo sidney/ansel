@@ -1715,10 +1715,6 @@ gboolean dt_history_paste_parts_on_list(const GList *list, gboolean undo)
   if(!list) // do we have any images to receive the pasted history?
     return FALSE;
 
-  const int mode = dt_conf_get_int("plugins/lighttable/copy_history/pastemode");
-  gboolean merge = FALSE;
-  if(mode == 0) merge = TRUE;
-
   // at the time the dialog is started, some signals are sent and this in turn call
   // back dt_view_get_images_to_act_on() which free list and create a new one.
 
@@ -1739,7 +1735,7 @@ gboolean dt_history_paste_parts_on_list(const GList *list, gboolean undo)
   {
     const int dest = GPOINTER_TO_INT(l->data);
     dt_history_copy_and_paste_on_image(darktable.view_manager->copy_paste.copied_imageid,
-                                       dest, merge,
+                                       dest, TRUE,
                                        darktable.view_manager->copy_paste.selops,
                                        darktable.view_manager->copy_paste.copy_iop_order,
                                        darktable.view_manager->copy_paste.full_copy);
