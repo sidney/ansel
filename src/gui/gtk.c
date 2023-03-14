@@ -470,10 +470,6 @@ void dt_gui_store_last_preset(const char *name)
   darktable.gui->last_preset = g_strdup(name);
 }
 
-static void _gui_noop_action_callback(dt_action_t *action)
-{
-}
-
 static void _gui_switch_view_key_accel_callback(dt_action_t *action)
 {
   dt_ctl_switch_mode_to(action->id);
@@ -782,9 +778,6 @@ int dt_gui_gtk_init(dt_gui_gtk_t *gui)
   //       3. append the shortcut path as text to the tooltip text content __BEFORE__ initialization of the widget.
   //       4. Find out where Diederik Ter Rahe lives and ensure he never writes another line of code.
   // g_signal_override_class_handler("query-tooltip", gtk_widget_get_type(), G_CALLBACK(dt_shortcut_tooltip_callback));
-
-  //an action that does nothing - used for overriding/removing default shortcuts
-  dt_action_register(&darktable.control->actions_global, N_("no-op"), _gui_noop_action_callback, 0, 0);
 
   ac = dt_action_section(&darktable.control->actions_global, N_("switch views"));
   dt_action_register(ac, N_("tethering"), _gui_switch_view_key_accel_callback, 0, 0);
