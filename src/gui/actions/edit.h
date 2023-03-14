@@ -371,6 +371,22 @@ static void load_xmp_callback()
   g_list_free(imgs);
 }
 
+static void duplicate_callback()
+{
+  if(compress_history_sensitive_callback())
+    dt_control_duplicate_images(FALSE);
+  else
+    dt_control_log(_("Duplication needs selected images to work"));
+}
+
+static void new_development_callback()
+{
+  if(compress_history_sensitive_callback())
+    dt_control_duplicate_images(TRUE);
+  else
+    dt_control_log(_("Creating new developments needs selected images to work"));
+}
+
 void append_edit(GtkWidget **menus, GList **lists, const dt_menus_t index)
 {
   dt_action_t *pnl = dt_action_section(&darktable.control->actions_global, N_("Edit"));
@@ -402,6 +418,21 @@ void append_edit(GtkWidget **menus, GList **lists, const dt_menus_t index)
 
   add_menu_separator(menus[index]);
 
+  add_sub_menu_entry(menus, lists, _("Load development from XMP"), index, NULL,
+                     load_xmp_callback, NULL, NULL, compress_history_sensitive_callback);
+  ac = dt_action_define(pnl, NULL, N_("Load development from XMP"), get_last_widget(lists), NULL);
+  dt_action_register(ac, NULL, load_xmp_callback, 0, 0);
+
+  add_sub_menu_entry(menus, lists, _("Create new development"), index, NULL,
+                    new_development_callback, NULL, NULL, compress_history_sensitive_callback);
+  ac = dt_action_define(pnl, NULL, N_("Create new development"), get_last_widget(lists), NULL);
+  dt_action_register(ac, NULL, new_development_callback, GDK_KEY_n, GDK_CONTROL_MASK);
+
+  add_sub_menu_entry(menus, lists, _("Duplicate existing development"), index, NULL,
+                     duplicate_callback, NULL, NULL, compress_history_sensitive_callback);
+  ac = dt_action_define(pnl, NULL, N_("Duplicate existing development"), get_last_widget(lists), NULL);
+  dt_action_register(ac, NULL, duplicate_callback, GDK_KEY_d, GDK_CONTROL_MASK);
+
   add_sub_menu_entry(menus, lists, _("Compress development history"), index, NULL,
                      compress_history_callback, NULL, NULL, compress_history_sensitive_callback);
   ac = dt_action_define(pnl, NULL, N_("Compress development history"), get_last_widget(lists), NULL);
@@ -411,11 +442,6 @@ void append_edit(GtkWidget **menus, GList **lists, const dt_menus_t index)
                      delete_development_callback, NULL, NULL, compress_history_sensitive_callback);
   ac = dt_action_define(pnl, NULL, N_("Delete development"), get_last_widget(lists), NULL);
   dt_action_register(ac, NULL, delete_development_callback, 0, 0);
-
-  add_sub_menu_entry(menus, lists, _("Load development from XMP"), index, NULL,
-                     load_xmp_callback, NULL, NULL, compress_history_sensitive_callback);
-  ac = dt_action_define(pnl, NULL, N_("Load development from XMP"), get_last_widget(lists), NULL);
-  dt_action_register(ac, NULL, load_xmp_callback, 0, 0);
 
   add_menu_separator(menus[index]);
 

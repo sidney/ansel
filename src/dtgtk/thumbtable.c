@@ -1472,8 +1472,6 @@ static void _event_dnd_end(GtkWidget *widget, GdkDragContext *context, gpointer 
   dt_gui_remove_class(table->widget, "dt_thumbtable_reorder");
 }
 
-static void _thumbtable_init_accels();
-
 dt_thumbtable_t *dt_thumbtable_new()
 {
   dt_thumbtable_t *table = (dt_thumbtable_t *)calloc(1, sizeof(dt_thumbtable_t));
@@ -1537,9 +1535,6 @@ dt_thumbtable_t *dt_thumbtable_new()
   gtk_widget_show(table->widget);
 
   g_object_ref(table->widget);
-
-  // we init key accels
-  _thumbtable_init_accels();
 
   return table;
 }
@@ -1829,38 +1824,6 @@ gboolean dt_thumbtable_set_offset_image(dt_thumbtable_t *table, const int imgid,
 {
   table->offset_imgid = imgid;
   return dt_thumbtable_set_offset(table, _thumb_get_rowid(imgid), redraw);
-}
-
-static void _accel_duplicate(dt_action_t *action)
-{
-  dt_undo_start_group(darktable.undo, DT_UNDO_DUPLICATE);
-
-  const int32_t sourceid = dt_act_on_get_main_image();
-  const int32_t newimgid = dt_image_duplicate(sourceid);
-  if(newimgid <= 0) return;
-
-  if(strcmp(action->id, "duplicate image"))
-    dt_history_delete_on_image(newimgid);
-  else
-    dt_history_copy_and_paste_on_image(sourceid, newimgid, FALSE, NULL, TRUE, TRUE);
-
-  // a duplicate should keep the change time stamp of the original
-  dt_image_cache_set_change_timestamp_from_image(darktable.image_cache, newimgid, sourceid);
-
-  dt_undo_end_group(darktable.undo);
-
-  dt_collection_update_query(darktable.collection, DT_COLLECTION_CHANGE_RELOAD, DT_COLLECTION_PROP_UNDEF, NULL);
-  DT_DEBUG_CONTROL_SIGNAL_RAISE(darktable.signals, DT_SIGNAL_TAG_CHANGED);
-}
-
-// init all accels
-static void _thumbtable_init_accels()
-{
-  dt_action_t *thumb_actions = &darktable.control->actions_thumb;
-
-  /* setup history key accelerators */
-  dt_action_register(thumb_actions, N_("duplicate image"), _accel_duplicate, GDK_KEY_d, GDK_CONTROL_MASK);
-  dt_action_register(thumb_actions, N_("duplicate image virgin"), _accel_duplicate, GDK_KEY_d, GDK_CONTROL_MASK | GDK_SHIFT_MASK);
 }
 
 static gboolean _filemanager_ensure_rowid_visibility(dt_thumbtable_t *table, int rowid)
