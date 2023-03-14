@@ -1638,16 +1638,6 @@ static void _toggle_mask_visibility_callback(dt_action_t *action)
   }
 }
 
-static void _darkroom_undo_callback(dt_action_t *action)
-{
-  dt_undo_do_undo(darktable.undo, DT_UNDO_DEVELOP);
-}
-
-static void _darkroom_redo_callback(dt_action_t *action)
-{
-  dt_undo_do_redo(darktable.undo, DT_UNDO_DEVELOP);
-}
-
 static void search_callback(dt_action_t *action)
 {
   // set focus to the search module text box
@@ -2230,10 +2220,6 @@ void gui_init(dt_view_t *self)
   // brush opacity +/-
   dt_action_register(DT_ACTION(self), N_("increase brush opacity"), _brush_opacity_up_callback, GDK_KEY_greater, 0);
   dt_action_register(DT_ACTION(self), N_("decrease brush opacity"), _brush_opacity_down_callback, GDK_KEY_less, 0);
-
-  // undo/redo
-  dt_action_register(DT_ACTION(self), N_("undo"), _darkroom_undo_callback, GDK_KEY_z, GDK_CONTROL_MASK);
-  dt_action_register(DT_ACTION(self), N_("redo"), _darkroom_redo_callback, GDK_KEY_y, GDK_CONTROL_MASK);
 
   // set focus to the search modules text box
   dt_action_register(DT_ACTION(self), N_("search modules"), search_callback, GDK_KEY_f, GDK_CONTROL_MASK);

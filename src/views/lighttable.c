@@ -340,16 +340,6 @@ static void zoom_min_callback(dt_action_t *action)
   dt_view_lighttable_set_zoom(darktable.view_manager, DT_LIGHTTABLE_MAX_ZOOM);
 }
 
-static void _lighttable_undo_callback(dt_action_t *action)
-{
-  dt_undo_do_undo(darktable.undo, DT_UNDO_LIGHTTABLE);
-}
-
-static void _lighttable_redo_callback(dt_action_t *action)
-{
-  dt_undo_do_redo(darktable.undo, DT_UNDO_LIGHTTABLE);
-}
-
 static void _accel_reset_first_offset(dt_action_t *action)
 {
   dt_thumbtable_reset_first_offset(dt_ui_thumbtable(darktable.gui->ui));
@@ -418,10 +408,6 @@ void gui_init(dt_view_t *self)
   dt_action_register(DT_ACTION(self), N_("reset first image offset"), _accel_reset_first_offset, 0, 0);
   dt_action_register(DT_ACTION(self), N_("select toggle image"), _accel_select_toggle, GDK_KEY_space, 0);
   dt_action_register(DT_ACTION(self), N_("open single image in darkroom"), _accel_open_single, GDK_KEY_Return, 0);
-
-  // undo/redo
-  dt_action_register(DT_ACTION(self), N_("undo"), _lighttable_undo_callback, GDK_KEY_z, GDK_CONTROL_MASK);
-  dt_action_register(DT_ACTION(self), N_("redo"), _lighttable_redo_callback, GDK_KEY_y, GDK_CONTROL_MASK);
 
   // zoom in/out/min/max
   dt_action_register(DT_ACTION(self), N_("zoom in"), zoom_in_callback, GDK_KEY_plus, GDK_CONTROL_MASK);
