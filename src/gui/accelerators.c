@@ -3736,8 +3736,12 @@ gboolean dt_shortcut_dispatcher(GtkWidget *w, GdkEvent *event, gpointer user_dat
   if(!darktable.gui->grab_widget)
     darktable.gui->grab_widget = gtk_window_get_focus(GTK_WINDOW(darktable.gui->grab_window));
   */
-  if((event->type ==  GDK_BUTTON_PRESS || event->type ==  GDK_BUTTON_RELEASE ||
-      event->type ==  GDK_DOUBLE_BUTTON_PRESS || event->type ==  GDK_TRIPLE_BUTTON_PRESS)
+
+  // Let ALT be used by Gtk menu mnemonics. It is ugly, like the rest of this file.
+  if(event->key.state & GDK_MOD1_MASK) return FALSE;
+
+  if((event->type == GDK_BUTTON_PRESS || event->type == GDK_BUTTON_RELEASE
+      || event->type == GDK_DOUBLE_BUTTON_PRESS || event->type == GDK_TRIPLE_BUTTON_PRESS)
      && event->button.button > 7)
   {
     if(event->type == GDK_BUTTON_RELEASE)
