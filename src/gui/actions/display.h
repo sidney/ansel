@@ -373,22 +373,22 @@ void append_display(GtkWidget **menus, GList **lists, const dt_menus_t index)
   add_sub_sub_menu_entry(parent, lists, _("Left"), index, NULL,
                          panel_left_callback, panel_left_checked_callback, NULL, NULL);
   ac = dt_action_define(pnl, NULL, N_("Toggle left panel visibility"), get_last_widget(lists), NULL);
-  dt_action_register(ac, NULL, panel_left_callback, GDK_KEY_L, GDK_CONTROL_MASK | GDK_SHIFT_MASK);
+  dt_action_register(ac, NULL, panel_left_callback, GDK_KEY_l, GDK_CONTROL_MASK | GDK_SHIFT_MASK);
 
   add_sub_sub_menu_entry(parent, lists, _("Right"), index, NULL,
                          panel_right_callback, panel_right_checked_callback, NULL, NULL);
   ac = dt_action_define(pnl, NULL, N_("Toggle right panel visibility"), get_last_widget(lists), NULL);
-  dt_action_register(ac, NULL, panel_right_callback, GDK_KEY_R, GDK_CONTROL_MASK | GDK_SHIFT_MASK);
+  dt_action_register(ac, NULL, panel_right_callback, GDK_KEY_r, GDK_CONTROL_MASK | GDK_SHIFT_MASK);
 
   add_sub_sub_menu_entry(parent, lists, _("Top"), index, NULL,
                          panel_top_callback, panel_top_checked_callback, NULL, NULL);
   ac = dt_action_define(pnl, NULL, N_("Toggle top bar visibility"), get_last_widget(lists), NULL);
-  dt_action_register(ac, NULL, panel_top_callback, GDK_KEY_T, GDK_CONTROL_MASK | GDK_SHIFT_MASK);
+  dt_action_register(ac, NULL, panel_top_callback, GDK_KEY_t, GDK_CONTROL_MASK | GDK_SHIFT_MASK);
 
   add_sub_sub_menu_entry(parent, lists, _("Bottom"), index, NULL,
                          panel_bottom_callback, panel_bottom_checked_callback, NULL, NULL);
   ac = dt_action_define(pnl, NULL, N_("Toggle bottom bar visibility"), get_last_widget(lists), NULL);
-  dt_action_register(ac, NULL, panel_bottom_callback, GDK_KEY_B, GDK_CONTROL_MASK | GDK_SHIFT_MASK);
+  dt_action_register(ac, NULL, panel_bottom_callback, GDK_KEY_b, GDK_CONTROL_MASK | GDK_SHIFT_MASK);
 
   add_sub_sub_menu_entry(parent, lists, _("Filmstrip"), index, NULL,
                          filmstrip_callback, filmstrip_checked_callback, NULL, filmstrip_sensitive_callback);
