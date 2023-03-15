@@ -1,6 +1,7 @@
 
 #include "common/darktable.h"
 #include "common/debug.h"
+#include "common/collection.h"
 #include "control/conf.h"
 #include "develop/develop.h"
 #include "gui/gtk.h"
