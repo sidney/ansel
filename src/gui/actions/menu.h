@@ -213,3 +213,9 @@ GtkWidget * get_last_widget(GList **list)
   }
   return w;
 }
+
+gboolean sensitive_if_selected()
+{
+  // Can be used to set menu items sensitivity when image(s) is/are selected
+  return dt_collection_get_selected_count(darktable.collection) > 0;
+}
