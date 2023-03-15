@@ -777,6 +777,36 @@ gboolean dt_shortcut_tooltip_callback(GtkWidget *widget, gint x, gint y, gboolea
   return strcmp(widget_name, "iop_description") ? FALSE : TRUE;
 }
 
+gboolean get_accel_from_widget(GtkWidget *widget, guint *key_val, GdkModifierType *mods)
+{
+  // Try to reconnect stupid "next-gen" accels to Gtk standard keyboard accels
+  // Return TRUE if we found something compatible.
+
+  dt_action_t *action = g_hash_table_lookup(darktable.control->widgets, widget);
+  if(action == NULL) return FALSE;
+
+  // Shitty API that forces us to crawl the whole list of shortcuts to find the action match.
+  // That's because actions can be mapped to more than one shortcut, a feature that maybe 0.1 % of users needed.
+  // In cleverland, you match action and shortcut 1:1, store a reference to shortcut in a pointer
+  // inside the widget and call it a day. But in darktableland, that doesn't cost enough CPU cycles.
+  // TODO: fuuuuuuuuck me.
+  for(GSequenceIter *iter = g_sequence_get_begin_iter(darktable.control->shortcuts);
+      !g_sequence_iter_is_end(iter);
+      iter = g_sequence_iter_next(iter))
+  {
+    dt_shortcut_t *shortcut = g_sequence_get(iter);
+    if(shortcut->action == action && shortcut->key_device == DT_SHORTCUT_DEVICE_KEYBOARD_MOUSE)
+    {
+      // This should be a vanilla keyboard shortcut. Hopefully ?
+      *mods = shortcut->mods;
+      *key_val = shortcut->key;
+      return TRUE;
+    }
+  }
+
+  return FALSE;
+}
+
 static dt_view_type_flags_t _find_views(dt_action_t *action)
 {
   dt_view_type_flags_t vws = 0;

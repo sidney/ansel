@@ -189,6 +189,10 @@ float dt_accel_get_speed_multiplier(GtkWidget *widget, guint state);
 // create a shortcutable button with ellipsized label and tooltip
 GtkWidget *dt_action_button_new(dt_lib_module_t *self, const gchar *label, gpointer callback, gpointer data, const gchar *tooltip, guint accel_key, GdkModifierType mods);
 
+// Try to reconnect stupid "next-gen" accels to Gtk standard keyboard accels
+// Return TRUE if we found something compatible.
+gboolean get_accel_from_widget(GtkWidget *widget, guint *key_val, GdkModifierType *mods);
+
 // clang-format off
 // modelines: These editor modelines have been set for all relevant files by tools/update_modelines.py
 // vim: shiftwidth=2 expandtab tabstop=2 cindent

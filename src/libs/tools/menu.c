@@ -63,16 +63,12 @@ void gui_init(dt_lib_module_t *self)
   d->menu_bar = gtk_menu_bar_new();
   gtk_widget_set_name(d->menu_bar, "menu-bar");
 
-  GtkAccelGroup* accelGroup = gtk_accel_group_new();
-  gtk_window_add_accel_group(GTK_WINDOW(dt_ui_main_window(darktable.gui->ui)), accelGroup);
-
   /* Init top-level menus */
   gchar *labels [DT_MENU_LAST] = { _("_File"), _("_Edit"), _("_Selection"), _("_Run"), _("_Display"), _("_Ateliers"), _("_Help") };
   for(int i = 0; i < DT_MENU_LAST; i++)
   {
     d->item_lists[i] = NULL;
     add_top_menu_entry(d->menu_bar, d->menus, &d->item_lists[i], i, labels[i]);
-    gtk_menu_set_accel_group(GTK_MENU(d->menus[i]), accelGroup);
   }
 
   gtk_box_pack_start(GTK_BOX(self->widget), d->menu_bar, FALSE, FALSE, 0);

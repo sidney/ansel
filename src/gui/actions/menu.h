@@ -65,8 +65,6 @@ static dt_menu_entry_t * set_menu_entry(GList **items_list, const gchar *label, 
   else
     entry->widget = gtk_menu_item_new_with_label(label);
 
-  if(shortcut) gtk_menu_item_set_accel_path(GTK_MENU_ITEM(entry->widget), shortcut);
-
   // Store arbitrary data in the GtkWidget if needed
   if(data)
     g_object_set_data(G_OBJECT(entry->widget), "custom-data", data);
@@ -105,6 +103,14 @@ void update_entry(dt_menu_entry_t *entry)
     if(entry->active_callback(entry->widget)) dt_gui_add_class(entry->widget, "menu-active");
     else dt_gui_remove_class(entry->widget, "menu-active");
   }
+
+  // Get the key shortcut if any and add it to the accel label
+  // TODO: connect refresh on "accel changed" signal, here
+  // it's refreshed at each display.
+  guint key_val;
+  GdkModifierType mods;
+  if(get_accel_from_widget(entry->widget, &key_val, &mods))
+    gtk_widget_add_accelerator(entry->widget, "activate", darktable.gui->global_accels, key_val, mods, GTK_ACCEL_VISIBLE);
 }
 
 void update_menu_entries(GtkWidget *widget, gpointer user_data)
@@ -126,6 +132,8 @@ void add_top_menu_entry(GtkWidget *menu_bar, GtkWidget **menus, GList **lists, c
 {
   // Top menus belong to menu bar : file, edit, display, etc.
   menus[index] = gtk_menu_new();
+  gtk_menu_set_accel_group(GTK_MENU(menus[index]), darktable.gui->global_accels);
+
   GtkWidget *menu_label = gtk_menu_item_new_with_mnemonic(label);
   gtk_menu_item_set_submenu(GTK_MENU_ITEM(menu_label), menus[index]);
   gtk_menu_shell_append(GTK_MENU_SHELL(menu_bar), menu_label);
@@ -137,6 +145,8 @@ void add_top_submenu_entry(GtkWidget **menus, GList **lists, const gchar *label,
 {
   // Special submenus entries that only open a sub-submenu
   GtkWidget *submenu = gtk_menu_new();
+  gtk_menu_set_accel_group(GTK_MENU(submenu), darktable.gui->global_accels);
+
   dt_menu_entry_t *entry = set_menu_entry(lists, label, NULL, index, NULL, NULL, NULL, NULL, NULL);
   gtk_menu_item_set_submenu(GTK_MENU_ITEM(entry->widget), submenu);
   gtk_menu_shell_append(GTK_MENU_SHELL(menus[index]), entry->widget);

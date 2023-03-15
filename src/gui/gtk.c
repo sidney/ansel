@@ -706,6 +706,9 @@ int dt_gui_gtk_init(dt_gui_gtk_t *gui)
   // Initializing widgets
   _init_widgets(gui);
 
+  // Init global accels
+  gui->global_accels = gtk_accel_group_new();
+
   //init overlay colors
   dt_guides_set_overlay_colors();
 
