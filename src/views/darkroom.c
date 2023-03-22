@@ -160,11 +160,7 @@ static cairo_status_t _write_snapshot_data(void *closure, const unsigned char *d
 
 static dt_darkroom_layout_t _lib_darkroom_get_layout(dt_view_t *self)
 {
-  dt_develop_t *dev = (dt_develop_t *)self->data;
-  if(dev->iso_12646.enabled)
-    return DT_DARKROOM_LAYOUT_EDITING;
-  else
-    return DT_DARKROOM_LAYOUT_EDITING;
+  return DT_DARKROOM_LAYOUT_EDITING;
 }
 
 static cairo_filter_t _get_filtering_level(dt_develop_t *dev, dt_dev_zoom_t zoom, int closeup)

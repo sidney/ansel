@@ -564,6 +564,11 @@ void dt_dev_configure(dt_develop_t *dev, int wd, int ht)
   const int32_t tb = dev->border_size;
   wd -= 2*tb;
   ht -= 2*tb;
+
+  // Ensure we have non-zero image surface
+  wd = MAX(wd, 32);
+  ht = MAX(ht, 32);
+
   if(dev->width != wd || dev->height != ht)
   {
     dev->width = wd;
