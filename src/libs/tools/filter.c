@@ -410,7 +410,7 @@ void gui_init(dt_lib_module_t *self)
   gtk_widget_set_halign(self->widget, GTK_ALIGN_START);
   gtk_widget_set_valign(self->widget, GTK_ALIGN_CENTER);
 
-  GtkWidget *label = gtk_label_new(C_("quickfilter", "View"));
+  GtkWidget *label = gtk_label_new(C_("quickfilter", "Filter"));
   gtk_box_pack_start(GTK_BOX(self->widget), label, TRUE, TRUE, 0);
   dt_gui_add_class(label, "quickfilter-label");
 
@@ -481,7 +481,7 @@ void gui_init(dt_lib_module_t *self)
   hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
   gtk_box_pack_start(GTK_BOX(self->widget), hbox, TRUE, TRUE, 0);
 
-  label = gtk_label_new(C_("quickfilter", "Sort"));
+  label = gtk_label_new(C_("quickfilter", "Sort by"));
   gtk_box_pack_start(GTK_BOX(hbox), label, TRUE, TRUE, 0);
   dt_gui_add_class(label, "quickfilter-label");
 
@@ -517,6 +517,7 @@ void gui_init(dt_lib_module_t *self)
   dt_gui_add_class(label, "quickfilter-label");
 
   d->text = gtk_search_entry_new();
+  dt_gui_add_class(GTK_WIDGET(d->text), "menu-text-entry");
   char *text = _decode_text_filter(dt_collection_get_text_filter(darktable.collection));
   gtk_entry_set_text(GTK_ENTRY(d->text), text);
   gtk_entry_set_placeholder_text(GTK_ENTRY(d->text), _("Search an image…"));
@@ -539,7 +540,6 @@ void gui_init(dt_lib_module_t *self)
   gtk_box_pack_end(GTK_BOX(hbox), d->text, TRUE, TRUE, 0);
   gtk_widget_set_name(hbox, "quickfilter-search-box");
   dt_gui_add_class(hbox, "quick_filter_box");
-
   dt_action_register(DT_ACTION(self), N_("search images"), _focus_filter_search, GDK_KEY_f, GDK_CONTROL_MASK);
 
   /* initialize proxy */

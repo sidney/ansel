@@ -305,6 +305,48 @@ static gboolean intent_checked_callback(GtkWidget *widget)
   return darktable.color_profiles->display_intent == string_to_color_intent(get_custom_data(widget));
 }
 
+static void always_hide_overlays_callback()
+{
+  dt_thumbtable_set_overlays_mode(dt_ui_thumbtable(darktable.gui->ui), DT_THUMBNAIL_OVERLAYS_NONE);
+}
+
+static gboolean always_hide_overlays_checked_callback(GtkWidget *widget)
+{
+  return dt_conf_get_int("plugins/lighttable/overlays/global") == DT_THUMBNAIL_OVERLAYS_NONE;
+}
+
+static void hover_overlays_callback()
+{
+  dt_thumbtable_set_overlays_mode(dt_ui_thumbtable(darktable.gui->ui), DT_THUMBNAIL_OVERLAYS_HOVER_NORMAL);
+}
+
+static gboolean hover_overlays_checked_callback(GtkWidget *widget)
+{
+  return dt_conf_get_int("plugins/lighttable/overlays/global") == DT_THUMBNAIL_OVERLAYS_HOVER_NORMAL;
+}
+
+static void always_show_overlays_callback()
+{
+  dt_thumbtable_set_overlays_mode(dt_ui_thumbtable(darktable.gui->ui), DT_THUMBNAIL_OVERLAYS_ALWAYS_NORMAL);
+}
+
+static gboolean always_show_overlays_checked_callback(GtkWidget *widget)
+{
+  return dt_conf_get_int("plugins/lighttable/overlays/global") == DT_THUMBNAIL_OVERLAYS_ALWAYS_NORMAL;
+}
+
+static void collapse_grouped_callback()
+{
+  darktable.gui->grouping = !darktable.gui->grouping;
+  dt_conf_set_bool("ui_last/grouping", darktable.gui->grouping);
+  darktable.gui->expanded_group_id = -1;
+  dt_collection_update_query(darktable.collection, DT_COLLECTION_CHANGE_RELOAD, DT_COLLECTION_PROP_GROUPING, NULL);
+}
+
+static gboolean collapse_grouped_checked_callback()
+{
+  return darktable.gui->grouping;
+}
 
 void append_display(GtkWidget **menus, GList **lists, const dt_menus_t index)
 {
@@ -327,7 +369,7 @@ void append_display(GtkWidget **menus, GList **lists, const dt_menus_t index)
   }
 
   // Parent sub-menu profile intent
-  add_top_submenu_entry(menus, lists, _("Color intent"), index);
+  add_top_submenu_entry(menus, lists, _("Monitor color intent"), index);
   parent = get_last_widget(lists);
 
   const char *intents[4] = { _("Perceptual"), _("Relative colorimetric"), C_("rendering intent", "Saturation"),
@@ -372,10 +414,36 @@ void append_display(GtkWidget **menus, GList **lists, const dt_menus_t index)
 
   add_menu_separator(menus[index]);
 
+  // Lighttable & Filmstrip options
+  add_top_submenu_entry(menus, lists, _("Thumbnail overlays"), index);
+  parent = get_last_widget(lists);
+
+  add_sub_sub_menu_entry(parent, lists, _("Always hide"), index, NULL,
+                         always_hide_overlays_callback, always_hide_overlays_checked_callback, NULL, NULL);
+  ac = dt_action_define(pnl, NULL, N_("Always hide thumbnail overlays"), get_last_widget(lists), NULL);
+  dt_action_register(ac, NULL, always_hide_overlays_callback, 0, 0);
+
+  add_sub_sub_menu_entry(parent, lists, _("Show on hover"), index, NULL,
+                         hover_overlays_callback, hover_overlays_checked_callback, NULL, NULL);
+  ac = dt_action_define(pnl, NULL, N_("Show thumbnail overlays on hover"), get_last_widget(lists), NULL);
+  dt_action_register(ac, NULL, hover_overlays_callback, 0, 0);
+
+  add_sub_sub_menu_entry(parent, lists, _("Always show"), index, NULL,
+                         always_show_overlays_callback, always_show_overlays_checked_callback, NULL, NULL);
+  ac = dt_action_define(pnl, NULL, N_("Always show thumbnail overlays"), get_last_widget(lists), NULL);
+  dt_action_register(ac, NULL, always_show_overlays_callback, 0, 0);
+
+  add_sub_menu_entry(menus, lists, _("Collapse grouped images"), index, NULL, collapse_grouped_callback, collapse_grouped_checked_callback, NULL, NULL);
+  ac = dt_action_define(pnl, NULL, N_("Collabse grouped images"), get_last_widget(lists), NULL);
+  dt_action_register(ac, NULL, collapse_grouped_callback, 0, 0);
+
+  add_menu_separator(menus[index]);
+
   add_sub_menu_entry(menus, lists, _("Full screen"), index, NULL, full_screen_callback,
                      full_screen_checked_callback, NULL, NULL);
 
   dt_action_register(&darktable.control->actions_global, N_("Fullscreen window"), full_screen_callback, GDK_KEY_F11, 0);
+
 
   // specific top/bottom toggles
   dt_action_register(pnl, N_("Toggle all panels visibility"), _toggle_side_borders_accel_callback, GDK_KEY_Tab, 0);
