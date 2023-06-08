@@ -3,6 +3,8 @@
 #include "gui/window_manager.h"
 #include "dtgtk/sidepanel.h"
 
+#define WINDOW_DEBUG 0
+
 
 const char *_ui_panel_config_names[]
     = { "header", "toolbar_top", "toolbar_bottom", "left", "right", "bottom" };
@@ -86,25 +88,41 @@ static void refresh_manager_sizes(dt_ui_t *ui)
 
   // Display in which the current window fits
   gdk_monitor_get_geometry(monitor, &manager->viewport);
-  // fprintf(stdout, "viewport: %i x %i\n", manager->viewport.width, manager->viewport.height);
+
+#if WINDOW_DEBUG
+  fprintf(stdout, "viewport: %i x %i\n", manager->viewport.width, manager->viewport.height);
+#endif
 
   // Main window
   gtk_window_get_size(GTK_WINDOW(window), &manager->window.width, &manager->window.height);
-  // fprintf(stdout, "main window: %i x %i\n", manager->window.width, manager->window.height);
+
+#if WINDOW_DEBUG
+  fprintf(stdout, "main window: %i x %i\n", manager->window.width, manager->window.height);
+#endif
 
   gtk_window_get_position(GTK_WINDOW(window), &manager->window.x, &manager->window.y);
-  // fprintf(stdout, "position : %i, %i\n", manager->window.x, manager->window.y);
+
+#if WINDOW_DEBUG
+  fprintf(stdout, "position : %i, %i\n", manager->window.x, manager->window.y);
+#endif
 
   // Panels (sidebars, menubar, toolbars, filmstrip)
   for(int i = 0; i < DT_UI_PANEL_SIZE; i++)
   {
     gtk_widget_get_allocation(GTK_WIDGET(ui->panels[i]), &manager->panels[i]);
-    // fprintf(stdout, "panel %i : %i x %i\n", i, manager->panels[i].width, manager->panels[i].height);
+
+#if WINDOW_DEBUG
+    fprintf(stdout, "panel %i : %i x %i\n", i, manager->panels[i].width, manager->panels[i].height);
+#endif
   }
 
   // Center view
   gtk_widget_get_allocation(dt_ui_center(ui), &manager->center);
-  //fprintf(stdout, "center: %i x %i\n", manager->center.width, manager->center.height);
+
+#if WINDOW_DEBUG
+  fprintf(stdout, "center: %i x %i\n", manager->center.width, manager->center.height);
+#endif
+
 }
 
 /*
@@ -122,10 +140,13 @@ static void sanitize_manager_size(dt_ui_t *ui)
 {
   dt_window_manager_t *manager = &ui->manager;
 
-  // Ensure window fits in viewport taking top-left corner position into account
-  manager->window.width = MIN(manager->window.width, manager->viewport.width - MAX(manager->window.x, 0));
-  manager->window.height = MIN(manager->window.height, manager->viewport.height - MAX(manager->window.y, 0));
+  // Ensure window fits in viewport NOT taking top-left corner position into account
+  manager->window.width = MIN(manager->window.width, manager->viewport.width);
+  manager->window.height = MIN(manager->window.height, manager->viewport.height);
+
+#if WINDOW_DEBUG
   fprintf(stdout, "new window size: %i x %i\n", manager->window.width, manager->window.height);
+#endif
   // Warning : the window.height doesn't account for the titlebar/decoration set by desktop manager.
   // The code above assumes zero titlebar height because Gtk doesn't have a way of retrieving this info.
   // Setting window.height to viewport.height doesn't guarantee it fits.
