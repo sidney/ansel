@@ -59,7 +59,8 @@ void gui_init(dt_lib_module_t *self)
   self->data = (void *)d;
 
   /* Init container widget */
-  self->widget = gtk_box_new(FALSE, 0);
+  self->widget = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
+  gtk_widget_set_halign(self->widget, GTK_ALIGN_START);
   d->menu_bar = gtk_menu_bar_new();
   gtk_widget_set_name(d->menu_bar, "menu-bar");
 
