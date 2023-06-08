@@ -31,7 +31,7 @@ const char **views(dt_lib_module_t *self)
 
 uint32_t container(dt_lib_module_t *self)
 {
-  return DT_UI_CONTAINER_PANEL_CENTER_TOP_LEFT;
+  return DT_UI_CONTAINER_PANEL_TOP_SECOND_ROW;
 }
 
 int expandable(dt_lib_module_t *self)
@@ -101,6 +101,8 @@ void gui_init(dt_lib_module_t *self)
   dt_lib_tool_mask_t *d = (dt_lib_tool_mask_t *)g_malloc0(sizeof(dt_lib_tool_mask_t));
   self->data = (void *)d;
   self->widget = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
+  gtk_widget_set_halign(self->widget, GTK_ALIGN_START);
+  gtk_widget_set_valign(self->widget, GTK_ALIGN_CENTER);
   gtk_widget_set_name(self->widget, "mask-toolbar");
 
   d->opacity = dt_bauhaus_slider_new_with_range(NULL, 0., 1., 0.01, 1., 2);

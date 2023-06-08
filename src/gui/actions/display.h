@@ -3,6 +3,7 @@
 #include "gui/actions/menu.h"
 #include "gui/gtk.h"
 #include "gui/accelerators.h"
+#include "gui/window_manager.h"
 
 #include <gtk/gtk.h>
 
@@ -36,41 +37,15 @@ static void full_screen_callback()
 }
 
 /** SIDE PANELS COLLAPSE **/
-const char *_ui_panel_config_names[]
-    = { "header", "toolbar_top", "toolbar_bottom", "left", "right", "bottom" };
-
-static gchar *_panels_get_view_path(char *suffix)
-{
-  if(!darktable.view_manager) return NULL;
-  const dt_view_t *cv = dt_view_manager_get_current_view(darktable.view_manager);
-  if(!cv) return NULL;
-  // in lighttable, we store panels states per layout
-  char lay[32] = "";
-
-  if(!strcmp(cv->module_name, "lighttable"))
-    g_snprintf(lay, sizeof(lay), "%d/", 0);
-  else if(!strcmp(cv->module_name, "darkroom"))
-    g_snprintf(lay, sizeof(lay), "%d/", dt_view_darkroom_get_layout(darktable.view_manager));
-
-  return g_strdup_printf("%s/ui/%s%s", cv->module_name, lay, suffix);
-}
-
-static gchar *_panels_get_panel_path(dt_ui_panel_t panel, char *suffix)
-{
-  gchar *v = _panels_get_view_path("");
-  if(!v) return NULL;
-  return dt_util_dstrcat(v, "%s%s", _ui_panel_config_names[panel], suffix);
-}
-
 static gboolean _panel_is_visible(dt_ui_panel_t panel)
 {
-  gchar *key = _panels_get_view_path("panel_collaps_state");
+  gchar *key = panels_get_view_path("panel_collaps_state");
   if(dt_conf_get_int(key))
   {
     g_free(key);
     return FALSE;
   }
-  key = _panels_get_panel_path(panel, "_visible");
+  key = panels_get_panel_path(panel, "_visible");
   const gboolean ret = dt_conf_get_bool(key);
   g_free(key);
   return ret;
@@ -87,7 +62,7 @@ static void _toggle_side_borders_accel_callback(dt_action_t *action)
 
 void dt_ui_toggle_panels_visibility(struct dt_ui_t *ui)
 {
-  gchar *key = _panels_get_view_path("panel_collaps_state");
+  gchar *key = panels_get_view_path("panel_collaps_state");
   const uint32_t state = dt_conf_get_int(key);
 
   if(state) dt_conf_set_int(key, 0);
@@ -123,7 +98,7 @@ void dt_ui_panel_show(dt_ui_t *ui, const dt_ui_panel_t p, gboolean show, gboolea
     if(show)
     {
       // we reset the collaps_panel value if we show a panel
-      key = _panels_get_view_path("panel_collaps_state");
+      key = panels_get_view_path("panel_collaps_state");
       if(dt_conf_get_int(key) != 0)
       {
         dt_conf_set_int(key, 0);
@@ -131,14 +106,14 @@ void dt_ui_panel_show(dt_ui_t *ui, const dt_ui_panel_t p, gboolean show, gboolea
         // we ensure that all panels state are recorded as hidden
         for(int k = 0; k < DT_UI_PANEL_SIZE; k++)
         {
-          key = _panels_get_panel_path(k, "_visible");
+          key = panels_get_panel_path(k, "_visible");
           dt_conf_set_bool(key, FALSE);
           g_free(key);
         }
       }
       else
         g_free(key);
-      key = _panels_get_panel_path(p, "_visible");
+      key = panels_get_panel_path(p, "_visible");
       dt_conf_set_bool(key, show);
       g_free(key);
     }
@@ -158,13 +133,13 @@ void dt_ui_panel_show(dt_ui_t *ui, const dt_ui_panel_t p, gboolean show, gboolea
 
       if(collapse)
       {
-        key = _panels_get_view_path("panel_collaps_state");
+        key = panels_get_view_path("panel_collaps_state");
         dt_conf_set_int(key, 1);
         g_free(key);
       }
       else
       {
-        key = _panels_get_panel_path(p, "_visible");
+        key = panels_get_panel_path(p, "_visible");
         dt_conf_set_bool(key, show);
         g_free(key);
       }
