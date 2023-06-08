@@ -1734,7 +1734,7 @@ GtkWidget *dt_ui_scroll_wrap(GtkWidget *w, gint min_size, char *config_str)
   g_signal_connect(G_OBJECT(w), "draw", G_CALLBACK(_scroll_wrap_resize), config_str);
   gtk_container_add(GTK_CONTAINER(sw), w);
 
-  return sw;
+  return GTK_WIDGET(sw);
 }
 
 gboolean dt_gui_container_has_children(GtkContainer *container)
@@ -1926,7 +1926,7 @@ void dt_gui_new_collapsible_section(dt_gui_collapsible_section_t *cs,
   gtk_box_pack_start(GTK_BOX(destdisp_head), cs->toggle, FALSE, FALSE, 0);
 
   cs->expander = dtgtk_expander_new(destdisp_head, GTK_WIDGET(cs->container));
-  gtk_box_pack_end(cs->parent, cs->expander, FALSE, FALSE, 0);
+  gtk_box_pack_end(GTK_BOX(cs->parent), cs->expander, FALSE, FALSE, 0);
   dtgtk_expander_set_expanded(DTGTK_EXPANDER(cs->expander), expanded);
   gtk_widget_set_name(cs->expander, "collapse-block");
 

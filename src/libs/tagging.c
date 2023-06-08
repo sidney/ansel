@@ -3103,7 +3103,7 @@ void gui_init(dt_lib_module_t *self)
 #define NEW_TOGGLE_BUTTON(paint, callback, tooltip, action)                  \
   button = dtgtk_togglebutton_new(paint, 0, NULL);                           \
   gtk_widget_set_tooltip_text(button, tooltip);                              \
-  gtk_box_pack_end(hbox, button, FALSE, TRUE, 0);                            \
+  gtk_box_pack_end(GTK_BOX(hbox), button, FALSE, TRUE, 0);                   \
   g_signal_connect(G_OBJECT(button), "clicked", G_CALLBACK(callback), self); \
   dt_action_define(toggle, NULL, action, button, &dt_action_def_toggle);
 
@@ -3140,7 +3140,7 @@ void gui_init(dt_lib_module_t *self)
 
   button = dtgtk_button_new(dtgtk_cairo_paint_multiply_small, 0, NULL);
   gtk_widget_set_tooltip_text(button, _("clear entry"));
-  gtk_box_pack_end(hbox, button, FALSE, TRUE, 0);
+  gtk_box_pack_end(GTK_BOX(hbox), button, FALSE, TRUE, 0);
   g_signal_connect(G_OBJECT(button), "clicked", G_CALLBACK(_clear_entry_button_callback), (gpointer)self);
   gtk_box_pack_start(box, GTK_WIDGET(hbox), FALSE, TRUE, 0);
   d->clear_button = button;
