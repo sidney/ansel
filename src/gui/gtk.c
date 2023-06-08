@@ -97,37 +97,6 @@ void dt_gui_remove_class(GtkWidget *widget, const gchar *class_name)
  */
 static void _init_widgets(dt_gui_gtk_t *gui);
 
-static inline void _update_focus_peaking_button()
-{
-  // read focus peaking global state and update toggle button accordingly
-  dt_pthread_mutex_lock(&darktable.gui->mutex);
-  const gboolean state = darktable.gui->show_focus_peaking;
-  dt_pthread_mutex_unlock(&darktable.gui->mutex);
-
-  gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(darktable.gui->focus_peaking_button), state);
-}
-
-static void _focuspeaking_switch_button_callback(GtkWidget *button, gpointer user_data)
-{
-  // button method
-  dt_pthread_mutex_lock(&darktable.gui->mutex);
-  const gboolean state_memory = darktable.gui->show_focus_peaking;
-  dt_pthread_mutex_unlock(&darktable.gui->mutex);
-
-  const gboolean state_new = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(button));
-
-  if(state_memory == state_new) return; // nothing to change, bypass
-
-  dt_pthread_mutex_lock(&darktable.gui->mutex);
-  darktable.gui->show_focus_peaking = state_new;
-  dt_pthread_mutex_unlock(&darktable.gui->mutex);
-
-  gtk_widget_queue_draw(button);
-
-  // we inform that all thumbnails need to be redraw
-  DT_DEBUG_CONTROL_SIGNAL_RAISE(darktable.signals, DT_SIGNAL_DEVELOP_MIPMAP_UPDATED, -1);
-}
-
 gboolean dt_gui_ignore_scroll(GdkEventScroll *event)
 {
   // TODO: records which GtkScrollWindow is capturing scroll events,
@@ -403,7 +372,6 @@ int dt_gui_gtk_write_config()
                    (gdk_window_get_state(gtk_widget_get_window(widget)) & GDK_WINDOW_STATE_MAXIMIZED));
   dt_conf_set_bool("ui_last/fullscreen",
                    (gdk_window_get_state(gtk_widget_get_window(widget)) & GDK_WINDOW_STATE_FULLSCREEN));
-  dt_conf_set_bool("ui/show_focus_peaking", darktable.gui->show_focus_peaking);
 
   dt_pthread_mutex_unlock(&darktable.gui->mutex);
 
@@ -810,18 +778,6 @@ int dt_gui_gtk_init(dt_gui_gtk_t *gui)
   // finally set the cursor to be the default.
   // for some reason this is needed on some systems to pick up the correctly themed cursor
   dt_control_change_cursor(GDK_LEFT_PTR);
-
-  // create focus-peaking button
-  darktable.gui->focus_peaking_button = dtgtk_togglebutton_new(dtgtk_cairo_paint_focus_peaking, 0, NULL);
-  gtk_widget_set_tooltip_text(darktable.gui->focus_peaking_button, _("toggle focus-peaking mode"));
-  g_signal_connect(G_OBJECT(darktable.gui->focus_peaking_button), "clicked", G_CALLBACK(_focuspeaking_switch_button_callback), NULL);
-  dt_gui_add_help_link(darktable.gui->focus_peaking_button, dt_get_help_url("focuspeaking"));
-  _update_focus_peaking_button();
-
-  // toggle focus peaking everywhere
-  ac = dt_action_define(&darktable.control->actions_global, NULL, N_("toggle focus peaking"),
-                        darktable.gui->focus_peaking_button, &dt_action_def_toggle);
-  dt_shortcut_register(ac, 0, 0, GDK_KEY_p, GDK_CONTROL_MASK | GDK_SHIFT_MASK);
 
   return 0;
 }

@@ -348,6 +348,18 @@ static gboolean collapse_grouped_checked_callback()
   return darktable.gui->grouping;
 }
 
+static void focus_peaking_callback()
+{
+  darktable.gui->show_focus_peaking = !darktable.gui->show_focus_peaking;
+  // Redraw all thumbnails
+  DT_DEBUG_CONTROL_SIGNAL_RAISE(darktable.signals, DT_SIGNAL_DEVELOP_MIPMAP_UPDATED, -1);
+}
+
+static gboolean focus_peaking_checked_callback()
+{
+  return darktable.gui->show_focus_peaking;
+}
+
 void append_display(GtkWidget **menus, GList **lists, const dt_menus_t index)
 {
   dt_action_t *pnl = dt_action_section(&darktable.control->actions_global, N_("Display"));
@@ -434,8 +446,12 @@ void append_display(GtkWidget **menus, GList **lists, const dt_menus_t index)
   dt_action_register(ac, NULL, always_show_overlays_callback, 0, 0);
 
   add_sub_menu_entry(menus, lists, _("Collapse grouped images"), index, NULL, collapse_grouped_callback, collapse_grouped_checked_callback, NULL, NULL);
-  ac = dt_action_define(pnl, NULL, N_("Collabse grouped images"), get_last_widget(lists), NULL);
+  ac = dt_action_define(pnl, NULL, N_("Collapse grouped images"), get_last_widget(lists), NULL);
   dt_action_register(ac, NULL, collapse_grouped_callback, 0, 0);
+
+  add_sub_menu_entry(menus, lists, _("Overlay focus peaking"), index, NULL, focus_peaking_callback, focus_peaking_checked_callback, NULL, NULL);
+  ac = dt_action_define(pnl, NULL, N_("Overlay focus peaking"), get_last_widget(lists), NULL);
+  dt_action_register(ac, NULL, focus_peaking_callback, GDK_KEY_p, GDK_CONTROL_MASK | GDK_SHIFT_MASK);
 
   add_menu_separator(menus[index]);
 
