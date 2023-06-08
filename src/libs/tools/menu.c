@@ -50,7 +50,7 @@ int expandable(dt_lib_module_t *self)
 
 int position()
 {
-  return 1;
+  return 2;
 }
 
 void gui_init(dt_lib_module_t *self)
