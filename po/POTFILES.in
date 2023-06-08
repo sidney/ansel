@@ -314,7 +314,6 @@ src/libs/recentcollect.c
 src/libs/snapshots.c
 src/libs/styles.c
 src/libs/tagging.c
-src/libs/tools/battery_indicator.c
 src/libs/tools/colorlabels.c
 src/libs/tools/filmstrip.c
 src/libs/tools/filter.c
