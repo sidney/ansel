@@ -457,7 +457,7 @@ if [ $DO_INSTALL ] ; then
 	$SUDO ln -s $INSTALL_PREFIX/bin/ansel /usr/local/bin/ansel
 
 	if [ -f "/usr/share/applications/ansel.desktop" ]; then
-		$SUDO /usr/share/applications/ansel.desktop
+		$SUDO rm /usr/share/applications/ansel.desktop
 	fi
 
 	$SUDO ln -s $INSTALL_PREFIX/share/applications/photos.ansel.app.desktop /usr/share/applications/ansel.desktop
