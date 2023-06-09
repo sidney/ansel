@@ -43,7 +43,7 @@ chmod +x linuxdeploy-x86_64.AppImage linuxdeploy-plugin-gtk.sh
 export DEPLOY_GTK_VERSION="3"
 export VERSION=$(sh ../tools/get_git_version_string.sh)
 
-export UPDATE_INFORMATION="gh-releases-zsync|aurelienpierreeng|ansel|0.0.0|Ansel-*-x86_64.AppImage.zsync"
+export UPDATE_INFORMATION="gh-releases-zsync|aurelienpierreeng|ansel|v0.0.0|Ansel-*-x86_64.AppImage.zsync"
 
 # Our plugins link against libansel, it's not in system, so tell linuxdeploy
 # where to find it. Don't use LD_PRELOAD here, linuxdeploy cannot see preloaded
