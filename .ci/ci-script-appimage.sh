@@ -51,4 +51,14 @@ export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:../AppDir/usr/lib64/ansel/"
 # libraries in this dir, but don't copy those libraries. On the contrary,
 # `--library` will copy both libraries and their dependencies, which is not what
 # we want, we already installed our plugins.
-./linuxdeploy-x86_64.AppImage --appdir ../AppDir --plugin gtk --deploy-deps-only ../AppDir/usr/lib64/ansel/plugins --deploy-deps-only ../AppDir/usr/lib64/ansel/views --output appimage
+# `--depoly-deps-only` apparently doesn't recurse in subfolders, everything
+# needs to be declared.
+./linuxdeploy-x86_64.AppImage \
+  --appdir ../AppDir \
+  --plugin gtk \
+  --deploy-deps-only ../AppDir/usr/lib64/ansel/views \
+  --deploy-deps-only ../AppDir/usr/lib64/ansel/plugins \
+  --deploy-deps-only ../AppDir/usr/lib64/ansel/plugins/imageio/format \
+  --deploy-deps-only ../AppDir/usr/lib64/ansel/plugins/imageio/storage \
+  --deploy-deps-only ../AppDir/usr/lib64/ansel/plugins/lighttable \
+  --output appimage
