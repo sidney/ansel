@@ -335,7 +335,7 @@ fi
 # Generic package or customized build ?
 # ---------------------------------------------------------------------------
 
-if [$BUILD_PACKAGE]
+if [[ $BUILD_PACKAGE == 1 ]]
 then
 	CMAKE_MORE_OPTIONS="${CMAKE_MORE_OPTIONS} -DBINARY_PACKAGE_BUILD=ON"
 else
