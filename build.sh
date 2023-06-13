@@ -462,3 +462,6 @@ if [ $DO_INSTALL ] ; then
 
 	$SUDO ln -s $INSTALL_PREFIX/share/applications/photos.ansel.app.desktop /usr/share/applications/ansel.desktop
 fi
+
+# update Lensfun
+lensfun-update-data
