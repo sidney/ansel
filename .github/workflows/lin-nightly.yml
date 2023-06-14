@@ -154,7 +154,7 @@ jobs:
           -DAOM_TARGET_CPU=generic \
           -DCMAKE_BUILD_TYPE=Release \
           -DBINARY_PACKAGE_BUILD=1 \
-          -DCMAKE_INSTALL_PREFIX=/usr \
+          -DCMAKE_INSTALL_PREFIX=/usr
           sudo ninja -C build install
           cd ..
       # This is needed on Ubuntu 20.04, which has no libavif-dev package
