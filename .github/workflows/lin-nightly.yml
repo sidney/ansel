@@ -132,7 +132,7 @@ jobs:
           cd exiv2-src
           cmake -B build -G Ninja \
           -DCMAKE_INSTALL_PREFIX=/usr \
-          -DEXIV2_ENABLE_VIDEO=ON \
+          -DEXIV2_ENABLE_VIDEO=OFF \
           -DEXIV2_ENABLE_NLS=ON \
           -DEXIV2_ENABLE_XMP=ON \
           -DEXIV2_ENABLE_CURL=ON \
@@ -148,7 +148,8 @@ jobs:
           cd aom
           cmake -B build -G Ninja \
           -DENABLE_DOCS=OFF \
-          -DBUILD_SHARED_LIBS=ON
+          -DBUILD_SHARED_LIBS=ON \
+          -DAOM_TARGET_CPU=generic
           sudo ninja -C build install
           cd ..
       # This is needed on Ubuntu 20.04, which has no libavif-dev package
