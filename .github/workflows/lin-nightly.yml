@@ -149,7 +149,11 @@ jobs:
           cmake -B build -G Ninja \
           -DENABLE_DOCS=OFF \
           -DBUILD_SHARED_LIBS=ON \
-          -DAOM_TARGET_CPU=generic
+          -DAOM_TARGET_CPU=generic \
+          -DCMAKE_BUILD_TYPE=Release \
+          -DBINARY_PACKAGE_BUILD=1 \
+          -DCMAKE_INSTALL_PREFIX=/usr \
+          -DCMAKE_INSTALL_LIBDIR=lib64
           sudo ninja -C build install
           cd ..
       # This is needed on Ubuntu 20.04, which has no libavif-dev package
@@ -157,7 +161,12 @@ jobs:
         run: |
           git clone --branch v0.11.1 --depth 1 https://github.com/AOMediaCodec/libavif.git
           cd libavif
-          cmake -B build -G Ninja -DAVIF_CODEC_AOM=ON
+          cmake -B build -G Ninja \
+          -DAVIF_CODEC_AOM=ON \
+          -DCMAKE_BUILD_TYPE=Release \
+          -DBINARY_PACKAGE_BUILD=1 \
+          -DCMAKE_INSTALL_PREFIX=/usr \
+          -DCMAKE_INSTALL_LIBDIR=lib64
           sudo ninja -C build install
           cd ..
       - name: Update lensfun data for root
