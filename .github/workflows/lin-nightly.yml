@@ -149,11 +149,12 @@ jobs:
           cmake -B build -G Ninja \
           -DENABLE_DOCS=OFF \
           -DBUILD_SHARED_LIBS=ON \
+          -DENABLE_EXAMPLES=OFF \
+          -DENABLE_TESTS=OFF \
           -DAOM_TARGET_CPU=generic \
           -DCMAKE_BUILD_TYPE=Release \
           -DBINARY_PACKAGE_BUILD=1 \
           -DCMAKE_INSTALL_PREFIX=/usr \
-          -DCMAKE_INSTALL_LIBDIR=lib64
           sudo ninja -C build install
           cd ..
       # This is needed on Ubuntu 20.04, which has no libavif-dev package
@@ -165,8 +166,7 @@ jobs:
           -DAVIF_CODEC_AOM=ON \
           -DCMAKE_BUILD_TYPE=Release \
           -DBINARY_PACKAGE_BUILD=1 \
-          -DCMAKE_INSTALL_PREFIX=/usr \
-          -DCMAKE_INSTALL_LIBDIR=lib64
+          -DCMAKE_INSTALL_PREFIX=/usr
           sudo ninja -C build install
           cd ..
       - name: Update lensfun data for root
