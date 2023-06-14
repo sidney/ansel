@@ -130,7 +130,7 @@ jobs:
       - name: Manually build exiv2 dependency
         run: |
           cd exiv2-src
-          cmake -B build -GNinja \
+          cmake -B build -G Ninja \
           -DCMAKE_INSTALL_PREFIX=/usr \
           -DEXIV2_ENABLE_VIDEO=ON \
           -DEXIV2_ENABLE_NLS=ON \
@@ -139,6 +139,24 @@ jobs:
           -DEXIV2_ENABLE_WEBREADY=ON \
           -DEXIV2_ENABLE_BMFF=ON
           ninja -C build
+          sudo ninja -C build install
+          cd ..
+      # This is needed for the next step
+      - name: Install OAM AVI codec for libavif
+        run: |
+          git clone --depth 1 https://aomedia.googlesource.com/aom
+          cd aom
+          cmake -B build -G Ninja \
+          -DENABLE_DOCS=OFF \
+          -DBUILD_SHARED_LIBS=ON
+          sudo ninja -C build install
+          cd ..
+      # This is needed on Ubuntu 20.04, which has no libavif-dev package
+      - name: Install libavif from source
+        run: |
+          git clone --branch v0.11.1 --depth 1 https://github.com/AOMediaCodec/libavif.git
+          cd libavif
+          cmake -B build -G Ninja -DAVIF_CODEC_AOM=ON
           sudo ninja -C build install
           cd ..
       - name: Update lensfun data for root
