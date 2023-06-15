@@ -1786,38 +1786,12 @@ static gchar *get_query_string(const dt_collection_properties_t property, const 
 
     case DT_COLLECTION_PROP_TAG: // tag
     {
-      const gboolean is_insensitive =
-        dt_conf_is_equal("plugins/lighttable/tagging/case_sensitivity", "insensitive");
-
       if(!strcmp(escaped_text, _("not tagged")))
       {
         // clang-format off
         query = g_strdup_printf("(id NOT IN (SELECT DISTINCT imgid FROM main.tagged_images "
                                             "WHERE tagid NOT IN memory.darktable_tags))");
         // clang-format on
-      }
-      else if(is_insensitive)
-      {
-        if ((escaped_length > 0) && (escaped_text[escaped_length-1] == '*'))
-        {
-          // shift-click adds an asterix * to include items in and under this hierarchy
-          // without using a wildcard % which also would include similar named items
-          escaped_text[escaped_length-1] = '\0';
-          // clang-format off
-          query = g_strdup_printf("(id IN (SELECT imgid FROM main.tagged_images WHERE tagid IN "
-                                         "(SELECT id FROM data.tags WHERE name LIKE '%s' OR name LIKE '%s|%%')))",
-                                  escaped_text, escaped_text);
-          // clang-format on
-        }
-        else
-        {
-          // default
-          // clang-format off
-          query = g_strdup_printf("(id IN (SELECT imgid FROM main.tagged_images WHERE tagid IN "
-                                       "(SELECT id FROM data.tags WHERE name LIKE '%s')))",
-                                  escaped_text);
-          // clang-format on
-        }
       }
       else
       {
@@ -1829,8 +1803,8 @@ static gchar *get_query_string(const dt_collection_properties_t property, const 
           // clang-format off
           query = g_strdup_printf("(id IN (SELECT imgid FROM main.tagged_images WHERE tagid IN "
                                          "(SELECT id FROM data.tags "
-                                         "WHERE name = '%s'"
-                                         "  OR SUBSTR(name, 1, LENGTH('%s') + 1) = '%s|')))",
+                                         "WHERE LOWER(name) = LOWER('%s')"
+                                         "  OR SUBSTR(LOWER(name), 1, LENGTH('%s') + 1) = LOWER('%s|'))))",
                                   escaped_text, escaped_text, escaped_text);
           // clang-format on
         }
@@ -1840,7 +1814,7 @@ static gchar *get_query_string(const dt_collection_properties_t property, const 
           escaped_text[escaped_length-1] = '\0';
           // clang-format off
           query = g_strdup_printf("(id IN (SELECT imgid FROM main.tagged_images WHERE tagid IN "
-                                         "(SELECT id FROM data.tags WHERE SUBSTR(name, 1, LENGTH('%s')) = '%s')))",
+                                         "(SELECT id FROM data.tags WHERE SUBSTR(LOWER(name), 1, LENGTH('%s')) = LOWER('%s'))))",
                                   escaped_text, escaped_text);
           // clang-format on
         }
@@ -1849,7 +1823,7 @@ static gchar *get_query_string(const dt_collection_properties_t property, const 
           // default
           // clang-format off
           query = g_strdup_printf("(id IN (SELECT imgid FROM main.tagged_images WHERE tagid IN "
-                                       "(SELECT id FROM data.tags WHERE name = '%s')))",
+                                       "(SELECT id FROM data.tags WHERE LOWER(name) = LOWER('%s'))))",
                                   escaped_text);
           // clang-format on
         }

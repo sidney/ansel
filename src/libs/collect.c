@@ -360,7 +360,7 @@ static void _lib_collect_update_params(dt_lib_collect_t *d)
     snprintf(confname, sizeof(confname), "plugins/lighttable/collect/string%1d", i);
     const char *string = dt_conf_get_string_const(confname);
     if(string != NULL) g_strlcpy(p->rule[i].string, string, PARAM_STRING_SIZE);
-    // fprintf(stderr,"[%i] %d,%d,%s\n",i, p->rule[i].item, p->rule[i].mode,  p->rule[i].string);
+    // fprintf(stdout,"[%i] %d,%d,%s\n",i, p->rule[i].item, p->rule[i].mode,  p->rule[i].string);
   }
 
   p->rules = active + 1;
@@ -1313,37 +1313,18 @@ static void tree_view(dt_lib_collect_rule_t *dr)
         break;
       case DT_COLLECTION_PROP_TAG:
       {
-        const gboolean is_insensitive =
-          dt_conf_is_equal("plugins/lighttable/tagging/case_sensitivity", "insensitive");
-
-        if(is_insensitive)
-          // clang-format off
-          query = g_strdup_printf("SELECT name, 1 AS tagid, SUM(count) AS count"
-                                  " FROM (SELECT tagid, COUNT(*) as count"
-                                  "   FROM main.images AS mi"
-                                  "   JOIN main.tagged_images"
-                                  "     ON id = imgid "
-                                  "   WHERE %s"
-                                  "   GROUP BY tagid)"
-                                  " JOIN (SELECT lower(name) AS name, id AS tag_id FROM data.tags)"
-                                  "   ON tagid = tag_id"
-                                  "   GROUP BY name", where_ext);
-          // clang-format on
-        else
-          // clang-format off
-          query = g_strdup_printf("SELECT name, tagid, count"
-                                  " FROM (SELECT tagid, COUNT(*) AS count"
-                                  "  FROM main.images AS mi"
-                                  "  JOIN main.tagged_images"
-                                  "     ON id = imgid "
-                                  "  WHERE %s"
-                                  "  GROUP BY tagid)"
-                                  " JOIN (SELECT name, id AS tag_id FROM data.tags)"
-                                  "   ON tagid = tag_id"
-                                  , where_ext);
-          // clang-format on
-
         // clang-format off
+        query = g_strdup_printf("SELECT name, 1 AS tagid, SUM(count) AS count"
+                                " FROM (SELECT tagid, COUNT(*) as count"
+                                "   FROM main.images AS mi"
+                                "   JOIN main.tagged_images"
+                                "     ON id = imgid "
+                                "   WHERE %s"
+                                "   GROUP BY tagid)"
+                                " JOIN (SELECT LOWER(name) AS name, id AS tag_id FROM data.tags)"
+                                "   ON tagid = tag_id"
+                                "   GROUP BY name", where_ext);
+
         query = dt_util_dstrcat(query, " UNION ALL "
                                        "SELECT '%s' AS name, 0 as id, COUNT(*) AS count "
                                        "FROM main.images AS mi "
