@@ -2277,8 +2277,8 @@ static gboolean _is_tag_collection(int i)
 }
 
 static void combo_changed(GtkWidget *combo, dt_lib_collect_rule_t *d);
-static void _clear_text_entry(dt_collection_properties_t next_property, dt_collection_properties_t prev_property,
-                              dt_lib_collect_rule_t *d);
+static gboolean _clear_text_entry(dt_collection_properties_t next_property, dt_collection_properties_t prev_property,
+                                  dt_lib_collect_rule_t *d);
 
 static void _depopulate_combo(GtkWidget *combo)
 {
@@ -2331,13 +2331,13 @@ static void _update_collect_modes(dt_lib_collect_t *d, int variant)
       dt_collection_properties_t prev_prop = dt_conf_get_int("plugins/lighttable/collect/item0");
       dt_collection_properties_t prop = (_is_folder_collection(0)) ? prev_prop : DT_COLLECTION_PROP_FOLDERS;
       dt_conf_set_int("plugins/lighttable/collect/item0", prop);
-      _clear_text_entry(prev_prop, prop, d->rule);
 
       // Rebuild the combobox list and remap the property to the new entry
       _depopulate_combo(d->rule[0].combo);
       _combo_set_active_collection(d->rule[0].combo, prop);
 
-      gtk_entry_set_placeholder_text(GTK_ENTRY(d->rule[0].text), _("Search a folder…"));
+      if(_clear_text_entry(prev_prop, prop, d->rule))
+        gtk_entry_set_placeholder_text(GTK_ENTRY(d->rule[0].text), _("Search a folder…"));
 
       break;
     }
@@ -2345,7 +2345,6 @@ static void _update_collect_modes(dt_lib_collect_t *d, int variant)
     {
       dt_collection_properties_t prev_prop = dt_conf_get_int("plugins/lighttable/collect/item0");
       dt_collection_properties_t prop = DT_COLLECTION_PROP_TAG;
-      _clear_text_entry(prev_prop, prop, d->rule);
       dt_conf_set_int("plugins/lighttable/collect/item0", DT_COLLECTION_PROP_TAG);
 
       // Depopulate combo
@@ -2359,7 +2358,8 @@ static void _update_collect_modes(dt_lib_collect_t *d, int variant)
       // Remap the property to the new entry. Only one remaining.
       _combo_set_active_collection(d->rule[0].combo, prop);
 
-      gtk_entry_set_placeholder_text(GTK_ENTRY(d->rule[0].text), _("Search a collection…"));
+      if(_clear_text_entry(prev_prop, prop, d->rule))
+        gtk_entry_set_placeholder_text(GTK_ENTRY(d->rule[0].text), _("Search a collection…"));
 
       break;
     }
@@ -2465,22 +2465,32 @@ static gboolean _is_folder_property(const int prop)
   return prop == DT_COLLECTION_PROP_FILMROLL || prop == DT_COLLECTION_PROP_FOLDERS;
 }
 
-static void _clear_text_entry(dt_collection_properties_t next_property,
-                              dt_collection_properties_t prev_property,
-                              dt_lib_collect_rule_t *d)
+static gboolean _is_tag_property(const int prop)
+{
+  return prop == DT_COLLECTION_PROP_TAG;
+}
+
+static gboolean _clear_text_entry(dt_collection_properties_t next_property,
+                                  dt_collection_properties_t prev_property,
+                                  dt_lib_collect_rule_t *d)
 {
   // Clear the rule text entry only if needed
+  gboolean cleared = FALSE;
 
-  if(_is_folder_property(next_property) && _is_folder_property(prev_property))
+  if((_is_folder_property(next_property) && _is_folder_property(prev_property)) ||
+     (_is_tag_property(next_property) && _is_tag_property(prev_property)))
   {
-    // Don't clear the text entry because the search is transferable.
+    // Don't clear the text entry because the search string is transferable.
   }
   else
   {
     g_signal_handlers_block_matched(d->text, G_SIGNAL_MATCH_FUNC, 0, 0, NULL, entry_changed, NULL);
     gtk_entry_set_text(GTK_ENTRY(d->text), "");
     g_signal_handlers_unblock_matched(d->text, G_SIGNAL_MATCH_FUNC, 0, 0, NULL, entry_changed, NULL);
+    cleared = TRUE;
   }
+
+  return cleared;
 }
 
 static void combo_changed(GtkWidget *combo, dt_lib_collect_rule_t *d)
@@ -2507,37 +2517,9 @@ static void combo_changed(GtkWidget *combo, dt_lib_collect_rule_t *d)
   }
 
   _set_tooltip(d);
-
-  gboolean order_request = FALSE;
-  uint32_t order = 0;
-  if(c->active_rule == 0) // this seems like a bug because only prev/next properties should matter here
-  {
-    const int prev_property = dt_conf_get_int("plugins/lighttable/collect/item0");
-
-    // FIXME: I don't understand what this is nor what use case it covers.
-    // If it's about custom re-ordering, the feature should be either better advertised or entirely removed.
-    // Both ways, this is ugly and should probably be handled at collection_changed signal.
-    if(prev_property != DT_COLLECTION_PROP_TAG && property == DT_COLLECTION_PROP_TAG)
-    {
-      // save global order
-      const uint32_t sort = dt_collection_get_sort_field(darktable.collection);
-      const gboolean descending = dt_collection_get_sort_descending(darktable.collection);
-      dt_conf_set_int("plugins/lighttable/collect/order", sort | (descending ? DT_COLLECTION_ORDER_FLAG : 0));
-    }
-    else if(prev_property == DT_COLLECTION_PROP_TAG && property != DT_COLLECTION_PROP_TAG)
-    {
-      // restore global order
-      order = dt_conf_get_int("plugins/lighttable/collect/order");
-      order_request = TRUE;
-      dt_collection_set_tag_id((dt_collection_t *)darktable.collection, 0);
-    }
-  }
-
   set_properties(d);
   update_view(d);
   c->view_rule = -1;
-  if(order_request)
-    DT_DEBUG_CONTROL_SIGNAL_RAISE(darktable.signals, DT_SIGNAL_IMAGES_ORDER_CHANGE, order);
   dt_collection_update_query(darktable.collection, DT_COLLECTION_CHANGE_NEW_QUERY, DT_COLLECTION_PROP_UNDEF, NULL);
 }
 
