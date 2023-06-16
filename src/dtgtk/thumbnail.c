@@ -1206,7 +1206,6 @@ GtkWidget *dt_thumbnail_create_widget(dt_thumbnail_t *thumb, float zoom_ratio)
 
     // the color labels
     thumb->w_color = dtgtk_thumbnail_btn_new(dtgtk_cairo_paint_label_flower, thumb->colorlabels, NULL);
-    dt_action_define(&darktable.control->actions_thumb, NULL, N_("color label"), thumb->w_color, &dt_action_def_color_label);
     dt_gui_add_class(thumb->w_color, "thumb-colorlabels");
     gtk_widget_set_valign(thumb->w_color, GTK_ALIGN_END);
     gtk_widget_set_halign(thumb->w_color, GTK_ALIGN_END);
