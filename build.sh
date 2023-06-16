@@ -484,4 +484,4 @@ if [ $DO_INSTALL ] ; then
 fi
 
 # update Lensfun
-lensfun-update-data
+$SUDO lensfun-update-data
