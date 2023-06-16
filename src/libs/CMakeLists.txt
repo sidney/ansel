@@ -23,7 +23,6 @@ add_custom_target(
 set(MODULES import export styles tagging collect recentcollect metadata metadata_view navigation histogram history snapshots modulegroups backgroundjobs colorpicker masks duplicate ioporder)
 
 # The tools
-set(MODULES ${MODULES} colorlabels)
 set(MODULES ${MODULES} filter)
 set(MODULES ${MODULES} lighttable_mode)
 set(MODULES ${MODULES} view_toolbox)
@@ -56,7 +55,6 @@ add_library(duplicate MODULE "duplicate.c")
 add_library(ioporder MODULE "ioporder.c")
 
 # tools
-add_library(colorlabels MODULE "tools/colorlabels.c")
 add_library(filter MODULE "tools/filter.c")
 add_library(lighttable_mode MODULE "tools/lighttable.c")
 add_library(view_toolbox MODULE "tools/view_toolbox.c")

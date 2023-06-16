@@ -1,5 +1,6 @@
 #include "gui/actions/menu.h"
 #include "common/grouping.h"
+#include "common/colorlabels.h"
 
 
 void rotate_counterclockwise_callback()
@@ -70,6 +71,42 @@ void ungroup_images_callback()
   }
 }
 
+static void _colorlabels_callback(int color)
+{
+  GList *imgs = dt_act_on_get_images(FALSE, TRUE, FALSE);
+  dt_colorlabels_toggle_label_on_list(imgs, color, TRUE);
+  dt_collection_update_query(darktable.collection, DT_COLLECTION_CHANGE_RELOAD, DT_COLLECTION_PROP_COLORLABEL, imgs);
+}
+
+void red_label_callback()
+{
+  _colorlabels_callback(0);
+}
+
+void yellow_label_callback()
+{
+  _colorlabels_callback(1);
+}
+
+void green_label_callback()
+{
+  _colorlabels_callback(2);
+}
+
+void blue_label_callback()
+{
+  _colorlabels_callback(3);
+}
+
+void magenta_label_callback()
+{
+  _colorlabels_callback(4);
+}
+
+void reset_label_callback()
+{
+  _colorlabels_callback(5);
+}
 
 void append_image(GtkWidget **menus, GList **lists, const dt_menus_t index)
 {
@@ -95,6 +132,42 @@ void append_image(GtkWidget **menus, GList **lists, const dt_menus_t index)
                          reset_rotation_callback, NULL, NULL, sensitive_if_selected);
   ac = dt_action_define(pnl, NULL, N_("Reset rotation"), get_last_widget(lists), NULL);
   dt_action_register(ac, NULL, reset_rotation_callback, 0, 0);
+
+  add_top_submenu_entry(menus, lists, _("Color labels"), index);
+  parent = get_last_widget(lists);
+
+  add_sub_sub_menu_entry(parent, lists, _("<span foreground='#BB2222'>⬤</span> Red"), index, NULL,
+                         red_label_callback, NULL, NULL, sensitive_if_selected);
+  ac = dt_action_define(pnl, NULL, N_("Toggle red label"), get_last_widget(lists), NULL);
+  dt_action_register(ac, NULL, red_label_callback, GDK_KEY_F1, 0);
+
+  add_sub_sub_menu_entry(parent, lists, _("<span foreground='#BBBB22'>⬤</span> Yellow"), index, NULL,
+                         yellow_label_callback, NULL, NULL, sensitive_if_selected);
+  ac = dt_action_define(pnl, NULL, N_("Toggle yellow label"), get_last_widget(lists), NULL);
+  dt_action_register(ac, NULL, yellow_label_callback, GDK_KEY_F2, 0);
+
+  add_sub_sub_menu_entry(parent, lists, _("<span foreground='#22BB22'>⬤</span> Green"), index, NULL,
+                         green_label_callback, NULL, NULL, sensitive_if_selected);
+  ac = dt_action_define(pnl, NULL, N_("Toggle green label"), get_last_widget(lists), NULL);
+  dt_action_register(ac, NULL, green_label_callback, GDK_KEY_F3, 0);
+
+  add_sub_sub_menu_entry(parent, lists, _("<span foreground='#2222BB'>⬤</span> Blue"), index, NULL,
+                         blue_label_callback, NULL, NULL, sensitive_if_selected);
+  ac = dt_action_define(pnl, NULL, N_("Toggle blue label"), get_last_widget(lists), NULL);
+  dt_action_register(ac, NULL, blue_label_callback, GDK_KEY_F4, 0);
+
+  add_sub_sub_menu_entry(parent, lists, _("<span foreground='#BB22BB'>⬤</span> Magenta"), index, NULL,
+                         magenta_label_callback, NULL, NULL, sensitive_if_selected);
+  ac = dt_action_define(pnl, NULL, N_("Toggle magenta label"), get_last_widget(lists), NULL);
+  dt_action_register(ac, NULL, magenta_label_callback, GDK_KEY_F5, 0);
+
+  add_sub_menu_separator(parent);
+
+  add_sub_sub_menu_entry(parent, lists, _("<span foreground='#BBBBBB'>⬤</span> Clear labels"), index, NULL,
+                         reset_label_callback, NULL, NULL, sensitive_if_selected);
+  ac = dt_action_define(pnl, NULL, N_("Clear color labels"), get_last_widget(lists), NULL);
+  dt_action_register(ac, NULL, reset_label_callback, GDK_KEY_F6, 0);
+
 
   add_menu_separator(menus[index]);
 

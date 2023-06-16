@@ -63,9 +63,13 @@ static dt_menu_entry_t * set_menu_entry(GList **items_list, const gchar *label, 
 
   // Main widget
   if(checked_callback)
-    entry->widget = gtk_check_menu_item_new_with_label(label);
+    entry->widget = gtk_check_menu_item_new_with_label("");
   else
-    entry->widget = gtk_menu_item_new_with_label(label);
+    entry->widget = gtk_menu_item_new_with_label("");
+
+  // Set the text label allowing markup
+  GtkWidget *child = gtk_bin_get_child(GTK_BIN(entry->widget));
+  gtk_label_set_markup(GTK_LABEL(child), label);
 
   // Store arbitrary data in the GtkWidget if needed
   if(data)
