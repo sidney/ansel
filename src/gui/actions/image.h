@@ -98,6 +98,13 @@ void append_image(GtkWidget **menus, GList **lists, const dt_menus_t index)
 
   add_menu_separator(menus[index]);
 
+  add_sub_menu_entry(menus, lists, _("Reload EXIF from file"), index, NULL, dt_control_refresh_exif, NULL, NULL,
+                     sensitive_if_selected);
+  ac = dt_action_define(pnl, NULL, N_("Reload EXIF from file"), get_last_widget(lists), NULL);
+  dt_action_register(ac, NULL, dt_control_refresh_exif, 0, 0);
+
+  add_menu_separator(menus[index]);
+
   add_sub_menu_entry(menus, lists, _("Group images"), index, NULL, group_images_callback, NULL, NULL,
                      sensitive_if_selected);
   ac = dt_action_define(pnl, NULL, N_("Group images"), get_last_widget(lists), NULL);
