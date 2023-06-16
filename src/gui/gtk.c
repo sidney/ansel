@@ -682,8 +682,6 @@ int dt_gui_gtk_init(dt_gui_gtk_t *gui)
   g_signal_connect(G_OBJECT(widget), "button-press-event", G_CALLBACK(_scrollbar_press_event), NULL);
   g_signal_connect(G_OBJECT(widget), "button-release-event", G_CALLBACK(_scrollbar_release_event), NULL);
 
-  dt_action_t *ac;
-
   dt_gui_presets_init();
 
   widget = dt_ui_center(darktable.gui->ui);
@@ -720,7 +718,7 @@ int dt_gui_gtk_init(dt_gui_gtk_t *gui)
   // register actions for applying styles via shortcuts
   dt_init_styles_actions();
 
-  dt_action_register(&darktable.control->actions_global, N_("reinitialise input devices"), dt_shortcuts_reinitialise, GDK_KEY_I, GDK_CONTROL_MASK | GDK_SHIFT_MASK | GDK_MOD1_MASK);
+  dt_action_register(&darktable.control->actions_global, N_("Reinitialise input devices"), dt_shortcuts_reinitialise, GDK_KEY_I, GDK_CONTROL_MASK | GDK_SHIFT_MASK | GDK_MOD1_MASK);
 
   darktable.gui->reset = 0;
 
