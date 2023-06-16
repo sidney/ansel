@@ -16,6 +16,8 @@ typedef enum dt_menus_t
   DT_MENU_FILE = 0,
   DT_MENU_EDIT,
   DT_MENU_SELECTION,
+  DT_MENU_IMAGE,
+  DT_MENU_STYLES,
   DT_MENU_RUN,
   DT_MENU_DISPLAY,
   DT_MENU_ATELIERS,
@@ -198,6 +200,12 @@ void add_menu_separator(GtkWidget *menu)
 {
   GtkWidget *sep = gtk_separator_menu_item_new();
   gtk_menu_shell_append(GTK_MENU_SHELL(menu), sep);
+}
+
+void add_sub_menu_separator(GtkWidget *parent)
+{
+  GtkWidget *sep = gtk_separator_menu_item_new();
+  gtk_menu_shell_append(GTK_MENU_SHELL(gtk_menu_item_get_submenu(GTK_MENU_ITEM(parent))), sep);
 }
 
 const char * get_label_text(GtkWidget *widget)

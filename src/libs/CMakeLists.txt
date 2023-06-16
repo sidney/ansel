@@ -20,7 +20,7 @@ add_custom_target(
 )
 
 # The modules
-set(MODULES import export styles tagging image collect recentcollect metadata metadata_view navigation histogram history snapshots modulegroups backgroundjobs colorpicker masks duplicate ioporder)
+set(MODULES import export styles tagging collect recentcollect metadata metadata_view navigation histogram history snapshots modulegroups backgroundjobs colorpicker masks duplicate ioporder)
 
 # The tools
 set(MODULES ${MODULES} colorlabels)
@@ -39,7 +39,6 @@ set(MODULES ${MODULES} masktoolbar)
 add_library(import MODULE "import.c")
 add_library(export MODULE "export.c" "export_metadata.c")
 add_library(styles MODULE "styles.c")
-add_library(image MODULE "image.c")
 add_library(tagging MODULE "tagging.c")
 add_library(collect MODULE "collect.c")
 add_library(recentcollect MODULE "recentcollect.c")
