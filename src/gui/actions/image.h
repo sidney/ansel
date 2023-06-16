@@ -1,6 +1,7 @@
 #include "gui/actions/menu.h"
 #include "common/grouping.h"
 #include "common/colorlabels.h"
+#include "common/ratings.h"
 
 
 void rotate_counterclockwise_callback()
@@ -78,6 +79,13 @@ static void _colorlabels_callback(int color)
   dt_collection_update_query(darktable.collection, DT_COLLECTION_CHANGE_RELOAD, DT_COLLECTION_PROP_COLORLABEL, imgs);
 }
 
+static void _rating_callback(int value)
+{
+  GList *imgs = dt_act_on_get_images(FALSE, TRUE, FALSE);
+  dt_ratings_apply_on_list(imgs, value, TRUE);
+  dt_collection_update_query(darktable.collection, DT_COLLECTION_CHANGE_RELOAD, DT_COLLECTION_PROP_RATING, imgs);
+}
+
 void red_label_callback()
 {
   _colorlabels_callback(0);
@@ -108,20 +116,57 @@ void reset_label_callback()
   _colorlabels_callback(5);
 }
 
+void rating_one_callback()
+{
+  _rating_callback(1);
+}
+
+void rating_two_callback()
+{
+  _rating_callback(2);
+}
+
+void rating_three_callback()
+{
+  _rating_callback(3);
+}
+
+void rating_four_callback()
+{
+  _rating_callback(4);
+}
+
+void rating_five_callback()
+{
+  _rating_callback(5);
+}
+
+void rating_reset_callback()
+{
+  _rating_callback(0);
+}
+
+void rating_reject_callback()
+{
+  _rating_callback(6);
+}
+
+
 void append_image(GtkWidget **menus, GList **lists, const dt_menus_t index)
 {
   dt_action_t *pnl = dt_action_section(&darktable.control->actions_global, N_("Image"));
   dt_action_t *ac;
 
+  /* Rotation */
   add_top_submenu_entry(menus, lists, _("Rotate"), index);
   GtkWidget *parent = get_last_widget(lists);
 
-  add_sub_sub_menu_entry(parent, lists, _("90° counter-clockwise"), index, NULL,
+  add_sub_sub_menu_entry(parent, lists, _("⭯ 90° counter-clockwise"), index, NULL,
                          rotate_counterclockwise_callback, NULL, NULL, sensitive_if_selected);
   ac = dt_action_define(pnl, NULL, N_("Rotate 90° counter-clockwise"), get_last_widget(lists), NULL);
   dt_action_register(ac, NULL, rotate_counterclockwise_callback, 0, 0);
 
-  add_sub_sub_menu_entry(parent, lists, _("90° clockwise"), index, NULL,
+  add_sub_sub_menu_entry(parent, lists, _("⭮ 90° clockwise"), index, NULL,
                          rotate_clockwise_callback, NULL, NULL, sensitive_if_selected);
   ac = dt_action_define(pnl, NULL, N_("Rotate 90° clockwise"), get_last_widget(lists), NULL);
   dt_action_register(ac, NULL, rotate_clockwise_callback, 0, 0);
@@ -133,6 +178,7 @@ void append_image(GtkWidget **menus, GList **lists, const dt_menus_t index)
   ac = dt_action_define(pnl, NULL, N_("Reset rotation"), get_last_widget(lists), NULL);
   dt_action_register(ac, NULL, reset_rotation_callback, 0, 0);
 
+  /* Color labels */
   add_top_submenu_entry(menus, lists, _("Color labels"), index);
   parent = get_last_widget(lists);
 
@@ -168,9 +214,50 @@ void append_image(GtkWidget **menus, GList **lists, const dt_menus_t index)
   ac = dt_action_define(pnl, NULL, N_("Clear color labels"), get_last_widget(lists), NULL);
   dt_action_register(ac, NULL, reset_label_callback, GDK_KEY_F6, 0);
 
+  /* Ratings */
+  add_top_submenu_entry(menus, lists, _("Ratings"), index);
+  parent = get_last_widget(lists);
+
+  add_sub_sub_menu_entry(parent, lists, _("⦻ Reject"), index, NULL,
+                         rating_reject_callback, NULL, NULL, sensitive_if_selected);
+  ac = dt_action_define(pnl, NULL, N_("Reject image"), get_last_widget(lists), NULL);
+  dt_action_register(ac, NULL, rating_reject_callback, GDK_KEY_r, 0);
+
+  add_sub_sub_menu_entry(parent, lists, _("★"), index, NULL,
+                         rating_one_callback, NULL, NULL, sensitive_if_selected);
+  ac = dt_action_define(pnl, NULL, N_("Rate 1 star"), get_last_widget(lists), NULL);
+  dt_action_register(ac, NULL, rating_one_callback, GDK_KEY_1, 0);
+
+  add_sub_sub_menu_entry(parent, lists, _("★★"), index, NULL,
+                         rating_two_callback, NULL, NULL, sensitive_if_selected);
+  ac = dt_action_define(pnl, NULL, N_("Rate 2 stars"), get_last_widget(lists), NULL);
+  dt_action_register(ac, NULL, rating_two_callback, GDK_KEY_2, 0);
+
+  add_sub_sub_menu_entry(parent, lists, _("★★★"), index, NULL,
+                         rating_three_callback, NULL, NULL, sensitive_if_selected);
+  ac = dt_action_define(pnl, NULL, N_("Rate 3 stars"), get_last_widget(lists), NULL);
+  dt_action_register(ac, NULL, rating_three_callback, GDK_KEY_3, 0);
+
+  add_sub_sub_menu_entry(parent, lists, _("★★★★"), index, NULL,
+                         rating_four_callback, NULL, NULL, sensitive_if_selected);
+  ac = dt_action_define(pnl, NULL, N_("Rate 4 stars"), get_last_widget(lists), NULL);
+  dt_action_register(ac, NULL, rating_four_callback, GDK_KEY_4, 0);
+
+  add_sub_sub_menu_entry(parent, lists, _("★★★★★"), index, NULL,
+                         rating_five_callback, NULL, NULL, sensitive_if_selected);
+  ac = dt_action_define(pnl, NULL, N_("Rate 5 stars"), get_last_widget(lists), NULL);
+  dt_action_register(ac, NULL, rating_five_callback, GDK_KEY_5, 0);
+
+  add_sub_menu_separator(parent);
+
+  add_sub_sub_menu_entry(parent, lists, _("⭘ Clear rating"), index, NULL,
+                         rating_reset_callback, NULL, NULL, sensitive_if_selected);
+  ac = dt_action_define(pnl, NULL, N_("Clear rating"), get_last_widget(lists), NULL);
+  dt_action_register(ac, NULL, rating_reset_callback, GDK_KEY_0, 0);
 
   add_menu_separator(menus[index]);
 
+  /* Reload EXIF */
   add_sub_menu_entry(menus, lists, _("Reload EXIF from file"), index, NULL, dt_control_refresh_exif, NULL, NULL,
                      sensitive_if_selected);
   ac = dt_action_define(pnl, NULL, N_("Reload EXIF from file"), get_last_widget(lists), NULL);
@@ -178,6 +265,7 @@ void append_image(GtkWidget **menus, GList **lists, const dt_menus_t index)
 
   add_menu_separator(menus[index]);
 
+  /* Group/Ungroup */
   add_sub_menu_entry(menus, lists, _("Group images"), index, NULL, group_images_callback, NULL, NULL,
                      sensitive_if_selected);
   ac = dt_action_define(pnl, NULL, N_("Group images"), get_last_widget(lists), NULL);
@@ -186,5 +274,5 @@ void append_image(GtkWidget **menus, GList **lists, const dt_menus_t index)
   add_sub_menu_entry(menus, lists, _("Ungroup images"), index, NULL, ungroup_images_callback, NULL, NULL,
                      sensitive_if_selected);
   ac = dt_action_define(pnl, NULL, N_("Ungroup images"), get_last_widget(lists), NULL);
-  dt_action_register(ac, NULL, ungroup_images_callback, GDK_KEY_g, GDK_CONTROL_MASK);
+  dt_action_register(ac, NULL, ungroup_images_callback, GDK_KEY_g, GDK_CONTROL_MASK | GDK_SHIFT_MASK);
 }
