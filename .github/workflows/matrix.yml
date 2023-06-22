@@ -27,5 +27,5 @@ jobs:
         homeserver: ${{ secrets.MATRIX_SERVER }}
         username: "Chantal AI"
         access_token: ${{ secrets.MATRIX_ACCESS }}
-        room_id: !khBjOtEnQNuCYlWScJ:matrix.org
+        room_id: "!khBjOtEnQNuCYlWScJ:matrix.org"
         # message: ???
