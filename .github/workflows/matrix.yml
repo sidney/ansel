@@ -13,8 +13,6 @@ jobs:
 
     - name: Checkout
       uses: actions/checkout@v2
-      with:
-        fetch-depth: 10
 
     - name: matrix-commit
       uses: krazykirby99999/matrix-commit@v1
@@ -24,4 +22,4 @@ jobs:
         username: "Chantal AI"
         access_token: ${{ secrets.MATRIX_ACCESS }}
         room_id: "!khBjOtEnQNuCYlWScJ:matrix.org"
-        # message: ???
+        message: "#### New commit : "
