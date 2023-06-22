@@ -1,0 +1,29 @@
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    types: [opened, reopened]
+  issues:
+      types: [opened, edited, milestoned]
+
+jobs:
+  matrix_action_job:
+    runs-on: ubuntu-latest
+    name: Send Message to Matrix Room
+    steps:
+
+    - name: Checkout
+      uses: actions/checkout@v2
+      with:
+        fetch-depth: 1
+
+    - name: matrix-commit
+      uses: krazykirby99999/matrix-commit@v1
+
+      with:
+        homeserver: ${{ secrets.MATRIX_SERVER }}
+        username: "Chantal AI"
+        access_token: ${{ secrets.MATRIX_ACCESS }}
+        room_id: !khBjOtEnQNuCYlWScJ:matrix.org
+        # message: ???
