@@ -4,10 +4,6 @@ on:
   push:
     branches:
       - master
-  pull_request:
-    types: [opened, reopened]
-  issues:
-      types: [opened, edited, milestoned]
 
 jobs:
   matrix_action_job:
@@ -18,7 +14,7 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v2
       with:
-        fetch-depth: 1
+        fetch-depth: 10
 
     - name: matrix-commit
       uses: krazykirby99999/matrix-commit@v1
