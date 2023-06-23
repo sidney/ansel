@@ -49,3 +49,14 @@ jobs:
         -u ${{ secrets.MATRIX_USER }} \
         -t ${{ secrets.MATRIX_ACCESS }} \
         -r ${{ env.ROOM }}
+
+    - name: Dispatch message - issue edited
+      if: ${{ github.event_name == 'issues' && github.event.action == 'edited' }}
+      run: |
+        MESSAGE="Issue ${{ github.event.issue.number }} edited: [${{ github.event.issue.title }}](${{ github.event.issue.html_url }})"
+        python .ci/matrix.py \
+        -m "$MESSAGE" \
+        -s ${{ secrets.MATRIX_SERVER }} \
+        -u ${{ secrets.MATRIX_USER }} \
+        -t ${{ secrets.MATRIX_ACCESS }} \
+        -r ${{ env.ROOM }}
