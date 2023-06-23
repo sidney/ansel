@@ -4,6 +4,10 @@ on:
   push:
     branches:
       - master
+  pull_request:
+    types: [opened, edited, reopened, closed]
+  issues:
+      types: [opened, edited, milestoned, closed]
 
 jobs:
   matrix_action_job:
@@ -23,10 +27,25 @@ jobs:
       run: |
         python -m pip install simplematrixbotlib
 
-    - name: Dispatch message
+    - name: Dispatch message - new commit
+      if: github.event_name == 'push'
       run: |
         GIT_HASH=$(git rev-parse HEAD)
         MESSAGE="Commit [$(git rev-parse --short HEAD)](${{ env.REPO }}/commit/${GIT_HASH}): $(git show -s --format=%s)"
+        python .ci/matrix.py \
+        -m "$MESSAGE" \
+        -s ${{ secrets.MATRIX_SERVER }} \
+        -u ${{ secrets.MATRIX_USER }} \
+        -t ${{ secrets.MATRIX_ACCESS }} \
+        -r ${{ env.ROOM }}
+
+    - name: Dispatch message - new issue
+      if: ${{ github.event_name == 'issues' && github.event.action == 'opened' }}
+      run: |
+        ISSUE_ID=${{ github.event.issue.number }}
+        ISSUE_TITLE=${{ github.event.issue.number }}
+        ISSUE_URL=${{ github.event.issue.issue_url }}
+        MESSAGE="New issue (${ISSUE_ID}) [${ISSUE_TITLE}](${ISSUE_URL})"
         python .ci/matrix.py \
         -m "$MESSAGE" \
         -s ${{ secrets.MATRIX_SERVER }} \
