@@ -60,3 +60,25 @@ jobs:
         -u ${{ secrets.MATRIX_USER }} \
         -t ${{ secrets.MATRIX_ACCESS }} \
         -r ${{ env.ROOM }}
+
+    - name: Dispatch message - issue milestoned
+      if: ${{ github.event_name == 'issues' && github.event.action == 'milestoned' }}
+      run: |
+        MESSAGE="Issue ${{ github.event.issue.number }} ([${{ github.event.issue.title }}](${{ github.event.issue.html_url }})) milestoned for ${{ github.event.issue.milestone }}"
+        python .ci/matrix.py \
+        -m "$MESSAGE" \
+        -s ${{ secrets.MATRIX_SERVER }} \
+        -u ${{ secrets.MATRIX_USER }} \
+        -t ${{ secrets.MATRIX_ACCESS }} \
+        -r ${{ env.ROOM }}
+
+    - name: Dispatch message - issue closed
+      if: ${{ github.event_name == 'issues' && github.event.action == 'closed' }}
+      run: |
+        MESSAGE="Issue ${{ github.event.issue.number }} closed: [${{ github.event.issue.title }}](${{ github.event.issue.html_url }})"
+        python .ci/matrix.py \
+        -m "$MESSAGE" \
+        -s ${{ secrets.MATRIX_SERVER }} \
+        -u ${{ secrets.MATRIX_USER }} \
+        -t ${{ secrets.MATRIX_ACCESS }} \
+        -r ${{ env.ROOM }}
