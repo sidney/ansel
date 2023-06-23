@@ -84,7 +84,7 @@ jobs:
         -r ${{ env.ROOM }}
 
     - name: Dispatch message - new PR
-      if: ${{ github.event_name == 'pull_request' && github.event.action == 'opened' }}
+      if: ${{ github.event_name == 'pull_request_target' && github.event.action == 'opened' }}
       run: |
         MESSAGE="New PR [${{ github.event.pull_request.number }}](${{ github.event.pull_request.html_url }}) (_${{ github.event.pull_request.title }}_) created"
         python .ci/matrix.py \
@@ -95,7 +95,7 @@ jobs:
         -r ${{ env.ROOM }}
 
     - name: Dispatch message - PR edited
-      if: ${{ github.event_name == 'pull_request' && github.event.action == 'edited' }}
+      if: ${{ github.event_name == 'pull_request_target' && github.event.action == 'edited' }}
       run: |
         MESSAGE="PR [${{ github.event.pull_request.number }}](${{ github.event.pull_request.html_url }}) (_${{ github.event.pull_request.title }}_) edited"
         python .ci/matrix.py \
@@ -106,7 +106,7 @@ jobs:
         -r ${{ env.ROOM }}
 
     - name: Dispatch message - PR closed
-      if: ${{ github.event_name == 'pull_request' && github.event.action == 'closed' }}
+      if: ${{ github.event_name == 'pull_request_target' && github.event.action == 'closed' }}
       run: |
         MESSAGE="PR [${{ github.event.pull_request.number }}](${{ github.event.pull_request.html_url }}) (_${{ github.event.pull_request.title }}_) closed"
         python .ci/matrix.py \
