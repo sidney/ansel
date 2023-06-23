@@ -5,11 +5,11 @@ on:
     branches:
       - master
   pull_request:
-      types: [opened, edited, reopened, closed]
-      branches:
-        - master
+    types: [opened, edited, reopened, closed]
+    branches:
+      - master
   issues:
-      types: [opened, edited, milestoned, closed]
+    types: [opened, edited, milestoned, closed]
 
 jobs:
   matrix_action_job:
