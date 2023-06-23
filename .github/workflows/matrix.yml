@@ -9,17 +9,27 @@ jobs:
   matrix_action_job:
     runs-on: ubuntu-latest
     name: Send Message to Matrix Room
+    env:
+      REPO: "https://github.com/aurelienpierreeng/ansel"
+      ROOM: "!khBjOtEnQNuCYlWScJ:matrix.org"
     steps:
 
     - name: Checkout
       uses: actions/checkout@v2
-
-    - name: matrix-commit
-      uses: krazykirby99999/matrix-commit@v1
-
       with:
-        homeserver: ${{ secrets.MATRIX_SERVER }}
-        username: "Chantal AI"
-        access_token: ${{ secrets.MATRIX_ACCESS }}
-        room_id: "!khBjOtEnQNuCYlWScJ:matrix.org"
-        message: "#### New commit : "
+        fetch-depth: 1
+
+    - name: Install dependencies
+      run: |
+        python -m pip install simplematrixbotlib
+
+    - name: Dispatch message
+      run: |
+        GIT_HASH=$(git rev-parse HEAD)
+        MESSAGE="Commit [$(git rev-parse --short HEAD)](${{ env.REPO }}/commit/${GIT_HASH}): $(git show -s --format=%s)"
+        python .ci/matrix.py \
+        -m "$MESSAGE" \
+        -s ${{ secrets.MATRIX_SERVER }} \
+        -u ${{ secrets.MATRIX_USER }} \
+        -t ${{ secrets.MATRIX_ACCESS }} \
+        -r ${{ env.ROOM }}
