@@ -43,9 +43,9 @@ jobs:
       if: ${{ github.event_name == 'issues' && github.event.action == 'opened' }}
       run: |
         ISSUE_ID=${{ github.event.issue.number }}
-        ISSUE_TITLE=${{ github.event.issue.number }}
-        ISSUE_URL=${{ github.event.issue.issue_url }}
-        MESSAGE="New issue (${ISSUE_ID}) [${ISSUE_TITLE}](${ISSUE_URL})"
+        ISSUE_TITLE=${{ github.event.issue.title }}
+        ISSUE_URL=${{ github.event.issue.html_url }}
+        MESSAGE="New issue (${ISSUE_ID}): [${ISSUE_TITLE}](${ISSUE_URL})"
         python .ci/matrix.py \
         -m "$MESSAGE" \
         -s ${{ secrets.MATRIX_SERVER }} \
