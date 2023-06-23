@@ -6,6 +6,8 @@ on:
       - master
   pull_request:
       types: [opened, edited, reopened, closed]
+      branches:
+        - master
   issues:
       types: [opened, edited, milestoned, closed]
 
