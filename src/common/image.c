@@ -482,7 +482,7 @@ void dt_image_set_xmp_rating(dt_image_t *img, const int rating)
 
   if(rating == -2) // assuming that value -2 cannot be found
   {
-    img->flags |= (DT_VIEW_RATINGS_MASK & dt_conf_get_int("ui_last/import_initial_rating"));
+    img->flags |= (DT_VIEW_RATINGS_MASK & 0);
   }
   else if(rating == -1)
   {
@@ -1505,7 +1505,7 @@ static uint32_t _image_import_internal(const int32_t film_id, const char *filena
   }
 
   // also need to set the no-legacy bit, to make sure we get the right presets (new ones)
-  uint32_t flags = dt_conf_get_int("ui_last/import_initial_rating");
+  uint32_t flags = 0;
   flags |= DT_IMAGE_NO_LEGACY_PRESETS;
   // and we set the type of image flag (from extension for now)
   gchar *extension = g_strrstr(imgfname, ".");
