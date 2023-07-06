@@ -1640,8 +1640,6 @@ static uint32_t _image_import_internal(const int32_t film_id, const char *filena
 
   // read dttags and exif for database queries!
   (void)dt_exif_read(img, normalized_filename);
-  if(dt_conf_get_bool("ui_last/ignore_exif_rating"))
-    img->flags = flags;
   char dtfilename[PATH_MAX] = { 0 };
   g_strlcpy(dtfilename, normalized_filename, sizeof(dtfilename));
   // dt_image_path_append_version(id, dtfilename, sizeof(dtfilename));
@@ -1658,6 +1656,8 @@ static uint32_t _image_import_internal(const int32_t film_id, const char *filena
   if((res != 0) && (nb_xmp == 0))
   {
     // Search for Lightroom sidecar file, import tags if found
+    // Actually this was extended by morons to load existing dt/Ansel history from XMP
+    // so the name is actively misleading.
     const gboolean lr_xmp = dt_lightroom_import(id, NULL, TRUE);
     // Make sure that lightroom xmp data (label in particular) are saved in dt xmp
     if(lr_xmp)
