@@ -1459,13 +1459,6 @@ static uint32_t _image_import_internal(const int32_t film_id, const char *filena
     return 0;
   }
   char *ext = g_ascii_strdown(cc + 1, -1);
-  if(override_ignore_jpegs == FALSE && (!strcmp(ext, "jpg") || !strcmp(ext, "jpeg"))
-     && dt_conf_get_bool("ui_last/import_ignore_jpegs"))
-  {
-    g_free(normalized_filename);
-    g_free(ext);
-    return 0;
-  }
   int supported = 0;
   for(const char **i = dt_supported_extensions; *i != NULL; i++)
     if(!strcmp(ext, *i))
