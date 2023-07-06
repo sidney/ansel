@@ -2200,7 +2200,7 @@ void gui_init(dt_view_t *self)
   dt_action_register(DT_ACTION(self), N_("image back"), skip_b_key_accel_callback, GDK_KEY_Left, GDK_MOD1_MASK);
 
   // cycle overlay colors
-  dt_action_register(DT_ACTION(self), N_("cycle overlay colors"), _overlay_cycle_callback, GDK_KEY_o, GDK_CONTROL_MASK);
+  dt_action_register(DT_ACTION(self), N_("cycle overlay colors"), _overlay_cycle_callback, 0, 0);
 
   // toggle visibility of drawn masks for current gui module
   dt_action_register(DT_ACTION(self), N_("show drawn masks"), _toggle_mask_visibility_callback, 0, 0);
