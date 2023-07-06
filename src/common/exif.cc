@@ -1475,63 +1475,6 @@ static bool _exif_decode_exif_data(dt_image_t *img, Exiv2::ExifData &exifData)
   }
 }
 
-void dt_exif_apply_default_metadata(dt_image_t *img)
-{
-  if(dt_conf_get_bool("ui_last/import_apply_metadata") == TRUE)
-  {
-    char *str;
-
-    for(unsigned int i = 0; i < DT_METADATA_NUMBER; i++)
-    {
-      if(dt_metadata_get_type(i) != DT_METADATA_TYPE_INTERNAL)
-      {
-        const char *name = dt_metadata_get_name(i);
-        char *setting = dt_util_dstrcat(NULL, "plugins/lighttable/metadata/%s_flag", name);
-        const gboolean hidden = dt_conf_get_int(setting) & DT_METADATA_FLAG_HIDDEN;
-        g_free(setting);
-        // don't import hidden stuff
-        if(!hidden)
-        {
-          setting = dt_util_dstrcat(NULL, "ui_last/import_last_%s", name);
-          str = dt_conf_get_string(setting);
-          if(str && str[0])
-          {
-            // calculated metadata
-            dt_variables_params_t *params;
-            dt_variables_params_init(&params);
-            params->filename = img->filename;
-            params->jobcode = "import";
-            params->sequence = 0;
-            params->imgid = img->id;
-            params->img = (void *)img;
-            // at this time only exif info are available
-            gchar *result = dt_variables_expand(params, str, FALSE);
-            dt_variables_params_destroy(params);
-            if(result && result[0])
-            {
-              g_free(str);
-              str = result;
-            }
-            dt_metadata_set(img->id, dt_metadata_get_key(i), str, FALSE);
-            g_free(str);
-          }
-          g_free(setting);
-        }
-      }
-    }
-
-    str = dt_conf_get_string("ui_last/import_last_tags");
-    if(img->id > 0 && str != NULL && str[0] != '\0')
-    {
-      GList *imgs = NULL;
-      imgs = g_list_prepend(imgs, GINT_TO_POINTER(img->id));
-      dt_tag_attach_string_list(str, imgs, FALSE);
-      g_list_free(imgs);
-    }
-    g_free(str);
-  }
-}
-
 // TODO: can this blob also contain xmp and iptc data?
 int dt_exif_read_from_blob(dt_image_t *img, uint8_t *blob, const int size)
 {
@@ -1540,7 +1483,6 @@ int dt_exif_read_from_blob(dt_image_t *img, uint8_t *blob, const int size)
     Exiv2::ExifData exifData;
     Exiv2::ExifParser::decode(exifData, blob, size);
     bool res = _exif_decode_exif_data(img, exifData);
-    dt_exif_apply_default_metadata(img);
     return res ? 0 : 1;
   }
   catch(Exiv2::AnyError &e)
@@ -1642,9 +1584,6 @@ int dt_exif_read(dt_image_t *img, const char *path)
     }
     else
       img->exif_inited = 1;
-
-    // these get overwritten by IPTC and XMP. is that how it should work?
-    dt_exif_apply_default_metadata(img);
 
     // IPTC metadata.
     Exiv2::IptcData &iptcData = image->iptcData();
