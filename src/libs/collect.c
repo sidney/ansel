@@ -128,7 +128,6 @@ static void collection_updated(gpointer instance, dt_collection_change_t query_c
 static void row_activated_with_event(GtkTreeView *view, GtkTreePath *path, GtkTreeViewColumn *col, GdkEventButton *event, dt_lib_collect_t *d);
 static int is_time_property(int property);
 static void _populate_collect_combo(GtkWidget *w);
-int last_state = 0;
 
 const char *name(dt_lib_module_t *self)
 {
@@ -623,65 +622,35 @@ static gboolean view_onButtonPressed(GtkWidget *treeview, GdkEventButton *event,
   /* Get tree path for row that was clicked */
   GtkTreePath *path = NULL;
   int get_path = gtk_tree_view_get_path_at_pos(GTK_TREE_VIEW(treeview), (gint)event->x, (gint)event->y, &path, NULL, NULL, NULL);
-
-  if(event->type == GDK_DOUBLE_BUTTON_PRESS)
+  if(!get_path)
   {
-    if(event->state == last_state)
-    {
-      if(gtk_tree_view_row_expanded(GTK_TREE_VIEW(treeview), path))
-        gtk_tree_view_collapse_row(GTK_TREE_VIEW(treeview), path);
-      else
-        gtk_tree_view_expand_row(GTK_TREE_VIEW(treeview), path, FALSE);
-    }
-    last_state = event->state;
+    gtk_tree_path_free(path);
+    return FALSE;
   }
 
-  if(((d->view_rule == DT_COLLECTION_PROP_FOLDERS
-       || d->view_rule == DT_COLLECTION_PROP_FILMROLL)
-      && event->type == GDK_BUTTON_PRESS && event->button == 3)
-     || (event->type == GDK_2BUTTON_PRESS && event->button == 1)
-     || ((d->view_rule == DT_COLLECTION_PROP_FOLDERS || d->view_rule == DT_COLLECTION_PROP_FILMROLL)
-          && (event->type == GDK_BUTTON_PRESS && event->button == 1 &&
-              (dt_modifier_is(event->state, GDK_SHIFT_MASK) || dt_modifier_is(event->state, GDK_CONTROL_MASK)))))
+  if(((d->view_rule == DT_COLLECTION_PROP_FOLDERS)
+      || (d->view_rule == DT_COLLECTION_PROP_FILMROLL))
+      && (event->type == GDK_BUTTON_PRESS && event->button == 3))
+  {
+    // Single right-click on filmroll/folder: allow editing the path
+    view_popup_menu(treeview, event, d);
+    gtk_tree_path_free(path);
+    return TRUE;
+  }
+  else if(event->type == GDK_BUTTON_PRESS && event->button == 1)
   {
     GtkTreeSelection *selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(treeview));
-
-    if(get_path)
-    {
-      gtk_tree_selection_unselect_all(selection);
-      gtk_tree_selection_select_path(selection, path);
-    }
-
-    /* single click on folder with the right mouse button? */
-    if(((d->view_rule == DT_COLLECTION_PROP_FOLDERS)
-        || (d->view_rule == DT_COLLECTION_PROP_FILMROLL))
-       && (event->type == GDK_BUTTON_PRESS && event->button == 3)
-       && !(dt_modifier_is(event->state, GDK_SHIFT_MASK) || dt_modifier_is(event->state, GDK_CONTROL_MASK)))
-    {
-      // Don't open a collection on right click
-      // row_activated_with_event(GTK_TREE_VIEW(treeview), path, NULL, event, d);
-      view_popup_menu(treeview, event, d);
-    }
-    else
-    {
-      row_activated_with_event(GTK_TREE_VIEW(treeview), path, NULL, event, d);
-    }
-
+    gtk_tree_selection_unselect_all(selection);
+    gtk_tree_selection_select_path(selection, path);
+    row_activated_with_event(GTK_TREE_VIEW(treeview), path, NULL, event, d);
     gtk_tree_path_free(path);
-
-    if((d->view_rule == DT_COLLECTION_PROP_DAY
-        || is_time_property(d->view_rule)
-        || d->view_rule == DT_COLLECTION_PROP_FOLDERS
-        || d->view_rule == DT_COLLECTION_PROP_TAG
-        || d->view_rule == DT_COLLECTION_PROP_GEOTAGGING
-       )
-       && !dt_modifier_is(event->state, GDK_SHIFT_MASK)
-      )
-      return FALSE; /* we allow propagation (expand/collapse row) */
-    else
-      return TRUE; /* we stop propagation */
+    return TRUE;
   }
-  return FALSE; /* we did not handle this */
+  else
+  {
+    gtk_tree_path_free(path);
+    return FALSE; /* we did not handle this */
+  }
 }
 
 static gboolean view_onPopupMenu(GtkWidget *treeview, dt_lib_collect_t *d)
@@ -3260,6 +3229,7 @@ void gui_init(dt_lib_module_t *self)
   d->view_rule = -1;
   d->view = view;
   gtk_tree_view_set_headers_visible(view, FALSE);
+  gtk_tree_view_set_activate_on_single_click(view, TRUE);
   g_signal_connect(G_OBJECT(view), "button-press-event", G_CALLBACK(view_onButtonPressed), d);
   g_signal_connect(G_OBJECT(view), "popup-menu", G_CALLBACK(view_onPopupMenu), d);
 
