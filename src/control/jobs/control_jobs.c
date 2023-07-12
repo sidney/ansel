@@ -1287,10 +1287,11 @@ static int32_t dt_control_refresh_exif_run(dt_job_t *job)
       dt_image_t *img = dt_image_cache_get(darktable.image_cache, imgid, 'w');
       if(img)
       {
+        // Overwrite EXIF flags with our own, to preserve user-defined star ratings over EXIF.
+        // All the rest should be synced with EXIF.
         const uint32_t flags = img->flags;
         dt_exif_read(img, sourcefile);
-        if(dt_conf_get_bool("ui_last/ignore_exif_rating"))
-          img->flags = flags;
+        img->flags = flags;
         dt_image_cache_write_release(darktable.image_cache, img, DT_IMAGE_CACHE_SAFE);
       }
       else
@@ -2075,8 +2076,7 @@ static int _control_import_image_copy(const char *filename,
       dt_import_session_set_exif_time(session, exif_time);
     dt_import_session_set_filename(session, basename);
     const char *output_path = dt_import_session_path(session, FALSE);
-    const gboolean use_filename = dt_conf_get_bool("session/use_filename");
-    const char *fname = dt_import_session_filename(session, use_filename);
+    const char *fname = dt_import_session_filename(session);
 
     output = g_build_filename(output_path, fname, NULL);
     g_free(basename);
@@ -2249,7 +2249,6 @@ static int32_t _control_import_job_run(dt_job_t *job)
       {
         first_filmid = filmid;
         const char *output_path = dt_import_session_path(data->session, FALSE);
-        dt_conf_set_int("plugins/lighttable/collect/num_rules", 1);
         dt_conf_set_int("plugins/lighttable/collect/item0", 0);
         dt_conf_set_string("plugins/lighttable/collect/string0", output_path);
         _collection_update(&last_coll_update, &update_interval);
