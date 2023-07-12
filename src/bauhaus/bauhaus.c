@@ -69,8 +69,8 @@ void bauhaus_request_focus(dt_bauhaus_widget_t *w)
 {
   if(w->module && w->module->type == DT_ACTION_TYPE_IOP_INSTANCE)
       dt_iop_request_focus((dt_iop_module_t *)w->module);
-  gtk_widget_set_state_flags(GTK_WIDGET(w), GTK_STATE_FLAG_FOCUSED, FALSE);
   gtk_widget_grab_focus(GTK_WIDGET(w));
+  gtk_widget_set_state_flags(GTK_WIDGET(w), GTK_STATE_FLAG_FOCUSED, TRUE);
   darktable.gui->has_scroll_focus = GTK_WIDGET(w);
 }
 
@@ -178,11 +178,15 @@ static int show_pango_text(dt_bauhaus_widget_t *w, GtkStyleContext *context, cai
     ? pango_font_description_copy_static(darktable.bauhaus->pango_sec_font_desc)
     : pango_font_description_copy_static(darktable.bauhaus->pango_font_desc);
 
-  // This should be able to update the font style for current text depending on :hover, :focused, etc.
-  // CSS pseudo-classes, yet it defaults to system font.
-  // FIXME: get that working so we can put :active text in bold, for example.
-  //gtk_style_context_get(context, gtk_widget_get_state_flags(GTK_WIDGET(w)), "font", font_desc, NULL);
-
+  // Update font properties for current text depending on :hover, :focused, etc. states
+  PangoWeight weight;
+  PangoStyle style;
+  gtk_style_context_get(context, gtk_widget_get_state_flags(GTK_WIDGET(w)),
+                        "font-weight", &weight,
+                        "font-style", &style,
+                        NULL);
+  pango_font_description_set_weight(font_desc, weight);
+  pango_font_description_set_style(font_desc, style);
   pango_layout_set_font_description(layout, font_desc);
 
   PangoAttrList *attrlist = pango_attr_list_new();
@@ -538,8 +542,6 @@ static gboolean dt_bauhaus_popup_button_press(GtkWidget *widget, GdkEventButton 
       const dt_bauhaus_combobox_data_t *d = &darktable.bauhaus->current->data.combobox;
       dt_bauhaus_combobox_set(GTK_WIDGET(darktable.bauhaus->current), d->defpos);
       dt_bauhaus_widget_reject(darktable.bauhaus->current);
-      gtk_widget_set_state_flags(GTK_WIDGET(darktable.bauhaus->current),
-                                 GTK_STATE_FLAG_FOCUSED, FALSE);
     }
     else
     {
@@ -548,8 +550,6 @@ static gboolean dt_bauhaus_popup_button_press(GtkWidget *widget, GdkEventButton 
       darktable.bauhaus->end_mouse_x = event->x - padding->left;
       darktable.bauhaus->end_mouse_y = event->y - padding->top;
       dt_bauhaus_widget_accept(darktable.bauhaus->current);
-      gtk_widget_set_state_flags(GTK_WIDGET(darktable.bauhaus->current),
-                                 GTK_STATE_FLAG_FOCUSED, FALSE);
     }
     darktable.bauhaus->hiding = TRUE;
   }
@@ -563,6 +563,7 @@ static gboolean dt_bauhaus_popup_button_press(GtkWidget *widget, GdkEventButton 
     dt_bauhaus_widget_reject(darktable.bauhaus->current);
     darktable.bauhaus->hiding = TRUE;
   }
+  gtk_widget_set_state_flags(GTK_WIDGET(darktable.bauhaus->current), GTK_STATE_FLAG_FOCUSED, TRUE);
   return TRUE;
 }
 
@@ -1922,11 +1923,12 @@ static gboolean dt_bauhaus_popup_draw(GtkWidget *widget, cairo_t *crf, gpointer 
   GtkStyleContext *context = gtk_widget_get_style_context(widget);
 
   // look up some colors once
-  GdkRGBA text_color, text_color_selected, text_color_hover, text_color_insensitive;
+  GdkRGBA text_color, text_color_selected, text_color_hover, text_color_insensitive, text_color_focused;
   gtk_style_context_get_color(context, GTK_STATE_FLAG_NORMAL, &text_color);
   gtk_style_context_get_color(context, GTK_STATE_FLAG_SELECTED, &text_color_selected);
   gtk_style_context_get_color(context, GTK_STATE_FLAG_PRELIGHT, &text_color_hover);
   gtk_style_context_get_color(context, GTK_STATE_FLAG_INSENSITIVE, &text_color_insensitive);
+  gtk_style_context_get_color(context, GTK_STATE_FLAG_FOCUSED, &text_color_focused);
 
   GdkRGBA *fg_color = default_color_assign();
   GdkRGBA *bg_color;
@@ -1990,7 +1992,16 @@ static gboolean dt_bauhaus_popup_draw(GtkWidget *widget, cairo_t *crf, gpointer 
       cairo_save(cr);
 
       char *text = dt_bauhaus_slider_get_text(GTK_WIDGET(w), dt_bauhaus_slider_get(GTK_WIDGET(w)));
-      set_color(cr, *fg_color);
+
+      if(state & GTK_STATE_FLAG_PRELIGHT)
+        set_color(cr, text_color_hover);
+      else if(state & GTK_STATE_FLAG_FOCUSED)
+        set_color(cr, text_color_focused);
+      else if(state & GTK_STATE_FLAG_INSENSITIVE)
+        set_color(cr, text_color_insensitive);
+      else
+        set_color(cr, *fg_color);
+
       const float value_width = show_pango_text(w, context, cr, text, w2 - _widget_get_quad_width(w), 0, 0, TRUE,
                                                 FALSE, PANGO_ELLIPSIZE_END, FALSE, FALSE, NULL, NULL);
       g_free(text);
@@ -2619,7 +2630,6 @@ static gboolean dt_bauhaus_combobox_button_press(GtkWidget *widget, GdkEventButt
 
   if(w->type != DT_BAUHAUS_COMBOBOX) return FALSE;
   bauhaus_request_focus(w);
-  gtk_widget_grab_focus(GTK_WIDGET(w));
 
   GtkAllocation tmp;
   gtk_widget_get_allocation(GTK_WIDGET(w), &tmp);
@@ -3055,7 +3065,6 @@ static gboolean dt_bauhaus_slider_button_press(GtkWidget *widget, GdkEventButton
 {
   dt_bauhaus_widget_t *w = (dt_bauhaus_widget_t *)widget;
   bauhaus_request_focus(w);
-  gtk_widget_grab_focus(widget);
 
   GtkAllocation allocation;
   gtk_widget_get_allocation(widget, &allocation);
