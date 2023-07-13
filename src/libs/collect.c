@@ -129,6 +129,24 @@ static void row_activated_with_event(GtkTreeView *view, GtkTreePath *path, GtkTr
 static int is_time_property(int property);
 static void _populate_collect_combo(GtkWidget *w);
 
+static gboolean item_is_folder_collection(dt_collection_properties_t item)
+{
+  return item == DT_COLLECTION_PROP_FILMROLL || item == DT_COLLECTION_PROP_FOLDERS;
+}
+
+static gboolean item_is_tag_collection(dt_collection_properties_t item)
+{
+  return item == DT_COLLECTION_PROP_TAG;
+}
+
+static gboolean item_is_numeric_collection(dt_collection_properties_t item)
+{
+  return item == DT_COLLECTION_PROP_DAY || is_time_property(item) || item == DT_COLLECTION_PROP_APERTURE
+         || item == DT_COLLECTION_PROP_FOCAL_LENGTH || item == DT_COLLECTION_PROP_ISO
+         || item == DT_COLLECTION_PROP_EXPOSURE || item == DT_COLLECTION_PROP_ASPECT_RATIO
+         || item == DT_COLLECTION_PROP_RATING;
+}
+
 const char *name(dt_lib_module_t *self)
 {
   return _("Library");
@@ -628,20 +646,48 @@ static gboolean view_onButtonPressed(GtkWidget *treeview, GdkEventButton *event,
     return FALSE;
   }
 
-  if(((d->view_rule == DT_COLLECTION_PROP_FOLDERS)
-      || (d->view_rule == DT_COLLECTION_PROP_FILMROLL))
-      && (event->type == GDK_BUTTON_PRESS && event->button == 3))
+  if(item_is_folder_collection(d->view_rule) &&
+      event->type == GDK_BUTTON_PRESS &&
+      event->button == 3)
   {
-    // Single right-click on filmroll/folder: allow editing the path
+    // Single right-click on filmroll/folder: open contextual menu
     view_popup_menu(treeview, event, d);
     gtk_tree_path_free(path);
     return TRUE;
   }
-  else if(event->type == GDK_BUTTON_PRESS && event->button == 1)
+  else if(event->button == 1 && event->type == GDK_BUTTON_PRESS)
   {
+    // Single left-click
     GtkTreeSelection *selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(treeview));
-    gtk_tree_selection_unselect_all(selection);
-    gtk_tree_selection_select_path(selection, path);
+
+    if(dt_modifier_is(event->state, GDK_SHIFT_MASK) && item_is_numeric_collection(d->view_rule))
+    {
+      // Shift+Click and a numeric selection : trigger range selection
+      gtk_tree_selection_select_path(selection, path);
+
+      GtkTreeModel *model = NULL;
+      GList *selected = gtk_tree_selection_get_selected_rows(selection, &model);
+      GtkTreePath *first_path = (GtkTreePath *)g_list_first(selected)->data;
+      GtkTreePath *last_path = (GtkTreePath *)g_list_last(selected)->data;
+      gtk_tree_selection_select_range(selection, first_path, last_path);
+      g_list_free_full(selected, (GDestroyNotify)gtk_tree_path_free);
+    }
+    else
+    {
+      // Single click alone : single selection
+      gtk_tree_selection_unselect_all(selection);
+      gtk_tree_selection_select_path(selection, path);
+
+      // Toggle expand/collapse state except on Shift because it excludes sub-folders
+      if(!dt_modifier_is(event->state, GDK_SHIFT_MASK))
+      {
+        if(gtk_tree_view_row_expanded(GTK_TREE_VIEW(treeview), path))
+          gtk_tree_view_collapse_row(GTK_TREE_VIEW(treeview), path);
+        else
+          gtk_tree_view_expand_row(GTK_TREE_VIEW(treeview), path, FALSE);
+      }
+    }
+
     row_activated_with_event(GTK_TREE_VIEW(treeview), path, NULL, event, d);
     gtk_tree_path_free(path);
     return TRUE;
@@ -1589,7 +1635,7 @@ static void tree_view(dt_lib_collect_rule_t *dr)
   gtk_tree_selection_unselect_all(gtk_tree_view_get_selection(d->view));
   gtk_tree_view_collapse_all(d->view);
 
-  if(property == DT_COLLECTION_PROP_DAY || is_time_property(property))
+  if(item_is_numeric_collection(property))
   {
     // test selection range [xxx;xxx]
     GRegex *regex;
@@ -2498,7 +2544,8 @@ static void row_activated_with_event(GtkTreeView *view, GtkTreePath *path, GtkTr
   GtkTreeModel *model = NULL;
 
   GtkTreeSelection *selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(view));
-  if(gtk_tree_selection_count_selected_rows(selection) < 1) return;
+  int n_selected = gtk_tree_selection_count_selected_rows(selection);
+  if(n_selected < 1) return;
   GList *sels = gtk_tree_selection_get_selected_rows(selection, &model);
   GtkTreePath *path1 = (GtkTreePath *)sels->data;
   if(!gtk_tree_model_get_iter(model, &iter, path1))
@@ -2517,7 +2564,7 @@ static void row_activated_with_event(GtkTreeView *view, GtkTreePath *path, GtkTr
 
   gboolean force_update_view = FALSE;
 
-  const int item = _combo_get_active_collection(active_rule->combo);
+  const int item = d->view_rule;
   gtk_tree_model_get(model, &iter, DT_LIB_COLLECT_COL_PATH, &text, -1);
 
   if(text && strlen(text) > 0)
@@ -2536,15 +2583,8 @@ static void row_activated_with_event(GtkTreeView *view, GtkTreePath *path, GtkTr
         force_update_view = TRUE;
       }
     }
-    else if(gtk_tree_selection_count_selected_rows(selection) > 1
-            && (item == DT_COLLECTION_PROP_DAY
-                || is_time_property(item)
-                || item == DT_COLLECTION_PROP_APERTURE
-                || item == DT_COLLECTION_PROP_FOCAL_LENGTH
-                || item == DT_COLLECTION_PROP_ISO
-                || item == DT_COLLECTION_PROP_EXPOSURE
-                || item == DT_COLLECTION_PROP_ASPECT_RATIO
-                || item == DT_COLLECTION_PROP_RATING))
+    else if(n_selected > 1
+            && item_is_numeric_collection(item))
     {
       /* this is a range selection */
       GtkTreeIter iter2;
@@ -3230,6 +3270,7 @@ void gui_init(dt_lib_module_t *self)
   d->view = view;
   gtk_tree_view_set_headers_visible(view, FALSE);
   gtk_tree_view_set_activate_on_single_click(view, TRUE);
+  gtk_widget_set_can_focus(GTK_WIDGET(view), TRUE);
   g_signal_connect(G_OBJECT(view), "button-press-event", G_CALLBACK(view_onButtonPressed), d);
   g_signal_connect(G_OBJECT(view), "popup-menu", G_CALLBACK(view_onPopupMenu), d);
 
