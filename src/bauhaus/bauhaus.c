@@ -1660,48 +1660,29 @@ static void dt_bauhaus_draw_indicator(dt_bauhaus_widget_t *w, float pos, cairo_t
 static void dt_bauhaus_draw_quad(dt_bauhaus_widget_t *w, cairo_t *cr, const int width, const int height)
 {
   if(!w->show_quad) return;
-  const gboolean sensitive = gtk_widget_is_sensitive(GTK_WIDGET(w));
 
+  cairo_save(cr);
   if(w->quad_paint)
   {
-    cairo_save(cr);
-
-    if(sensitive && (w->quad_paint_flags & CPF_ACTIVE))
-      set_color(cr, darktable.bauhaus->color_fg);
-    else
-      set_color(cr, darktable.bauhaus->color_fg_insensitive);
-
+    // draw color picker
     w->quad_paint(cr, width - darktable.bauhaus->quad_width,  // x
                       0.0,                                    // y
                       darktable.bauhaus->quad_width,          // width
                       darktable.bauhaus->quad_width,          // height
                       w->quad_paint_flags, w->quad_paint_data);
-
-    cairo_restore(cr);
   }
   else
   {
     // draw active area square:
-    cairo_save(cr);
-    if(sensitive)
-      set_color(cr, darktable.bauhaus->color_fg);
-    else
-      set_color(cr, darktable.bauhaus->color_fg_insensitive);
     switch(w->type)
     {
       case DT_BAUHAUS_COMBOBOX:
         cairo_translate(cr, width - darktable.bauhaus->quad_width * .5f, height * .5f);
-        GdkRGBA *text_color = default_color_assign();
-        GtkStyleContext *context = gtk_widget_get_style_context(GTK_WIDGET(w));
-        const GtkStateFlags state = gtk_widget_get_state_flags(GTK_WIDGET(w));
-        gtk_style_context_get_color(context, state, text_color);
         const float r = darktable.bauhaus->quad_width * .2f;
         cairo_move_to(cr, -r, -r * .5f);
         cairo_line_to(cr, 0, r * .5f);
         cairo_line_to(cr, r, -r * .5f);
-        set_color(cr, *text_color);
         cairo_stroke(cr);
-        gdk_rgba_free(text_color);
         break;
       case DT_BAUHAUS_SLIDER:
         break;
@@ -1711,8 +1692,8 @@ static void dt_bauhaus_draw_quad(dt_bauhaus_widget_t *w, cairo_t *cr, const int 
         cairo_fill(cr);
         break;
     }
-    cairo_restore(cr);
   }
+  cairo_restore(cr);
 }
 
 static void dt_bauhaus_draw_baseline(dt_bauhaus_widget_t *w, cairo_t *cr, float width)
@@ -2179,13 +2160,10 @@ static gboolean _widget_draw(GtkWidget *widget, cairo_t *crf)
   cairo_t *cr = cairo_create(cst);
   GtkStyleContext *context = gtk_widget_get_style_context(widget);
 
-  GdkRGBA *fg_color = default_color_assign();
-  GdkRGBA *bg_color;
+  GdkRGBA *bg_color = default_color_assign();
   GdkRGBA *text_color = default_color_assign();
   const GtkStateFlags state = gtk_widget_get_state_flags(widget);
   gtk_style_context_get_color(context, state, text_color);
-
-  gtk_style_context_get_color(context, state, fg_color);
   gtk_style_context_get(context, state, "background-color", &bg_color, NULL);
   _margins_retrieve(w);
 
@@ -2199,13 +2177,13 @@ static gboolean _widget_draw(GtkWidget *widget, cairo_t *crf)
 
   // draw type specific content:
   cairo_save(cr);
+  set_color(cr, *text_color);
   cairo_set_line_width(cr, 1.0);
   switch(w->type)
   {
     case DT_BAUHAUS_COMBOBOX:
     {
       // draw label and quad area at right end
-      set_color(cr, *text_color);
       if(w->show_quad) dt_bauhaus_draw_quad(w, cr, inner_w, inner_h);
 
       dt_bauhaus_combobox_data_t *d = &w->data.combobox;
@@ -2216,7 +2194,6 @@ static gboolean _widget_draw(GtkWidget *widget, cairo_t *crf)
         const dt_bauhaus_combobox_entry_t *entry = g_ptr_array_index(d->entries, d->active);
         text = entry->label;
       }
-      set_color(cr, *text_color);
 
       const float available_width = inner_w - _widget_get_quad_width(w);
 
@@ -2284,7 +2261,14 @@ static gboolean _widget_draw(GtkWidget *widget, cairo_t *crf)
     {
       // line for orientation
       dt_bauhaus_draw_baseline(w, cr, inner_w);
+
+      // Paint the non-active quad icon with some transparency, because
+      // icons are bolder than the neighbouring text and appear brighter.
+      cairo_save(cr);
+      if(!(w->quad_paint_flags & CPF_ACTIVE))
+        cairo_set_source_rgba(cr, text_color->red, text_color->green, text_color->blue, text_color->alpha * 0.7);
       if(w->show_quad) dt_bauhaus_draw_quad(w, cr, inner_w, inner_h);
+      cairo_restore(cr);
 
       float value_width = 0;
       if(gtk_widget_is_sensitive(widget))
@@ -2292,20 +2276,16 @@ static gboolean _widget_draw(GtkWidget *widget, cairo_t *crf)
         cairo_save(cr);
         cairo_rectangle(cr, 0, 0, inner_w - _widget_get_quad_width(w), inner_h + INNER_PADDING);
         cairo_clip(cr);
-        dt_bauhaus_draw_indicator(w, w->data.slider.pos, cr, inner_w, *fg_color, *bg_color);
+        dt_bauhaus_draw_indicator(w, w->data.slider.pos, cr, inner_w, *text_color, *bg_color);
         cairo_restore(cr);
 
-        // TODO: merge that text with combo
-
         char *text = dt_bauhaus_slider_get_text(widget, dt_bauhaus_slider_get(widget));
-        set_color(cr, *text_color);
         value_width = show_pango_text(w, context, cr, text, inner_w - _widget_get_quad_width(w), 0, 0, TRUE, FALSE,
                                       PANGO_ELLIPSIZE_END, FALSE, FALSE, NULL, NULL);
         g_free(text);
       }
       // label on top of marker:
       gchar *label_text = _build_label(w);
-      set_color(cr, *text_color);
       const float label_width = inner_w - _widget_get_quad_width(w) - value_width;
       if(label_width > 0)
         show_pango_text(w, context, cr, label_text, 0, 0, label_width, FALSE, FALSE, PANGO_ELLIPSIZE_END, FALSE,
@@ -2324,9 +2304,7 @@ static gboolean _widget_draw(GtkWidget *widget, cairo_t *crf)
 
   // render eventual css borders
   gtk_render_frame(context, crf, w->margin->left, w->margin->top, padded_w, padded_h);
-
   gdk_rgba_free(text_color);
-  gdk_rgba_free(fg_color);
   gdk_rgba_free(bg_color);
 
   return TRUE;
