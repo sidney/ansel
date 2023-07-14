@@ -2060,16 +2060,6 @@ static gboolean dt_bauhaus_popup_draw(GtkWidget *widget, cairo_t *crf, gpointer 
             g_free(label);
             g_free(esc_label);
           }
-          else if(entry->alignment == DT_BAUHAUS_COMBOBOX_ALIGN_MIDDLE)
-          {
-            // first pass, we just get the text width
-            label_width = show_pango_text(w, context, cr, entry->label, 0, ht * k + top_gap, max_width, FALSE,
-                                          TRUE, ellipsis, TRUE, FALSE, NULL, NULL, TRUE);
-            // second pass, we draw it in the middle
-            const int posx = MAX(0, (max_width - label_width) / 2);
-            label_width = show_pango_text(w, context, cr, entry->label, posx, ht * k + top_gap, max_width, FALSE,
-                                          FALSE, ellipsis, TRUE, FALSE, NULL, NULL, TRUE);
-          }
           else
           {
             if(first_label) max_width *= 0.8; // give the label at least some room
@@ -2234,12 +2224,6 @@ static gboolean _widget_draw(GtkWidget *widget, cairo_t *crf)
           show_pango_text(w, context, cr, text, available_width, w->top_gap, available_width * (1.0f - ratio),
                           TRUE, FALSE, combo_ellipsis, FALSE, FALSE, NULL, NULL, FALSE);
         }
-        else if(d->text_align == DT_BAUHAUS_COMBOBOX_ALIGN_MIDDLE)
-        {
-          const int posx = MAX(0, (available_width - combo_width) / 2);
-          show_pango_text(w, context, cr, text, posx, w->top_gap, available_width, FALSE, FALSE, combo_ellipsis,
-                          FALSE, FALSE, NULL, NULL, FALSE);
-        }
         else
           show_pango_text(w, context, cr, text, 0, w->top_gap, available_width, FALSE, FALSE, combo_ellipsis,
                           FALSE, FALSE, NULL, NULL, FALSE);
@@ -2253,12 +2237,6 @@ static gboolean _widget_draw(GtkWidget *widget, cairo_t *crf)
                             TRUE, NULL, NULL, FALSE);
           show_pango_text(w, context, cr, text, available_width, w->top_gap, 0, TRUE, FALSE, combo_ellipsis, FALSE,
                           FALSE, NULL, NULL, FALSE);
-        }
-        else if(d->text_align == DT_BAUHAUS_COMBOBOX_ALIGN_MIDDLE)
-        {
-          const int posx = MAX(0, (available_width - combo_width) / 2);
-          show_pango_text(w, context, cr, text, posx, w->top_gap, 0, FALSE, FALSE, combo_ellipsis, FALSE, FALSE,
-                          NULL, NULL, FALSE);
         }
         else
           show_pango_text(w, context, cr, text, 0, w->top_gap, 0, FALSE, FALSE, combo_ellipsis, FALSE, FALSE, NULL,
