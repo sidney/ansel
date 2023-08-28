@@ -134,10 +134,12 @@ static gboolean item_is_folder_collection(dt_collection_properties_t item)
   return item == DT_COLLECTION_PROP_FILMROLL || item == DT_COLLECTION_PROP_FOLDERS;
 }
 
+/*
 static gboolean item_is_tag_collection(dt_collection_properties_t item)
 {
   return item == DT_COLLECTION_PROP_TAG;
 }
+*/
 
 static gboolean item_is_numeric_collection(dt_collection_properties_t item)
 {
