@@ -769,22 +769,10 @@ static inline float get_pixel_norm(const dt_aligned_pixel_t pixel, const dt_iop_
   }
 }
 
-
 #ifdef _OPENMP
 #pragma omp declare simd uniform(grey, black, dynamic_range)
 #endif
-static inline float log_tonemapping_v1(const float x, const float grey, const float black,
-                                       const float dynamic_range)
-{
-  const float temp = (log2f(x / grey) - black) / dynamic_range;
-  return fmaxf(fminf(temp, 1.0f), NORM_MIN);
-}
-
-
-#ifdef _OPENMP
-#pragma omp declare simd uniform(grey, black, dynamic_range)
-#endif
-static inline float log_tonemapping_v2(const float x, const float grey, const float black,
+static inline float log_tonemapping(const float x, const float grey, const float black,
                                        const float dynamic_range)
 {
   return clamp_simd((log2f(x / grey) - black) / dynamic_range);
@@ -1310,7 +1298,7 @@ static inline void filmic_split_v1(const float *const restrict in, float *const 
 
     // Log tone-mapping
     for(int c = 0; c < 3; c++)
-      temp[c] = log_tonemapping_v1(fmaxf(pix_in[c], NORM_MIN), data->grey_source, data->black_source,
+      temp[c] = log_tonemapping(fmaxf(pix_in[c], NORM_MIN), data->grey_source, data->black_source,
                                    data->dynamic_range);
 
     // Get the desaturation coeff based on the log value
@@ -1326,8 +1314,10 @@ static inline void filmic_split_v1(const float *const restrict in, float *const 
     // Apply the transfer function of the display
     for(int c = 0; c < 3; c++)
       pix_out[c] = powf(
-          clamp_simd(filmic_spline(linear_saturation(temp[c], lum, desaturation), spline.M1, spline.M2, spline.M3,
-                                   spline.M4, spline.M5, spline.latitude_min, spline.latitude_max, spline.type)),
+          CLAMPF(filmic_spline(linear_saturation(temp[c], lum, desaturation),
+                               spline.M1, spline.M2, spline.M3, spline.M4, spline.M5,
+                               spline.latitude_min, spline.latitude_max, spline.type),
+                 spline.y[0], spline.y[4]),
           data->output_power);
   }
 }
@@ -1352,7 +1342,7 @@ static inline void filmic_split_v2_v3(const float *const restrict in, float *con
 
     // Log tone-mapping
     for(int c = 0; c < 3; c++)
-      temp[c] = log_tonemapping_v2(fmaxf(pix_in[c], NORM_MIN), data->grey_source, data->black_source,
+      temp[c] = log_tonemapping(fmaxf(pix_in[c], NORM_MIN), data->grey_source, data->black_source,
                                    data->dynamic_range);
 
     // Get the desaturation coeff based on the log value
@@ -1368,8 +1358,10 @@ static inline void filmic_split_v2_v3(const float *const restrict in, float *con
     // Apply the transfer function of the display
     for(int c = 0; c < 3; c++)
       pix_out[c] = powf(
-          clamp_simd(filmic_spline(linear_saturation(temp[c], lum, desaturation), spline.M1, spline.M2, spline.M3,
-                                   spline.M4, spline.M5, spline.latitude_min, spline.latitude_max, spline.type)),
+          CLAMPF(filmic_spline(linear_saturation(temp[c], lum, desaturation),
+                               spline.M1, spline.M2, spline.M3, spline.M4, spline.M5,
+                               spline.latitude_min, spline.latitude_max, spline.type),
+                 spline.y[0], spline.y[4]),
           data->output_power);
   }
 }
@@ -1403,7 +1395,7 @@ static inline void filmic_chroma_v1(const float *const restrict in, float *const
       for_each_channel(c) ratios[c] -= min_ratios;
 
     // Log tone-mapping
-    norm = log_tonemapping_v1(norm, data->grey_source, data->black_source, data->dynamic_range);
+    norm = log_tonemapping(norm, data->grey_source, data->black_source, data->dynamic_range);
 
     // Get the desaturation value based on the log value
     const float desaturation = filmic_desaturate_v1(norm, data->sigma_toe, data->sigma_shoulder, data->saturation);
@@ -1420,8 +1412,9 @@ static inline void filmic_chroma_v1(const float *const restrict in, float *const
 
     // Filmic S curve on the max RGB
     // Apply the transfer function of the display
-    norm = powf(clamp_simd(filmic_spline(norm, spline.M1, spline.M2, spline.M3, spline.M4, spline.M5,
-                                         spline.latitude_min, spline.latitude_max, spline.type)),
+    norm = powf(CLAMPF(filmic_spline(norm, spline.M1, spline.M2, spline.M3, spline.M4, spline.M5,
+                                     spline.latitude_min, spline.latitude_max, spline.type),
+                       spline.y[0], spline.y[4]),
                 data->output_power);
 
     // Re-apply ratios
@@ -1465,15 +1458,16 @@ static inline void filmic_chroma_v2_v3(const float *const restrict in, float *co
         ratios[c] -= min_ratios;
 
     // Log tone-mapping
-    norm = log_tonemapping_v2(norm, data->grey_source, data->black_source, data->dynamic_range);
+    norm = log_tonemapping(norm, data->grey_source, data->black_source, data->dynamic_range);
 
     // Get the desaturation value based on the log value
     const float desaturation = filmic_desaturate_v2(norm, data->sigma_toe, data->sigma_shoulder, data->saturation);
 
     // Filmic S curve on the max RGB
     // Apply the transfer function of the display
-    norm = powf(clamp_simd(filmic_spline(norm, spline.M1, spline.M2, spline.M3, spline.M4, spline.M5,
-                                         spline.latitude_min, spline.latitude_max, spline.type)),
+    norm = powf(CLAMPF(filmic_spline(norm, spline.M1, spline.M2, spline.M3, spline.M4, spline.M5,
+                                         spline.latitude_min, spline.latitude_max, spline.type),
+                       spline.y[0], spline.y[4]),
                 data->output_power);
 
     // Re-apply ratios with saturation change
@@ -1497,7 +1491,7 @@ static inline void filmic_chroma_v2_v3(const float *const restrict in, float *co
       for_each_channel(c,aligned(pix_out))
       {
         ratios[c] = fmaxf(ratios[c] + (1.0f - max_pix), 0.0f);
-        pix_out[c] = clamp_simd(ratios[c] * norm);
+        pix_out[c] = ratios[c] * norm;
       }
     }
   }
@@ -1805,7 +1799,7 @@ static inline void norm_tone_mapping_v4(const dt_aligned_pixel_t pix_in, dt_alig
                                         const float display_black, const float display_white)
     {
   // Norm must be clamped early to the valid input range, otherwise it will be clamped
-  // later in log_tonemapping_v2 and the ratios will be then incorrect.
+  // later in log_tonemapping and the ratios will be then incorrect.
   // This would result in colorful patches darker than their surrounding in places
   // where the raw data is clipped.
   float norm = CLAMPF(get_pixel_norm(pix_in, type, work_profile), norm_min, norm_max);
@@ -1815,14 +1809,14 @@ static inline void norm_tone_mapping_v4(const dt_aligned_pixel_t pix_in, dt_alig
   for_each_channel(c,aligned(pix_in)) ratios[c] = pix_in[c] / norm;
 
   // Log tone-mapping
-  norm = log_tonemapping_v2(norm, data->grey_source, data->black_source, data->dynamic_range);
+  norm = log_tonemapping(norm, data->grey_source, data->black_source, data->dynamic_range);
 
   // Filmic S curve on the max RGB
   // Apply the transfer function of the display
   norm = powf(CLAMP(filmic_spline(norm, spline.M1, spline.M2, spline.M3, spline.M4, spline.M5,
                                         spline.latitude_min, spline.latitude_max, spline.type),
-                    display_black,
-                    display_white),
+                    spline.y[0],
+                    spline.y[4]),
               data->output_power);
 
   // Restore RGB
@@ -1841,14 +1835,15 @@ static inline void RGB_tone_mapping_v4(const dt_aligned_pixel_t pix_in, dt_align
   for_each_channel(c,aligned(pix_in, pix_out))
   {
     // Log tone-mapping
-    pix_out[c] = log_tonemapping_v2(pix_in[c], data->grey_source, data->black_source, data->dynamic_range);
+    pix_out[c] = log_tonemapping(pix_in[c], data->grey_source, data->black_source, data->dynamic_range);
 
     // Filmic S curve on RGB
     // Apply the transfer function of the display
     pix_out[c] = powf(CLAMP(filmic_spline(pix_out[c], spline.M1, spline.M2, spline.M3, spline.M4, spline.M5,
-                                                spline.latitude_min, spline.latitude_max, spline.type),
+                                          spline.latitude_min, spline.latitude_max, spline.type),
                             0.f,  // individual components can always go to zero, luminance is clamped later
-                            display_white), data->output_power);
+                            spline.y[4]),
+                      data->output_power);
   }
 }
 
@@ -2588,6 +2583,8 @@ int process_cl(struct dt_iop_module_t *self, dt_dev_pixelpipe_iop_t *piece, cl_m
     dt_opencl_set_kernel_arg(devid, gd->kernel_filmic_rgb_split, 28, sizeof(int), (void *)&use_output_profile);
     dt_opencl_set_kernel_arg(devid, gd->kernel_filmic_rgb_split, 29, sizeof(cl_mem), (void *)&export_input_matrix_cl);
     dt_opencl_set_kernel_arg(devid, gd->kernel_filmic_rgb_split, 30, sizeof(cl_mem), (void *)&export_output_matrix_cl);
+    dt_opencl_set_kernel_arg(devid, gd->kernel_filmic_rgb_split, 31, sizeof(float), (void *)&spline.y[0]);
+    dt_opencl_set_kernel_arg(devid, gd->kernel_filmic_rgb_split, 32, sizeof(float), (void *)&spline.y[4]);
 
     err = dt_opencl_enqueue_kernel_2d(devid, gd->kernel_filmic_rgb_split, sizes);
     if(err != CL_SUCCESS) goto error;
@@ -2628,6 +2625,8 @@ int process_cl(struct dt_iop_module_t *self, dt_dev_pixelpipe_iop_t *piece, cl_m
     dt_opencl_set_kernel_arg(devid, gd->kernel_filmic_rgb_chroma, 31, sizeof(cl_mem), (void *)&export_output_matrix_cl);
     dt_opencl_set_kernel_arg(devid, gd->kernel_filmic_rgb_chroma, 32, sizeof(float), (void *)&norm_min);
     dt_opencl_set_kernel_arg(devid, gd->kernel_filmic_rgb_chroma, 33, sizeof(float), (void *)&norm_max);
+    dt_opencl_set_kernel_arg(devid, gd->kernel_filmic_rgb_chroma, 34, sizeof(float), (void *)&spline.y[0]);
+    dt_opencl_set_kernel_arg(devid, gd->kernel_filmic_rgb_chroma, 35, sizeof(float), (void *)&spline.y[4]);
 
     err = dt_opencl_enqueue_kernel_2d(devid, gd->kernel_filmic_rgb_chroma, sizes);
     if(err != CL_SUCCESS) goto error;
@@ -3596,7 +3595,7 @@ static gboolean dt_iop_tonecurve_draw(GtkWidget *widget, cairo_t *crf, gpointer 
     // draw the tone curve
     float x_start = 0.f;
     if(g->gui_mode == DT_FILMIC_GUI_BASECURVE || g->gui_mode == DT_FILMIC_GUI_BASECURVE_LOG)
-      x_start = log_tonemapping_v2(x_start, grey, p->black_point_source, DR);
+      x_start = log_tonemapping(x_start, grey, p->black_point_source, DR);
 
     if(g->gui_mode == DT_FILMIC_GUI_BASECURVE_LOG) x_start = dt_log_scale_axis(x_start, LOGBASE);
 
@@ -3618,7 +3617,7 @@ static gboolean dt_iop_tonecurve_draw(GtkWidget *widget, cairo_t *crf, gpointer 
       float value = x;
 
       if(g->gui_mode == DT_FILMIC_GUI_BASECURVE || g->gui_mode == DT_FILMIC_GUI_BASECURVE_LOG)
-        value = log_tonemapping_v2(x, grey, p->black_point_source, DR);
+        value = log_tonemapping(x, grey, p->black_point_source, DR);
 
       if(g->gui_mode == DT_FILMIC_GUI_BASECURVE_LOG) x = dt_log_scale_axis(x, LOGBASE);
 
