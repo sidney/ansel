@@ -172,6 +172,7 @@ jobs:
         btype:
           - Debug
           - Release
+        eco: [-DUSE_XMLLINT=OFF]
         target:
           - skiptest
           - nofeatures
