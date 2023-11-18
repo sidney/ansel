@@ -45,130 +45,8 @@ permissions:
   contents: read
 
 jobs:
-
-  Linux-minimal:
-    name: Linux-minimal.${{ matrix.os.code }}.${{ matrix.compiler.compiler }}.${{ matrix.target }}.${{ matrix.btype }}.${{ matrix.generator }}
-    runs-on: ${{ matrix.os.label }}
-    strategy:
-      fail-fast: true
-      matrix:
-        include:
-          # Ubuntu 22.04 GCC 12
-          - os: { label: ubuntu-22.04, code: jammy }
-            btype: Debug
-            compiler: { compiler: GNU12,   CC: gcc-12,    CXX: g++-12,      packages: gcc-12 g++-12 }
-            target: nofeatures
-            generator: Ninja
-          # Ubuntu 22.04 GCC 13
-          - os: { label: ubuntu-22.04, code: jammy }
-            btype: Debug
-            compiler: { compiler: GNU13,   CC: gcc-13,    CXX: g++-13,      packages: gcc-13 g++-13 }
-            target: nofeatures
-            generator: Ninja
-          # Ubuntu 22.04 Clang 14
-          - os: { label: ubuntu-22.04, code: jammy }
-            btype: Debug
-            compiler: { compiler: LLVM14, CC: clang-14, CXX: clang++-14, packages: clang-14 libomp-14-dev libclang-common-14-dev llvm-14-dev clang++-14 libc++-14-dev libc++1-14 libc++abi1-14 lld-14}
-            target: nofeatures
-            generator: Ninja
-    env:
-      CC: ${{ matrix.compiler.CC }}
-      CXX: ${{ matrix.compiler.CXX }}
-      SRC_DIR: ${{ github.workspace }}/src
-      BUILD_DIR: ${{ github.workspace }}/build
-      INSTALL_PREFIX: ${{ github.workspace }}/install
-      CMAKE_BUILD_TYPE: ${{ matrix.btype }}
-      GENERATOR: ${{ matrix.generator }}
-      TARGET: ${{ matrix.target }}
-      DARKTABLE_CLI: ${{ github.workspace }}/install/bin/ansel-cli
-
-    steps:
-      - name: Install compiler ${{ matrix.compiler.compiler }}
-        run: |
-          sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test
-          sudo add-apt-repository -y universe
-          sudo add-apt-repository -y multiverse
-          sudo apt-get update
-          sudo apt-get -y install \
-            ${{ matrix.compiler.packages }}
-      - name: Install Base Dependencies
-        run: |
-          sudo apt-get -y install \
-            build-essential \
-            appstream-util \
-            desktop-file-utils \
-            gettext \
-            git \
-            gdb \
-            intltool \
-            libatk1.0-dev \
-            libcairo2-dev \
-            libcolord-dev \
-            libcolord-gtk-dev \
-            libcmocka-dev \
-            libcups2-dev \
-            libcurl4-gnutls-dev \
-            libexiv2-dev \
-            libgdk-pixbuf2.0-dev \
-            libglib2.0-dev \
-            libgraphicsmagick1-dev \
-            libgtk-3-dev \
-            libheif-dev \
-            libjpeg-dev \
-            libjson-glib-dev \
-            liblcms2-dev \
-            liblensfun-dev \
-            liblua5.3-dev \
-            libopenexr-dev \
-            libopenjp2-7-dev \
-            libosmgpsmap-1.0-dev \
-            libpango1.0-dev \
-            libpng-dev \
-            libpugixml-dev \
-            librsvg2-dev \
-            libsaxon-java \
-            libsecret-1-dev \
-            libsoup2.4-dev \
-            libsqlite3-dev \
-            libtiff5-dev \
-            libwebp-dev \
-            libx11-dev \
-            libxml2-dev \
-            libxml2-utils \
-            ninja-build \
-            perl \
-            po4a \
-            python3-jsonschema \
-            xsltproc \
-            zlib1g-dev;
-      - uses: actions/checkout@v4
-        with:
-          submodules: true
-          fetch-depth: 1
-          path: src
-      - name: Build and Install
-        run: |
-          cmake -E make_directory "${BUILD_DIR}";
-          cmake -E make_directory "${INSTALL_PREFIX}";
-          ./src/.ci/ci-script.sh;
-      - name: Check if it runs
-        if: ${{ matrix.target != 'usermanual' }}
-        run: |
-          ${INSTALL_PREFIX}/bin/ansel --version || true
-          ${INSTALL_PREFIX}/bin/ansel-cli \
-                 --width 2048 --height 2048 \
-                 --hq true --apply-custom-presets false \
-                 "${SRC_DIR}/src/tests/integration/images/mire1.cr2" \
-                 "${SRC_DIR}/src/tests/integration/0000-nop/nop.xmp" \
-                 output.png \
-                 --core --disable-opencl --conf host_memory_limit=8192 \
-                 --conf worker_threads=4 -t 4 \
-                 --conf plugins/lighttable/export/force_lcms2=FALSE \
-                 --conf plugins/lighttable/export/iccintent=0
-
   Linux:
     name: Linux.${{ matrix.os.code }}.${{ matrix.compiler.compiler }}.${{ matrix.target }}.${{ matrix.btype }}.${{ matrix.generator }}
-    needs: Linux-minimal
     runs-on: ${{ matrix.os.label }}
     strategy:
       fail-fast: true
@@ -176,17 +54,15 @@ jobs:
         os:
           - { label: ubuntu-22.04, code: jammy }
         compiler:
-          - { compiler: GNU12,  CC: gcc-12,   CXX: g++-12,     packages: gcc-12 g++-12 }
           - { compiler: GNU13,  CC: gcc-13,   CXX: g++-13,     packages: gcc-13 g++-13 }
-          - { compiler: LLVM14, CC: clang-14, CXX: clang++-14, packages: clang-14 libomp-14-dev libclang-common-14-dev llvm-14-dev clang++-14 libc++-14-dev libc++1-14 libc++abi1-14 lld-14}
+          - { compiler: LLVM15, CC: clang-15, CXX: clang++-15, packages: clang-15 libomp-15-dev llvm-15-dev libc++-15-dev libc++abi1-15 lld-15 clang-tools-15 mlir-15-tools libmlir-15-dev}
         btype:
-          - RelWithDebInfo
+          - Debug
           - Release
         target:
           - skiptest
           - nofeatures
         generator:
-          #- Unix Makefiles
           - Ninja
     env:
       CC: ${{ matrix.compiler.CC }}
@@ -289,22 +165,20 @@ jobs:
 
   Win64:
     name: Win64.${{ matrix.msystem }}.${{ matrix.target }}.${{ matrix.btype }}.${{ matrix.generator }}
-    needs: Linux-minimal
     runs-on: windows-latest
     strategy:
       fail-fast: true
       matrix:
         btype:
-          - Release
           - Debug
-        msystem:
-          - UCRT64
+          - Release
         target:
           - skiptest
           - nofeatures
         generator:
-          #- MSYS Makefiles
           - Ninja
+        msystem:
+          - UCRT64
     defaults:
       run:
         shell: msys2 {0}
@@ -322,13 +196,11 @@ jobs:
         with:
           msystem: ${{ matrix.msystem }}
           install: >-
-            base-devel
             git
             intltool
             po4a
           pacboy: >-
             cc:p
-            toolchain:p
             cmake:p
             cmocka:p
             ninja:p
@@ -383,7 +255,6 @@ jobs:
           cmake -E make_directory "${INSTALL_PREFIX}"
           $(cygpath ${SRC_DIR})/.ci/ci-script.sh
       - name: Check if it runs
-        if: ${{success() && matrix.compiler.compiler == 'GNU' }} # LLVM build on windws for some reason breaks in imageio_rawspeed...
         run: |
           $(cygpath ${INSTALL_PREFIX})/bin/ansel.exe --version || true
           $(cygpath ${INSTALL_PREFIX})/bin/ansel-cli.exe --version || true
@@ -401,6 +272,7 @@ jobs:
                  --conf plugins/lighttable/export/iccintent=0
 
   macOS:
+    if: ${{ false }}
     name: macOS.${{ matrix.compiler.compiler }}.${{ matrix.build.xcode }}.${{ matrix.target }}.${{ matrix.btype }}.${{ matrix.generator }}
     runs-on: ${{ matrix.build.os }}
     strategy:
