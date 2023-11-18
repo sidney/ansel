@@ -297,7 +297,7 @@ jobs:
         btype:
           - Release
           - Debug
-         msystem:
+        msystem:
           - UCRT64
         target:
           - skiptest
