@@ -59,6 +59,12 @@ jobs:
             compiler: { compiler: GNU12,   CC: gcc-12,    CXX: g++-12,      packages: gcc-12 g++-12 }
             target: nofeatures
             generator: Ninja
+          # Ubuntu 22.04 GCC 13
+            - os: { label: ubuntu-22.04, code: jammy }
+            btype: Debug
+            compiler: { compiler: GNU13,   CC: gcc-13,    CXX: g++-13,      packages: gcc-13 g++-13 }
+            target: nofeatures
+            generator: Ninja
           # Ubuntu 22.04 Clang 14
           - os: { label: ubuntu-22.04, code: jammy }
             btype: Debug
@@ -135,7 +141,7 @@ jobs:
             python3-jsonschema \
             xsltproc \
             zlib1g-dev;
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           submodules: true
           fetch-depth: 1
@@ -171,6 +177,7 @@ jobs:
           - { label: ubuntu-22.04, code: jammy }
         compiler:
           - { compiler: GNU12,  CC: gcc-12,   CXX: g++-12,     packages: gcc-12 g++-12 }
+          - { compiler: GNU13,  CC: gcc-13,   CXX: g++-13,     packages: gcc-13 g++-13 }
           - { compiler: LLVM14, CC: clang-14, CXX: clang++-14, packages: clang-14 libomp-14-dev libclang-common-14-dev llvm-14-dev clang++-14 libc++-14-dev libc++1-14 libc++abi1-14 lld-14}
         btype:
           - RelWithDebInfo
@@ -251,7 +258,7 @@ jobs:
             python3-jsonschema \
             xsltproc \
             zlib1g-dev;
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           submodules: true
           path: src
@@ -281,39 +288,27 @@ jobs:
           ./run.sh --no-opencl --no-deltae --fast-fail
 
   Win64:
-    name: Win64.${{ matrix.compiler.compiler }}.${{ matrix.target }}.${{ matrix.btype }}.${{ matrix.generator }}
+    name: Win64.${{ matrix.msystem }}.${{ matrix.target }}.${{ matrix.btype }}.${{ matrix.generator }}
     needs: Linux-minimal
     runs-on: windows-latest
     strategy:
       fail-fast: true
       matrix:
         btype:
-          - RelWithDebInfo
           - Release
-        compiler:
-          - { compiler: GNU,  CC: gcc,   CXX: g++ }
+          - Debug
+         msystem:
+          - UCRT64
         target:
           - skiptest
           - nofeatures
         generator:
           #- MSYS Makefiles
           - Ninja
-        include:
-          - btype: Release
-            compiler: { compiler: GNU,  CC: gcc,   CXX: g++ }
-            eco: -DBINARY_PACKAGE_BUILD=ON
-            target: skiptest
-            generator: Ninja
-          - btype: Debug
-            compiler: { compiler: GNU,  CC: gcc,   CXX: g++ }
-            target: skiptest
-            generator: Ninja
     defaults:
       run:
         shell: msys2 {0}
     env:
-      CC: ${{ matrix.compiler.CC }}
-      CXX: ${{ matrix.compiler.CXX }}
       SRC_DIR: ${{ github.workspace }}/src
       BUILD_DIR: ${{ github.workspace }}/build
       INSTALL_PREFIX: ${{ github.workspace }}/install
@@ -325,12 +320,14 @@ jobs:
     steps:
       - uses: msys2/setup-msys2@v2
         with:
-          msystem: ucrt64
+          msystem: ${{ matrix.msystem }}
           install: >-
             base-devel
             git
             intltool
+            po4a
           pacboy: >-
+            cc:p
             toolchain:p
             cmake:p
             cmocka:p
@@ -339,10 +336,13 @@ jobs:
             dbus-glib:p
             drmingw:p
             exiv2:p
+            gcc-libs:p
             gettext:p
             gmic:p
             graphicsmagick:p
             gtk3:p
+            icu:p
+            imath:p
             iso-codes:p
             lcms2:p
             lensfun:p
@@ -350,12 +350,17 @@ jobs:
             libexif:p
             libheif:p
             libjpeg-turbo:p
+            libjxl:p
+            librsvg:p
             libsecret:p
             libsoup:p
+            libwebp:p
+            libtiff:p
             libwebp:p
             libxml2:p
             libxslt:p
             lua:p
+            omp:p
             openexr:p
             openjpeg2:p
             osm-gps-map:p
@@ -367,9 +372,8 @@ jobs:
             python3-six:p
             sqlite3:p
             zlib:p
-            gmic:p
           update: true
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           submodules: true
           path: src
@@ -397,27 +401,23 @@ jobs:
                  --conf plugins/lighttable/export/iccintent=0
 
   macOS:
-    if: ${{ false }}
-    name: macOS.${{ matrix.compiler.compiler }}.${{ matrix.build.xcode }}.${{ matrix.target }}.${{ matrix.generator }}
-    needs: Linux-minimal
+    name: macOS.${{ matrix.compiler.compiler }}.${{ matrix.build.xcode }}.${{ matrix.target }}.${{ matrix.btype }}.${{ matrix.generator }}
     runs-on: ${{ matrix.build.os }}
     strategy:
       fail-fast: true
       matrix:
         build:
-          - { os: macos-11,    xcode: 12.5.1, deployment: 11.3 }
-          - { os: macos-11,    xcode: 13.2.1, deployment: 12.1 }
-          - { os: macos-12,    xcode: 13.4,   deployment: 12.3 }
+          - { os: macos-12,    xcode: 14.2,   deployment: 12.5 } # LLVM14
         compiler:
           - { compiler: XCode,   CC: cc, CXX: c++ }
         btype:
-          - RelWithDebInfo
+          - Debug
           - Release
         target:
           - skiptest
-          - nofeatures
         generator:
           - Ninja
+        eco: [-DDONT_USE_INTERNAL_LIBRAW=ON]
     env:
       DEVELOPER_DIR: /Applications/Xcode_${{ matrix.build.xcode }}.app/Contents/Developer
       CC: ${{ matrix.compiler.CC }}
@@ -426,25 +426,25 @@ jobs:
       SRC_DIR: ${{ github.workspace }}/src
       BUILD_DIR: ${{ github.workspace }}/build
       INSTALL_PREFIX: ${{ github.workspace }}/install
+      ECO: ${{ matrix.eco }}
       CMAKE_BUILD_TYPE: ${{ matrix.btype }}
       GENERATOR: ${{ matrix.generator }}
       TARGET: ${{ matrix.target }}
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           submodules: true
           path: src
       - name: Install Base Dependencies
         run: |
           brew update > /dev/null || true
-          brew unlink python@3.8
-          # brew link --overwrite python@3.9 # workaround introduced 30.12.2020, replace asap.
-          # brew link --overwrite python@3.10 # workaround introduced 16.12.2022
-          # brew upgrade --ignore-pinned # workaround introduced 18.07.2021, replace asap
           brew tap Homebrew/bundle
           cd src/.ci
-          brew bundle --verbose
-          brew link --force libomp # fix for keg-only libomp
+          export HOMEBREW_NO_INSTALL_UPGRADE=1
+          brew bundle --verbose || true
+          # handle keg-only libs
+          brew link --force libomp
+          brew link --force libsoup@2
       - name: Build and Install
           # todo: use linker which supports --wrap, ld.bfd and ld.gold support it
         run: |
@@ -463,4 +463,4 @@ jobs:
                  --core --disable-opencl --conf host_memory_limit=8192 \
                  --conf worker_threads=4 -t 4 \
                  --conf plugins/lighttable/export/force_lcms2=FALSE \
-                 --conf plugins/lighttable/export/iccintent=0 || true # OpenMP builds crash for most configs
+                 --conf plugins/lighttable/export/iccintent=0
