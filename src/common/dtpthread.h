@@ -65,8 +65,7 @@ typedef struct dt_pthread_rwlock_t
 static inline int dt_pthread_mutex_destroy(dt_pthread_mutex_t *mutex)
 {
   // Prevent mutexes from being destroyed if they are still locked by a thread.
-  if(pthread_mutex_trylock(&mutex->mutex) == 0)
-    pthread_mutex_unlock(&mutex->mutex);
+  pthread_mutex_unlock(&mutex->mutex);
   const int ret = pthread_mutex_destroy(&(mutex->mutex));
   assert(!ret);
 
@@ -325,8 +324,7 @@ static inline int dt_pthread_mutex_unlock(dt_pthread_mutex_t *mutex) RELEASE(mut
 static inline int dt_pthread_mutex_destroy(dt_pthread_mutex_t *mutex)
 {
   // Prevent mutexes from being destroyed if they are still locked by a thread.
-  if(pthread_mutex_trylock(&mutex->mutex) == 0)
-    pthread_mutex_unlock(&mutex->mutex);
+  pthread_mutex_unlock(&mutex->mutex);
   return pthread_mutex_destroy(&mutex->mutex);
 };
 
