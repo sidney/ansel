@@ -366,10 +366,11 @@ chart_t *parse_cht(const char *filename)
             }
           }
           y_max = MAX(y_max, y + h);
-          if(kl == 'X' || kl == 'Y')
+          if((kl == 'X' || kl == 'Y') && first_label && last_label)
             g_hash_table_insert(result->patch_sets, g_strdup_printf("%s .. %s", first_label, last_label), labels);
 
           g_free(last_label);
+          g_free(first_label);
           free(y_label);
           free(x_label);
         }
