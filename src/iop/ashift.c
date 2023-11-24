@@ -5696,7 +5696,6 @@ void gui_init(struct dt_iop_module_t *self)
 
   g->f_length = dt_bauhaus_slider_from_params(self, "f_length");
   dt_bauhaus_slider_set_soft_range(g->f_length, 10.0f, 1000.0f);
-  dt_bauhaus_slider_set_curve(g->f_length, log10_curve);
   dt_bauhaus_slider_set_digits(g->f_length, 0);
   dt_bauhaus_slider_set_format(g->f_length, " mm");
 
@@ -5712,7 +5711,6 @@ void gui_init(struct dt_iop_module_t *self)
   gtk_widget_set_visible(g->orthocorr, FALSE);
 
   g->aspect = dt_bauhaus_slider_from_params(self, "aspect");
-  dt_bauhaus_slider_set_curve(g->aspect, log2_curve);
 
   gtk_box_pack_start(GTK_BOX(g->cs.container), g->specifics, TRUE, TRUE, 0);
 
