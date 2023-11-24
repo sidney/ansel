@@ -348,7 +348,7 @@ static void _combobox_next_sensitive(dt_bauhaus_widget_t *w, int delta)
     cur += step;
   }
   d->hovered = new_pos;
-  dt_bauhaus_combobox_set(GTK_WIDGET(w), d->hovered);
+  dt_bauhaus_combobox_set(GTK_WIDGET(w), new_pos);
 }
 
 static dt_bauhaus_combobox_entry_t *new_combobox_entry(const char *label, dt_bauhaus_combobox_alignment_t alignment,
@@ -430,7 +430,7 @@ static void show_pango_text(dt_bauhaus_widget_t *w, GtkStyleContext *context,
   // Prepare context and font properties
   PangoLayout *layout = pango_cairo_create_layout(cr);
   PangoFontDescription *font_desc = NULL;
-  GtkStateFlags state = (ignore_pseudo_classes) ? GTK_STATE_NORMAL
+  GtkStateFlags state = (ignore_pseudo_classes) ? GTK_STATE_FLAG_NORMAL
                                                 : gtk_widget_get_state_flags(GTK_WIDGET(w));
   gtk_style_context_get(context, state, "font", &font_desc, NULL);
   pango_layout_set_font_description(layout, font_desc);
@@ -561,7 +561,7 @@ static void _slider_zoom_range(dt_bauhaus_widget_t *w, float zoom)
 
   const float value = dt_bauhaus_slider_get(GTK_WIDGET(w));
 
-  if((int)roundf(zoom) == 0)
+  if(roundf(zoom) == 0.f)
   {
     d->min = d->soft_min;
     d->max = d->soft_max;
@@ -632,6 +632,13 @@ static gboolean dt_bauhaus_popup_motion_notify(GtkWidget *widget, GdkEventMotion
     return TRUE;
   }
 
+  // WARNING :
+  // This used to manually compute cursor coordinates by fetching
+  // parent window base coordinates, then getting event->x/y_root.
+  // This is what event->x/y seems to be doing directly as of Gtk 3.26.
+  // Let's see if that works.
+
+
   // Pass-on new cursor coordinates corrected for padding and margin
   // and start a redraw. Nothing else.
   darktable.bauhaus->mouse_x = event_x;
@@ -656,6 +663,11 @@ static gboolean dt_bauhaus_popup_button_release(GtkWidget *widget, GdkEventButto
      && (event->button == 1) && (event->time >= darktable.bauhaus->opentime + delay) && !darktable.bauhaus->hiding)
   {
     gtk_widget_set_state_flags(widget, GTK_STATE_FLAG_ACTIVE, TRUE);
+    // WARNING : this used to manually translate cursor coordinates by getting
+    // the origin coordinates of the window and then the absolute
+    // coordinates of cursor in said window. This seems to be what
+    // event->x already does as of Gtk 3.26. Let's see if that works.
+
     dt_bauhaus_hide_popup();
   }
   else if(darktable.bauhaus->hiding)
