@@ -5538,34 +5538,6 @@ void gui_focus(struct dt_iop_module_t *self, gboolean in)
   }
 }
 
-static float log10_curve(float inval, dt_bauhaus_curve_t dir)
-{
-  float outval;
-  if(dir == DT_BAUHAUS_SET)
-  {
-    outval = log10f(inval * 999.0f + 1.0f) / 3.0f;
-  }
-  else
-  {
-    outval = (expf(M_LN10 * inval * 3.0f) - 1.0f) / 999.0f;
-  }
-  return outval;
-}
-
-static float log2_curve(float inval, dt_bauhaus_curve_t dir)
-{
-  float outval;
-  if(dir == DT_BAUHAUS_SET)
-  {
-      outval = log2f(inval * 1.5f + 0.5f) / 2.0f + 0.5f;
-  }
-  else
-  {
-    outval = (exp2f(inval * 2.0 - 1.0) - 0.5f) / 1.5f;
-  }
-  return outval;
-}
-
 static int _event_structure_quad_clicked(GtkWidget *widget, GdkEventButton *event, gpointer user_data)
 {
   dt_iop_module_t *self = (dt_iop_module_t *)user_data;
