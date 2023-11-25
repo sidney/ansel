@@ -896,6 +896,11 @@ void dt_bauhaus_init()
   gtk_window_set_resizable(GTK_WINDOW(darktable.bauhaus->popup_window), FALSE);
   gtk_window_set_default_size(GTK_WINDOW(darktable.bauhaus->popup_window), 260, 260);
   gtk_window_set_modal(GTK_WINDOW(darktable.bauhaus->popup_window), TRUE);
+
+  // Needed for Wayland and Sway :
+  gtk_window_set_transient_for(GTK_WINDOW(darktable.bauhaus->popup_window),
+                               GTK_WINDOW(dt_ui_main_window(darktable.gui->ui)));
+
   gtk_window_set_decorated(GTK_WINDOW(darktable.bauhaus->popup_window), FALSE);
   gtk_window_set_attached_to(GTK_WINDOW(darktable.bauhaus->popup_window), NULL);
 
