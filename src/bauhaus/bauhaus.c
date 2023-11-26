@@ -1971,12 +1971,16 @@ static void dt_bauhaus_widget_accept(struct dt_bauhaus_widget_t *w)
     {
       dt_bauhaus_combobox_data_t *d = &w->data.combobox;
 
-      if(d->editable && darktable.bauhaus->keys > 0)
+      if(d->editable && darktable.bauhaus->keys_cnt > 0)
       {
         // combobox is editable and we have text, assume it is a custom input
         memset(d->text, 0, DT_BAUHAUS_COMBO_MAX_TEXT);
         g_strlcpy(d->text, darktable.bauhaus->keys, DT_BAUHAUS_COMBO_MAX_TEXT);
         dt_bauhaus_combobox_set(widget, -1); // select custom entry
+
+#if DEBUG
+        fprintf(stdout, "combobox went the custom path\n");
+#endif
       }
       else
       {
