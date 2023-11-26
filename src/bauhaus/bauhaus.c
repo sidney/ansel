@@ -2445,6 +2445,15 @@ void dt_bauhaus_show_popup(GtkWidget *widget)
   GtkStyleContext *context = gtk_widget_get_style_context(darktable.bauhaus->popup_area);
   gtk_style_context_add_class(context, "dt_bauhaus_popup");
 
+  // The popup is a drop-down, meaning we can be sure it will not go higher than the calling widget.
+  // But it can still exit the viewport by the bottom.
+  // When that's the case, shift it vertically until it fits, assuming
+  // the combobox is smaller than the viewport.
+  // If that's not enough, then reduce comboboxes items or use a scrolled window.
+  const int min_y = floorf(y) + tmp.height;
+  if(darktable.gui->ui->manager.viewport.height < min_y)
+    y = MAX(0, y - (min_y - darktable.gui->ui->manager.viewport.height));
+
   // gtk_widget_get_window will return null if not shown yet.
   // it is needed for gdk_window_move, and gtk_window move will
   // sometimes be ignored. this is why we always call both...
