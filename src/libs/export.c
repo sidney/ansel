@@ -1099,7 +1099,7 @@ void gui_init(dt_lib_module_t *self)
   for(const GList *it = darktable.imageio->plugins_format; it; it = g_list_next(it))
   {
     const dt_imageio_module_format_t *module = (dt_imageio_module_format_t *)it->data;
-    dt_bauhaus_combobox_add(d->format, module->name(module));
+    dt_bauhaus_combobox_add(d->format, module->name());
     if(module->widget)
     {
       gtk_container_add(GTK_CONTAINER(d->format_extra_container), module->widget);
