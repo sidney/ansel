@@ -300,10 +300,10 @@ static float _bh_slider_get_min_step(const struct dt_bauhaus_widget_t *const w)
   return d->factor * (float)ipow(10, d->digits);
 }
 
-static float _bh_slider_get_scale(struct dt_bauhaus_widget_t *w)
+static double _bh_slider_get_scale(struct dt_bauhaus_widget_t *w)
 {
   const dt_bauhaus_slider_data_t *d = &w->data.slider;
-  return 5.0f / (_bh_slider_get_min_step(w) * (d->max - d->min));
+  return 10.0 / (_bh_slider_get_min_step(w) * (d->max - d->min));
 }
 
 static void _bh_combobox_get_hovered_entry()
@@ -512,7 +512,7 @@ static void show_pango_text(struct dt_bauhaus_widget_t *w, GtkStyleContext *cont
 
 static void dt_bauhaus_slider_set_normalized(struct dt_bauhaus_widget_t *w, float pos, gboolean raise);
 
-static double get_slider_line_offset(const float pos, float scale, double x, double y, const double line_height)
+static double get_slider_line_offset(const double pos, const double scale, const double x, double y, const double line_height)
 {
   // handle linear startup and rescale y to fit the whole range again
   // Note : all inputs are in relative coordinates, except pos
@@ -524,23 +524,23 @@ static double get_slider_line_offset(const float pos, float scale, double x, dou
   else
   {
     // Renormalize y coordinates below the baseline
-    y = (y - line_height) / (1.0f - line_height);
-    offset = (x - sqf(y) * .5f - (1.0f - sqf(y)) * pos)
-             / (.5f * sqf(y) / scale + (1.0f - sqf(y)));
+    y = (y - line_height) / (1.0 - line_height);
+    offset = (x - sqf(y) * .5 - (1.0 - sqf(y)) * pos)
+             / (.5 * sqf(y) / scale + (1.0 - sqf(y)));
   }
   // clamp to result in a [0,1] range:
-  if(pos + offset > 1.0f) offset = 1.0f - pos;
-  if(pos + offset < 0.0f) offset = -pos;
+  if(pos + offset > 1.0) offset = 1.0 - pos;
+  if(pos + offset < 0.0) offset = -pos;
   return offset;
 }
 
 // draw a loupe guideline for the quadratic zoom in in the slider interface:
-static void draw_slider_line(cairo_t *cr, float pos, float off, float scale, const double width, const double height,
+static void draw_slider_line(cairo_t *cr, const double pos, const double off, const double scale, const double width, const double height,
                              const double line_height, double line_width)
 {
   // pos is normalized position [0,1], offset is on that scale.
   // ht is in pixels here
-  const int steps = 64;
+  const int steps = 128;
   const double corrected_height = (height - line_height);
 
   cairo_set_line_width(cr, line_width);
@@ -638,13 +638,37 @@ static gboolean dt_bauhaus_popup_motion_notify(GtkWidget *widget, GdkEventMotion
   // This is what event->x/y seems to be doing directly as of Gtk 3.26.
   // Let's see if that works.
 
-
   // Pass-on new cursor coordinates corrected for padding and margin
   // and start a redraw. Nothing else.
   darktable.bauhaus->mouse_x = event_x;
   darktable.bauhaus->mouse_y = event_y;
-   _bh_combobox_get_hovered_entry();
-  gtk_widget_queue_draw(darktable.bauhaus->popup_area);
+
+  if(w->type == DT_BAUHAUS_COMBOBOX)
+  {
+    _bh_combobox_get_hovered_entry();
+    gtk_widget_queue_draw(darktable.bauhaus->popup_area);
+  }
+  else
+  {
+    dt_bauhaus_slider_data_t *d = &w->data.slider;
+    const double main_height = _widget_get_main_height(w, widget);
+    const float mouse_off = get_slider_line_offset(
+        d->oldpos, _bh_slider_get_scale(w), darktable.bauhaus->mouse_x / _widget_get_main_width(w, NULL, NULL),
+        darktable.bauhaus->mouse_y / main_height, _get_slider_bar_height() / main_height);
+
+    if(d->is_dragging)
+    {
+      // On dragging (when holding a click), we commit intermediate values to pipeline for "realtime" preview
+      dt_bauhaus_slider_set_normalized(w, d->oldpos + mouse_off, TRUE);
+    }
+    else
+    {
+      // If not dragging, assume user just wants to take his time to fine-tune the value.
+      d->pos = d->oldpos + mouse_off;
+      gtk_widget_queue_draw(darktable.bauhaus->popup_area);
+    }
+  }
+
   return TRUE;
 }
 
@@ -681,6 +705,8 @@ static gboolean dt_bauhaus_popup_button_press(GtkWidget *widget, GdkEventButton 
 {
   int delay = 0;
   g_object_get(gtk_settings_get_default(), "gtk-double-click-time", &delay, NULL);
+  dt_bauhaus_widget_t *w = darktable.bauhaus->current;
+
   if(event->button == 1)
   {
     if(darktable.bauhaus->current->type == DT_BAUHAUS_COMBOBOX
@@ -704,7 +730,15 @@ static gboolean dt_bauhaus_popup_button_press(GtkWidget *widget, GdkEventButton 
       darktable.bauhaus->end_mouse_x = darktable.bauhaus->mouse_x = event_x;
       darktable.bauhaus->end_mouse_y = darktable.bauhaus->mouse_y = event_y;
 
-      _bh_combobox_get_hovered_entry();
+      if(w->type == DT_BAUHAUS_SLIDER)
+      {
+        dt_bauhaus_slider_data_t *d = &w->data.slider;
+        d->is_dragging = TRUE;
+      }
+      else
+      {
+        _bh_combobox_get_hovered_entry();
+      }
       dt_bauhaus_widget_accept(darktable.bauhaus->current);
     }
     darktable.bauhaus->hiding = TRUE;
@@ -1655,7 +1689,6 @@ void dt_bauhaus_combobox_set(GtkWidget *widget, const int pos)
   if(old_pos != new_pos)
   {
     d->active = new_pos;
-    gtk_widget_queue_draw(GTK_WIDGET(w));
 
 #if DEBUG
     fprintf(stdout, "%s | %s | %s | item : %i \n",
@@ -1667,6 +1700,8 @@ void dt_bauhaus_combobox_set(GtkWidget *widget, const int pos)
 
     if(darktable.bauhaus->current == w)
       gtk_widget_queue_draw(darktable.bauhaus->popup_area);
+
+    gtk_widget_queue_draw(GTK_WIDGET(w));
 
     if(!darktable.gui->reset && !d->timeout_handle)
     {
@@ -2073,13 +2108,7 @@ static gboolean dt_bauhaus_popup_draw(GtkWidget *widget, cairo_t *crf, gpointer 
       cairo_restore(cr);
 
       // Get the x offset compared to d->oldpos accounting for vertical position magnification
-      const float mouse_off
-          = get_slider_line_offset(d->oldpos, scale,
-              darktable.bauhaus->mouse_x / main_width,
-              darktable.bauhaus->mouse_y / main_height,
-              bottom_baseline / main_height);
-
-      d->pos = d->oldpos + mouse_off;
+      const double mouse_off = d->pos - d->oldpos;
 
       // Draw the baseline with fill feedback if any (needs the new d->pos set before)
       dt_bauhaus_draw_baseline(w, cr, main_width);
@@ -2390,6 +2419,9 @@ void dt_bauhaus_show_popup(GtkWidget *widget)
     case DT_BAUHAUS_SLIDER:
     {
       // Slider popup: make it square
+      dt_bauhaus_slider_data_t *d = &w->data.slider;
+      d->oldpos = d->pos;
+      d->is_dragging = FALSE;
       tmp.height = tmp.width;
       break;
     }
@@ -2780,7 +2812,10 @@ static void dt_bauhaus_slider_set_normalized(struct dt_bauhaus_widget_t *w, floa
     const float precision = (float)ipow(10, d->digits) * d->factor;
     const float rounded_value = roundf(new_value * precision) / precision;
     d->pos = (rounded_value - d->min) / (d->max - d->min);
-    d->oldpos = d->pos;
+
+    if(darktable.bauhaus->current == w)
+      gtk_widget_queue_draw(darktable.bauhaus->popup_area);
+
     gtk_widget_queue_draw(GTK_WIDGET(w));
 
 #if DEBUG
