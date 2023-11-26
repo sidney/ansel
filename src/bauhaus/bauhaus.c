@@ -1684,7 +1684,8 @@ void dt_bauhaus_combobox_set(GtkWidget *widget, const int pos)
   struct dt_bauhaus_widget_t *w = DT_BAUHAUS_WIDGET(widget);
   dt_bauhaus_combobox_data_t *d = &w->data.combobox;
   const int old_pos = d->active;
-  const int new_pos = CLAMP(pos, -1, (int)d->entries->len - 1);
+  const int new_pos = (d->entries) ? CLAMP(pos, -1, (int)d->entries->len - 1)
+                                   : -1;
 
   if(old_pos != new_pos)
   {

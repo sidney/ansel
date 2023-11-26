@@ -1099,6 +1099,7 @@ void gui_init(dt_lib_module_t *self)
   for(const GList *it = darktable.imageio->plugins_format; it; it = g_list_next(it))
   {
     const dt_imageio_module_format_t *module = (dt_imageio_module_format_t *)it->data;
+    dt_bauhaus_combobox_add(d->format, module->name(module));
     if(module->widget)
     {
       gtk_container_add(GTK_CONTAINER(d->format_extra_container), module->widget);
@@ -1358,6 +1359,11 @@ void gui_init(dt_lib_module_t *self)
   setting = dt_conf_get_string_const(CONFIG_PREFIX "storage_name");
   const int storage_index = dt_imageio_get_index_of_storage(dt_imageio_get_storage_by_name(setting));
   dt_bauhaus_combobox_set(d->storage, storage_index);
+
+  // Set format
+  setting = dt_conf_get_string_const(CONFIG_PREFIX "format_name");
+  const int format_index = dt_imageio_get_index_of_format(dt_imageio_get_format_by_name(setting));
+  dt_bauhaus_combobox_set(d->format, format_index);
 
   dt_bauhaus_combobox_set(d->upscale, dt_conf_get_bool(CONFIG_PREFIX "upscale") ? 1 : 0);
   dt_bauhaus_combobox_set(d->high_quality, dt_conf_get_bool(CONFIG_PREFIX "high_quality_processing") ? 1 : 0);
