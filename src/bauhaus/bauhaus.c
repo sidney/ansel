@@ -2450,7 +2450,7 @@ void dt_bauhaus_show_popup(GtkWidget *widget)
   // When that's the case, shift it vertically until it fits, assuming
   // the combobox is smaller than the viewport.
   // If that's not enough, then reduce comboboxes items or use a scrolled window.
-  const int min_y = floorf(y) + tmp.height + darktable.gui->ui->manager.viewport.y;
+  const int min_y = floorf(y) + tmp.height;
   if(darktable.gui->ui->manager.viewport.height < min_y)
     y = MAX(0, y - (min_y - darktable.gui->ui->manager.viewport.height));
 
