@@ -625,12 +625,7 @@ static gboolean dt_bauhaus_popup_motion_notify(GtkWidget *widget, GdkEventMotion
   fprintf(stdout, "x: %i, y: %i, active: %i\n", (int)event_x, (int)event_y, active);
 #endif
 
-  if(active == BH_REGION_OUT)
-  {
-    dt_bauhaus_widget_reject(darktable.bauhaus->current);
-    dt_bauhaus_hide_popup();
-    return TRUE;
-  }
+  if(active == BH_REGION_OUT) return TRUE;
 
   // WARNING :
   // This used to manually compute cursor coordinates by fetching
@@ -725,7 +720,14 @@ static gboolean dt_bauhaus_popup_button_press(GtkWidget *widget, GdkEventButton 
       // aka we need to re-read coordinates here.
       double event_x = event->x;
       double event_y = event->y;
-      _translate_cursor(&event_x, &event_y, darktable.bauhaus->current);
+      _bh_active_region_t active = _bh_get_active_region(GTK_WIDGET(darktable.bauhaus->current), &event_x, &event_y, NULL, widget);
+
+      if(active == BH_REGION_OUT)
+      {
+        dt_bauhaus_widget_reject(darktable.bauhaus->current);
+        dt_bauhaus_hide_popup();
+        return TRUE;
+      }
 
       darktable.bauhaus->end_mouse_x = darktable.bauhaus->mouse_x = event_x;
       darktable.bauhaus->end_mouse_y = darktable.bauhaus->mouse_y = event_y;
