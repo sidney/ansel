@@ -254,21 +254,21 @@ static _bh_active_region_t _bh_get_active_region(GtkWidget *widget, double *x, d
 
   // The widget to use as a reference to fetch allocation and compute sizes
   GtkWidget *box_reference = (popup) ? popup : widget;
-  const double quad_width = _widget_get_quad_width(w);
-  const double main_width = _widget_get_main_width(w, box_reference, NULL);
+  double total_width;
+  const double main_width = _widget_get_main_width(w, box_reference, &total_width);
   const double main_height = _widget_get_main_height(w, box_reference);
 
   if(width) *width = main_width;
   _translate_cursor(x, y, w);
 
-  // Check if we are within vertical bounds
-  if(!(*y >= 0. && *y <= main_height)) return BH_REGION_OUT;
+  // Check if we are within popup frame
+  if(*y < 0. || *y > main_height || *x < 0. || *x > total_width)
+    return BH_REGION_OUT;
 
   // Check where we are horizontally
-  if(*x >= 0. && *x <= main_width + INTERNAL_PADDING)
+  if(*x <= main_width + INTERNAL_PADDING)
     return BH_REGION_MAIN;
-  else if (*x >= main_width + INTERNAL_PADDING &&
-           *x <= main_width + INTERNAL_PADDING + quad_width)
+  else
     return BH_REGION_QUAD;
 
   return BH_REGION_OUT;
@@ -314,6 +314,20 @@ static void _bh_combobox_get_hovered_entry()
     dt_bauhaus_combobox_data_t *d = &darktable.bauhaus->current->data.combobox;
     d->hovered = (int)floorf(darktable.bauhaus->mouse_y / _bh_get_row_height());
   }
+}
+
+static _bh_active_region_t _popup_coordinates(GtkWidget *widget, const double x_root, const double y_root, double *event_x, double *event_y)
+{
+  // Because the popup widget is a floating window, it keeps capturing motion events even if they don't
+  // overlap it. In those events, (x, y) coordinates are expressed in the space of the hovered third-party widget,
+  // meaning their coordinates will seem ok from here (right range regarding height/width of widget) but will belong to something else.
+  // We need to grab absolute coordinates in the main window space to ensure we overlay the widget popup.
+  gint wx, wy;
+  GdkWindow *window = gtk_widget_get_window(darktable.bauhaus->popup_window);
+  gdk_window_get_origin(window, &wx, &wy);
+  *event_x = x_root - (double)wx;
+  *event_y = y_root - (double)wy;
+  return _bh_get_active_region(GTK_WIDGET(darktable.bauhaus->current), event_x, event_y, NULL, widget);
 }
 
 void bauhaus_request_focus(struct dt_bauhaus_widget_t *w)
@@ -617,21 +631,15 @@ static gboolean dt_bauhaus_popup_scroll(GtkWidget *widget, GdkEventScroll *event
 static gboolean dt_bauhaus_popup_motion_notify(GtkWidget *widget, GdkEventMotion *event, gpointer user_data)
 {
   struct dt_bauhaus_widget_t *w = darktable.bauhaus->current;
-  double event_x = event->x;
-  double event_y = event->y;
-  _bh_active_region_t active = _bh_get_active_region(GTK_WIDGET(w), &event_x, &event_y, NULL, widget);
+  double event_x;
+  double event_y;
+  const _bh_active_region_t active = _popup_coordinates(widget, event->x_root, event->y_root, &event_x, &event_y);
 
 #if DEBUG
   fprintf(stdout, "x: %i, y: %i, active: %i\n", (int)event_x, (int)event_y, active);
 #endif
 
-  if(active == BH_REGION_OUT) return TRUE;
-
-  // WARNING :
-  // This used to manually compute cursor coordinates by fetching
-  // parent window base coordinates, then getting event->x/y_root.
-  // This is what event->x/y seems to be doing directly as of Gtk 3.26.
-  // Let's see if that works.
+  if(active == BH_REGION_OUT) return FALSE;
 
   // Pass-on new cursor coordinates corrected for padding and margin
   // and start a redraw. Nothing else.
@@ -682,10 +690,6 @@ static gboolean dt_bauhaus_popup_button_release(GtkWidget *widget, GdkEventButto
      && (event->button == 1) && (event->time >= darktable.bauhaus->opentime + delay) && !darktable.bauhaus->hiding)
   {
     gtk_widget_set_state_flags(widget, GTK_STATE_FLAG_ACTIVE, TRUE);
-    // WARNING : this used to manually translate cursor coordinates by getting
-    // the origin coordinates of the window and then the absolute
-    // coordinates of cursor in said window. This seems to be what
-    // event->x already does as of Gtk 3.26. Let's see if that works.
 
     dt_bauhaus_hide_popup();
   }
@@ -718,9 +722,9 @@ static gboolean dt_bauhaus_popup_button_press(GtkWidget *widget, GdkEventButton 
       // coordinates are set in motion_notify, which also makes sure they are within the valid range.
       // problems appear with the cornercase where user didn't move the cursor since opening the popup.
       // aka we need to re-read coordinates here.
-      double event_x = event->x;
-      double event_y = event->y;
-      _bh_active_region_t active = _bh_get_active_region(GTK_WIDGET(darktable.bauhaus->current), &event_x, &event_y, NULL, widget);
+      double event_x;
+      double event_y;
+      const _bh_active_region_t active = _popup_coordinates(widget, event->x_root, event->y_root, &event_x, &event_y);
 
       if(active == BH_REGION_OUT)
       {
