@@ -2407,6 +2407,10 @@ void dt_bauhaus_show_popup(GtkWidget *widget)
   darktable.bauhaus->mouse_line_distance = 0.0f;
   darktable.bauhaus->hiding = FALSE;
 
+  // Make sure all relevant widgets exist
+  gtk_widget_realize(darktable.bauhaus->popup_window);
+  gtk_widget_realize(widget);
+
   GtkAllocation tmp;
   gtk_widget_get_allocation(widget, &tmp);
   int width = tmp.width;
@@ -2438,13 +2442,14 @@ void dt_bauhaus_show_popup(GtkWidget *widget)
   /* Bind to CSS rules from parent widget */
   GtkStyleContext *context = gtk_widget_get_style_context(darktable.bauhaus->popup_area);
   gtk_style_context_add_class(context, "dt_bauhaus_popup");
-  gtk_window_set_attached_to(GTK_WINDOW(darktable.bauhaus->popup_window), GTK_WIDGET(darktable.bauhaus->current));
+  gtk_window_set_attached_to(GTK_WINDOW(darktable.bauhaus->popup_window), widget);
 
-  /* Position the popup window in viewport */
+  // Get the origin coordinates of the parent widget allocation box with regard to the main window
   gint wx = 0, wy = 0;
   GdkWindow *widget_window = gtk_widget_get_window(widget);
   if(widget_window) gdk_window_get_origin(widget_window, &wx, &wy);
 
+#if GTK_CHECK_VERSION(3, 24, 0)
   // From here, all positions are float so we need to handle them as such
   // to avoid rounding errors resulting is pixel-shifting glitches.
   float x = (float)wx;
@@ -2455,32 +2460,40 @@ void dt_bauhaus_show_popup(GtkWidget *widget)
   // When that's the case, shift it vertically until it fits, assuming
   // the combobox is smaller than the viewport.
   // If that's not enough, then reduce comboboxes items or use a scrolled window.
-  const int min_y = floorf(y) + tmp.height;
+  const int min_y = floorf(y) + height;
   if(darktable.gui->ui->manager.viewport.height < min_y)
     y = MAX(0, y - (min_y - darktable.gui->ui->manager.viewport.height));
+#else
+  // Get the origin coordinates of the main window box with regard to the screen
+  gint wwx = 0, wwy = 0;
+  gdk_window_get_origin(gtk_widget_get_window(dt_ui_main_window(darktable.gui->ui)), &wwx, &wwy);
+
+  // Final coordinates of the allocation box where to anchor the popup
+  tmp.x = wx - wwx;
+  tmp.y = wy - wwy;
+#endif
 
   // Set desired size, but it's more a guide than a rule.
   gtk_widget_set_size_request(darktable.bauhaus->popup_window, width, height);
 
-  // Actually, need to call resize to actually change something
+  // Need to call resize to actually change something
   gtk_window_resize(GTK_WINDOW(darktable.bauhaus->popup_window), width, height);
 
-  // Realizing a widget is the prerequisite for gtk_widget_get_window() to not return NULL
-  gtk_widget_realize(darktable.bauhaus->popup_window);
   GdkWindow *window = gtk_widget_get_window(darktable.bauhaus->popup_window);
 
+  // move_to_rect below needs visible widgets to compute sizing properly.
+  // That makes the GUI glitch but I have no better solution…
+  gtk_widget_show(darktable.bauhaus->popup_window);
+
+#if GTK_CHECK_VERSION(3, 24, 0)
   // X11 wonky way of setting window position in absolute coordinates
   gdk_window_move(window, (gint)x, (gint)y);
+#else
+  // For Wayland (and supposed to work on X11 too) and Gtk 3.24 this is how you do it
+  gdk_window_move_to_rect(GDK_WINDOW(window), &tmp, GDK_GRAVITY_NORTH, GDK_GRAVITY_NORTH,
+                          GDK_ANCHOR_SLIDE_Y, 0, 0);
+#endif
 
-  /*
-  * For Wayland (and supposed to work on X11 too) and Gtk 3.24 this is how you would do it, using
-  * relative coordinates. Here it doesn't work : popups get sent to the top of the window.
-  * Horizontal positionning works though.
-  gdk_window_move_to_rect(GDK_WINDOW(window), &tmp, GDK_GRAVITY_NORTH_WEST, GDK_GRAVITY_SOUTH_WEST,
-                          GDK_ANCHOR_SLIDE, 0, 0);
-  */
-
-  // gtk_window_set_keep_above isn't enough on macOS
   gtk_widget_show_all(darktable.bauhaus->popup_window);
   gtk_widget_grab_focus(darktable.bauhaus->popup_area);
 }
