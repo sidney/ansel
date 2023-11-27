@@ -73,8 +73,9 @@ static gboolean _widget_scroll(GtkWidget *widget, GdkEventScroll *event);
 static gboolean _widget_key_press(GtkWidget *widget, GdkEventKey *event);
 static void _get_preferred_width(GtkWidget *widget, gint *minimum_size, gint *natural_size);
 static void _style_updated(GtkWidget *widget);
-static void dt_bauhaus_widget_accept(struct dt_bauhaus_widget_t *w);
+static void dt_bauhaus_widget_accept(struct dt_bauhaus_widget_t *w, gboolean timeout);
 static void dt_bauhaus_widget_reject(struct dt_bauhaus_widget_t *w);
+static void _combobox_set(GtkWidget *widget, const int pos, gboolean timeout);
 
 // !!! EXECUTIVE NOTE !!!
 // Sizing and spacing need to be declared once only in getters/setters functions below.
@@ -362,7 +363,7 @@ static void _combobox_next_sensitive(struct dt_bauhaus_widget_t *w, int delta)
     cur += step;
   }
   d->hovered = new_pos;
-  dt_bauhaus_combobox_set(GTK_WIDGET(w), new_pos);
+  _combobox_set(GTK_WIDGET(w), new_pos, TRUE);
 }
 
 static dt_bauhaus_combobox_entry_t *new_combobox_entry(const char *label, dt_bauhaus_combobox_alignment_t alignment,
@@ -524,7 +525,7 @@ static void show_pango_text(struct dt_bauhaus_widget_t *w, GtkStyleContext *cont
   g_object_unref(layout);
 }
 
-static void dt_bauhaus_slider_set_normalized(struct dt_bauhaus_widget_t *w, float pos, gboolean raise);
+static void dt_bauhaus_slider_set_normalized(struct dt_bauhaus_widget_t *w, float pos, gboolean raise, gboolean timeout);
 
 static double get_slider_line_offset(const double pos, const double scale, const double x, double y, const double line_height)
 {
@@ -662,7 +663,7 @@ static gboolean dt_bauhaus_popup_motion_notify(GtkWidget *widget, GdkEventMotion
     if(d->is_dragging)
     {
       // On dragging (when holding a click), we commit intermediate values to pipeline for "realtime" preview
-      dt_bauhaus_slider_set_normalized(w, d->oldpos + mouse_off, TRUE);
+      dt_bauhaus_slider_set_normalized(w, d->oldpos + mouse_off, TRUE, TRUE);
     }
     else
     {
@@ -685,9 +686,10 @@ static gboolean dt_bauhaus_popup_button_release(GtkWidget *widget, GdkEventButto
 {
   int delay = 0;
   g_object_get(gtk_settings_get_default(), "gtk-double-click-time", &delay, NULL);
+  dt_bauhaus_widget_t *w = darktable.bauhaus->current;
 
-  if(darktable.bauhaus->current && (darktable.bauhaus->current->type == DT_BAUHAUS_COMBOBOX)
-     && (event->button == 1) && (event->time >= darktable.bauhaus->opentime + delay) && !darktable.bauhaus->hiding)
+  if(w && (w->type == DT_BAUHAUS_COMBOBOX) && (event->button == 1)
+     && (event->time >= darktable.bauhaus->opentime + delay) && !darktable.bauhaus->hiding)
   {
     gtk_widget_set_state_flags(widget, GTK_STATE_FLAG_ACTIVE, TRUE);
 
@@ -713,7 +715,7 @@ static gboolean dt_bauhaus_popup_button_press(GtkWidget *widget, GdkEventButton 
     {
       // counts as double click, reset:
       const dt_bauhaus_combobox_data_t *d = &darktable.bauhaus->current->data.combobox;
-      dt_bauhaus_combobox_set(GTK_WIDGET(darktable.bauhaus->current), d->defpos);
+      _combobox_set(GTK_WIDGET(darktable.bauhaus->current), d->defpos, FALSE);
       dt_bauhaus_widget_reject(darktable.bauhaus->current);
     }
     else
@@ -740,12 +742,18 @@ static gboolean dt_bauhaus_popup_button_press(GtkWidget *widget, GdkEventButton 
       {
         dt_bauhaus_slider_data_t *d = &w->data.slider;
         d->is_dragging = TRUE;
+
+        // Trick to ensure new value ≠ d->pos (so we commit to pipeline), since
+        // d->pos is used for uncommitted drawings.
+        const float value = d->pos;
+        d->pos = d->oldpos;
+        dt_bauhaus_slider_set_normalized(w, value, TRUE, FALSE);
       }
       else
       {
         _bh_combobox_get_hovered_entry();
+        dt_bauhaus_widget_accept(darktable.bauhaus->current, FALSE);
       }
-      dt_bauhaus_widget_accept(darktable.bauhaus->current);
     }
     darktable.bauhaus->hiding = TRUE;
   }
@@ -1685,7 +1693,16 @@ static gint _delayed_combobox_commit(gpointer data)
   return G_SOURCE_REMOVE;
 }
 
-void dt_bauhaus_combobox_set(GtkWidget *widget, const int pos)
+/**
+ * @brief Set a combobox to a given integer position. Private API function, called from user events.
+ *
+ * @param widget
+ * @param pos -1 for "custom" value in editable comboboxes, >= 0 for items in the list
+ * @param timeout TRUE to apply an adaptative timeout preventing intermediate setting steps (e.g. while scrolling)
+ * to emit too many value-changed signals and committing to pipeline. FALSE forces immediate dispatch of new value,
+ * when there is no ambiguity that the setting is final (e.g left click).
+ */
+void _combobox_set(GtkWidget *widget, const int pos, gboolean timeout)
 {
   struct dt_bauhaus_widget_t *w = DT_BAUHAUS_WIDGET(widget);
   dt_bauhaus_combobox_data_t *d = &w->data.combobox;
@@ -1712,13 +1729,21 @@ void dt_bauhaus_combobox_set(GtkWidget *widget, const int pos)
 
     if(!darktable.gui->reset && !d->timeout_handle)
     {
-      const int delay = CLAMP(darktable.develop->average_delay * 3 / 2,
-                              DT_BAUHAUS_SLIDER_VALUE_CHANGED_DELAY_MIN,
-                              DT_BAUHAUS_SLIDER_VALUE_CHANGED_DELAY_MAX);
+      const int delay
+          = timeout ? CLAMP(darktable.develop->average_delay * 3 / 2, DT_BAUHAUS_SLIDER_VALUE_CHANGED_DELAY_MIN,
+                            DT_BAUHAUS_SLIDER_VALUE_CHANGED_DELAY_MAX)
+                    : 0;
       d->timeout_handle = g_timeout_add(delay, _delayed_combobox_commit, w);
     }
   }
 }
+
+// Public API function, called from GUI init and update
+void dt_bauhaus_combobox_set(GtkWidget *widget, const int pos)
+{
+  _combobox_set(widget, pos, FALSE);
+}
+
 
 gboolean dt_bauhaus_combobox_set_from_text(GtkWidget *widget, const char *text)
 {
@@ -1960,7 +1985,7 @@ static void dt_bauhaus_widget_reject(struct dt_bauhaus_widget_t *w)
     case DT_BAUHAUS_SLIDER:
     {
       dt_bauhaus_slider_data_t *d = &w->data.slider;
-      dt_bauhaus_slider_set_normalized(w, d->oldpos, FALSE);
+      dt_bauhaus_slider_set_normalized(w, d->oldpos, TRUE, FALSE);
     }
     break;
     default:
@@ -1968,7 +1993,7 @@ static void dt_bauhaus_widget_reject(struct dt_bauhaus_widget_t *w)
   }
 }
 
-static void dt_bauhaus_widget_accept(struct dt_bauhaus_widget_t *w)
+static void dt_bauhaus_widget_accept(struct dt_bauhaus_widget_t *w, gboolean timeout)
 {
   GtkWidget *widget = GTK_WIDGET(w);
 
@@ -1983,7 +2008,7 @@ static void dt_bauhaus_widget_accept(struct dt_bauhaus_widget_t *w)
         // combobox is editable and we have text, assume it is a custom input
         memset(d->text, 0, DT_BAUHAUS_COMBO_MAX_TEXT);
         g_strlcpy(d->text, darktable.bauhaus->keys, DT_BAUHAUS_COMBO_MAX_TEXT);
-        dt_bauhaus_combobox_set(widget, -1); // select custom entry
+        _combobox_set(widget, -1, timeout); // select custom entry
 
 #if DEBUG
         fprintf(stdout, "combobox went the custom path\n");
@@ -2015,11 +2040,11 @@ static void dt_bauhaus_widget_accept(struct dt_bauhaus_widget_t *w)
 
           // Accept result only if exactly one match was found. Anything else is ambiguous
           if(matches == 1)
-            dt_bauhaus_combobox_set(widget, match);
+            _combobox_set(widget, match, timeout);
         }
         else {
           // Active entry (below cursor or scrolled)
-          dt_bauhaus_combobox_set(widget, d->hovered);
+          _combobox_set(widget, d->hovered, timeout);
         }
       }
 
@@ -2038,7 +2063,7 @@ static void dt_bauhaus_widget_accept(struct dt_bauhaus_widget_t *w)
       // with value-changed signal through dt_bauhaus_slider_set_normalized()
       const float value = d->pos;
       d->pos = d->oldpos;
-      dt_bauhaus_slider_set_normalized(w, value, TRUE);
+      dt_bauhaus_slider_set_normalized(w, value, TRUE, timeout);
       break;
     }
     default:
@@ -2621,7 +2646,7 @@ static gboolean dt_bauhaus_combobox_button_press(GtkWidget *widget, GdkEventButt
       {
         // never called, as we popup the other window under your cursor before.
         // (except in weird corner cases where the popup is under the -1st entry
-        dt_bauhaus_combobox_set(widget, d->defpos);
+        _combobox_set(widget, d->defpos, FALSE);
         dt_bauhaus_hide_popup();
       }
       else
@@ -2669,7 +2694,7 @@ void dt_bauhaus_slider_set(GtkWidget *widget, float pos)
   const float rpos = CLAMP(pos, d->hard_min, d->hard_max);
   d->min = MIN(d->min, rpos);
   d->max = MAX(d->max, rpos);
-  dt_bauhaus_slider_set_normalized(w, (rpos - d->min) / (d->max - d->min), TRUE);
+  dt_bauhaus_slider_set_normalized(w, (rpos - d->min) / (d->max - d->min), TRUE, FALSE);
 }
 
 void dt_bauhaus_slider_set_val(GtkWidget *widget, float val)
@@ -2843,14 +2868,17 @@ static gboolean _delayed_slider_commit(gpointer data)
  * @param raise Set to FALSE to redraw slider position without committing the actual value to pipeline
  * nor sending the `value-changed` event (e.g. in motion-notify events, while dragging).
  * Set to TRUE when the change is finished (e.g. in button-pressed events).
+ * @param timeout TRUE to add a timeout preventing intermediate setting steps (e.g. while scrolling) to emit
+ * value-changed signal and commit to pipeline too often. FALSE to set immediately, when there is no ambiguity
+ * on the final setting (e.g. at init time and on click). Doesn't change anything if raise is FALSE.
  */
-static void dt_bauhaus_slider_set_normalized(struct dt_bauhaus_widget_t *w, float pos, gboolean raise)
+static void dt_bauhaus_slider_set_normalized(struct dt_bauhaus_widget_t *w, float pos, gboolean raise, gboolean timeout)
 {
   dt_bauhaus_slider_data_t *d = &w->data.slider;
   const float old_pos = d->pos;
   const float new_pos = CLAMP(pos, 0.0f, 1.0f);
 
-  if(old_pos != new_pos || raise)
+  if(old_pos != new_pos)
   {
     const float new_value = new_pos * (d->max - d->min) + d->min;
     const float precision = (float)ipow(10, d->digits) * d->factor;
@@ -2872,9 +2900,10 @@ static void dt_bauhaus_slider_set_normalized(struct dt_bauhaus_widget_t *w, floa
 
     if(!darktable.gui->reset && raise && !d->timeout_handle)
     {
-      const int delay = CLAMP(darktable.develop->average_delay * 3 / 2,
-                              DT_BAUHAUS_SLIDER_VALUE_CHANGED_DELAY_MIN,
-                              DT_BAUHAUS_SLIDER_VALUE_CHANGED_DELAY_MAX);
+      const int delay
+          = timeout ? CLAMP(darktable.develop->average_delay * 3 / 2, DT_BAUHAUS_SLIDER_VALUE_CHANGED_DELAY_MIN,
+                            DT_BAUHAUS_SLIDER_VALUE_CHANGED_DELAY_MAX)
+                    : 0;
       d->timeout_handle = g_timeout_add(delay, _delayed_slider_commit, w);
     }
   }
@@ -2960,7 +2989,7 @@ static gboolean dt_bauhaus_popup_key_press(GtkWidget *widget, GdkEventKey *event
         else
           darktable.bauhaus->end_mouse_y = 0;
         darktable.bauhaus->keys[darktable.bauhaus->keys_cnt] = 0;
-        dt_bauhaus_widget_accept(darktable.bauhaus->current);
+        dt_bauhaus_widget_accept(darktable.bauhaus->current, TRUE);
         darktable.bauhaus->keys_cnt = 0;
         memset(darktable.bauhaus->keys, 0, sizeof(darktable.bauhaus->keys));
         dt_bauhaus_hide_popup();
@@ -2987,7 +3016,7 @@ static gboolean dt_bauhaus_popup_key_press(GtkWidget *widget, GdkEventKey *event
         darktable.bauhaus->keys[darktable.bauhaus->keys_cnt] = 0;
         darktable.bauhaus->keys_cnt = 0;
         memset(darktable.bauhaus->keys, 0, sizeof(darktable.bauhaus->keys));
-        dt_bauhaus_widget_accept(darktable.bauhaus->current);
+        dt_bauhaus_widget_accept(darktable.bauhaus->current, TRUE);
         dt_bauhaus_hide_popup();
       }
       else
@@ -3043,7 +3072,7 @@ static gboolean dt_bauhaus_slider_button_press(GtkWidget *widget, GdkEventButton
         {
           // single left click on slider bar : set new value
           d->is_dragging = 1;
-          dt_bauhaus_slider_set_normalized(w, event_x / main_width, FALSE);
+          dt_bauhaus_slider_set_normalized(w, event_x / main_width, FALSE, FALSE);
         }
       }
     }
@@ -3082,7 +3111,7 @@ static gboolean dt_bauhaus_slider_button_release(GtkWidget *widget, GdkEventButt
 
     if(event->button == 1)
     {
-      dt_bauhaus_slider_set_normalized(w, darktable.bauhaus->mouse_x / _widget_get_main_width(w, NULL, NULL), TRUE);
+      dt_bauhaus_slider_set_normalized(w, darktable.bauhaus->mouse_x / _widget_get_main_width(w, NULL, NULL), TRUE, FALSE);
       return TRUE;
     }
   }
@@ -3104,7 +3133,7 @@ static gboolean dt_bauhaus_slider_motion_notify(GtkWidget *widget, GdkEventMotio
 
     darktable.bauhaus->mouse_x = event_x;
     darktable.bauhaus->mouse_y = event_y;
-    dt_bauhaus_slider_set_normalized(w, event_x / main_width, FALSE);
+    dt_bauhaus_slider_set_normalized(w, event_x / main_width, FALSE, FALSE);
   }
 
   return activated;
