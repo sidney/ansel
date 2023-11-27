@@ -2450,6 +2450,14 @@ void dt_bauhaus_show_popup(GtkWidget *widget)
   if(widget_window) gdk_window_get_origin(widget_window, &wx, &wy);
 
 #if GTK_CHECK_VERSION(3, 24, 0)
+  // Get the origin coordinates of the main window box with regard to the screen
+  gint wwx = 0, wwy = 0;
+  gdk_window_get_origin(gtk_widget_get_window(dt_ui_main_window(darktable.gui->ui)), &wwx, &wwy);
+
+  // Final coordinates of the allocation box where to anchor the popup
+  tmp.x = wx - wwx;
+  tmp.y = wy - wwy;
+#else
   // From here, all positions are float so we need to handle them as such
   // to avoid rounding errors resulting is pixel-shifting glitches.
   float x = (float)wx;
@@ -2463,14 +2471,6 @@ void dt_bauhaus_show_popup(GtkWidget *widget)
   const int min_y = floorf(y) + height;
   if(darktable.gui->ui->manager.viewport.height < min_y)
     y = MAX(0, y - (min_y - darktable.gui->ui->manager.viewport.height));
-#else
-  // Get the origin coordinates of the main window box with regard to the screen
-  gint wwx = 0, wwy = 0;
-  gdk_window_get_origin(gtk_widget_get_window(dt_ui_main_window(darktable.gui->ui)), &wwx, &wwy);
-
-  // Final coordinates of the allocation box where to anchor the popup
-  tmp.x = wx - wwx;
-  tmp.y = wy - wwy;
 #endif
 
   // Set desired size, but it's more a guide than a rule.
@@ -2481,17 +2481,18 @@ void dt_bauhaus_show_popup(GtkWidget *widget)
 
   GdkWindow *window = gtk_widget_get_window(darktable.bauhaus->popup_window);
 
+#if GTK_CHECK_VERSION(3, 24, 0)
+  // For Wayland (and supposed to work on X11 too) and Gtk 3.24 this is how you do it
+
   // move_to_rect below needs visible widgets to compute sizing properly.
   // That makes the GUI glitch but I have no better solution…
   gtk_widget_show(darktable.bauhaus->popup_window);
 
-#if GTK_CHECK_VERSION(3, 24, 0)
-  // X11 wonky way of setting window position in absolute coordinates
-  gdk_window_move(window, (gint)x, (gint)y);
-#else
-  // For Wayland (and supposed to work on X11 too) and Gtk 3.24 this is how you do it
   gdk_window_move_to_rect(GDK_WINDOW(window), &tmp, GDK_GRAVITY_NORTH, GDK_GRAVITY_NORTH,
                           GDK_ANCHOR_SLIDE_Y, 0, 0);
+#else
+  // X11 wonky way of setting window position in absolute coordinates
+  gdk_window_move(window, (gint)x, (gint)y);
 #endif
 
   gtk_widget_show_all(darktable.bauhaus->popup_window);
