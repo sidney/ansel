@@ -2407,23 +2407,10 @@ void dt_bauhaus_show_popup(GtkWidget *widget)
   darktable.bauhaus->mouse_line_distance = 0.0f;
   darktable.bauhaus->hiding = FALSE;
 
-  // Should not be needed if we come from a click
-  bauhaus_request_focus(w);
-
-  gtk_widget_realize(darktable.bauhaus->popup_window);
-
-  GdkWindow *widget_window = gtk_widget_get_window(widget);
-
-  gint wx = 0, wy = 0;
-  if(widget_window) gdk_window_get_origin(widget_window, &wx, &wy);
-
-  // From here, all positions are float so we need to handle them as such
-  // to avoid rounding errors resulting is pixel-shifting glitches.
-  float x = (float)wx;
-  float y = (float)wy;
-
   GtkAllocation tmp;
   gtk_widget_get_allocation(widget, &tmp);
+  int width = tmp.width;
+  int height = tmp.height;
 
   switch(darktable.bauhaus->current->type)
   {
@@ -2433,12 +2420,12 @@ void dt_bauhaus_show_popup(GtkWidget *widget)
       dt_bauhaus_slider_data_t *d = &w->data.slider;
       d->oldpos = d->pos;
       d->is_dragging = FALSE;
-      tmp.height = tmp.width;
+      height = tmp.width;
       break;
     }
     case DT_BAUHAUS_COMBOBOX:
     {
-      tmp.height = _get_combobox_popup_height(w);
+      height = floorf(_get_combobox_popup_height(w));
       break;
     }
     default:
@@ -2448,8 +2435,20 @@ void dt_bauhaus_show_popup(GtkWidget *widget)
     }
   }
 
+  /* Bind to CSS rules from parent widget */
   GtkStyleContext *context = gtk_widget_get_style_context(darktable.bauhaus->popup_area);
   gtk_style_context_add_class(context, "dt_bauhaus_popup");
+  gtk_window_set_attached_to(GTK_WINDOW(darktable.bauhaus->popup_window), GTK_WIDGET(darktable.bauhaus->current));
+
+  /* Position the popup window in viewport */
+  gint wx = 0, wy = 0;
+  GdkWindow *widget_window = gtk_widget_get_window(widget);
+  if(widget_window) gdk_window_get_origin(widget_window, &wx, &wy);
+
+  // From here, all positions are float so we need to handle them as such
+  // to avoid rounding errors resulting is pixel-shifting glitches.
+  float x = (float)wx;
+  float y = (float)wy;
 
   // The popup is a drop-down, meaning we can be sure it will not go higher than the calling widget.
   // But it can still exit the viewport by the bottom.
@@ -2460,17 +2459,28 @@ void dt_bauhaus_show_popup(GtkWidget *widget)
   if(darktable.gui->ui->manager.viewport.height < min_y)
     y = MAX(0, y - (min_y - darktable.gui->ui->manager.viewport.height));
 
-  // gtk_widget_get_window will return null if not shown yet.
-  // it is needed for gdk_window_move, and gtk_window move will
-  // sometimes be ignored. this is why we always call both...
-  // we also don't want to show before move, as this results in noticeable flickering.
+  // Set desired size, but it's more a guide than a rule.
+  gtk_widget_set_size_request(darktable.bauhaus->popup_window, width, height);
+
+  // Actually, need to call resize to actually change something
+  gtk_window_resize(GTK_WINDOW(darktable.bauhaus->popup_window), width, height);
+
+  // Realizing a widget is the prerequisite for gtk_widget_get_window() to not return NULL
+  gtk_widget_realize(darktable.bauhaus->popup_window);
   GdkWindow *window = gtk_widget_get_window(darktable.bauhaus->popup_window);
-  if(window) gdk_window_move(window, (gint)x, (gint)y);
-  gtk_window_move(GTK_WINDOW(darktable.bauhaus->popup_window), (gint)x, (gint)y);
-  gtk_widget_set_size_request(darktable.bauhaus->popup_window, tmp.width, tmp.height);
+
+  // X11 wonky way of setting window position in absolute coordinates
+  gdk_window_move(window, (gint)x, (gint)y);
+
+  /*
+  * For Wayland (and supposed to work on X11 too) and Gtk 3.24 this is how you would do it, using
+  * relative coordinates. Here it doesn't work : popups get sent to the top of the window.
+  * Horizontal positionning works though.
+  gdk_window_move_to_rect(GDK_WINDOW(window), &tmp, GDK_GRAVITY_NORTH_WEST, GDK_GRAVITY_SOUTH_WEST,
+                          GDK_ANCHOR_SLIDE, 0, 0);
+  */
 
   // gtk_window_set_keep_above isn't enough on macOS
-  gtk_window_set_attached_to(GTK_WINDOW(darktable.bauhaus->popup_window), GTK_WIDGET(darktable.bauhaus->current));
   gtk_widget_show_all(darktable.bauhaus->popup_window);
   gtk_widget_grab_focus(darktable.bauhaus->popup_area);
 }
