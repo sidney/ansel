@@ -2952,7 +2952,7 @@ void dt_iop_gui_init_blending(GtkWidget *iopw, dt_iop_module_t *module)
                               NULL };
     bd->mask_mode_combo = dt_bauhaus_combobox_new_full(
         (dt_action_t *)module, NULL, N_("Blending"),
-        _("Define opacity masks and blinding modes to limit the spatial application of the module."), 0,
+        _("Define opacity masks and blending modes to limit the spatial application of the module."), 0,
         (GtkCallback)_blendop_masks_mode_changed, module, labels);
     GtkWidget *blend_modes_hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
 
@@ -3065,7 +3065,7 @@ void dt_iop_gui_init_blending(GtkWidget *iopw, dt_iop_module_t *module)
     gtk_box_pack_start(GTK_BOX(bd->masks_modes_box), GTK_WIDGET(presets_button), FALSE, FALSE, 0);
     gtk_box_pack_start(GTK_BOX(box), GTK_WIDGET(bd->masks_modes_box), FALSE, FALSE, 0);
     dt_gui_add_help_link(GTK_WIDGET(bd->masks_modes_box), dt_get_help_url("masks_blending"));
-    gtk_widget_set_name(GTK_WIDGET(bd->masks_modes_box), "blending-tabs");
+    gtk_widget_set_name(GTK_WIDGET(bd->masks_modes_box), "blending-header");
 
     bd->top_box = GTK_BOX(gtk_box_new(GTK_ORIENTATION_VERTICAL, 0));
     gtk_box_pack_start(GTK_BOX(bd->top_box), blend_modes_hbox, TRUE, TRUE, 0);
