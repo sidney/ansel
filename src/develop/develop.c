@@ -209,17 +209,9 @@ void dt_dev_invalidate(dt_develop_t *dev)
   dt_show_times(&start, "[dev_process_image] sending killswitch signal on running pipelines");
 
   dt_atomic_set_int(&dev->pipe->shutdown, TRUE);
-
-  // Wait for pipelines to finish before dispatching new recomputes
-  dt_pthread_mutex_lock(&dev->pipe->busy_mutex);
-
   dev->image_status = DT_DEV_PIXELPIPE_DIRTY;
   dev->timestamp++;
   if(dev->preview_pipe) dev->preview_pipe->input_timestamp = dev->timestamp;
-
-  dt_pthread_mutex_unlock(&dev->pipe->busy_mutex);
-
-  dt_show_times(&start, "[dev_process_image] resuming pipelines recompute after killswitch");
 }
 
 void dt_dev_invalidate_all(dt_develop_t *dev)
@@ -231,20 +223,8 @@ void dt_dev_invalidate_all(dt_develop_t *dev)
   dt_atomic_set_int(&dev->pipe->shutdown, TRUE);
   dt_atomic_set_int(&dev->preview_pipe->shutdown, TRUE);
 
-  // Wait for pipelines to finish before dispatching new recomputes
-  dt_pthread_mutex_lock(&dev->pipe->busy_mutex);
-  dt_pthread_mutex_lock(&dev->preview_pipe->busy_mutex);
-
-  dt_atomic_set_int(&dev->pipe->shutdown, FALSE);
-  dt_atomic_set_int(&dev->preview_pipe->shutdown, FALSE);
-
   dev->image_status = dev->preview_status = DT_DEV_PIXELPIPE_DIRTY;
   dev->timestamp++;
-
-  dt_pthread_mutex_unlock(&dev->pipe->busy_mutex);
-  dt_pthread_mutex_unlock(&dev->preview_pipe->busy_mutex);
-
-  dt_show_times(&start, "[dev_process_all] resuming pipelines recompute after killswitch");
 }
 
 void dt_dev_invalidate_preview(dt_develop_t *dev)
@@ -255,18 +235,9 @@ void dt_dev_invalidate_preview(dt_develop_t *dev)
 
   dt_atomic_set_int(&dev->preview_pipe->shutdown, TRUE);
 
-  // Wait for pipelines to finish before dispatching new recomputes
-  dt_pthread_mutex_lock(&dev->preview_pipe->busy_mutex);
-
-  dt_atomic_set_int(&dev->preview_pipe->shutdown, FALSE);
-
   dev->preview_status = DT_DEV_PIXELPIPE_DIRTY;
   dev->timestamp++;
   if(dev->pipe) dev->pipe->input_timestamp = dev->timestamp;
-
-  dt_pthread_mutex_unlock(&dev->preview_pipe->busy_mutex);
-
-  dt_show_times(&start, "[dev_process_preview] resuming pipelines recompute after killswitch");
 }
 
 void dt_dev_process_preview_job(dt_develop_t *dev)
@@ -323,6 +294,10 @@ void dt_dev_process_preview_job(dt_develop_t *dev)
 
 // always process the whole downsampled mipf buffer, to allow for fast scrolling and mip4 write-through.
 restart:
+  dt_pthread_mutex_lock(&dev->preview_pipe->busy_mutex);
+  dt_atomic_set_int(&dev->preview_pipe->shutdown, FALSE);
+  dt_pthread_mutex_unlock(&dev->preview_pipe->busy_mutex);
+
   if(dev->gui_leaving)
   {
     dt_control_log_busy_leave();
@@ -433,6 +408,10 @@ void dt_dev_process_image_job(dt_develop_t *dev)
 
 // adjust pipeline according to changed flag set by {add,pop}_history_item.
 restart:
+  dt_pthread_mutex_lock(&dev->pipe->busy_mutex);
+  dt_atomic_set_int(&dev->pipe->shutdown, FALSE);
+  dt_pthread_mutex_unlock(&dev->pipe->busy_mutex);
+
   if(dev->gui_leaving)
   {
     dt_mipmap_cache_release(darktable.mipmap_cache, &buf);
