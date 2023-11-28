@@ -810,8 +810,6 @@ static void _dev_add_history_item_ext(dt_develop_t *dev, dt_iop_module_t *module
 
 const dt_dev_history_item_t *dt_dev_get_history_item(dt_develop_t *dev, const char *op)
 {
-  dt_pthread_mutex_lock(&dev->history_mutex);
-
   for(GList *l = g_list_last(dev->history); l; l = g_list_previous(l))
   {
     dt_dev_history_item_t *item = (dt_dev_history_item_t *)l->data;
@@ -821,9 +819,6 @@ const dt_dev_history_item_t *dt_dev_get_history_item(dt_develop_t *dev, const ch
       break;
     }
   }
-
-  dt_pthread_mutex_unlock(&dev->history_mutex);
-
   return NULL;
 }
 
