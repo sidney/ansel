@@ -294,6 +294,7 @@ restart:
          dev->preview_pipe, dev, 0, 0, dev->preview_pipe->processed_width,
          dev->preview_pipe->processed_height, 1.f))
   {
+    // interrupted because image changed?
     if(dev->preview_loading || dev->preview_input_changed)
     {
       dt_control_log_busy_leave();
@@ -303,8 +304,16 @@ restart:
       dt_mipmap_cache_release(darktable.mipmap_cache, &buf);
       return;
     }
+    // or because the pipeline changed?
     else
+    {
+      // block until pipe is idle, make sure we don't compete
+      // with dt_dev_pixelpipe_cleanup_nodes()/dt_dev_pixelpipe_create_nodes()
+      dt_pthread_mutex_lock(&dev->preview_pipe->busy_mutex);
+      dt_atomic_set_int(&dev->preview_pipe->shutdown, FALSE);
+      dt_pthread_mutex_unlock(&dev->preview_pipe->busy_mutex);
       goto restart;
+    }
   }
 
   dev->preview_status = DT_DEV_PIXELPIPE_VALID;
@@ -439,7 +448,14 @@ restart:
     }
     // or because the pipeline changed?
     else
+    {
+      // block until pipe is idle, make sure we don't compete
+      // with dt_dev_pixelpipe_cleanup_nodes()/dt_dev_pixelpipe_create_nodes()
+      dt_pthread_mutex_lock(&dev->pipe->busy_mutex);
+      dt_atomic_set_int(&dev->pipe->shutdown, FALSE);
+      dt_pthread_mutex_unlock(&dev->pipe->busy_mutex);
       goto restart;
+    }
   }
   dt_show_times(&start, "[dev_process_image] pixel pipeline processing");
   dt_dev_average_delay_update(&start, &dev->average_delay);
@@ -831,6 +847,11 @@ void _dev_add_history_item(dt_develop_t *dev, dt_iop_module_t *module, gboolean 
   /* register export timestamp in cache */
   dt_image_cache_set_change_timestamp(darktable.image_cache, imgid);
 
+  // Notify the pipeline that it's useless to keep computing :
+  // settings have changed, exit early.
+  dt_atomic_set_int(&dev->pipe->shutdown, TRUE);
+  dt_atomic_set_int(&dev->preview_pipe->shutdown, TRUE);
+
   // invalidate buffers and force redraw of darkroom
   dt_dev_invalidate_all(dev);
   dt_pthread_mutex_unlock(&dev->history_mutex);
@@ -1057,6 +1078,11 @@ void dt_dev_pop_history_items(dt_develop_t *dev, int32_t cnt)
   dt_pthread_mutex_lock(&dev->history_mutex);
   ++darktable.gui->reset;
   GList *dev_iop = g_list_copy(dev->iop);
+
+  // Notify the pipeline that it's useless to keep computing :
+  // settings have changed, exit early.
+  dt_atomic_set_int(&dev->pipe->shutdown, TRUE);
+  dt_atomic_set_int(&dev->preview_pipe->shutdown, TRUE);
 
   dt_dev_pop_history_items_ext(dev, cnt);
 
