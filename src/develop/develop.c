@@ -810,6 +810,8 @@ static void _dev_add_history_item_ext(dt_develop_t *dev, dt_iop_module_t *module
 
 const dt_dev_history_item_t *dt_dev_get_history_item(dt_develop_t *dev, const char *op)
 {
+  dt_pthread_mutex_lock(&dev->history_mutex);
+
   for(GList *l = g_list_last(dev->history); l; l = g_list_previous(l))
   {
     dt_dev_history_item_t *item = (dt_dev_history_item_t *)l->data;
@@ -819,6 +821,8 @@ const dt_dev_history_item_t *dt_dev_get_history_item(dt_develop_t *dev, const ch
       break;
     }
   }
+
+  dt_pthread_mutex_unlock(&dev->history_mutex);
 
   return NULL;
 }
@@ -863,10 +867,10 @@ void _dev_add_history_item(dt_develop_t *dev, dt_iop_module_t *module, gboolean 
   /* register export timestamp in cache */
   dt_image_cache_set_change_timestamp(darktable.image_cache, imgid);
 
-  dt_pthread_mutex_unlock(&dev->history_mutex);
-
   // invalidate buffers and force redraw of darkroom
   dt_dev_invalidate_all(dev);
+
+  dt_pthread_mutex_unlock(&dev->history_mutex);
 
   if(dev->gui_attached)
   {
@@ -930,10 +934,10 @@ void dt_dev_add_masks_history_item(dt_develop_t *dev, dt_iop_module_t *module, g
     dt_dev_add_masks_history_item_ext(dev, module, enable, FALSE);
   }
 
-  dt_pthread_mutex_unlock(&dev->history_mutex);
-
   // invalidate buffers and force redraw of darkroom
   dt_dev_invalidate_all(dev);
+
+  dt_pthread_mutex_unlock(&dev->history_mutex);
 
   if(dev->gui_attached)
   {
@@ -1141,9 +1145,10 @@ void dt_dev_pop_history_items(dt_develop_t *dev, int32_t cnt)
   }
 
   --darktable.gui->reset;
-  dt_pthread_mutex_unlock(&dev->history_mutex);
 
   dt_dev_invalidate_all(dev);
+
+  dt_pthread_mutex_unlock(&dev->history_mutex);
 
   dt_dev_masks_list_change(dev);
 
@@ -1930,12 +1935,16 @@ void dt_dev_read_history_ext(dt_develop_t *dev, const int imgid, gboolean no_ima
 
   dt_masks_read_masks_history(dev, imgid);
 
-  // FIXME : this probably needs to capture dev thread lock
   if(dev->gui_attached && !no_image)
   {
+    dt_pthread_mutex_lock(&dev->history_mutex);
+
     dev->pipe->changed |= DT_DEV_PIPE_SYNCH;
     dev->preview_pipe->changed |= DT_DEV_PIPE_SYNCH; // again, fixed topology for now.
+
     dt_dev_invalidate_all(dev);
+
+    dt_pthread_mutex_unlock(&dev->history_mutex);
 
     /* signal history changed */
     dt_dev_undo_end_record(dev);
@@ -1989,6 +1998,8 @@ void dt_dev_reprocess_all(dt_develop_t *dev)
   if(darktable.gui->reset) return;
   if(dev && dev->gui_attached)
   {
+    dt_pthread_mutex_lock(&dev->history_mutex);
+
     dev->pipe->changed |= DT_DEV_PIPE_SYNCH;
     dev->preview_pipe->changed |= DT_DEV_PIPE_SYNCH;
     dev->pipe->cache_obsolete = 1;
@@ -1996,6 +2007,8 @@ void dt_dev_reprocess_all(dt_develop_t *dev)
 
     // invalidate buffers and force redraw of darkroom
     dt_dev_invalidate_all(dev);
+
+    dt_pthread_mutex_unlock(&dev->history_mutex);
 
     /* redraw */
     dt_control_queue_redraw_center();
@@ -2007,11 +2020,15 @@ void dt_dev_reprocess_center(dt_develop_t *dev)
   if(darktable.gui->reset) return;
   if(dev && dev->gui_attached)
   {
+    dt_pthread_mutex_lock(&dev->history_mutex);
+
     dev->pipe->changed |= DT_DEV_PIPE_SYNCH;
     dev->pipe->cache_obsolete = 1;
 
     // invalidate buffers and force redraw of darkroom
     dt_dev_invalidate_all(dev);
+
+    dt_pthread_mutex_unlock(&dev->history_mutex);
 
     /* redraw */
     dt_control_queue_redraw_center();
@@ -2022,10 +2039,15 @@ void dt_dev_reprocess_preview(dt_develop_t *dev)
 {
   if(darktable.gui->reset || !dev || !dev->gui_attached) return;
 
+  dt_pthread_mutex_lock(&dev->history_mutex);
+
   dev->preview_pipe->changed |= DT_DEV_PIPE_SYNCH;
   dev->preview_pipe->cache_obsolete = 1;
 
   dt_dev_invalidate_preview(dev);
+
+  dt_pthread_mutex_unlock(&dev->history_mutex);
+
   dt_control_queue_redraw_center();
 }
 
