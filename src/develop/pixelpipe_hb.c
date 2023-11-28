@@ -444,12 +444,12 @@ void dt_dev_pixelpipe_change(dt_dev_pixelpipe_t *pipe, struct dt_develop_t *dev)
     // only top history item changed.
     dt_dev_pixelpipe_synch_top(pipe, dev);
   }
-  if(pipe->changed & DT_DEV_PIPE_SYNCH)
+  else if(pipe->changed & DT_DEV_PIPE_SYNCH)
   {
     // pipeline topology remains intact, only change all params.
     dt_dev_pixelpipe_synch_all(pipe, dev);
   }
-  if(pipe->changed & DT_DEV_PIPE_REMOVE)
+  else if(pipe->changed & DT_DEV_PIPE_REMOVE)
   {
     // modules have been added in between or removed. need to rebuild the whole pipeline.
     dt_dev_pixelpipe_cleanup_nodes(pipe);
