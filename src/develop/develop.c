@@ -204,22 +204,69 @@ void dt_dev_process_preview(dt_develop_t *dev)
 
 void dt_dev_invalidate(dt_develop_t *dev)
 {
+  dt_times_t start;
+  dt_get_times(&start);
+  dt_show_times(&start, "[dev_process_image] sending killswitch signal on running pipelines");
+
+  dt_atomic_set_int(&dev->pipe->shutdown, TRUE);
+
+  // Wait for pipelines to finish before dispatching new recomputes
+  dt_pthread_mutex_lock(&dev->pipe->busy_mutex);
+
   dev->image_status = DT_DEV_PIXELPIPE_DIRTY;
   dev->timestamp++;
   if(dev->preview_pipe) dev->preview_pipe->input_timestamp = dev->timestamp;
+
+  dt_pthread_mutex_unlock(&dev->pipe->busy_mutex);
+
+  dt_show_times(&start, "[dev_process_image] resuming pipelines recompute after killswitch");
 }
 
 void dt_dev_invalidate_all(dt_develop_t *dev)
 {
+  dt_times_t start;
+  dt_get_times(&start);
+  dt_show_times(&start, "[dev_process_all] sending killswitch signal on running pipelines");
+
+  dt_atomic_set_int(&dev->pipe->shutdown, TRUE);
+  dt_atomic_set_int(&dev->preview_pipe->shutdown, TRUE);
+
+  // Wait for pipelines to finish before dispatching new recomputes
+  dt_pthread_mutex_lock(&dev->pipe->busy_mutex);
+  dt_pthread_mutex_lock(&dev->preview_pipe->busy_mutex);
+
+  dt_atomic_set_int(&dev->pipe->shutdown, FALSE);
+  dt_atomic_set_int(&dev->preview_pipe->shutdown, FALSE);
+
   dev->image_status = dev->preview_status = DT_DEV_PIXELPIPE_DIRTY;
   dev->timestamp++;
+
+  dt_pthread_mutex_unlock(&dev->pipe->busy_mutex);
+  dt_pthread_mutex_unlock(&dev->preview_pipe->busy_mutex);
+
+  dt_show_times(&start, "[dev_process_all] resuming pipelines recompute after killswitch");
 }
 
 void dt_dev_invalidate_preview(dt_develop_t *dev)
 {
+  dt_times_t start;
+  dt_get_times(&start);
+  dt_show_times(&start, "[dev_process_preview] sending killswitch signal on running pipelines");
+
+  dt_atomic_set_int(&dev->preview_pipe->shutdown, TRUE);
+
+  // Wait for pipelines to finish before dispatching new recomputes
+  dt_pthread_mutex_lock(&dev->preview_pipe->busy_mutex);
+
+  dt_atomic_set_int(&dev->preview_pipe->shutdown, FALSE);
+
   dev->preview_status = DT_DEV_PIXELPIPE_DIRTY;
   dev->timestamp++;
   if(dev->pipe) dev->pipe->input_timestamp = dev->timestamp;
+
+  dt_pthread_mutex_unlock(&dev->preview_pipe->busy_mutex);
+
+  dt_show_times(&start, "[dev_process_preview] resuming pipelines recompute after killswitch");
 }
 
 void dt_dev_process_preview_job(dt_develop_t *dev)
@@ -307,11 +354,6 @@ restart:
     // or because the pipeline changed?
     else
     {
-      // block until pipe is idle, make sure we don't compete
-      // with dt_dev_pixelpipe_cleanup_nodes()/dt_dev_pixelpipe_create_nodes()
-      dt_pthread_mutex_lock(&dev->preview_pipe->busy_mutex);
-      dt_atomic_set_int(&dev->preview_pipe->shutdown, FALSE);
-      dt_pthread_mutex_unlock(&dev->preview_pipe->busy_mutex);
       goto restart;
     }
   }
@@ -449,11 +491,6 @@ restart:
     // or because the pipeline changed?
     else
     {
-      // block until pipe is idle, make sure we don't compete
-      // with dt_dev_pixelpipe_cleanup_nodes()/dt_dev_pixelpipe_create_nodes()
-      dt_pthread_mutex_lock(&dev->pipe->busy_mutex);
-      dt_atomic_set_int(&dev->pipe->shutdown, FALSE);
-      dt_pthread_mutex_unlock(&dev->pipe->busy_mutex);
       goto restart;
     }
   }
@@ -847,14 +884,10 @@ void _dev_add_history_item(dt_develop_t *dev, dt_iop_module_t *module, gboolean 
   /* register export timestamp in cache */
   dt_image_cache_set_change_timestamp(darktable.image_cache, imgid);
 
-  // Notify the pipeline that it's useless to keep computing :
-  // settings have changed, exit early.
-  dt_atomic_set_int(&dev->pipe->shutdown, TRUE);
-  dt_atomic_set_int(&dev->preview_pipe->shutdown, TRUE);
+  dt_pthread_mutex_unlock(&dev->history_mutex);
 
   // invalidate buffers and force redraw of darkroom
   dt_dev_invalidate_all(dev);
-  dt_pthread_mutex_unlock(&dev->history_mutex);
 
   if(dev->gui_attached)
   {
@@ -918,9 +951,10 @@ void dt_dev_add_masks_history_item(dt_develop_t *dev, dt_iop_module_t *module, g
     dt_dev_add_masks_history_item_ext(dev, module, enable, FALSE);
   }
 
+  dt_pthread_mutex_unlock(&dev->history_mutex);
+
   // invalidate buffers and force redraw of darkroom
   dt_dev_invalidate_all(dev);
-  dt_pthread_mutex_unlock(&dev->history_mutex);
 
   if(dev->gui_attached)
   {
@@ -1079,11 +1113,6 @@ void dt_dev_pop_history_items(dt_develop_t *dev, int32_t cnt)
   ++darktable.gui->reset;
   GList *dev_iop = g_list_copy(dev->iop);
 
-  // Notify the pipeline that it's useless to keep computing :
-  // settings have changed, exit early.
-  dt_atomic_set_int(&dev->pipe->shutdown, TRUE);
-  dt_atomic_set_int(&dev->preview_pipe->shutdown, TRUE);
-
   dt_dev_pop_history_items_ext(dev, cnt);
 
   darktable.develop->history_updating = TRUE;
@@ -1133,8 +1162,9 @@ void dt_dev_pop_history_items(dt_develop_t *dev, int32_t cnt)
   }
 
   --darktable.gui->reset;
-  dt_dev_invalidate_all(dev);
   dt_pthread_mutex_unlock(&dev->history_mutex);
+
+  dt_dev_invalidate_all(dev);
 
   dt_dev_masks_list_change(dev);
 
