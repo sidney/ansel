@@ -162,7 +162,7 @@ static void _file_filters(GtkWidget *file_chooser)
 
   /* ALL IMAGES */
   filter = gtk_file_filter_new();
-  gtk_file_filter_set_name(filter, "All image files");
+  gtk_file_filter_set_name(filter, _("All image files"));
   //TODO: use dt_supported_extensions list ?
   for(int i = 0; i < 46; i++)
   {
@@ -178,7 +178,7 @@ static void _file_filters(GtkWidget *file_chooser)
 
   /* RAW ONLY */
   filter = gtk_file_filter_new();
-  gtk_file_filter_set_name(filter, "Raw image files");
+  gtk_file_filter_set_name(filter, _("Raw image files"));
   for(int i = 0; i < 46; i++)
   {
     gtk_file_filter_add_pattern(filter, g_strdup_printf("*.%s", raw[i]));
@@ -191,7 +191,7 @@ static void _file_filters(GtkWidget *file_chooser)
 
   /* RASTER ONLY */
   filter = gtk_file_filter_new();
-  gtk_file_filter_set_name(filter, "Raster image files");
+  gtk_file_filter_set_name(filter, _("Raster image files"));
   for(int i = 0; i < 14; i++)
   {
     gtk_file_filter_add_pattern(filter, g_strdup_printf("*.%s", raster[i]));
