@@ -153,6 +153,12 @@ typedef struct dt_gui_gtk_t
   GtkWidget *grab_widget;
   GtkWidget *grab_window;
 
+  // Export popup window
+  struct {
+    GtkWidget *window;
+    GtkWidget *module;
+  } export_popup;
+
   dt_pthread_mutex_t mutex;
 } dt_gui_gtk_t;
 

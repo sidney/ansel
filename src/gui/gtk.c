@@ -620,6 +620,8 @@ int dt_gui_gtk_init(dt_gui_gtk_t *gui)
   gui->show_overlays = dt_conf_get_bool("lighttable/ui/expose_statuses");
   gui->presets_popup_menu = NULL;
   gui->last_preset = NULL;
+  gui->export_popup.window = NULL;
+  gui->export_popup.module = NULL;
 
   // load the style / theme
   GtkSettings *settings = gtk_settings_get_default();

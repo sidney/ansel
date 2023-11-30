@@ -156,17 +156,14 @@ const char *name(dt_lib_module_t *self)
 
 const char **views(dt_lib_module_t *self)
 {
-  static const char *v[] = {"lighttable", NULL};
+  // Not displayed in views, only in popup triggered from main menu
+  static const char *v[] = {NULL};
   return v;
 }
 
 uint32_t container(dt_lib_module_t *self)
 {
-  const dt_view_t *cv = dt_view_manager_get_current_view(darktable.view_manager);
-  if(cv->view((dt_view_t *)cv) == DT_VIEW_DARKROOM)
-    return DT_UI_CONTAINER_PANEL_LEFT_CENTER;
-  else
-    return DT_UI_CONTAINER_PANEL_LEFT_CENTER;
+  return DT_UI_CONTAINER_SIZE;
 }
 
 static void _update(dt_lib_module_t *self)
@@ -1433,13 +1430,13 @@ void gui_cleanup(dt_lib_module_t *self)
   for(const GList *it = darktable.imageio->plugins_storage; it; it = g_list_next(it))
   {
     dt_imageio_module_storage_t *module = (dt_imageio_module_storage_t *)it->data;
-    if(module->widget) gtk_container_remove(GTK_CONTAINER(d->storage_extra_container), module->widget);
+    if(module->widget && GTK_IS_CONTAINER(d->storage_extra_container)) gtk_container_remove(GTK_CONTAINER(d->storage_extra_container), module->widget);
   }
 
   for(const GList *it = darktable.imageio->plugins_format; it; it = g_list_next(it))
   {
     dt_imageio_module_format_t *module = (dt_imageio_module_format_t *)it->data;
-    if(module->widget) gtk_container_remove(GTK_CONTAINER(d->format_extra_container), module->widget);
+    if(module->widget && GTK_IS_CONTAINER(d->format_extra_container)) gtk_container_remove(GTK_CONTAINER(d->format_extra_container), module->widget);
   }
 
   g_free(d->metadata_export);
