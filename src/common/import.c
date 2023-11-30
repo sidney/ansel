@@ -351,10 +351,19 @@ static void _datetime_changed_callback(GtkEntry *entry, dt_lib_import_t *d)
   gtk_entry_set_icon_from_icon_name(entry, GTK_ENTRY_ICON_PRIMARY, NULL);
 }
 
+static void _file_activated(GtkFileChooser *chooser, GtkDialog *dialog)
+{
+  // If we double-click on image and we are not asking to duplicate files, let the filechooser
+  // behave as a replacement of lighttable and directly open the image in darkroom.
+  if(g_file_test(gtk_file_chooser_get_filename(chooser), G_FILE_TEST_IS_REGULAR)
+     && !dt_conf_get_bool("ui_last/import_copy"))
+  {
+    gtk_dialog_response(dialog, GTK_RESPONSE_ACCEPT);
+  }
+}
+
 static void _import_from_dialog_new(dt_lib_import_t *d)
 {
-  GtkWidget *win = dt_ui_main_window(darktable.gui->ui);
-
   d->dialog = gtk_dialog_new_with_buttons
     ( _("Ansel — Open pictures"), NULL, GTK_DIALOG_MODAL,
       _("Cancel"), GTK_RESPONSE_CANCEL,
@@ -362,13 +371,13 @@ static void _import_from_dialog_new(dt_lib_import_t *d)
       NULL);
 
 #ifdef GDK_WINDOWING_QUARTZ
-  dt_osx_disallow_fullscreen(d->from.dialog);
+  dt_osx_disallow_fullscreen(d->dialog);
 #endif
   gtk_window_set_default_size(GTK_WINDOW(d->dialog),
                               dt_conf_get_int("ui_last/import_dialog_width"),
                               dt_conf_get_int("ui_last/import_dialog_height"));
-  gtk_window_set_transient_for(GTK_WINDOW(d->dialog), GTK_WINDOW(win));
   gtk_window_set_modal(GTK_WINDOW(d->dialog), FALSE);
+
 
   GtkWidget *content = gtk_dialog_get_content_area(GTK_DIALOG(d->dialog));
   g_signal_connect(d->dialog, "check-resize", G_CALLBACK(_resize_dialog), NULL);
@@ -389,6 +398,7 @@ static void _import_from_dialog_new(dt_lib_import_t *d)
                                       dt_conf_get_string("ui_last/import_last_directory"));
   gtk_box_pack_start(GTK_BOX(rbox), d->file_chooser, TRUE, TRUE, 0);
   g_signal_connect(G_OBJECT(d->file_chooser), "current-folder-changed", G_CALLBACK(_update_directory), NULL);
+  g_signal_connect(G_OBJECT(d->file_chooser), "file-activated", G_CALLBACK(_file_activated), GTK_DIALOG(d->dialog));
 
   // file extension filters
   _file_filters(d->file_chooser);
