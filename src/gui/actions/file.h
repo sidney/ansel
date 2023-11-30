@@ -1,6 +1,7 @@
 #include "gui/actions/menu.h"
 #include "common/collection.h"
 #include "libs/collect.h"
+#include "common/import.h"
 
 
 static void pretty_print_collection(const char *buf, char *out, size_t outsize)
@@ -108,11 +109,23 @@ void init_collection_line(gpointer instance,
   }
 }
 
+void import_files_callback()
+{
+  dt_images_import();
+}
+
 
 void append_file(GtkWidget **menus, GList **lists, const dt_menus_t index)
 {
   dt_action_t *pnl = dt_action_section(&darktable.control->actions_global, N_("File"));
   dt_action_t *ac;
+
+  add_sub_menu_entry(menus, lists, _("Import…"), index, NULL, import_files_callback, NULL, NULL,
+                     NULL);
+  ac = dt_action_define(pnl, NULL, N_("Import images"), get_last_widget(lists), NULL);
+  dt_action_register(ac, NULL, import_files_callback, GDK_KEY_i, GDK_CONTROL_MASK | GDK_SHIFT_MASK);
+
+  add_menu_separator(menus[index]);
 
   add_top_submenu_entry(menus, lists, _("Recent collections"), index);
   GtkWidget *parent = get_last_widget(lists);
