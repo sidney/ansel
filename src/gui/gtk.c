@@ -1839,7 +1839,7 @@ static void _collapsible_set_states(dt_gui_collapsible_section_t *cs, gboolean a
   }
   else
   {
-    gtk_widget_set_state_flags(GTK_WIDGET(cs->expander), GTK_STATE_NORMAL, TRUE);
+    gtk_widget_set_state_flags(GTK_WIDGET(cs->expander), GTK_STATE_FLAG_NORMAL, TRUE);
     dt_gui_remove_class(GTK_WIDGET(cs->expander), "active");
   }
 }
