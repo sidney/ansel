@@ -259,7 +259,7 @@ int dt_load_from_string(const gchar *input, gboolean open_image_in_dr, gboolean 
     gchar *directory = g_path_get_dirname((const gchar *)filename);
     dt_film_t film;
     const int filmid = dt_film_new(&film, directory);
-    id = dt_image_import(filmid, filename, TRUE, TRUE);
+    id = dt_image_import(filmid, filename, TRUE);
     g_free(directory);
     if(id)
     {

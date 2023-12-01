@@ -320,10 +320,9 @@ int32_t dt_image_get_id_full_path(const gchar *filename);
 /** get image id by film_id and filename */
 int32_t dt_image_get_id(uint32_t film_id, const gchar *filename);
 /** imports a new image from raw/etc file and adds it to the data base and image cache. Use from threads other than lua.*/
-uint32_t dt_image_import(int32_t film_id, const char *filename, gboolean override_ignore_jpegs,
-                         gboolean raise_signals);
+uint32_t dt_image_import(int32_t film_id, const char *filename, gboolean raise_signals);
 /** imports a new image from raw/etc file and adds it to the data base and image cache. Use from lua thread.*/
-uint32_t dt_image_import_lua(int32_t film_id, const char *filename, gboolean override_ignore_jpegs);
+uint32_t dt_image_import_lua(int32_t film_id, const char *filename);
 /** removes the given image from the database. */
 void dt_image_remove(const int32_t imgid);
 /** duplicates the given image in the database with the duplicate getting the supplied version number. if that
@@ -452,4 +451,3 @@ void dt_image_check_camera_missing_sample(const struct dt_image_t *img);
 // vim: shiftwidth=2 expandtab tabstop=2 cindent
 // kate: tab-indents: off; indent-width 2; replace-tabs on; indent-mode cstyle; remove-trailing-spaces modified;
 // clang-format on
-

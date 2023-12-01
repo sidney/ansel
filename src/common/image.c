@@ -1453,7 +1453,7 @@ static int _image_read_duplicates(const uint32_t id, const char *filename, const
   return count_xmps_processed;
 }
 
-static uint32_t _image_import_internal(const int32_t film_id, const char *filename, gboolean override_ignore_jpegs,
+static uint32_t _image_import_internal(const int32_t film_id, const char *filename,
                                        gboolean lua_locking, gboolean raise_signals)
 {
   const dt_imageio_write_xmp_t xmp_mode = dt_image_get_xmp_mode();
@@ -1764,15 +1764,14 @@ int32_t dt_image_get_id(uint32_t film_id, const gchar *filename)
   return id;
 }
 
-uint32_t dt_image_import(const int32_t film_id, const char *filename, gboolean override_ignore_jpegs,
-                         gboolean raise_signals)
+uint32_t dt_image_import(const int32_t film_id, const char *filename, gboolean raise_signals)
 {
-  return _image_import_internal(film_id, filename, override_ignore_jpegs, TRUE, raise_signals);
+  return _image_import_internal(film_id, filename, TRUE, raise_signals);
 }
 
-uint32_t dt_image_import_lua(const int32_t film_id, const char *filename, gboolean override_ignore_jpegs)
+uint32_t dt_image_import_lua(const int32_t film_id, const char *filename)
 {
-  return _image_import_internal(film_id, filename, override_ignore_jpegs, FALSE, TRUE);
+  return _image_import_internal(film_id, filename, FALSE, TRUE);
 }
 
 void dt_image_init(dt_image_t *img)

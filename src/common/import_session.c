@@ -193,7 +193,7 @@ void dt_import_session_unref(struct dt_import_session_t *self)
 
 void dt_import_session_import(struct dt_import_session_t *self)
 {
-  const int32_t id = dt_image_import(self->film->id, self->current_filename, TRUE, TRUE);
+  const int32_t id = dt_image_import(self->film->id, self->current_filename, TRUE);
   if(id)
   {
     DT_DEBUG_CONTROL_SIGNAL_RAISE(darktable.signals, DT_SIGNAL_VIEWMANAGER_THUMBTABLE_ACTIVATE, id);

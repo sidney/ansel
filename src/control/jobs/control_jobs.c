@@ -56,12 +56,12 @@
 
 // Control of the collection updates during an import.  Start with a short interval to feel responsive,
 // but use fairly infrequent updates for large imports to minimize overall time.
-#define INIT_UPDATE_INTERVAL	0.5 //seconds
+#define INIT_UPDATE_INTERVAL	2 //seconds
 #define MAX_UPDATE_INTERVAL     3.0 //seconds
 // How long (in seconds) between updates of the "importing N/M" progress indicator?  Should be relatively
 // short to avoid the impression that the import has gotten stuck.  Setting this too low will impact the
 // overall time for a large import.
-#define PROGRESS_UPDATE_INTERVAL 0.5
+#define PROGRESS_UPDATE_INTERVAL 1
 
 typedef struct dt_control_datetime_t
 {
@@ -556,7 +556,7 @@ static int32_t dt_control_merge_hdr_job_run(dt_job_t *job)
   gchar *directory = g_path_get_dirname((const gchar *)pathname);
   dt_film_t film;
   const int filmid = dt_film_new(&film, directory);
-  const uint32_t imageid = dt_image_import(filmid, pathname, TRUE, TRUE);
+  const uint32_t imageid = dt_image_import(filmid, pathname, TRUE);
   g_free(directory);
 
   // refresh the thumbtable view
@@ -2089,7 +2089,7 @@ static int _control_import_image_copy(const char *filename,
   }
   else
   {
-    const int32_t imgid = dt_image_import(dt_import_session_film_id(session), output, FALSE, FALSE);
+    const int32_t imgid = dt_image_import(dt_import_session_film_id(session), output, FALSE);
     if(!imgid) dt_control_log(_("error loading file `%s'"), output);
     else
     {
@@ -2148,7 +2148,7 @@ static int _control_import_image_insitu(const char *filename, GList **imgs, doub
   char *dirname = dt_util_path_get_dirname(filename);
   dt_film_t film;
   const int filmid = dt_film_new(&film, dirname);
-  const int32_t imgid = dt_image_import(filmid, filename, FALSE, FALSE);
+  const int32_t imgid = dt_image_import(filmid, filename, FALSE);
   if(!imgid) dt_control_log(_("error loading file `%s'"), filename);
   else
   {
@@ -2235,7 +2235,7 @@ static int32_t _control_import_job_run(dt_job_t *job)
   double fraction = 0.0f;
   int filmid = -1;
   int first_filmid = -1;
-  double last_coll_update = dt_get_wtime() - (INIT_UPDATE_INTERVAL/2.0);
+  double last_coll_update = dt_get_wtime();
   double last_prog_update = last_coll_update;
   double update_interval = INIT_UPDATE_INTERVAL;
   char *prev_filename = NULL;
