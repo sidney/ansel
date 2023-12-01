@@ -4481,6 +4481,12 @@ int dt_exif_xmp_write(const int imgid, const char *filename)
       unsigned char *content = (unsigned char*)dt_read_file(filename, &end);
       if(content)
       {
+        if(end > 1000000)
+        {
+          dt_control_log(_("The XMP file \n'%s'\n weighs %.2f MB. Writing it will take some time."), filename, (float)end / 1000000);
+          fprintf(stdout, "The XMP file '%s' weighs %.2f MB. Writing it will take some time.", filename, (float)end / 1000000);
+        }
+
         checksum_old = g_compute_checksum_for_data(G_CHECKSUM_MD5, content, end);
         free(content);
       }
