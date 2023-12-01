@@ -58,7 +58,14 @@ typedef struct dt_dev_pixelpipe_iop_t
 
   float iscale;        // input actually just downscaled buffer? iscale*iwidth = actual width
   int iwidth, iheight; // width and height of input buffer
-  uint64_t hash;       // hash of params and enabled.
+
+  // Hash representing the current state of the params, blend params and enabled state of this individual module
+  uint64_t hash;
+
+  // Cumulative hash representing the current module hash and all the upstream modules from the pipeline,
+  // for the current ROI.
+  uint64_t global_hash;
+
   int bpc;             // bits per channel, 32 means float
   int colors;          // how many colors per pixel
   dt_iop_roi_t buf_in,

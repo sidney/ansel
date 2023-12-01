@@ -318,6 +318,7 @@ void dt_dev_pixelpipe_create_nodes(dt_dev_pixelpipe_t *pipe, dt_develop_t *dev)
     piece->pipe = pipe;
     piece->data = NULL;
     piece->hash = 0;
+    piece->global_hash = 0;
     piece->process_cl_ready = 0;
     piece->process_tiling_ready = 0;
     piece->raster_masks = g_hash_table_new_full(g_direct_hash, g_direct_equal, NULL, dt_free_align_ptr);
@@ -329,9 +330,39 @@ void dt_dev_pixelpipe_create_nodes(dt_dev_pixelpipe_t *pipe, dt_develop_t *dev)
   dt_pthread_mutex_unlock(&pipe->busy_mutex); // safe for others to use/mess with the pipe now
 }
 
+void _pixelpipe_global_hash(dt_dev_pixelpipe_t *pipe)
+{
+  /* Traverse the pipeline node by node and compute the cumulative (global) hash of each module.
+  *  This hash takes into account the hashes of the previous modules and the size of the current ROI.
+  *  It is used to map pipeline cache states to current parameters.
+  *  It represents the state of internal modules params as well as their position in the pipe and their output size.
+  */
+
+  // bernstein hash (djb2)
+  // the hash is made of imgid and the actual fast-pipe mode if activated
+  uint64_t hash = (5381 + (pipe->type & DT_DEV_PIXELPIPE_FAST)) ^ pipe->output_imgid;
+
+  for(GList *node = pipe->nodes; node; node = g_list_next(node))
+  {
+    dt_dev_pixelpipe_iop_t *piece = (dt_dev_pixelpipe_iop_t *)node->data;
+    hash = ((hash << 5) + hash) ^ piece->hash;
+
+    // Factor-in the ROI out size
+    const char *str = (const char *)&piece->processed_roi_out;
+    for(size_t i = 0; i < sizeof(dt_iop_roi_t) / sizeof(char); i++) hash = ((hash << 5) + hash) ^ str[i];
+
+    // Write
+    piece->global_hash = hash;
+  }
+}
+
 // helper
 void dt_dev_pixelpipe_synch(dt_dev_pixelpipe_t *pipe, dt_develop_t *dev, GList *history)
 {
+  /*
+  * WARNING: this function is called to traverse the pipeline in the order of history items (touches),
+  * not in the order of nodes application in pipeline.
+  */
   dt_dev_history_item_t *hist = (dt_dev_history_item_t *)history->data;
   // find piece in nodes list
   dt_dev_pixelpipe_iop_t *piece = NULL;
@@ -373,9 +404,8 @@ void dt_dev_pixelpipe_synch(dt_dev_pixelpipe_t *pipe, dt_develop_t *dev, GList *
       }
 
       if(piece->enabled != hist->enabled)
-      {
         dt_print(DT_DEBUG_PARAMS, "[pixelpipe_synch] enabling mismatch for module %s in image %i\n", piece->module->op, imgid);
-      }
+
       dt_iop_commit_params(hist->module, hist->params, hist->blend_params, pipe, piece);
 
       if(piece->blendop_data)
@@ -399,6 +429,7 @@ void dt_dev_pixelpipe_synch_all(dt_dev_pixelpipe_t *pipe, dt_develop_t *dev)
   {
     dt_dev_pixelpipe_iop_t *piece = (dt_dev_pixelpipe_iop_t *)nodes->data;
     piece->hash = 0;
+    piece->global_hash = 0;
     piece->enabled = piece->module->default_enabled;
     dt_iop_commit_params(piece->module, piece->module->default_params, piece->module->default_blendop_params,
                          pipe, piece);
@@ -478,6 +509,8 @@ void dt_dev_pixelpipe_change(dt_dev_pixelpipe_t *pipe, struct dt_develop_t *dev)
   dt_dev_pixelpipe_get_dimensions(pipe, dev, pipe->iwidth, pipe->iheight, &pipe->processed_width,
                                   &pipe->processed_height);
 
+  // This needs correct roi_out, so run get_dimensions before
+  _pixelpipe_global_hash(pipe);
   dt_show_times(&start, "[dt_dev_pixelpipe_change] pipeline resync on the current modules stack");
 }
 
@@ -1103,24 +1136,22 @@ static int dt_dev_pixelpipe_process_rec(dt_dev_pixelpipe_t *pipe, dt_develop_t *
     return 1;
   }
   gboolean cache_available = FALSE;
-  uint64_t basichash = 0;
-  uint64_t hash = 0;
+  uint64_t hash = piece ? piece->global_hash : 0;
   // do not get gamma from cache on preview pipe so we can compute the final scope
   // FIXME: better yet, don't even cache the gamma output in this case -- but then we'd need to allocate a temporary output buffer and garbage collect it
   if((pipe->type & DT_DEV_PIXELPIPE_PREVIEW) != DT_DEV_PIXELPIPE_PREVIEW
      || module == NULL
      || strcmp(module->op, "gamma") != 0)
   {
-    dt_dev_pixelpipe_cache_fullhash(pipe->image.id, roi_out, pipe, pos, &basichash, &hash);
     cache_available = dt_dev_pixelpipe_cache_available(&(pipe->cache), hash);
   }
   if(cache_available)
   {
-    dt_print(DT_DEBUG_PARAMS, "[pixelpipe] dt_dev_pixelpipe_process_rec, cache available for pipe %i with hash %lu\n", pipe->type, (long unsigned int)hash);
-    // if(module) printf("found valid buf pos %d in cache for module %s %s %lu\n", pos, module->op, pipe ==
-    // dev->preview_pipe ? "[preview]" : "", hash);
+    if(module)
+      dt_print(DT_DEBUG_PARAMS, "[pixelpipe] dt_dev_pixelpipe_process_rec, cache available for pipe %i and module %s with hash %lu\n",
+             pipe->type, module->op, hash);
 
-    (void)dt_dev_pixelpipe_cache_get(&(pipe->cache), basichash, hash, bufsize, output, out_format);
+    (void)dt_dev_pixelpipe_cache_get(&(pipe->cache), hash, bufsize, output, out_format);
 
     if(dt_atomic_get_int(&pipe->shutdown))
       return 1;
@@ -1156,7 +1187,7 @@ static int dt_dev_pixelpipe_process_rec(dt_dev_pixelpipe_t *pipe, dt_develop_t *
       {
         *output = pipe->input;
       }
-      else if(dt_dev_pixelpipe_cache_get(&(pipe->cache), basichash, hash, bufsize, output, out_format))
+      else if(dt_dev_pixelpipe_cache_get(&(pipe->cache), hash, bufsize, output, out_format))
       {
         if(roi_in.scale == 1.0f)
         {
@@ -1243,15 +1274,7 @@ static int dt_dev_pixelpipe_process_rec(dt_dev_pixelpipe_t *pipe, dt_develop_t *
     return 1;
   }
 
-  gboolean important = FALSE;
-  if((pipe->type & DT_DEV_PIXELPIPE_PREVIEW) == DT_DEV_PIXELPIPE_PREVIEW)
-    important = (strcmp(module->op, "colorout") == 0);
-  else
-    important = (strcmp(module->op, "gamma") == 0);
-  if(important)
-    (void)dt_dev_pixelpipe_cache_get_important(&(pipe->cache), basichash, hash, bufsize, output, out_format);
-  else
-    (void)dt_dev_pixelpipe_cache_get(&(pipe->cache), basichash, hash, bufsize, output, out_format);
+  (void)dt_dev_pixelpipe_cache_get(&(pipe->cache), hash, bufsize, output, out_format);
 
 // if(module) printf("reserving new buf in cache for module %s %s: %ld buf %p\n", module->op, pipe ==
 // dev->preview_pipe ? "[preview]" : "", hash, *output);
@@ -2257,7 +2280,9 @@ restart:
 
   // terminate
   dt_pthread_mutex_lock(&pipe->backbuf_mutex);
-  pipe->backbuf_hash = dt_dev_pixelpipe_cache_hash(pipe->image.id, &roi, pipe, 0);
+  GList *last_node = g_list_last(pipe->nodes);
+  const dt_dev_pixelpipe_iop_t *last_module = (const dt_dev_pixelpipe_iop_t *)(last_node->data);
+  pipe->backbuf_hash = last_module->global_hash;
   pipe->backbuf = buf;
   pipe->backbuf_width = width;
   pipe->backbuf_height = height;

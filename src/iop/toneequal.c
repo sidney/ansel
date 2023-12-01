@@ -928,7 +928,7 @@ void toneeq_process(struct dt_iop_module_t *self, dt_dev_pixelpipe_iop_t *piece,
 
   // Get the hash of the upstream pipe to track changes
   const int position = self->iop_order;
-  uint64_t hash = dt_dev_pixelpipe_cache_hash(piece->pipe->image.id, roi_out, piece->pipe, position);
+  uint64_t hash = piece->global_hash;
 
   // Sanity checks
   if(width < 1 || height < 1) return;

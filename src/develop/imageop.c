@@ -1653,6 +1653,7 @@ void dt_iop_commit_params(dt_iop_module_t *module, dt_iop_params_t *params,
   // 2. compute the hash only if piece is enabled
 
   piece->hash = 0;
+  piece->global_hash = 0;
 
   if(piece->enabled)
   {
@@ -2869,9 +2870,6 @@ void dt_iop_refresh_center(dt_iop_module_t *module)
   dt_develop_t *dev = module->dev;
   if (dev && dev->gui_attached)
   {
-    // invalidate the pixelpipe cache except for the output of the prior module
-    const uint64_t hash = dt_dev_pixelpipe_cache_basichash_prior(dev->pipe->image.id, dev->pipe, module);
-    dt_dev_pixelpipe_cache_flush_all_but(&dev->pipe->cache, hash);
     dev->pipe->changed |= DT_DEV_PIPE_SYNCH; //ensure that commit_params gets called to pick up any GUI changes
     dt_dev_invalidate(dev);
     dt_control_queue_redraw_center();
@@ -2884,9 +2882,6 @@ void dt_iop_refresh_preview(dt_iop_module_t *module)
   dt_develop_t *dev = module->dev;
   if (dev && dev->gui_attached)
   {
-    // invalidate the pixelpipe cache except for the output of the prior module
-    const uint64_t hash = dt_dev_pixelpipe_cache_basichash_prior(dev->pipe->image.id, dev->preview_pipe, module);
-    dt_dev_pixelpipe_cache_flush_all_but(&dev->preview_pipe->cache, hash);
     dev->pipe->changed |= DT_DEV_PIPE_SYNCH; //ensure that commit_params gets called to pick up any GUI changes
     dt_dev_invalidate_all(dev);
     dt_control_queue_redraw();
