@@ -197,6 +197,7 @@ struct dt_dbus_t *dt_dbus_init()
 
 void dt_dbus_destroy(const dt_dbus_t *dbus)
 {
+  if(!dbus) return;
   g_bus_unown_name(dbus->owner_id);
   g_dbus_node_info_unref(dbus->introspection_data);
   if(dbus->dbus_connection)
@@ -215,4 +216,3 @@ gboolean dt_dbus_connected(const dt_dbus_t *dbus)
 // vim: shiftwidth=2 expandtab tabstop=2 cindent
 // kate: tab-indents: off; indent-width 2; replace-tabs on; indent-mode cstyle; remove-trailing-spaces modified;
 // clang-format on
-
