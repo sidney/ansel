@@ -3661,6 +3661,7 @@ void gui_changed(dt_iop_module_t *self, GtkWidget *w, void *previous)
   // If "as shot in camera" illuminant is used, CAT space is forced automatically
   // therefore, make the control insensitive
   gtk_widget_set_sensitive(g->adaptation, p->illuminant != DT_ILLUMINANT_CAMERA);
+  gtk_widget_queue_draw(g->adaptation);
 
   declare_cat_on_pipe(self, FALSE);
 
