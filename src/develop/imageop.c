@@ -1676,16 +1676,14 @@ void dt_iop_commit_params(dt_iop_module_t *module, dt_iop_params_t *params,
     /* and we add masks */
     dt_masks_group_get_hash_buffer(grp, str + pos);
 
-    uint64_t hash = 5381;
-    for(int i = 0; i < length; i++) hash = ((hash << 5) + hash + piece->enabled) ^ str[i];
-    piece->hash = hash;
+    // Get the hash
+    piece->hash = piece->global_hash = dt_hash(5381, str, length);
 
     free(str);
 
     dt_print(DT_DEBUG_PARAMS, "[params] commit for %s in pipe %i with hash %lu\n", module->op, pipe->type, (long unsigned int)piece->hash);
   }
-  // printf("commit params hash += module %s: %lu, enabled = %d\n", piece->module->op, piece->hash,
-  // piece->enabled);
+
 }
 
 void dt_iop_gui_cleanup_module(dt_iop_module_t *module)
