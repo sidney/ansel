@@ -1677,7 +1677,7 @@ void dt_iop_commit_params(dt_iop_module_t *module, dt_iop_params_t *params,
     dt_masks_group_get_hash_buffer(grp, str + pos);
 
     uint64_t hash = 5381;
-    for(int i = 0; i < length; i++) hash = ((hash << 5) + hash) ^ str[i];
+    for(int i = 0; i < length; i++) hash = ((hash << 5) + hash + piece->enabled) ^ str[i];
     piece->hash = hash;
 
     free(str);

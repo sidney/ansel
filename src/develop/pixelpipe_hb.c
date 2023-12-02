@@ -330,7 +330,7 @@ void dt_dev_pixelpipe_create_nodes(dt_dev_pixelpipe_t *pipe, dt_develop_t *dev)
   dt_pthread_mutex_unlock(&pipe->busy_mutex); // safe for others to use/mess with the pipe now
 }
 
-void _pixelpipe_global_hash(dt_dev_pixelpipe_t *pipe)
+void dt_pixelpipe_get_global_hash(dt_dev_pixelpipe_t *pipe)
 {
   /* Traverse the pipeline node by node and compute the cumulative (global) hash of each module.
   *  This hash takes into account the hashes of the previous modules and the size of the current ROI.
@@ -339,17 +339,27 @@ void _pixelpipe_global_hash(dt_dev_pixelpipe_t *pipe)
   */
 
   // bernstein hash (djb2)
-  // the hash is made of imgid and the actual fast-pipe mode if activated
-  uint64_t hash = (5381 + (pipe->type & DT_DEV_PIXELPIPE_FAST)) ^ pipe->output_imgid;
+  uint64_t hash = 5381 ^ pipe->output_imgid;
 
   for(GList *node = pipe->nodes; node; node = g_list_next(node))
   {
     dt_dev_pixelpipe_iop_t *piece = (dt_dev_pixelpipe_iop_t *)node->data;
-    hash = ((hash << 5) + hash) ^ piece->hash;
+    if(piece->enabled)
+    {
+      hash = ((hash << 5) + hash) ^ piece->hash;
 
-    // Factor-in the ROI out size
-    const char *str = (const char *)&piece->processed_roi_out;
-    for(size_t i = 0; i < sizeof(dt_iop_roi_t) / sizeof(char); i++) hash = ((hash << 5) + hash) ^ str[i];
+      // Factor-in the ROI out sizes
+      char *str = (char *)&piece->processed_roi_out;
+      for(size_t i = 0; i < sizeof(dt_iop_roi_t); i++) hash = ((hash << 5) + hash) ^ str[i];
+      /*
+      fprintf(stdout, "[hash %i] module %s produced %lu (%i, %i, %i, %i)\n",
+              pipe->type, piece->module->op, hash,
+              piece->processed_roi_out.x,
+              piece->processed_roi_out.y,
+              piece->processed_roi_out.width,
+              piece->processed_roi_out.height);
+      */
+    }
 
     // Write
     piece->global_hash = hash;
@@ -510,7 +520,7 @@ void dt_dev_pixelpipe_change(dt_dev_pixelpipe_t *pipe, struct dt_develop_t *dev)
                                   &pipe->processed_height);
 
   // This needs correct roi_out, so run get_dimensions before
-  _pixelpipe_global_hash(pipe);
+  dt_pixelpipe_get_global_hash(pipe);
   dt_show_times(&start, "[dt_dev_pixelpipe_change] pipeline resync on the current modules stack");
 }
 
@@ -1137,6 +1147,15 @@ static int dt_dev_pixelpipe_process_rec(dt_dev_pixelpipe_t *pipe, dt_develop_t *
   }
   gboolean cache_available = FALSE;
   uint64_t hash = piece ? piece->global_hash : 0;
+
+  // For panned/zoomed preview in darkroom, the global hash doesn't account for
+  // coordinates changes in viewport, since roi_out computed from commit_params
+  // accounts only for geometric distortions (perspective, crop, liquify).
+  // The roi_out passed from here as parameter accounts for zoom and pan.
+  // We need to amend our module global_hash to represent that.
+  char *str = (char *)roi_out;
+  for(size_t i = 0; i < sizeof(dt_iop_roi_t); i++) hash = ((hash << 5) + hash) ^ str[i];
+
   // do not get gamma from cache on preview pipe so we can compute the final scope
   // FIXME: better yet, don't even cache the gamma output in this case -- but then we'd need to allocate a temporary output buffer and garbage collect it
   if((pipe->type & DT_DEV_PIXELPIPE_PREVIEW) != DT_DEV_PIXELPIPE_PREVIEW
