@@ -1142,6 +1142,17 @@ static uint64_t _node_hash(dt_dev_pixelpipe_t *pipe, const dt_dev_pixelpipe_iop_
   return hash;
 }
 
+static dt_dev_pixelpipe_iop_t *_last_node_in_pipe(dt_dev_pixelpipe_t *pipe)
+{
+  for(GList *node = g_list_last(pipe->nodes); node; node = g_list_previous(node))
+  {
+    dt_dev_pixelpipe_iop_t *piece = (dt_dev_pixelpipe_iop_t *)node->data;
+    if(piece->enabled) return piece;
+  }
+
+  return NULL;
+}
+
 // recursive helper for process:
 static int dt_dev_pixelpipe_process_rec(dt_dev_pixelpipe_t *pipe, dt_develop_t *dev, void **output,
                                         void **cl_mem_output, dt_iop_buffer_dsc_t **out_format,
@@ -2323,8 +2334,7 @@ restart:
 
   // terminate
   dt_pthread_mutex_lock(&pipe->backbuf_mutex);
-  GList *last_node = g_list_last(pipe->nodes);
-  const dt_dev_pixelpipe_iop_t *last_module = (const dt_dev_pixelpipe_iop_t *)(last_node->data);
+  const dt_dev_pixelpipe_iop_t *last_module = _last_node_in_pipe(pipe);
   pipe->backbuf_hash = _node_hash(pipe, last_module, &roi, pos);
   pipe->backbuf = buf;
   pipe->backbuf_width = width;
