@@ -332,7 +332,7 @@ void dt_pixelpipe_get_global_hash(dt_dev_pixelpipe_t *pipe, dt_develop_t *dev)
   */
 
   // bernstein hash (djb2)
-  uint64_t hash = dt_hash(5381, (const char *)&pipe->output_imgid, sizeof(int));
+  uint64_t hash = dt_hash(5381, (const char *)&pipe->image.id, sizeof(int));
 
   for(GList *node = pipe->nodes; node; node = g_list_next(node))
   {
