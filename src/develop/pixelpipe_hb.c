@@ -364,11 +364,19 @@ void dt_pixelpipe_get_global_hash(dt_dev_pixelpipe_t *pipe, dt_develop_t *dev)
         }
         hash = dt_hash(hash, (const char *)&piece->module->request_histogram, sizeof(dt_dev_request_flags_t));
       }
+
       if(pipe->type & DT_DEV_PIXELPIPE_FULL)
       {
         // Full-preview-centric tweaks : mask display
         hash = dt_hash(hash, (const char *)&piece->module->request_mask_display, sizeof(int));
         hash = dt_hash(hash, (const char *)&piece->module->suppress_mask, sizeof(uint32_t));
+
+        if(dev->gui_module && dev->gui_module != piece->module)
+        {
+          // Crop and perspective need a full ROI to set-up bounds in GUI, but only temporarily
+          const int distort_tags = dev->gui_module->operation_tags_filter() & piece->module->operation_tags();
+          hash = dt_hash(hash, (const char *)&distort_tags, sizeof(int));
+        }
       }
 
       /*
