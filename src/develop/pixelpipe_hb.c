@@ -69,31 +69,21 @@ static void get_output_format(dt_iop_module_t *module, dt_dev_pixelpipe_t *pipe,
 
 static char *_pipe_type_to_str(int pipe_type)
 {
-  const gboolean fast = (pipe_type & DT_DEV_PIXELPIPE_FAST) == DT_DEV_PIXELPIPE_FAST;
   char *r = NULL;
 
   switch(pipe_type & DT_DEV_PIXELPIPE_ANY)
   {
     case DT_DEV_PIXELPIPE_PREVIEW:
-      if(fast)
-        r = "preview/fast";
-      else
-        r = "preview";
+      r = "preview";
       break;
     case DT_DEV_PIXELPIPE_FULL:
       r = "full";
       break;
     case DT_DEV_PIXELPIPE_THUMBNAIL:
-      if(fast)
-        r = "thumbnail/fast";
-      else
-        r = "thumbnail";
+      r = "thumbnail";
       break;
     case DT_DEV_PIXELPIPE_EXPORT:
-      if(fast)
-        r = "export/fast";
-      else
-        r = "export";
+      r = "export";
       break;
     default:
       r = "unknown";
@@ -342,7 +332,7 @@ void dt_pixelpipe_get_global_hash(dt_dev_pixelpipe_t *pipe, dt_develop_t *dev)
   */
 
   // bernstein hash (djb2)
-  uint64_t hash = 5381 ^ pipe->output_imgid;
+  uint64_t hash = dt_hash(5381, (const char *)&pipe->output_imgid, sizeof(int));
 
   for(GList *node = pipe->nodes; node; node = g_list_next(node))
   {
@@ -512,7 +502,7 @@ void dt_dev_pixelpipe_change(dt_dev_pixelpipe_t *pipe, struct dt_develop_t *dev)
 
   dt_pthread_mutex_lock(&dev->history_mutex);
 
-  dt_print(DT_DEBUG_PARAMS, "[pixelpipe] pipeline state changing for pipe %i, flag %i\n", pipe->type, pipe->changed);
+  dt_print(DT_DEBUG_DEV, "[pixelpipe] pipeline state changing for pipe %i, flag %i\n", pipe->type, pipe->changed);
 
   /*
   * Those cases seem mutually-exclusive but are not.
@@ -1133,7 +1123,6 @@ static int pixelpipe_process_on_CPU(dt_dev_pixelpipe_t *pipe, dt_develop_t *dev,
 static uint64_t _default_pipe_hash(dt_dev_pixelpipe_t *pipe)
 {
   uint64_t hash = dt_hash(5381, (const char *)&pipe->image.id, sizeof(uint32_t));
-  hash += (pipe->type & DT_DEV_PIXELPIPE_FAST);
   return hash;
 }
 
@@ -1149,10 +1138,6 @@ static uint64_t _node_hash(dt_dev_pixelpipe_t *pipe, const dt_dev_pixelpipe_iop_
   // The roi_out passed from here as parameter accounts for zoom and pan.
   // We need to amend our module global_hash to represent that.
   hash = dt_hash(hash, (const char *)roi_out, sizeof(dt_iop_roi_t));
-
-  // Again for fast pipe
-  const uint32_t fast_pipe = (pipe->type & DT_DEV_PIXELPIPE_FAST);
-  hash = dt_hash(hash, (const char *)&fast_pipe, sizeof(uint32_t));
 
   return hash;
 }
@@ -1173,13 +1158,6 @@ static int dt_dev_pixelpipe_process_rec(dt_dev_pixelpipe_t *pipe, dt_develop_t *
   *cl_mem_output = NULL;
   dt_iop_module_t *module = NULL;
   dt_dev_pixelpipe_iop_t *piece = NULL;
-
-  // if a module is active, check if this module allow a fast pipe run
-
-  if(darktable.develop && dev->gui_module && dev->gui_module->flags() & IOP_FLAGS_ALLOW_FAST_PIPE)
-    pipe->type |= DT_DEV_PIXELPIPE_FAST;
-  else
-    pipe->type &= ~DT_DEV_PIXELPIPE_FAST;
 
   if(modules)
   {
@@ -1213,8 +1191,10 @@ static int dt_dev_pixelpipe_process_rec(dt_dev_pixelpipe_t *pipe, dt_develop_t *
   if(cache_available)
   {
     if(module)
-      dt_print(DT_DEBUG_PARAMS, "[pixelpipe] dt_dev_pixelpipe_process_rec, cache available for pipe %i and module %s with hash %lu\n",
+      dt_print(DT_DEBUG_DEV, "[pixelpipe] dt_dev_pixelpipe_process_rec, cache available for pipe %i and module %s with hash %lu\n",
              pipe->type, module->op, hash);
+    else
+      dt_print(DT_DEBUG_DEV, "[pixelpipe] dt_dev_pixelpipe_process_rec has no module at pos %i\n", pos);
 
     (void)dt_dev_pixelpipe_cache_get(&(pipe->cache), hash, bufsize, output, out_format);
 
