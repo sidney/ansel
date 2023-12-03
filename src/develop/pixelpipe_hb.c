@@ -22,6 +22,7 @@
 #include "common/opencl.h"
 #include "common/iop_order.h"
 #include "control/control.h"
+#include "control/conf.h"
 #include "control/signal.h"
 #include "develop/blend.h"
 #include "develop/format.h"
@@ -127,7 +128,8 @@ int dt_dev_pixelpipe_init_dummy(dt_dev_pixelpipe_t *pipe, int32_t width, int32_t
 int dt_dev_pixelpipe_init_preview(dt_dev_pixelpipe_t *pipe)
 {
   // don't know which buffer size we're going to need, set to 0 (will be alloced on demand)
-  const int res = dt_dev_pixelpipe_init_cached(pipe, 0, 64);
+  int32_t cachelines = MAX(dt_conf_get_int("cachelines"), 8);
+  const int res = dt_dev_pixelpipe_init_cached(pipe, 0, cachelines);
   pipe->type = DT_DEV_PIXELPIPE_PREVIEW;
   return res;
 }
@@ -135,7 +137,8 @@ int dt_dev_pixelpipe_init_preview(dt_dev_pixelpipe_t *pipe)
 int dt_dev_pixelpipe_init(dt_dev_pixelpipe_t *pipe)
 {
   // don't know which buffer size we're going to need, set to 0 (will be alloced on demand)
-  const int res = dt_dev_pixelpipe_init_cached(pipe, 0, 64);
+  int32_t cachelines = MAX(dt_conf_get_int("cachelines"), 8);
+  const int res = dt_dev_pixelpipe_init_cached(pipe, 0, cachelines);
   pipe->type = DT_DEV_PIXELPIPE_FULL;
   return res;
 }
