@@ -2594,7 +2594,7 @@ uint64_t dt_dev_hash_plus(dt_develop_t *dev, struct dt_dev_pixelpipe_t *pipe, co
                           || (transf_direction == DT_DEV_TRANSFORM_DIR_BACK_INCL && module->iop_order <= iop_order)
                           || (transf_direction == DT_DEV_TRANSFORM_DIR_BACK_EXCL && module->iop_order < iop_order)))
     {
-      hash = ((hash << 5) + hash) ^ piece->hash;
+      hash = piece->global_hash;
     }
     modules = g_list_previous(modules);
     pieces = g_list_previous(pieces);
@@ -2692,7 +2692,7 @@ uint64_t dt_dev_hash_distort_plus(dt_develop_t *dev, struct dt_dev_pixelpipe_t *
            || (transf_direction == DT_DEV_TRANSFORM_DIR_BACK_INCL && module->iop_order <= iop_order)
            || (transf_direction == DT_DEV_TRANSFORM_DIR_BACK_EXCL && module->iop_order < iop_order)))
     {
-      hash = ((hash << 5) + hash) ^ piece->hash;
+      hash = piece->global_hash;
     }
     modules = g_list_previous(modules);
     pieces = g_list_previous(pieces);
