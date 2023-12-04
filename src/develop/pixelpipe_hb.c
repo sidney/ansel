@@ -1202,6 +1202,9 @@ static int dt_dev_pixelpipe_process_rec(dt_dev_pixelpipe_t *pipe, dt_develop_t *
     else
       dt_print(DT_DEBUG_DEV, "[pixelpipe] dt_dev_pixelpipe_process_rec has no module at pos %i\n", pos);
 
+    if(dt_atomic_get_int(&pipe->shutdown))
+      return 1;
+
     (void)dt_dev_pixelpipe_cache_get(&(pipe->cache), hash, bufsize, output, out_format);
 
     if(dt_atomic_get_int(&pipe->shutdown))
@@ -1214,10 +1217,6 @@ static int dt_dev_pixelpipe_process_rec(dt_dev_pixelpipe_t *pipe, dt_develop_t *
   }
 
   // 2) if history changed or exit event, abort processing?
-  // preview pipe: abort on all but zoom events (same buffer anyways)
-  if(dt_iop_breakpoint(dev, pipe)) return 1;
-  // if image has changed, stop now.
-  if(pipe == dev->pipe && dev->image_force_reload) return 1;
   if(pipe == dev->preview_pipe && dev->preview_loading) return 1;
   if(dev->gui_leaving) return 1;
 
@@ -1226,9 +1225,8 @@ static int dt_dev_pixelpipe_process_rec(dt_dev_pixelpipe_t *pipe, dt_develop_t *
   {
     // 3a) import input array with given scale and roi
     if(dt_atomic_get_int(&pipe->shutdown))
-    {
       return 1;
-    }
+
     dt_times_t start;
     dt_get_times(&start);
     // we're looking for the full buffer

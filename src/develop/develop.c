@@ -461,21 +461,7 @@ restart:
   dt_get_times(&start);
   if(dt_dev_pixelpipe_process(dev->pipe, dev, x, y, wd, ht, scale))
   {
-    // interrupted because image changed?
-    if(dev->image_force_reload)
-    {
-      dt_mipmap_cache_release(darktable.mipmap_cache, &buf);
-      dt_control_log_busy_leave();
-      dt_control_toast_busy_leave();
-      dev->image_status = DT_DEV_PIXELPIPE_INVALID;
-      dt_pthread_mutex_unlock(&dev->pipe_mutex);
-      return;
-    }
-    // or because the pipeline changed?
-    else
-    {
-      goto restart;
-    }
+    goto restart;
   }
   dt_show_times(&start, "[dev_process_image] pixel pipeline processing");
   dt_dev_average_delay_update(&start, &dev->average_delay);
