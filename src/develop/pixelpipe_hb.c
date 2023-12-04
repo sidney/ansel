@@ -477,7 +477,7 @@ void dt_dev_pixelpipe_synch(dt_dev_pixelpipe_t *pipe, dt_develop_t *dev, GList *
       }
 
       if(piece->enabled != hist->enabled)
-        dt_print(DT_DEBUG_PARAMS, "[pixelpipe_synch] enabling mismatch for module %s in image %i\n", piece->module->op, imgid);
+        dt_print(DT_DEBUG_DEV, "[pixelpipe_synch] enabling mismatch for module %s in image %i\n", piece->module->op, imgid);
 
       dt_iop_commit_params(hist->module, hist->params, hist->blend_params, pipe, piece);
 
@@ -495,7 +495,7 @@ void dt_dev_pixelpipe_synch_all(dt_dev_pixelpipe_t *pipe, dt_develop_t *dev)
 {
   dt_pthread_mutex_lock(&pipe->busy_mutex);
 
-  dt_print(DT_DEBUG_PARAMS, "[pixelpipe] synch all modules with defaults_params for pipe %i\n", pipe->type);
+  dt_print(DT_DEBUG_DEV, "[pixelpipe] synch all modules with defaults_params for pipe %i\n", pipe->type);
 
   // call reset_params on all pieces first. This is mandatory to init utility modules that don't have an history stack
   for(GList *nodes = pipe->nodes; nodes; nodes = g_list_next(nodes))
@@ -508,7 +508,7 @@ void dt_dev_pixelpipe_synch_all(dt_dev_pixelpipe_t *pipe, dt_develop_t *dev)
                          pipe, piece);
   }
 
-  dt_print(DT_DEBUG_PARAMS, "[pixelpipe] synch all modules with history for pipe %i\n", pipe->type);
+  dt_print(DT_DEBUG_DEV, "[pixelpipe] synch all modules with history for pipe %i\n", pipe->type);
 
   // go through all history items and adjust params
   GList *history = dev->history;
@@ -527,12 +527,12 @@ void dt_dev_pixelpipe_synch_top(dt_dev_pixelpipe_t *pipe, dt_develop_t *dev)
   if(history)
   {
     dt_dev_history_item_t *hist = (dt_dev_history_item_t *)history->data;
-    dt_print(DT_DEBUG_PARAMS, "[pixelpipe] synch top history module `%s` for pipe %i\n", hist->module->op, pipe->type);
+    dt_print(DT_DEBUG_DEV, "[pixelpipe] synch top history module `%s` for pipe %i\n", hist->module->op, pipe->type);
     dt_dev_pixelpipe_synch(pipe, dev, history);
   }
   else
   {
-    dt_print(DT_DEBUG_PARAMS, "[pixelpipe] synch top history module missing error for pipe %i\n", pipe->type);
+    dt_print(DT_DEBUG_DEV, "[pixelpipe] synch top history module missing error for pipe %i\n", pipe->type);
   }
   dt_pthread_mutex_unlock(&pipe->busy_mutex);
 }
@@ -544,32 +544,9 @@ void dt_dev_pixelpipe_change(dt_dev_pixelpipe_t *pipe, struct dt_develop_t *dev)
 
   dt_pthread_mutex_lock(&dev->history_mutex);
 
-  dt_print(DT_DEBUG_DEV, "[pixelpipe] pipeline state changing for pipe %i, flag %i\n", pipe->type, pipe->changed);
-
-  /*
-  * Those cases seem mutually-exclusive but are not.
-  * Problems :
-  * 1. _sync_top() is a special case of _sync_all(). if DT_DEV_PIPE_TOP_CHANGED & DT_DEV_PIPE_SYNCH,
-  *    we should directly call *_sync_all() and bypass sync_top().
-  * 2. if DT_DEV_PIPE_SYNCH & DT_DEV_PIPE_REMOVE, then _sync_all() is called once for nothing, before pipeline is rebuilt.
-  * 3. this function takes between 0.12 and 0.25 s to run on Intel Xeon, whether a new module
-  *   was inserted (aka full pipeline cleanup + create + sync_all) or params got simply updated (sync_top).
-  *   The simple _sync_top() case should exhibit shorter runtimes than the full refresh, yet it doesn't.
-  *
-  * TODO: clean up this mess and remove superfluous calls.
-  */
+  dt_print(DT_DEBUG_DEV, "[dt_dev_pixelpipe_change] pipeline state changing for pipe %i, flag %i\n", pipe->type, pipe->changed);
 
   // case DT_DEV_PIPE_UNCHANGED: case DT_DEV_PIPE_ZOOMED:
-  if(pipe->changed & DT_DEV_PIPE_TOP_CHANGED)
-  {
-    // only top history item changed.
-    dt_dev_pixelpipe_synch_top(pipe, dev);
-  }
-  if(pipe->changed & DT_DEV_PIPE_SYNCH)
-  {
-    // pipeline topology remains intact, only change all params.
-    dt_dev_pixelpipe_synch_all(pipe, dev);
-  }
   if(pipe->changed & DT_DEV_PIPE_REMOVE)
   {
     // modules have been added in between or removed. need to rebuild the whole pipeline.
@@ -577,6 +554,18 @@ void dt_dev_pixelpipe_change(dt_dev_pixelpipe_t *pipe, struct dt_develop_t *dev)
     dt_dev_pixelpipe_create_nodes(pipe, dev);
     dt_dev_pixelpipe_synch_all(pipe, dev);
   }
+  else if(pipe->changed & DT_DEV_PIPE_SYNCH)
+  {
+    // pipeline topology remains intact, only change all params.
+    dt_dev_pixelpipe_synch_all(pipe, dev);
+  }
+  else if(pipe->changed & DT_DEV_PIPE_TOP_CHANGED)
+  {
+    // only top history item changed.
+    // FIXME: this seems to never be called.
+    dt_dev_pixelpipe_synch_top(pipe, dev);
+  }
+
   pipe->changed = DT_DEV_PIPE_UNCHANGED;
   dt_pthread_mutex_unlock(&dev->history_mutex);
   dt_dev_pixelpipe_get_dimensions(pipe, dev, pipe->iwidth, pipe->iheight, &pipe->processed_width,
