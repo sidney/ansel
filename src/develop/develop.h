@@ -155,7 +155,6 @@ typedef struct dt_develop_t
 
   dt_dev_pixelpipe_status_t image_status, preview_status;
   int32_t image_invalid_cnt;
-  uint32_t timestamp;
   uint32_t average_delay;
   uint32_t preview_average_delay;
   struct dt_iop_module_t *gui_module; // this module claims gui expose/event callbacks.
@@ -347,6 +346,9 @@ void dt_dev_read_history_ext(dt_develop_t *dev, const int imgid, gboolean no_ima
 void dt_dev_read_history(dt_develop_t *dev);
 void dt_dev_free_history_item(gpointer data);
 void dt_dev_invalidate_history_module(GList *list, struct dt_iop_module_t *module);
+
+// force a rebuild of the pipe, needed when a module order is changed for example
+void dt_dev_pixelpipe_rebuild(struct dt_develop_t *dev);
 
 void dt_dev_invalidate(dt_develop_t *dev);
 void dt_dev_invalidate_preview(dt_develop_t *dev);
