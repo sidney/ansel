@@ -57,7 +57,6 @@ void dt_dev_init(dt_develop_t *dev, int32_t gui_attached)
   dev->average_delay = DT_DEV_AVERAGE_DELAY_START;
   dev->preview_average_delay = DT_DEV_PREVIEW_AVERAGE_DELAY_START;
   dev->gui_leaving = 0;
-  dev->gui_synch = 0;
   dt_pthread_mutex_init(&dev->history_mutex, NULL);
   dev->history_end = 0;
   dev->history = NULL; // empty list
@@ -395,7 +394,6 @@ void dt_dev_process_image_job(dt_develop_t *dev)
       // during load, a mipf update could have been issued.
       dev->preview_input_changed = TRUE;
       dev->preview_status = DT_DEV_PIXELPIPE_DIRTY;
-      dev->gui_synch = 1; // notify gui thread we want to synch (call gui_update in the modules)
       dev->preview_pipe->changed |= DT_DEV_PIPE_SYNCH;
     }
     dev->pipe->changed |= DT_DEV_PIPE_SYNCH;

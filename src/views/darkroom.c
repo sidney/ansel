@@ -339,31 +339,6 @@ void expose(
   pointerx -= tb;
   pointery -= tb;
 
-  if(dev->gui_synch && !dev->image_loading)
-  {
-    // synch module guis from gtk thread:
-    ++darktable.gui->reset;
-    for(const GList *modules = dev->iop; modules; modules = g_list_next(modules))
-    {
-      dt_iop_module_t *module = (dt_iop_module_t *)(modules->data);
-      dt_iop_gui_update(module);
-    }
-    --darktable.gui->reset;
-    dev->gui_synch = 0;
-  }
-
-  if(dev->image_status == DT_DEV_PIXELPIPE_DIRTY || dev->image_status == DT_DEV_PIXELPIPE_INVALID
-     || dev->pipe->input_timestamp < dev->preview_pipe->input_timestamp)
-  {
-    dt_dev_process_image(dev);
-  }
-
-  if(dev->preview_status == DT_DEV_PIXELPIPE_DIRTY || dev->preview_status == DT_DEV_PIXELPIPE_INVALID
-     || dev->pipe->input_timestamp > dev->preview_pipe->input_timestamp)
-  {
-    dt_dev_process_preview(dev);
-  }
-
   dt_pthread_mutex_t *mutex = NULL;
   int stride;
   // FIXME: these four dt_control_get_dev_*() calls each lock/unlock global_mutex -- consolidate this work
