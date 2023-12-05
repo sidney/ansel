@@ -249,19 +249,17 @@ void dt_dev_invalidate_all(dt_develop_t *dev)
 
 void dt_dev_process_preview_job(dt_develop_t *dev)
 {
-  if(dev->image_loading)
+  int i = 0;
+  while(dev->image_loading && i < 20)
   {
-    // raw is already loading, no use starting another file access, we wait.
-    return;
+    // Wait up to 10 s for image finishing loading
+    g_usleep(500);
+    i++;
   }
+
+  if(dev->gui_leaving) return;
 
   dt_pthread_mutex_lock(&dev->preview_pipe_mutex);
-
-  if(dev->gui_leaving)
-  {
-    dt_pthread_mutex_unlock(&dev->preview_pipe_mutex);
-    return;
-  }
 
   dt_control_log_busy_enter();
   dt_control_toast_busy_enter();
@@ -270,33 +268,38 @@ void dt_dev_process_preview_job(dt_develop_t *dev)
   // lock if there, issue a background load, if not (best-effort for mip f).
   dt_mipmap_buffer_t buf;
   dt_mipmap_cache_get(darktable.mipmap_cache, &buf, dev->image_storage.id, DT_MIPMAP_F, DT_MIPMAP_BEST_EFFORT,
-                      'r');
-  if(!buf.buf)
+                        'r');
+  uint8_t *img_buff = buf.buf;
+
+  if(!img_buff)
   {
-    dt_control_log_busy_leave();
-    dt_control_toast_busy_leave();
-    dev->preview_status = DT_DEV_PIXELPIPE_DIRTY;
-    dt_pthread_mutex_unlock(&dev->preview_pipe_mutex);
-    return; // not loaded yet. load will issue a gtk redraw on completion, which in turn will trigger us again
-            // later.
+    // If we couldn't get a cache lock straight away, maybe another pipeline captured it.
+    // Give it some time to release it.
+    i = 0;
+    while(!img_buff && i < 200)
+    {
+      // Wait at most 10 s to acquire the mipmap cache lock
+      dt_mipmap_cache_get(darktable.mipmap_cache, &buf, dev->image_storage.id, DT_MIPMAP_F, DT_MIPMAP_BEST_EFFORT, 'r');
+      img_buff = buf.buf;
+      g_usleep(50);
+      i++;
+    }
+
+    if(!img_buff)
+    {
+      // We ran out of luck, abort.
+      dt_control_log_busy_leave();
+      dt_control_toast_busy_leave();
+      dev->preview_status = DT_DEV_PIXELPIPE_DIRTY;
+      dt_pthread_mutex_unlock(&dev->preview_pipe_mutex);
+      return;
+    }
   }
+
   // init pixel pipeline for preview.
   dt_dev_pixelpipe_set_input(dev->preview_pipe, dev, (float *)buf.buf, buf.width, buf.height, buf.iscale);
 
-  if(dev->preview_loading)
-  {
-    dt_dev_pixelpipe_cleanup_nodes(dev->preview_pipe);
-    dt_dev_pixelpipe_create_nodes(dev->preview_pipe, dev);
-    dt_dev_pixelpipe_flush_caches(dev->preview_pipe);
-    dev->preview_loading = FALSE;
-  }
-
-  // if raw loaded, get new mipf
-  if(dev->preview_input_changed)
-  {
-    dt_dev_pixelpipe_flush_caches(dev->preview_pipe);
-    dev->preview_input_changed = FALSE;
-  }
+  if(dev->preview_loading) dev->preview_loading = FALSE;
 
 // always process the whole downsampled mipf buffer, to allow for fast scrolling and mip4 write-through.
 restart:
@@ -322,20 +325,21 @@ restart:
          dev->preview_pipe, dev, 0, 0, dev->preview_pipe->processed_width,
          dev->preview_pipe->processed_height, 1.f))
   {
-    // interrupted because image changed?
-    if(dev->preview_loading || dev->preview_input_changed)
+    // Interrupted because the pipeline changed?
+    if(dt_atomic_get_int(&dev->preview_pipe->shutdown))
     {
+      goto restart;
+    }
+    else
+    {
+      // interrupted because image changed?
+      // if(dev->preview_loading || dev->preview_input_changed)
       dt_control_log_busy_leave();
       dt_control_toast_busy_leave();
       dev->preview_status = DT_DEV_PIXELPIPE_INVALID;
       dt_pthread_mutex_unlock(&dev->preview_pipe_mutex);
       dt_mipmap_cache_release(darktable.mipmap_cache, &buf);
       return;
-    }
-    // or because the pipeline changed?
-    else
-    {
-      goto restart;
     }
   }
 
@@ -356,14 +360,9 @@ restart:
 
 void dt_dev_process_image_job(dt_develop_t *dev)
 {
+  if(dev->gui_leaving) return;
+
   dt_pthread_mutex_lock(&dev->pipe_mutex);
-
-  if(dev->gui_leaving)
-  {
-    dt_pthread_mutex_unlock(&dev->pipe_mutex);
-    return;
-  }
-
   dt_control_log_busy_enter();
   dt_control_toast_busy_enter();
   // let gui know to draw preview instead of us, if it's there:
@@ -389,22 +388,8 @@ void dt_dev_process_image_job(dt_develop_t *dev)
 
   dt_dev_pixelpipe_set_input(dev->pipe, dev, (float *)buf.buf, buf.width, buf.height, 1.0);
 
-  if(dev->image_loading)
-  {
-    // init pixel pipeline
-    dt_dev_pixelpipe_cleanup_nodes(dev->pipe);
-    dt_dev_pixelpipe_create_nodes(dev->pipe, dev);
-    if(dev->image_force_reload) dt_dev_pixelpipe_flush_caches(dev->pipe);
-    dev->image_force_reload = FALSE;
-    if(dev->gui_attached)
-    {
-      // during load, a mipf update could have been issued.
-      dev->preview_input_changed = TRUE;
-      dev->preview_status = DT_DEV_PIXELPIPE_DIRTY;
-      dev->preview_pipe->changed |= DT_DEV_PIPE_SYNCH;
-    }
-    dev->pipe->changed |= DT_DEV_PIPE_SYNCH;
-  }
+  if(dev->image_loading) dev->image_loading = FALSE;
+  if(dev->first_load) dev->first_load = FALSE;
 
   dt_dev_zoom_t zoom;
   float zoom_x = 0.0f, zoom_y = 0.0f, scale = 0.0f;
@@ -461,8 +446,24 @@ restart:
   dt_get_times(&start);
   if(dt_dev_pixelpipe_process(dev->pipe, dev, x, y, wd, ht, scale))
   {
-    goto restart;
+    // Interrupted because the pipeline changed?
+    if(dt_atomic_get_int(&dev->pipe->shutdown))
+    {
+      goto restart;
+    }
+    else
+    {
+      // interrupted because image changed?
+      // if(dev->preview_loading || dev->preview_input_changed)
+      dt_mipmap_cache_release(darktable.mipmap_cache, &buf);
+      dt_control_log_busy_leave();
+      dt_control_toast_busy_leave();
+      dev->image_status = DT_DEV_PIXELPIPE_INVALID;
+      dt_pthread_mutex_unlock(&dev->pipe_mutex);
+      return;
+    }
   }
+
   dt_show_times(&start, "[dev_process_image] pixel pipeline processing");
   dt_dev_average_delay_update(&start, &dev->average_delay);
 
@@ -516,7 +517,6 @@ static inline void _dt_dev_load_raw(dt_develop_t *dev, const uint32_t imgid)
 void dt_dev_reload_image(dt_develop_t *dev, const uint32_t imgid)
 {
   _dt_dev_load_raw(dev, imgid);
-  dev->image_force_reload = dev->image_loading = dev->preview_loading = TRUE;
   dt_dev_invalidate_all(dev);
 }
 
@@ -569,8 +569,13 @@ void dt_dev_load_image(dt_develop_t *dev, const uint32_t imgid)
   // we need a global lock as the dev->iop set must not be changed until read history is terminated
   dt_pthread_mutex_lock(&darktable.dev_threadsafe);
   dev->iop = dt_iop_load_modules(dev);
-
   dt_dev_read_history(dev);
+  if(dev->gui_attached)
+  {
+    dev->image_status = dev->preview_status = DT_DEV_PIXELPIPE_DIRTY;
+    dev->preview_pipe->changed |= DT_DEV_PIPE_SYNCH | DT_DEV_PIPE_REMOVE;
+    dev->pipe->changed |= DT_DEV_PIPE_SYNCH | DT_DEV_PIPE_REMOVE;
+  }
   dt_pthread_mutex_unlock(&darktable.dev_threadsafe);
 
   dev->first_load = FALSE;
