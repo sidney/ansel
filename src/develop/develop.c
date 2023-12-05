@@ -1997,44 +1997,26 @@ void dt_dev_read_history(dt_develop_t *dev)
   dt_dev_read_history_ext(dev, dev->image_storage.id, FALSE);
 }
 
-void dt_dev_reprocess_all(dt_develop_t *dev)
-{
-  if(darktable.gui->reset) return;
-  if(dev && dev->gui_attached)
-  {
-    dt_pthread_mutex_lock(&dev->history_mutex);
-    dev->pipe->cache_obsolete = 1;
-    dev->preview_pipe->cache_obsolete = 1;
-    dt_pthread_mutex_unlock(&dev->history_mutex);
-
-    // invalidate buffers and force redraw of darkroom
-    dt_dev_invalidate_all(dev);
-  }
-}
-
 void dt_dev_reprocess_center(dt_develop_t *dev)
 {
-  if(darktable.gui->reset) return;
-  if(dev && dev->gui_attached)
-  {
-    dt_pthread_mutex_lock(&dev->history_mutex);
-    dev->pipe->cache_obsolete = 1;
-    dt_pthread_mutex_unlock(&dev->history_mutex);
-
-    // invalidate buffers and force redraw of darkroom
-    dt_dev_invalidate(dev);
-  }
+  // Flush the caches and recompute from scratch
+  if(darktable.gui->reset || !dev || !dev->gui_attached) return;
+  dt_dev_pixelpipe_cache_flush(&(dev->pipe->cache));
+  dt_dev_invalidate(dev);
 }
 
 void dt_dev_reprocess_preview(dt_develop_t *dev)
 {
+  // Flush the caches and recompute from scratch
   if(darktable.gui->reset || !dev || !dev->gui_attached) return;
-
-  dt_pthread_mutex_lock(&dev->history_mutex);
-  dev->preview_pipe->cache_obsolete = 1;
-  dt_pthread_mutex_unlock(&dev->history_mutex);
-
+  dt_dev_pixelpipe_cache_flush(&(dev->preview_pipe->cache));
   dt_dev_invalidate_preview(dev);
+}
+
+void dt_dev_reprocess_all(dt_develop_t *dev)
+{
+  dt_dev_reprocess_center(dev);
+  dt_dev_reprocess_preview(dev);
 }
 
 void dt_dev_check_zoom_bounds(dt_develop_t *dev, float *zoom_x, float *zoom_y, dt_dev_zoom_t zoom,

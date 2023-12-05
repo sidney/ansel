@@ -1,6 +1,8 @@
 /*
-    This file is part of darktable,
+    This file was part of darktable,
+    This file is part of Ansel,
     Copyright (C) 2009-2021 darktable developers.
+    Copyright (C) 2023 Aurélien Pierre.
 
     darktable is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -142,7 +144,6 @@ int dt_dev_pixelpipe_init_cached(dt_dev_pixelpipe_t *pipe, size_t size, int32_t 
   pipe->nodes = NULL;
   pipe->backbuf_size = size;
   if(!dt_dev_pixelpipe_cache_init(&(pipe->cache), entries, pipe->backbuf_size)) return 0;
-  pipe->cache_obsolete = 0;
   pipe->backbuf = NULL;
   pipe->backbuf_scale = 0.0f;
   pipe->backbuf_zoom_x = 0.0f;
@@ -2087,11 +2088,6 @@ int dt_dev_pixelpipe_process(dt_dev_pixelpipe_t *pipe, dt_develop_t *dev, int x,
 
 // re-entry point: in case of late opencl errors we start all over again with opencl-support disabled
 restart:
-
-  // check if we should obsolete caches
-  if(pipe->cache_obsolete) dt_dev_pixelpipe_cache_flush(&(pipe->cache));
-  pipe->cache_obsolete = 0;
-
   // mask display off as a starting point
   pipe->mask_display = DT_DEV_PIXELPIPE_DISPLAY_NONE;
   // and blendif active
