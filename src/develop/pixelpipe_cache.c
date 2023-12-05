@@ -99,7 +99,7 @@ int dt_dev_pixelpipe_cache_available(dt_dev_pixelpipe_cache_t *cache, const uint
 int dt_dev_pixelpipe_cache_get(dt_dev_pixelpipe_cache_t *cache,const uint64_t hash,
                                const size_t size, void **data, dt_iop_buffer_dsc_t **dsc)
 {
-  return dt_dev_pixelpipe_cache_get_weighted(cache, hash, size, data, dsc, 0);
+  return dt_dev_pixelpipe_cache_get_weighted(cache, hash, size, data, dsc, -cache->entries);
 }
 
 int dt_dev_pixelpipe_cache_get_weighted(dt_dev_pixelpipe_cache_t *cache, const uint64_t hash,
