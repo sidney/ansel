@@ -2862,6 +2862,7 @@ void dt_iop_refresh_center(dt_iop_module_t *module)
   if (dev && dev->gui_attached)
   {
     dt_dev_invalidate(dev);
+    dt_dev_refresh_ui_images(dev);
   }
 }
 
@@ -2872,6 +2873,7 @@ void dt_iop_refresh_preview(dt_iop_module_t *module)
   if (dev && dev->gui_attached)
   {
     dt_dev_invalidate_preview(dev);
+    dt_dev_refresh_ui_images(dev);
   }
 }
 

@@ -2233,6 +2233,7 @@ static void _visualize_callback(GtkWidget *quad, gpointer user_data)
   dt_iop_highlights_gui_data_t *g = (dt_iop_highlights_gui_data_t *)self->gui_data;
   g->show_visualize = dt_bauhaus_widget_get_quad_active(quad);
   dt_dev_invalidate(self->dev);
+  dt_dev_refresh_ui_images(self->dev);
 }
 
 void gui_focus(struct dt_iop_module_t *self, gboolean in)
@@ -2244,6 +2245,7 @@ void gui_focus(struct dt_iop_module_t *self, gboolean in)
     dt_bauhaus_widget_set_quad_active(g->clip, FALSE);
     g->show_visualize = FALSE;
     if(was_visualize) dt_dev_invalidate(self->dev);
+    dt_dev_refresh_ui_images(self->dev);
   }
 }
 

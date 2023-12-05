@@ -2802,6 +2802,7 @@ static void show_mask_callback(GtkToggleButton *button, GdkEventButton *event, g
   g->show_mask = !(g->show_mask);
   gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(g->show_highlight_mask), !g->show_mask);
   dt_dev_invalidate(self->dev);
+  dt_dev_refresh_ui_images(self->dev);
 }
 
 #define ORDER_4 5
@@ -3191,6 +3192,7 @@ void gui_focus(struct dt_iop_module_t *self, gboolean in)
     g->show_mask = FALSE;
     gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(g->show_highlight_mask), FALSE);
     if(mask_was_shown) dt_dev_invalidate(self->dev);
+    dt_dev_refresh_ui_images(self->dev);
   }
 }
 

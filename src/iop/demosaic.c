@@ -1543,6 +1543,7 @@ static void _visualize_callback(GtkWidget *quad, gpointer user_data)
 
   g->visual_mask = dt_bauhaus_widget_get_quad_active(quad);
   dt_dev_invalidate(self->dev);
+  dt_dev_refresh_ui_images(self->dev);
 }
 
 void gui_focus(struct dt_iop_module_t *self, gboolean in)
@@ -1554,6 +1555,7 @@ void gui_focus(struct dt_iop_module_t *self, gboolean in)
     dt_bauhaus_widget_set_quad_active(g->dual_thrs, FALSE);
     g->visual_mask = FALSE;
     if(was_dualmask) dt_dev_invalidate(self->dev);
+    dt_dev_refresh_ui_images(self->dev);
   }
 }
 

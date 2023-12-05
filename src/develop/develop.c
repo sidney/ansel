@@ -66,7 +66,7 @@ void dt_dev_init(dt_develop_t *dev, int32_t gui_attached)
 
   dt_image_init(&dev->image_storage);
   dev->image_status = dev->preview_status = DT_DEV_PIXELPIPE_DIRTY;
-  dev->history_updating = dev->image_force_reload = dev->image_loading = dev->preview_loading = FALSE;
+  dev->history_updating = dev->image_loading = dev->preview_loading = FALSE;
   dev->preview_input_changed = FALSE;
   dev->image_invalid_cnt = 0;
   dev->pipe = dev->preview_pipe = NULL;
@@ -195,9 +195,20 @@ void dt_dev_process_image(dt_develop_t *dev)
 void dt_dev_process_preview(dt_develop_t *dev)
 {
   if(!dev->gui_attached || dev->preview_pipe->processing) return;
-  const int err = dt_control_add_job_res(darktable.control, dt_dev_process_preview_job_create(dev),
-                                   DT_CTL_WORKER_ZOOM_FILL);
+  const int err
+      = dt_control_add_job_res(darktable.control, dt_dev_process_preview_job_create(dev), DT_CTL_WORKER_ZOOM_FILL);
   if(err) fprintf(stderr, "[dev_process_preview] job queue exceeded!\n");
+}
+
+void dt_dev_refresh_ui_images(dt_develop_t *dev)
+{
+  // We need to get the shutdown atomic set to TRUE,
+  // which is handled everytime history is changed,
+  // including when initing a new pipeline (from scratch or from user history).
+  // Benefit is atomics are de-facto thread-safe.
+  if(dt_atomic_get_int(&dev->pipe->shutdown)) dt_dev_process_image(dev);
+
+  if(dt_atomic_get_int(&dev->preview_pipe->shutdown)) dt_dev_process_preview(dev);
 }
 
 void dt_dev_pixelpipe_rebuild(dt_develop_t *dev)
@@ -585,6 +596,7 @@ void dt_dev_load_image(dt_develop_t *dev, const uint32_t imgid)
 
 void dt_dev_configure(dt_develop_t *dev, int wd, int ht)
 {
+  // Called only from Darkroom to init drawing size
   // fixed border on every side
   const int32_t tb = dev->border_size;
   wd -= 2*tb;
@@ -600,7 +612,14 @@ void dt_dev_configure(dt_develop_t *dev, int wd, int ht)
     dev->height = ht;
     dev->preview_pipe->changed |= DT_DEV_PIPE_ZOOMED;
     dev->pipe->changed |= DT_DEV_PIPE_ZOOMED;
-    dt_dev_invalidate(dev);
+
+    if(dev->image_storage.id > -1 && darktable.mipmap_cache)
+    {
+      // Only if it's not our initial configure call, aka if we already have an image
+      dt_dev_invalidate(dev);
+      dt_control_queue_redraw_center();
+      dt_dev_refresh_ui_images(dev);
+    }
   }
 }
 
@@ -876,14 +895,22 @@ void _dev_add_history_item(dt_develop_t *dev, dt_iop_module_t *module, gboolean 
   }
 }
 
+// The next 2 functions are always called from GUI controls setting parameters
+// This is why they directly start a pipeline recompute.
+// Otherwise, please keep GUI and pipeline fully separated.
+
 void dt_dev_add_history_item(dt_develop_t *dev, dt_iop_module_t *module, gboolean enable)
 {
   _dev_add_history_item(dev, module, enable, FALSE);
+  dt_control_queue_redraw_center();
+  dt_dev_refresh_ui_images(dev);
 }
 
 void dt_dev_add_new_history_item(dt_develop_t *dev, dt_iop_module_t *module, gboolean enable)
 {
   _dev_add_history_item(dev, module, enable, TRUE);
+  dt_control_queue_redraw_center();
+  dt_dev_refresh_ui_images(darktable.develop);
 }
 
 void dt_dev_add_masks_history_item_ext(dt_develop_t *dev, dt_iop_module_t *_module, gboolean _enable, gboolean no_image)
@@ -928,9 +955,6 @@ void dt_dev_add_masks_history_item(dt_develop_t *dev, dt_iop_module_t *module, g
 
   dt_pthread_mutex_unlock(&dev->history_mutex);
 
-  // invalidate buffers and force redraw of darkroom
-  dt_dev_invalidate_all(dev);
-
   if(dev->gui_attached)
   {
     /* signal that history has changed */
@@ -939,6 +963,11 @@ void dt_dev_add_masks_history_item(dt_develop_t *dev, dt_iop_module_t *module, g
     /* recreate mask list */
     dt_dev_masks_list_change(dev);
   }
+
+  // invalidate buffers and force redraw of darkroom
+  dt_dev_invalidate_all(dev);
+  dt_control_queue_redraw_center();
+  dt_dev_refresh_ui_images(dev);
 }
 
 void dt_dev_free_history_item(gpointer data)

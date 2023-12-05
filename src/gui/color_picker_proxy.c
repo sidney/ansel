@@ -214,6 +214,7 @@ static gboolean _color_picker_callback_button_press(GtkWidget *button, GdkEventB
     }
     // force applying the next incoming sample
     self->changed = TRUE;
+    dt_dev_invalidate_all(darktable.develop);
   }
   else
   {
@@ -232,6 +233,7 @@ static gboolean _color_picker_callback_button_press(GtkWidget *button, GdkEventB
   }
 
   dt_control_queue_redraw_center();
+  dt_dev_refresh_ui_images(darktable.develop);
 
   return TRUE;
 }

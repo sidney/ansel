@@ -1978,6 +1978,7 @@ void dt_masks_update_image(dt_develop_t *dev)
 
   // invalidate buffers and force redraw of darkroom
   dt_dev_invalidate_all(dev);
+  dt_dev_refresh_ui_images(dev);
 }
 
 // adds formid to used array

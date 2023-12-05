@@ -327,6 +327,10 @@ void dt_dev_process_preview_job(dt_develop_t *dev);
 void dt_dev_process_image(dt_develop_t *dev);
 void dt_dev_process_preview(dt_develop_t *dev);
 
+// Lazy helpers that will update GUI pipelines (main image and small preview)
+// only when needed, and only the one(s) needed.
+void dt_dev_refresh_ui_images(dt_develop_t *dev);
+
 void dt_dev_load_image(dt_develop_t *dev, const uint32_t imgid);
 void dt_dev_reload_image(dt_develop_t *dev, const uint32_t imgid);
 /** checks if provided imgid is the image currently in develop */

@@ -1082,6 +1082,7 @@ static void _blendop_blendif_tab_switch(GtkNotebook *notebook, GtkWidget *page, 
   {
     dt_iop_color_picker_set_cst(data->module, _blendop_blendif_get_picker_colorspace(data));
     dt_dev_invalidate_all(data->module->dev);
+    dt_dev_refresh_ui_images(data->module->dev);
   }
 
   _blendop_blendif_update_tab(data->module, data->tab);
@@ -1131,6 +1132,7 @@ static void _blendop_blendif_details_callback(GtkWidget *slider, dt_iop_gui_blen
   if((oldval == 0.0f) && (bp->details != 0.0f))
   {
     dt_dev_invalidate_all(data->module->dev);
+    dt_dev_refresh_ui_images(data->module->dev);
   }
 }
 
@@ -1625,6 +1627,7 @@ static gboolean _blendif_change_blend_colorspace(dt_iop_module_t *module, dt_dev
     {
       dt_iop_color_picker_set_cst(bd->module, _blendop_blendif_get_picker_colorspace(bd));
       dt_dev_invalidate_all(bd->module->dev);
+      dt_dev_refresh_ui_images(bd->module->dev);
     }
 
     return TRUE;
@@ -2043,6 +2046,7 @@ void dt_iop_gui_update_blendif(dt_iop_module_t *module)
     {
       module->request_mask_display = bd->save_for_leave & ~DT_DEV_PIXELPIPE_DISPLAY_STICKY;
       dt_dev_invalidate_all(module->dev);//DBG
+      dt_dev_refresh_ui_images(module->dev);
     }
   }
   dt_pthread_mutex_unlock(&bd->lock);
@@ -2442,6 +2446,7 @@ static void _raster_value_changed_callback(GtkWidget *widget, struct dt_iop_modu
   if(reprocess)
   {
     dt_dev_invalidate_all(module->dev);
+    dt_dev_refresh_ui_images(module->dev);
   }
 }
 

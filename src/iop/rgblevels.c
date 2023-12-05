@@ -276,6 +276,7 @@ int button_released(struct dt_iop_module_t *self, double x, double y, int which,
       g->call_auto_levels = 1;
 
       dt_dev_invalidate_all(self->dev);
+      dt_dev_refresh_ui_images(self->dev);
     }
     else
       g->button_down = 0;
@@ -702,6 +703,7 @@ static void _auto_levels_callback(GtkButton *button, dt_iop_module_t *self)
   dt_iop_gui_leave_critical_section(self);
 
   dt_dev_invalidate_all(self->dev);
+  dt_dev_refresh_ui_images(self->dev);
 }
 
 static void _select_region_toggled_callback(GtkToggleButton *togglebutton, dt_iop_module_t *self)

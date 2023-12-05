@@ -3036,6 +3036,7 @@ static int _do_get_structure_auto(dt_iop_module_t *module, dt_iop_ashift_params_
     // force to reprocess the preview, otherwise the buffer is ko
     dt_dev_pixelpipe_flush_caches(module->dev->preview_pipe);
     dt_dev_invalidate_preview(module->dev);
+    dt_dev_refresh_ui_images(module->dev);
     goto error;
   }
 
@@ -3086,6 +3087,7 @@ static void _do_get_structure_lines(dt_iop_module_t *self)
     // force to reprocess the preview, otherwise the buffer is ko
     dt_dev_pixelpipe_flush_caches(self->dev->preview_pipe);
     dt_dev_invalidate_preview(self->dev);
+    dt_dev_refresh_ui_images(self->dev);
     return;
   }
 
@@ -3132,6 +3134,7 @@ static void _do_get_structure_quad(dt_iop_module_t *self)
     // force to reprocess the preview, otherwise the buffer is ko
     dt_dev_pixelpipe_flush_caches(self->dev->preview_pipe);
     dt_dev_invalidate_preview(self->dev);
+    dt_dev_refresh_ui_images(self->dev);
     return;
   }
 
