@@ -19,6 +19,7 @@
 */
 #include "common/color_picker.h"
 #include "common/colorspaces.h"
+#include "common/darktable.h"
 #include "common/histogram.h"
 #include "common/imageio.h"
 #include "common/opencl.h"
@@ -379,6 +380,9 @@ void dt_pixelpipe_get_global_hash(dt_dev_pixelpipe_t *pipe, dt_develop_t *dev)
       if(pipe->type & DT_DEV_PIXELPIPE_PREVIEW)
       {
         // Preview-centric tweaks : color-pickers and histograms
+        hash = dt_hash(hash, (const char *)&piece->module->request_color_pick, sizeof(dt_dev_request_colorpick_flags_t));
+        hash = dt_hash(hash, (const char *)&piece->module->request_histogram, sizeof(dt_dev_request_flags_t));
+
         if(piece->module->request_color_pick != DT_REQUEST_COLORPICK_OFF)
         {
           if(darktable.lib->proxy.colorpicker.primary_sample->size == DT_LIB_COLORPICKER_SIZE_BOX)
@@ -386,7 +390,6 @@ void dt_pixelpipe_get_global_hash(dt_dev_pixelpipe_t *pipe, dt_develop_t *dev)
           else if(darktable.lib->proxy.colorpicker.primary_sample->size == DT_LIB_COLORPICKER_SIZE_POINT)
             hash = dt_hash(hash, (const char *)darktable.lib->proxy.colorpicker.primary_sample->point, sizeof(float) * 2);
         }
-        hash = dt_hash(hash, (const char *)&piece->module->request_histogram, sizeof(dt_dev_request_flags_t));
       }
 
       if(pipe->type & DT_DEV_PIXELPIPE_FULL)
