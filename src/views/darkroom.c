@@ -2940,7 +2940,9 @@ void mouse_moved(dt_view_t *self, double x, double y, double pressure, int which
         dev->preview_status = DT_DEV_PIXELPIPE_DIRTY;
       }
     }
+    dt_dev_invalidate_preview(dev);
     dt_control_queue_redraw_center();
+    dt_dev_refresh_ui_images(dev);
     return;
   }
   x += offx;
@@ -3001,6 +3003,10 @@ int button_released(dt_view_t *self, double x, double y, int which, uint32_t sta
       dt_control_queue_redraw_center();
       dt_control_change_cursor(GDK_LEFT_PTR);
     }
+    dt_control_queue_redraw_center();
+    dt_control_navigation_redraw();
+    dt_dev_invalidate_preview(dev);
+    dt_dev_refresh_ui_images(dev);
     return 1;
   }
   // masks
@@ -3011,6 +3017,10 @@ int button_released(dt_view_t *self, double x, double y, int which, uint32_t sta
     handled = dev->gui_module->button_released(dev->gui_module, x, y, which, state);
   if(handled) return handled;
   if(which == 1) dt_control_change_cursor(GDK_LEFT_PTR);
+  dt_control_queue_redraw_center();
+  dt_control_navigation_redraw();
+  dt_dev_invalidate_preview(dev);
+  dt_dev_refresh_ui_images(dev);
   return 1;
 }
 
@@ -3220,9 +3230,6 @@ int button_pressed(dt_view_t *self, double x, double y, double pressure, int whi
     dt_control_set_dev_zoom_x(zoom_x);
     dt_control_set_dev_zoom_y(zoom_y);
     dt_control_queue_redraw_center();
-    dt_control_navigation_redraw();
-    dt_dev_invalidate(dev);
-    dt_dev_refresh_ui_images(dev);
     return 1;
   }
   return 0;
