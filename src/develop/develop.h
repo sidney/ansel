@@ -162,6 +162,11 @@ typedef struct dt_develop_t
   // width, height: dimensions of window
   int32_t width, height;
 
+  // Contains the source image to work with. Shared between pipes to
+  // mutualize I/O
+  dt_mipmap_buffer_t full_buf;
+  dt_mipmap_buffer_t small_buf;
+
   // image processing pipeline with caching
   struct dt_dev_pixelpipe_t *pipe, *preview_pipe;
   dt_pthread_mutex_t pipe_mutex, preview_pipe_mutex; // these are locked while the pipes are still in use
@@ -331,8 +336,9 @@ void dt_dev_process_preview(dt_develop_t *dev);
 // only when needed, and only the one(s) needed.
 void dt_dev_refresh_ui_images(dt_develop_t *dev);
 
-void dt_dev_load_image(dt_develop_t *dev, const uint32_t imgid);
+int dt_dev_load_image(dt_develop_t *dev, const uint32_t imgid);
 void dt_dev_reload_image(dt_develop_t *dev, const uint32_t imgid);
+void dt_dev_unload_image(dt_develop_t *dev);
 /** checks if provided imgid is the image currently in develop */
 int dt_dev_is_current_image(dt_develop_t *dev, uint32_t imgid);
 const dt_dev_history_item_t *dt_dev_get_history_item(dt_develop_t *dev, const char *op);

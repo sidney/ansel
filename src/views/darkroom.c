@@ -653,6 +653,7 @@ void reset(dt_view_t *self)
   dt_control_set_dev_zoom_x(0);
   dt_control_set_dev_zoom_y(0);
   dt_control_set_dev_closeup(0);
+  dt_dev_unload_image(darktable.develop);
 }
 
 int try_enter(dt_view_t *self)
@@ -662,28 +663,18 @@ int try_enter(dt_view_t *self)
   if(imgid < 0)
   {
     // fail :(
-    dt_control_log(_("no image to open !"));
+    dt_control_log(_("No image to open !"));
     return 1;
   }
 
-  // this loads the image from db if needed:
-  const dt_image_t *img = dt_image_cache_get(darktable.image_cache, imgid, 'r');
-  // get image and check if it has been deleted from disk first!
-
-  char imgfilename[PATH_MAX] = { 0 };
-  gboolean from_cache = TRUE;
-  dt_image_full_path(img->id,  imgfilename,  sizeof(imgfilename),  &from_cache, __FUNCTION__);
-  if(!g_file_test(imgfilename, G_FILE_TEST_IS_REGULAR))
+  int ret = dt_dev_load_image(darktable.develop, imgid);
+  if(ret)
   {
-    dt_control_log(_("image `%s' is currently unavailable"), img->filename);
-    dt_image_cache_read_release(darktable.image_cache, img);
+    dt_control_log(_("We could not load the image."));
     return 1;
   }
-  // and drop the lock again.
-  dt_image_cache_read_release(darktable.image_cache, img);
-  darktable.develop->image_storage.id = imgid;
   darktable.develop->proxy.wb_coeffs[0] = 0.f;
-  return 0;
+  return ret;
 }
 
 static void _dev_change_image(dt_develop_t *dev, const int32_t imgid)
@@ -2596,11 +2587,6 @@ void enter(dt_view_t *self)
   dt_control_set_dev_zoom_y(0);
   dt_control_set_dev_closeup(0);
 
-  // take a copy of the image struct for convenience.
-
-  dt_dev_load_image(darktable.develop, dev->image_storage.id);
-
-
   /*
    * add IOP modules to plugin list
    */
@@ -2705,6 +2691,8 @@ void leave(dt_view_t *self)
     dt_iop_color_picker_reset(darktable.lib->proxy.colorpicker.picker_proxy->module, FALSE);
 
   _unregister_modules_drag_n_drop(self);
+
+  dt_dev_unload_image(darktable.develop);
 
   /* disconnect from filmstrip image activate */
   DT_DEBUG_CONTROL_SIGNAL_DISCONNECT(darktable.signals, G_CALLBACK(_view_darkroom_filmstrip_activate_callback),
