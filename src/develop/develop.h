@@ -150,7 +150,7 @@ typedef struct dt_develop_t
                         // gui_init'ed.
   int32_t gui_leaving;  // set if everything is scheduled to shut down.
   int32_t focus_hash;   // determines whether to start a new history item or to merge down.
-  gboolean preview_loading, image_loading, history_updating, first_load;
+  gboolean preview_loading, image_loading, first_load;
   gboolean preview_input_changed;
 
   dt_dev_pixelpipe_status_t image_status, preview_status;
