@@ -1164,15 +1164,8 @@ static int dt_dev_pixelpipe_process_rec(dt_dev_pixelpipe_t *pipe, dt_develop_t *
   const size_t bufsize = (size_t)bpp * roi_out->width * roi_out->height;
 
   // 1) if cached buffer is still available, return data
-  gboolean cache_available = FALSE;
   uint64_t hash = _node_hash(pipe, piece, roi_out, pos);
-
-  // do not get gamma from cache on preview pipe so we can compute the final scope
-  // FIXME: better yet, don't even cache the gamma output in this case -- but then we'd need to allocate a temporary output buffer and garbage collect it
-  if(!(module && !strcmp(module->op, "gamma")))
-    cache_available = dt_dev_pixelpipe_cache_available(&(pipe->cache), hash);
-
-  if(cache_available)
+  if(dt_dev_pixelpipe_cache_available(&(pipe->cache), hash))
   {
     if(module)
       dt_print(DT_DEBUG_DEV, "[pixelpipe] dt_dev_pixelpipe_process_rec, cache available for pipe %i and module %s with hash %lu\n",
