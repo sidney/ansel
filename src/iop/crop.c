@@ -178,8 +178,6 @@ static void _commit_box(dt_iop_module_t *self, dt_iop_crop_gui_data_t *g, dt_iop
   if(self->dev->preview_status != DT_DEV_PIXELPIPE_VALID) return;
 
   g->cropping = 0;
-  const dt_boundingbox_t old = { p->cx, p->cy, p->cw, p->ch };
-  const float eps = 1e-6f; // threshold to avoid rounding errors
   if(!self->enabled)
   {
     // first time crop, if any data is stored in p, it's obsolete:
