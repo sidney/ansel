@@ -338,7 +338,6 @@ int dt_dev_is_current_image(dt_develop_t *dev, uint32_t imgid);
 const dt_dev_history_item_t *dt_dev_get_history_item(dt_develop_t *dev, const char *op);
 void dt_dev_add_history_item_ext(dt_develop_t *dev, struct dt_iop_module_t *module, gboolean enable, gboolean no_image);
 void dt_dev_add_history_item(dt_develop_t *dev, struct dt_iop_module_t *module, gboolean enable);
-void dt_dev_add_new_history_item(dt_develop_t *dev, struct dt_iop_module_t *module, gboolean enable);
 void dt_dev_add_masks_history_item_ext(dt_develop_t *dev, struct dt_iop_module_t *_module, gboolean _enable, gboolean no_image);
 void dt_dev_add_masks_history_item(dt_develop_t *dev, struct dt_iop_module_t *_module, gboolean enable);
 void dt_dev_reload_history_items(dt_develop_t *dev);
@@ -354,10 +353,9 @@ void dt_dev_invalidate_history_module(GList *list, struct dt_iop_module_t *modul
 // force a rebuild of the pipe, needed when a module order is changed for example
 void dt_dev_pixelpipe_rebuild(struct dt_develop_t *dev);
 
-void dt_dev_invalidate(dt_develop_t *dev);
-void dt_dev_invalidate_preview(dt_develop_t *dev);
-// also invalidates preview (which is unaffected by resize/zoom/pan)
-void dt_dev_invalidate_all(dt_develop_t *dev);
+void dt_dev_invalidate(dt_develop_t *dev, const char *caller, const char *file, const long line);
+void dt_dev_invalidate_preview(dt_develop_t *dev, const char *caller, const char *file, const long line);
+void dt_dev_invalidate_all(dt_develop_t *dev, const char *caller, const char *file, const long line);
 void dt_dev_set_histogram(dt_develop_t *dev);
 void dt_dev_set_histogram_pre(dt_develop_t *dev);
 void dt_dev_get_history_item_label(dt_dev_history_item_t *hist, char *label, const int cnt);

@@ -217,14 +217,12 @@ void dt_dev_pixelpipe_rebuild(dt_develop_t *dev)
   dev->pipe->changed |= DT_DEV_PIPE_REMOVE;
   dev->preview_pipe->changed |= DT_DEV_PIPE_REMOVE;
   dt_pthread_mutex_unlock(&dev->history_mutex);
-  dt_dev_invalidate_all(dev);
+  dt_dev_invalidate_all(dev, __FUNCTION__, __FILE__, __LINE__);
 }
 
-void dt_dev_invalidate(dt_develop_t *dev)
+void dt_dev_invalidate(dt_develop_t *dev, const char *caller, const char *file, const long line)
 {
-  dt_times_t start;
-  dt_get_times(&start);
-  dt_show_times(&start, "[dev_process_image] sending killswitch signal on running pipelines");
+  dt_print(DT_DEBUG_DEV, "[dev_process_image] sending killswitch signal from %s - in %s:%ld\n", caller, file, line);
 
   dt_atomic_set_int(&dev->pipe->shutdown, TRUE);
 
@@ -234,11 +232,9 @@ void dt_dev_invalidate(dt_develop_t *dev)
   dt_pthread_mutex_unlock(&dev->history_mutex);
 }
 
-void dt_dev_invalidate_preview(dt_develop_t *dev)
+void dt_dev_invalidate_preview(dt_develop_t *dev, const char *caller, const char *file, const long line)
 {
-  dt_times_t start;
-  dt_get_times(&start);
-  dt_show_times(&start, "[dev_process_preview] sending killswitch signal on running pipelines");
+  dt_print(DT_DEBUG_DEV, "[dev_process_preview] sending killswitch signal from %s - in %s:%ld\n", caller, file, line);
 
   dt_atomic_set_int(&dev->preview_pipe->shutdown, TRUE);
 
@@ -248,14 +244,14 @@ void dt_dev_invalidate_preview(dt_develop_t *dev)
   dt_pthread_mutex_unlock(&dev->history_mutex);
 }
 
-void dt_dev_invalidate_all(dt_develop_t *dev)
+void dt_dev_invalidate_all(dt_develop_t *dev, const char *caller, const char *file, const long line)
 {
   // Send killswitch ASAP
   dt_atomic_set_int(&dev->pipe->shutdown, TRUE);
   dt_atomic_set_int(&dev->preview_pipe->shutdown, TRUE);
 
-  dt_dev_invalidate(dev);
-  dt_dev_invalidate_preview(dev);
+  dt_dev_invalidate(dev, caller, file, line);
+  dt_dev_invalidate_preview(dev, caller, file, line);
 }
 
 void dt_dev_process_preview_job(dt_develop_t *dev)
@@ -528,7 +524,7 @@ static inline void _dt_dev_load_raw(dt_develop_t *dev, const uint32_t imgid)
 void dt_dev_reload_image(dt_develop_t *dev, const uint32_t imgid)
 {
   _dt_dev_load_raw(dev, imgid);
-  dt_dev_invalidate_all(dev);
+  dt_dev_invalidate_all(dev, __FUNCTION__, __FILE__, __LINE__);
 }
 
 float dt_dev_get_zoom_scale(dt_develop_t *dev, dt_dev_zoom_t zoom, int closeup_factor, int preview)
@@ -596,8 +592,8 @@ void dt_dev_load_image(dt_develop_t *dev, const uint32_t imgid)
 
 void dt_dev_configure(dt_develop_t *dev, int wd, int ht)
 {
-  // Called only from Darkroom to init drawing size
-  // fixed border on every side
+  // Called only from Darkroom to init and update drawing size
+  // depending on sidebars and main window resizing.
   const int32_t tb = dev->border_size;
   wd -= 2*tb;
   ht -= 2*tb;
@@ -616,7 +612,7 @@ void dt_dev_configure(dt_develop_t *dev, int wd, int ht)
     if(dev->image_storage.id > -1 && darktable.mipmap_cache)
     {
       // Only if it's not our initial configure call, aka if we already have an image
-      dt_dev_invalidate(dev);
+      dt_dev_invalidate(dev, __FUNCTION__, __FILE__, __LINE__);
       dt_control_queue_redraw_center();
       dt_dev_refresh_ui_images(dev);
     }
@@ -883,9 +879,6 @@ void _dev_add_history_item(dt_develop_t *dev, dt_iop_module_t *module, gboolean 
 
   dt_pthread_mutex_unlock(&dev->history_mutex);
 
-  // invalidate buffers and force redraw of darkroom
-  dt_dev_invalidate_all(dev);
-
   if(dev->gui_attached)
   {
     /* signal that history has changed */
@@ -902,15 +895,9 @@ void _dev_add_history_item(dt_develop_t *dev, dt_iop_module_t *module, gboolean 
 void dt_dev_add_history_item(dt_develop_t *dev, dt_iop_module_t *module, gboolean enable)
 {
   _dev_add_history_item(dev, module, enable, FALSE);
+  dt_dev_invalidate_all(dev, __FUNCTION__, __FILE__, __LINE__);
   dt_control_queue_redraw_center();
   dt_dev_refresh_ui_images(dev);
-}
-
-void dt_dev_add_new_history_item(dt_develop_t *dev, dt_iop_module_t *module, gboolean enable)
-{
-  _dev_add_history_item(dev, module, enable, TRUE);
-  dt_control_queue_redraw_center();
-  dt_dev_refresh_ui_images(darktable.develop);
 }
 
 void dt_dev_add_masks_history_item_ext(dt_develop_t *dev, dt_iop_module_t *_module, gboolean _enable, gboolean no_image)
@@ -963,11 +950,6 @@ void dt_dev_add_masks_history_item(dt_develop_t *dev, dt_iop_module_t *module, g
     /* recreate mask list */
     dt_dev_masks_list_change(dev);
   }
-
-  // invalidate buffers and force redraw of darkroom
-  dt_dev_invalidate_all(dev);
-  dt_control_queue_redraw_center();
-  dt_dev_refresh_ui_images(dev);
 }
 
 void dt_dev_free_history_item(gpointer data)
@@ -1040,6 +1022,8 @@ void dt_dev_reload_history_items(dt_develop_t *dev)
   dt_dev_modules_update_multishow(dev);
 
   dt_unlock_image(dev->image_storage.id);
+
+  dt_dev_invalidate_all(dev, __FUNCTION__, __FILE__, __LINE__);
 }
 
 void dt_dev_pop_history_items_ext(dt_develop_t *dev, int32_t cnt)
@@ -1161,8 +1145,6 @@ void dt_dev_pop_history_items(dt_develop_t *dev, int32_t cnt)
   --darktable.gui->reset;
 
   dt_pthread_mutex_unlock(&dev->history_mutex);
-
-  dt_dev_invalidate_all(dev);
 
   dt_dev_masks_list_change(dev);
 }
@@ -1949,7 +1931,6 @@ void dt_dev_read_history_ext(dt_develop_t *dev, const int imgid, gboolean no_ima
 
   if(dev->gui_attached && !no_image)
   {
-    dt_dev_invalidate_all(dev);
     /* signal history changed */
     dt_dev_undo_end_record(dev);
   }
@@ -2002,7 +1983,7 @@ void dt_dev_reprocess_center(dt_develop_t *dev)
   // Flush the caches and recompute from scratch
   if(darktable.gui->reset || !dev || !dev->gui_attached) return;
   dt_dev_pixelpipe_cache_flush(&(dev->pipe->cache));
-  dt_dev_invalidate(dev);
+  dt_dev_invalidate(dev, __FUNCTION__, __FILE__, __LINE__);
 }
 
 void dt_dev_reprocess_preview(dt_develop_t *dev)
@@ -2010,7 +1991,7 @@ void dt_dev_reprocess_preview(dt_develop_t *dev)
   // Flush the caches and recompute from scratch
   if(darktable.gui->reset || !dev || !dev->gui_attached) return;
   dt_dev_pixelpipe_cache_flush(&(dev->preview_pipe->cache));
-  dt_dev_invalidate_preview(dev);
+  dt_dev_invalidate_preview(dev, __FUNCTION__, __FILE__, __LINE__);
 }
 
 void dt_dev_reprocess_all(dt_develop_t *dev)
@@ -2626,7 +2607,7 @@ int dt_dev_sync_pixelpipe_hash(dt_develop_t *dev, struct dt_dev_pixelpipe_t *pip
   // timed out. let's see if history stack has changed
   if(pipe->changed & (DT_DEV_PIPE_TOP_CHANGED | DT_DEV_PIPE_REMOVE | DT_DEV_PIPE_SYNCH))
   {
-    dt_dev_invalidate(dev);
+    dt_dev_invalidate(dev, __FUNCTION__, __FILE__, __LINE__);
     // pretend that everything is fine
     return TRUE;
   }
@@ -2723,7 +2704,7 @@ int dt_dev_sync_pixelpipe_hash_distort(dt_develop_t *dev, struct dt_dev_pixelpip
   // timed out. let's see if history stack has changed
   if(pipe->changed & (DT_DEV_PIPE_TOP_CHANGED | DT_DEV_PIPE_REMOVE | DT_DEV_PIPE_SYNCH))
   {
-    dt_dev_invalidate(dev);
+    dt_dev_refresh_ui_images(dev);
     // pretend that everything is fine
     return TRUE;
   }
