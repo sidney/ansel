@@ -117,7 +117,9 @@ int dt_dev_pixelpipe_cache_get_weighted(dt_dev_pixelpipe_cache_t *cache, const u
       max_used = cache->used[k];
       max = k;
     }
+
     cache->used[k]++; // age all entries
+
     if(cache->hash[k] == hash)
     {
       *data = cache->data[k];

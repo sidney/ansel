@@ -1264,7 +1264,6 @@ void dt_masks_reset_form_gui(void)
 
 void dt_masks_reset_show_masks_icons(void)
 {
-  if(darktable.develop->first_load) return;
   for(GList *modules = darktable.develop->iop; modules; modules = g_list_next(modules))
   {
     dt_iop_module_t *m = (dt_iop_module_t *)modules->data;

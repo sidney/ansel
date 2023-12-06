@@ -1368,7 +1368,7 @@ int mouse_moved(struct dt_iop_module_t *self, double x, double y, double pressur
   dt_iop_crop_gui_data_t *g = (dt_iop_crop_gui_data_t *)self->gui_data;
 
   // we don't do anything if the image is not ready
-  if(!g->preview_ready || self->dev->preview_loading) return 0;
+  if(!g->preview_ready) return 0;
 
   const float wd = self->dev->preview_pipe->backbuf_width;
   const float ht = self->dev->preview_pipe->backbuf_height;

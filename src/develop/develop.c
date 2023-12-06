@@ -66,8 +66,6 @@ void dt_dev_init(dt_develop_t *dev, int32_t gui_attached)
 
   dt_image_init(&dev->image_storage);
   dev->image_status = dev->preview_status = DT_DEV_PIXELPIPE_DIRTY;
-  dev->image_loading = dev->preview_loading = FALSE;
-  dev->preview_input_changed = FALSE;
   dev->image_invalid_cnt = 0;
   dev->pipe = dev->preview_pipe = NULL;
   dt_pthread_mutex_init(&dev->pipe_mutex, NULL);
@@ -298,7 +296,6 @@ restart:
     else
     {
       // interrupted because image changed?
-      // if(dev->preview_loading || dev->preview_input_changed)
       dt_control_log_busy_leave();
       dt_control_toast_busy_leave();
       dev->preview_status = DT_DEV_PIXELPIPE_INVALID;
@@ -367,7 +364,7 @@ restart:
   // if just changed to an image with a different aspect ratio or
   // altered image orientation, the prior zoom xy could now be beyond
   // the image boundary
-  if(dev->image_loading || (pipe_changed != DT_DEV_PIPE_UNCHANGED))
+  if(pipe_changed != DT_DEV_PIPE_UNCHANGED)
   {
     dt_dev_check_zoom_bounds(dev, &zoom_x, &zoom_y, zoom, closeup, NULL, NULL);
     dt_control_set_dev_zoom_x(zoom_x);
@@ -398,7 +395,6 @@ restart:
     else
     {
       // interrupted because image changed?
-      // if(dev->preview_loading || dev->preview_input_changed)
       dt_control_log_busy_leave();
       dt_control_toast_busy_leave();
       dev->image_status = DT_DEV_PIXELPIPE_INVALID;
@@ -419,9 +415,8 @@ restart:
   dev->pipe->backbuf_zoom_y = zoom_y;
 
   dev->image_status = DT_DEV_PIXELPIPE_VALID;
-  dev->image_loading = FALSE;
   dev->image_invalid_cnt = 0;
-  // if a widget needs to be redraw there's the DT_SIGNAL_*_PIPE_FINISHED signals
+  // if a widget needs to be redrawn there's the DT_SIGNAL_*_PIPE_FINISHED signals
   dt_control_log_busy_leave();
   dt_control_toast_busy_leave();
   dt_pthread_mutex_unlock(&dev->pipe_mutex);
@@ -1628,9 +1623,6 @@ void dt_dev_read_history_ext(dt_develop_t *dev, const int imgid, gboolean no_ima
     _dev_merge_history(dev, imgid);
 
     dt_print(DT_DEBUG_PARAMS, "[history] temporary history merged with image history\n");
-
-    //  first time we are loading the image, try to import lightroom .xmp if any
-    if(dev->image_loading && first_run) dt_lightroom_import(dev->image_storage.id, dev, TRUE);
   }
 
   sqlite3_stmt *stmt;
@@ -2080,7 +2072,7 @@ float dt_dev_exposure_get_black(dt_develop_t *dev)
 
 void dt_dev_modulegroups_set(dt_develop_t *dev, uint32_t group)
 {
-  if(dev->proxy.modulegroups.module && dev->proxy.modulegroups.set && dev->first_load == FALSE)
+  if(dev->proxy.modulegroups.module && dev->proxy.modulegroups.set)
     dev->proxy.modulegroups.set(dev->proxy.modulegroups.module, group);
 }
 
@@ -2094,19 +2086,19 @@ uint32_t dt_dev_modulegroups_get(dt_develop_t *dev)
 
 void dt_dev_modulegroups_switch(dt_develop_t *dev, dt_iop_module_t *module)
 {
-  if(dev->proxy.modulegroups.module && dev->proxy.modulegroups.switch_group && dev->first_load == FALSE)
+  if(dev->proxy.modulegroups.module && dev->proxy.modulegroups.switch_group)
     dev->proxy.modulegroups.switch_group(dev->proxy.modulegroups.module, module);
 }
 
 void dt_dev_modulegroups_update_visibility(dt_develop_t *dev)
 {
-  if(dev->proxy.modulegroups.module && dev->proxy.modulegroups.switch_group && dev->first_load == FALSE)
+  if(dev->proxy.modulegroups.module && dev->proxy.modulegroups.switch_group)
     dev->proxy.modulegroups.update_visibility(dev->proxy.modulegroups.module);
 }
 
 void dt_dev_modulegroups_search_text_focus(dt_develop_t *dev)
 {
-  if(dev->proxy.modulegroups.module && dev->proxy.modulegroups.search_text_focus && dev->first_load == FALSE)
+  if(dev->proxy.modulegroups.module && dev->proxy.modulegroups.search_text_focus)
     dev->proxy.modulegroups.search_text_focus(dev->proxy.modulegroups.module);
 }
 

@@ -1189,7 +1189,6 @@ static int dt_dev_pixelpipe_process_rec(dt_dev_pixelpipe_t *pipe, dt_develop_t *
   }
 
   // 2) if history changed or exit event, abort processing?
-  if(pipe == dev->preview_pipe && dev->preview_loading) return 1;
   if(dev->gui_leaving) return 1;
   KILL_SWITCH_ABORT;
 
