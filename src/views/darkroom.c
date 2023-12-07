@@ -551,7 +551,7 @@ void expose(
   if(dev->full_preview) return;
 
   /* check if we should create a snapshot of view */
-  if(darktable.develop->proxy.snapshot.request && !darktable.develop->image_loading)
+  if(darktable.develop->proxy.snapshot.request)
   {
     /* reset the request */
     darktable.develop->proxy.snapshot.request = FALSE;
@@ -680,7 +680,6 @@ int try_enter(dt_view_t *self)
 static void _dev_change_image(dt_develop_t *dev, const int32_t imgid)
 {
   // stop crazy users from sleeping on key-repeat spacebar:
-  if(dev->image_loading) return;
 
   // Pipe reset needed when changing image
   // FIXME: synch with dev_init() and dev_cleanup() instead of redoing it
@@ -1004,8 +1003,6 @@ static void _view_darkroom_filmstrip_activate_callback(gpointer instance, int32_
 
 static void dt_dev_jump_image(dt_develop_t *dev, int diff, gboolean by_key)
 {
-  if(dev->image_loading) return;
-
   const int32_t imgid = dev->image_storage.id;
   int new_offset = 1;
   int new_id = -1;
