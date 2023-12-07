@@ -559,12 +559,14 @@ void dt_dev_pixelpipe_change(dt_dev_pixelpipe_t *pipe, struct dt_develop_t *dev)
   }
 
   pipe->changed = DT_DEV_PIPE_UNCHANGED;
-  dt_pthread_mutex_unlock(&dev->history_mutex);
   dt_dev_pixelpipe_get_dimensions(pipe, dev, pipe->iwidth, pipe->iheight, &pipe->processed_width,
                                   &pipe->processed_height);
 
   // This needs correct roi_out, so run get_dimensions before
   dt_pixelpipe_get_global_hash(pipe, dev);
+
+  dt_pthread_mutex_unlock(&dev->history_mutex);
+
   dt_show_times(&start, "[dt_dev_pixelpipe_change] pipeline resync on the current modules stack");
 }
 
