@@ -904,6 +904,8 @@ void dt_dev_reload_history_items(dt_develop_t *dev)
   dt_ioppr_set_default_iop_order(dev, dev->image_storage.id);
   dt_dev_pop_history_items(dev, 0);
 
+  dt_pthread_mutex_lock(&dev->history_mutex);
+
   // remove unused history items:
   GList *history = g_list_nth(dev->history, dev->history_end);
   while(history)
@@ -914,7 +916,12 @@ void dt_dev_reload_history_items(dt_develop_t *dev)
     dev->history = g_list_delete_link(dev->history, history);
     history = next;
   }
+
+  dt_pthread_mutex_unlock(&dev->history_mutex);
+
   dt_dev_read_history(dev);
+
+  dt_pthread_mutex_lock(&dev->history_mutex);
 
   // we have to add new module instances first
   for(GList *modules = dev->iop; modules; modules = g_list_next(modules))
@@ -944,6 +951,8 @@ void dt_dev_reload_history_items(dt_develop_t *dev)
       dt_iop_gui_update_header(module);
     }
   }
+
+  dt_pthread_mutex_unlock(&dev->history_mutex);
 
   dt_dev_pop_history_items(dev, dev->history_end);
 
@@ -1026,20 +1035,25 @@ void dt_dev_pop_history_items_ext(dt_develop_t *dev, int32_t cnt)
 
 void dt_dev_pop_history_items(dt_develop_t *dev, int32_t cnt)
 {
-  dt_pthread_mutex_lock(&dev->history_mutex);
   ++darktable.gui->reset;
-  GList *dev_iop = g_list_copy(dev->iop);
 
+  dt_pthread_mutex_lock(&dev->history_mutex);
+  GList *dev_iop = g_list_copy(dev->iop);
   dt_dev_pop_history_items_ext(dev, cnt);
+  dt_pthread_mutex_unlock(&dev->history_mutex);
 
   // update all gui modules
   GList *modules = dev->iop;
   while(modules)
   {
     dt_iop_module_t *module = (dt_iop_module_t *)(modules->data);
+
+    // this locks dev->history_mutex internally :
     dt_iop_gui_update(module);
     modules = g_list_next(modules);
   }
+
+  dt_pthread_mutex_lock(&dev->history_mutex);
 
   // check if the order of modules has changed
   int dev_iop_changed = (g_list_length(dev_iop) != g_list_length(dev->iop));
@@ -1578,9 +1592,6 @@ void dt_dev_read_history_ext(dt_develop_t *dev, const int imgid, gboolean no_ima
 {
   if(imgid <= 0) return;
   if(!dev->iop) return;
-
-  dt_pthread_mutex_lock(&dev->history_mutex);
-
   dt_dev_undo_start_record(dev);
 
   int auto_apply_modules = 0;
@@ -1891,12 +1902,13 @@ void dt_dev_read_history_ext(dt_develop_t *dev, const int imgid, gboolean no_ima
   {
     dt_history_hash_write_from_history(imgid, flags);
   }
-  dt_pthread_mutex_unlock(&dev->history_mutex);
 }
 
 void dt_dev_read_history(dt_develop_t *dev)
 {
+  dt_pthread_mutex_lock(&dev->history_mutex);
   dt_dev_read_history_ext(dev, dev->image_storage.id, FALSE);
+  dt_pthread_mutex_unlock(&dev->history_mutex);
 }
 
 void dt_dev_reprocess_center(dt_develop_t *dev)

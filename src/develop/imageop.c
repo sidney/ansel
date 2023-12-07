@@ -1701,6 +1701,8 @@ void dt_iop_gui_cleanup_module(dt_iop_module_t *module)
 void dt_iop_gui_update(dt_iop_module_t *module)
 {
   ++darktable.gui->reset;
+  dt_pthread_mutex_lock(&module->dev->history_mutex);
+
   if(!dt_iop_is_hidden(module))
   {
     if(module->gui_data)
@@ -1738,6 +1740,7 @@ void dt_iop_gui_update(dt_iop_module_t *module)
     dt_iop_show_hide_header_buttons(module, NULL, FALSE, FALSE);
     dt_guides_update_module_widget(module);
   }
+  dt_pthread_mutex_unlock(&module->dev->history_mutex);
   --darktable.gui->reset;
 }
 
