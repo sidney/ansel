@@ -501,7 +501,6 @@ int dt_dev_load_image(dt_develop_t *dev, const uint32_t imgid)
 {
   if(_dt_dev_load_raw(dev, imgid)) return 1;
 
-  dt_lock_image(imgid);
   // we need a global lock as the dev->iop set must not be changed until read history is terminated
   dev->iop = dt_iop_load_modules(dev);
   dt_dev_read_history(dev);
@@ -523,8 +522,6 @@ int dt_dev_load_image(dt_develop_t *dev, const uint32_t imgid)
     dt_atomic_set_int(&dev->preview_pipe->shutdown, TRUE);
   }
   dt_pthread_mutex_unlock(&dev->history_mutex);
-
-  dt_unlock_image(imgid);
 
   return 0;
 }
@@ -904,8 +901,6 @@ void dt_dev_reload_history_items(dt_develop_t *dev)
 {
   dev->focus_hash = 0;
 
-  dt_lock_image(dev->image_storage.id);
-
   dt_ioppr_set_default_iop_order(dev, dev->image_storage.id);
   dt_dev_pop_history_items(dev, 0);
 
@@ -959,8 +954,6 @@ void dt_dev_reload_history_items(dt_develop_t *dev)
 
   // we update show params for multi-instances for each other instances
   dt_dev_modules_update_multishow(dev);
-
-  dt_unlock_image(dev->image_storage.id);
 
   dt_dev_invalidate_all(dev, __FUNCTION__, __FILE__, __LINE__);
 }
@@ -1128,7 +1121,6 @@ static void _warn_about_history_overuse(dt_develop_t *dev)
 void dt_dev_write_history_ext(dt_develop_t *dev, const int imgid)
 {
   sqlite3_stmt *stmt;
-  dt_lock_image(imgid);
 
   _cleanup_history(imgid);
   _warn_about_history_overuse(dev);
@@ -1166,8 +1158,6 @@ void dt_dev_write_history_ext(dt_develop_t *dev, const int imgid)
 
   dt_ioppr_write_iop_order_list(dev->iop_order_list, imgid);
   dt_history_hash_write_from_history(imgid, DT_HISTORY_HASH_CURRENT);
-
-  dt_unlock_image(imgid);
 }
 
 void dt_dev_write_history(dt_develop_t *dev)

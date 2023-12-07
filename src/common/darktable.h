@@ -416,37 +416,6 @@ void dt_free_align(void *mem);
 #define dt_free_align_ptr free
 #endif
 
-static inline void dt_lock_image(int32_t imgid) ACQUIRE(darktable.db_image[imgid & (DT_IMAGE_DBLOCKS-1)])
-{
-  dt_pthread_mutex_lock(&(darktable.db_image[imgid & (DT_IMAGE_DBLOCKS-1)]));
-}
-
-static inline void dt_unlock_image(int32_t imgid) RELEASE(darktable.db_image[imgid & (DT_IMAGE_DBLOCKS-1)])
-{
-  dt_pthread_mutex_unlock(&(darktable.db_image[imgid & (DT_IMAGE_DBLOCKS-1)]));
-}
-
-static inline void dt_lock_image_pair(int32_t imgid1, int32_t imgid2) ACQUIRE(darktable.db_image[imgid1 & (DT_IMAGE_DBLOCKS-1)], darktable.db_image[imgid2 & (DT_IMAGE_DBLOCKS-1)])
-{
-  if(imgid1 < imgid2)
-  {
-    dt_pthread_mutex_lock(&(darktable.db_image[imgid1 & (DT_IMAGE_DBLOCKS-1)]));
-    dt_pthread_mutex_lock(&(darktable.db_image[imgid2 & (DT_IMAGE_DBLOCKS-1)]));
-  }
-  else
-  {
-    dt_pthread_mutex_lock(&(darktable.db_image[imgid2 & (DT_IMAGE_DBLOCKS-1)]));
-    dt_pthread_mutex_lock(&(darktable.db_image[imgid1 & (DT_IMAGE_DBLOCKS-1)]));
-  }
-}
-
-static inline void dt_unlock_image_pair(int32_t imgid1, int32_t imgid2) RELEASE(darktable.db_image[imgid1 & (DT_IMAGE_DBLOCKS-1)], darktable.db_image[imgid2 & (DT_IMAGE_DBLOCKS-1)])
-{
-  dt_pthread_mutex_unlock(&(darktable.db_image[imgid1 & (DT_IMAGE_DBLOCKS-1)]));
-  dt_pthread_mutex_unlock(&(darktable.db_image[imgid2 & (DT_IMAGE_DBLOCKS-1)]));
-}
-
-
 // check whether the specified mask of modifier keys exactly matches, among the set Shift+Control+(Alt/Meta).
 // ignores the state of any other shifting keys
 static inline gboolean dt_modifier_is(const GdkModifierType state, const GdkModifierType desired_modifier_mask)
