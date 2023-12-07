@@ -1906,9 +1906,10 @@ void dt_dev_read_history_ext(dt_develop_t *dev, const int imgid, gboolean no_ima
 
 void dt_dev_read_history(dt_develop_t *dev)
 {
-  dt_pthread_mutex_lock(&dev->history_mutex);
+  // FIXME : This should be made thread-safe, but results in deadlock
+  //dt_pthread_mutex_lock(&dev->history_mutex);
   dt_dev_read_history_ext(dev, dev->image_storage.id, FALSE);
-  dt_pthread_mutex_unlock(&dev->history_mutex);
+  //dt_pthread_mutex_unlock(&dev->history_mutex);
 }
 
 void dt_dev_reprocess_center(dt_develop_t *dev)
