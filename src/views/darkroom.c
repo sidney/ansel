@@ -2377,6 +2377,9 @@ void enter(dt_view_t *self)
   dt_iop_color_picker_init();
 
   dt_image_check_camera_missing_sample(&dev->image_storage);
+
+  // Notify history module that history has changed
+  DT_DEBUG_CONTROL_SIGNAL_RAISE(darktable.signals, DT_SIGNAL_DEVELOP_HISTORY_CHANGE);
 }
 
 void leave(dt_view_t *self)
