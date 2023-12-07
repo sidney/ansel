@@ -1130,6 +1130,7 @@ static dt_dev_pixelpipe_iop_t *_last_node_in_pipe(dt_dev_pixelpipe_t *pipe)
   return NULL;
 }
 
+#ifdef HAVE_OPENCL
 static int pixelpipe_process_on_GPU(dt_dev_pixelpipe_t *pipe, dt_develop_t *dev, void *input,
                                     void *cl_mem_input, dt_iop_buffer_dsc_t *input_format, const dt_iop_roi_t *roi_in,
                                     void **output, void **cl_mem_output, dt_iop_buffer_dsc_t **out_format, const dt_iop_roi_t *roi_out,
@@ -1578,6 +1579,7 @@ static int pixelpipe_process_on_GPU(dt_dev_pixelpipe_t *pipe, dt_develop_t *dev,
 
   return !success_opencl;
 }
+#endif
 
 // recursive helper for process:
 static int dt_dev_pixelpipe_process_rec(dt_dev_pixelpipe_t *pipe, dt_develop_t *dev, void **output,
@@ -1614,7 +1616,7 @@ static int dt_dev_pixelpipe_process_rec(dt_dev_pixelpipe_t *pipe, dt_develop_t *
 
   // 1) if cached buffer is still available, return data
   uint64_t hash = _node_hash(pipe, piece, roi_out, pos);
-  if(dt_dev_pixelpipe_cache_available(&(pipe->cache), hash) && FALSE)
+  if(dt_dev_pixelpipe_cache_available(&(pipe->cache), hash))
   {
     if(module)
       dt_print(DT_DEBUG_DEV, "[pixelpipe] dt_dev_pixelpipe_process_rec, cache available for pipe %i and module %s with hash %lu\n",
