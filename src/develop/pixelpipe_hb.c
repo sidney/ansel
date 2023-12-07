@@ -1136,9 +1136,6 @@ static int pixelpipe_process_on_GPU(dt_dev_pixelpipe_t *pipe, dt_develop_t *dev,
                                     dt_iop_module_t *module, dt_dev_pixelpipe_iop_t *piece,
                                     dt_develop_tiling_t *tiling, dt_pixelpipe_flow_t *pixelpipe_flow)
 {
-  /* do we have opencl at all? did user tell us to use it? did we get a resource? */
-  if(!(dt_opencl_is_inited() && pipe->opencl_enabled && pipe->devid >= 0)) return 1; // bail
-
   // Fetch RGB working profile
   // if input is RAW, we can't color convert because RAW is not in a color space
   // so we send NULL to by-pass
@@ -1168,11 +1165,9 @@ static int pixelpipe_process_on_GPU(dt_dev_pixelpipe_t *pipe, dt_develop_t *dev,
       are treated in the same manner. */
 
   /* test for a possible opencl path after checking some module specific pre-requisites */
-  gboolean possible_cl = (module->process_cl && piece->process_cl_ready
-      && !(((pipe->type & DT_DEV_PIXELPIPE_PREVIEW) == DT_DEV_PIXELPIPE_PREVIEW
-            || (pipe->type & DT_DEV_PIXELPIPE_PREVIEW2) == DT_DEV_PIXELPIPE_PREVIEW2)
-          && (module->flags() & IOP_FLAGS_PREVIEW_NON_OPENCL))
-      && (fits_on_device || piece->process_tiling_ready));
+  gboolean preview_non_opencl = ((pipe->type & DT_DEV_PIXELPIPE_PREVIEW) == DT_DEV_PIXELPIPE_PREVIEW)
+                                && (module->flags() & IOP_FLAGS_PREVIEW_NON_OPENCL);
+  gboolean possible_cl = !preview_non_opencl && fits_on_device && piece->process_tiling_ready;
 
   if(possible_cl && !fits_on_device)
   {
@@ -1619,7 +1614,7 @@ static int dt_dev_pixelpipe_process_rec(dt_dev_pixelpipe_t *pipe, dt_develop_t *
 
   // 1) if cached buffer is still available, return data
   uint64_t hash = _node_hash(pipe, piece, roi_out, pos);
-  if(dt_dev_pixelpipe_cache_available(&(pipe->cache), hash))
+  if(dt_dev_pixelpipe_cache_available(&(pipe->cache), hash) && FALSE)
   {
     if(module)
       dt_print(DT_DEBUG_DEV, "[pixelpipe] dt_dev_pixelpipe_process_rec, cache available for pipe %i and module %s with hash %lu\n",
@@ -1810,17 +1805,29 @@ static int dt_dev_pixelpipe_process_rec(dt_dev_pixelpipe_t *pipe, dt_develop_t *
   assert(tiling.factor_cl > 0.0f);
 
 #ifdef HAVE_OPENCL
-  if (pixelpipe_process_on_GPU(pipe, dev, input, cl_mem_input, input_format, &roi_in, output, cl_mem_output, out_format, roi_out,
-                               module, piece, &tiling, &pixelpipe_flow))
-    if (pixelpipe_process_on_CPU(pipe, dev, input, input_format, &roi_in, output, out_format, roi_out,
-                               module, piece, &tiling, &pixelpipe_flow))
+  if(dt_opencl_is_inited() && pipe->opencl_enabled && pipe->devid >= 0 && module->process_cl && piece->process_cl_ready)
+  {
+    // If all the OpenCL requirements are met
+    if (pixelpipe_process_on_GPU(pipe, dev, input, cl_mem_input, input_format, &roi_in, output, cl_mem_output, out_format, roi_out,
+                                module, piece, &tiling, &pixelpipe_flow))
+    {
+      // GPU processing failed : try again on CPU
+      if (pixelpipe_process_on_CPU(pipe, dev, input, input_format, &roi_in, output, out_format, roi_out,
+                                module, piece, &tiling, &pixelpipe_flow))
+      {
+        // Everything failed.
         return 1;
-
-#else // HAVE_OPENCL
-  if (pixelpipe_process_on_CPU(pipe, dev, input, input_format, &roi_in, output, out_format, roi_out,
-                               module, piece, &tiling, &pixelpipe_flow))
-    return 1;
+      }
+    }
+  }
+  else
 #endif // HAVE_OPENCL
+  {
+    if (pixelpipe_process_on_CPU(pipe, dev, input, input_format, &roi_in, output, out_format, roi_out,
+                                module, piece, &tiling, &pixelpipe_flow))
+
+      return 1;
+  }
 
   char histogram_log[32] = "";
   if(!(pixelpipe_flow & PIXELPIPE_FLOW_HISTOGRAM_NONE))
