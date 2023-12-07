@@ -129,7 +129,6 @@ void dt_dev_cleanup(dt_develop_t *dev)
   // image_cache does not have to be unref'd, this is done outside develop module.
   dt_pthread_mutex_destroy(&dev->pipe_mutex);
   dt_pthread_mutex_destroy(&dev->preview_pipe_mutex);
-  dt_dev_unload_image(dev);
   dev->proxy.chroma_adaptation = NULL;
   dev->proxy.wb_coeffs[0] = 0.f;
   if(dev->pipe)

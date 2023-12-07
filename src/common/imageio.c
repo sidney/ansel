@@ -1106,9 +1106,10 @@ int dt_imageio_export_with_flags(const int32_t imgid, const char *filename,
   if(res)
     goto error;
 
-  dt_dev_pixelpipe_cleanup(&pipe);
-  dt_dev_cleanup(&dev);
   dt_mipmap_cache_release(darktable.mipmap_cache, &buf);
+  dt_dev_pixelpipe_cleanup(&pipe);
+  dt_dev_unload_image(&dev);
+  dt_dev_cleanup(&dev);
 
   /* now write xmp into that container, if possible */
   if(copy_metadata && (format->flags(format_params) & FORMAT_FLAGS_SUPPORT_XMP))
