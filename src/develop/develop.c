@@ -1910,6 +1910,9 @@ void dt_dev_read_history(dt_develop_t *dev)
   //dt_pthread_mutex_lock(&dev->history_mutex);
   dt_dev_read_history_ext(dev, dev->image_storage.id, FALSE);
   //dt_pthread_mutex_unlock(&dev->history_mutex);
+
+  if(dev->gui_attached)
+    DT_DEBUG_CONTROL_SIGNAL_RAISE(darktable.signals, DT_SIGNAL_DEVELOP_HISTORY_CHANGE);
 }
 
 void dt_dev_reprocess_center(dt_develop_t *dev)
