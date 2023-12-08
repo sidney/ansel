@@ -1189,7 +1189,9 @@ void dt_dev_write_history_ext(dt_develop_t *dev, const int imgid)
 
 void dt_dev_write_history(dt_develop_t *dev)
 {
+  dt_pthread_mutex_lock(&dev->history_mutex);
   dt_dev_write_history_ext(dev, dev->image_storage.id);
+  dt_pthread_mutex_unlock(&dev->history_mutex);
 }
 
 static int _dev_get_module_nb_records()
