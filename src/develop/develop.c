@@ -917,6 +917,7 @@ void dt_dev_free_history_item(gpointer data)
 
 void dt_dev_reload_history_items(dt_develop_t *dev)
 {
+  // FIXME: [CRITICAL] should lock the image history at the app level
   dev->focus_hash = 0;
 
   dt_ioppr_set_default_iop_order(dev, dev->image_storage.id);
@@ -1197,6 +1198,7 @@ void dt_dev_write_history_ext(dt_develop_t *dev, const int imgid)
 
 void dt_dev_write_history(dt_develop_t *dev)
 {
+  // FIXME: [CRITICAL] should lock the image history at the app level
   dt_pthread_mutex_lock(&dev->history_mutex);
   dt_dev_write_history_ext(dev, dev->image_storage.id);
   dt_pthread_mutex_unlock(&dev->history_mutex);
