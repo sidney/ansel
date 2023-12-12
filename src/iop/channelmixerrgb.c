@@ -94,7 +94,7 @@ typedef struct dt_iop_channelmixer_rgb_params_t
   float blue[CHANNEL_SIZE];        // $MIN: COLOR_MIN $MAX: COLOR_MAX
   float saturation[CHANNEL_SIZE];  // $MIN: -1.0 $MAX: 1.0
   float lightness[CHANNEL_SIZE];   // $MIN: -1.0 $MAX: 1.0
-  float grey[CHANNEL_SIZE];        // $MIN: 0.0 $MAX: 1.0
+  float grey[CHANNEL_SIZE];        // $MIN: -2.0 $MAX: 2.0
   gboolean normalize_R, normalize_G, normalize_B, normalize_sat, normalize_light, normalize_grey; // $DESCRIPTION: "normalize channels"
   dt_illuminant_t illuminant;      // $DEFAULT: DT_ILLUMINANT_D
   dt_illuminant_fluo_t illum_fluo; // $DEFAULT: DT_ILLUMINANT_FLUO_F3 $DESCRIPTION: "F source"
