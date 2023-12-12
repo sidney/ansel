@@ -547,8 +547,6 @@ void gui_update(struct dt_iop_module_t *self)
      || self->dev->image_storage.buf_dsc.datatype != TYPE_UINT16)
   {
     gtk_widget_set_sensitive(GTK_WIDGET(g->mode), FALSE);
-    p->mode = EXPOSURE_MODE_MANUAL;
-    dt_dev_add_history_item(darktable.develop, self, TRUE);
   }
   else
   {
