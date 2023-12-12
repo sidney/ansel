@@ -1058,7 +1058,6 @@ void dt_dev_pop_history_items(dt_develop_t *dev, int32_t cnt)
   dt_pthread_mutex_lock(&dev->history_mutex);
   GList *dev_iop = g_list_copy(dev->iop);
   dt_dev_pop_history_items_ext(dev, cnt);
-  dt_pthread_mutex_unlock(&dev->history_mutex);
 
   // update all gui modules
   GList *modules = dev->iop;
@@ -1068,8 +1067,6 @@ void dt_dev_pop_history_items(dt_develop_t *dev, int32_t cnt)
     dt_iop_gui_update(module);
     modules = g_list_next(modules);
   }
-
-  dt_pthread_mutex_lock(&dev->history_mutex);
 
   // check if the order of modules has changed
   int dev_iop_changed = (g_list_length(dev_iop) != g_list_length(dev->iop));
