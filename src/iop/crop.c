@@ -1169,7 +1169,7 @@ void gui_init(struct dt_iop_module_t *self)
   g_signal_connect(GTK_TOGGLE_BUTTON(g->edit_button), "toggled", G_CALLBACK(_enter_edit_mode), self);
   gtk_box_pack_start(GTK_BOX(box), g->edit_button, TRUE, TRUE, 0);
 
-  g->commit_button = dt_action_button_new((dt_lib_module_t *)self, N_("Validate"), _event_commit_clicked, self, _("Validate changes"), 0, 0);
+  g->commit_button = dt_action_button_new((dt_lib_module_t *)self, N_("Apply"), _event_commit_clicked, self, _("Apply changes"), 0, 0);
   gtk_box_pack_start(GTK_BOX(box), g->commit_button, TRUE, TRUE, 0);
   gtk_widget_set_sensitive(g->commit_button, FALSE);
 
@@ -1276,26 +1276,30 @@ void gui_post_expose(struct dt_iop_module_t *self, cairo_t *cr, int32_t width, i
   cairo_translate(cr, -.5f * g->wd - g->zoom_x * g->wd, -.5f * g->ht - g->zoom_y * g->ht);
 
   double dashes = DT_PIXEL_APPLY_DPI(5.0) / g->zoom_scale;
+  double border_width = dashes / 2.;
 
   // draw cropping window
   float pzx, pzy;
   dt_dev_get_pointer_zoom_pos(dev, pointerx, pointery, &pzx, &pzy);
   pzx += 0.5f;
   pzy += 0.5f;
+
+  cairo_set_line_width(cr, border_width);
+
   if(_set_max_clip(self))
   {
-    cairo_set_source_rgba(cr, .2, .2, .2, .8);
+    cairo_set_source_rgba(cr, .1, .1, .1, .8);
     cairo_set_fill_rule(cr, CAIRO_FILL_RULE_EVEN_ODD);
     cairo_rectangle(cr, g->clip_max_x * g->wd, g->clip_max_y * g->ht,
                         g->clip_max_w * g->wd, g->clip_max_h * g->ht);
-    cairo_rectangle(cr, g->clip_x * g->wd, g->clip_y * g->ht,
-                        g->clip_w * g->wd, g->clip_h * g->ht);
+    cairo_rectangle(cr, g->clip_x * g->wd - border_width / 2., g->clip_y * g->ht - border_width / 2.,
+                        g->clip_w * g->wd + border_width, g->clip_h * g->ht + border_width);
     cairo_fill(cr);
   }
   if(g->clip_x > .0f || g->clip_y > .0f || g->clip_w < 1.0f || g->clip_h < 1.0f)
   {
-    cairo_set_line_width(cr, dashes / 2.0);
-    cairo_rectangle(cr, g->clip_x * g->wd, g->clip_y * g->ht, g->clip_w * g->wd, g->clip_h * g->ht);
+    cairo_rectangle(cr, g->clip_x * g->wd - border_width / 2., g->clip_y * g->ht - border_width / 2.,
+                        g->clip_w * g->wd + border_width, g->clip_h * g->ht + border_width);
     dt_draw_set_color_overlay(cr, TRUE, 1.0);
     cairo_stroke(cr);
   }
