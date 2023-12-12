@@ -198,7 +198,7 @@ void dt_dev_process_preview(dt_develop_t *dev)
   if(err) fprintf(stderr, "[dev_process_preview] job queue exceeded!\n");
 }
 
-void dt_dev_refresh_ui_images(dt_develop_t *dev)
+void dt_dev_refresh_ui_images_real(dt_develop_t *dev, const char *file, const int line)
 {
   // We need to get the shutdown atomic set to TRUE,
   // which is handled everytime history is changed,
@@ -206,6 +206,8 @@ void dt_dev_refresh_ui_images(dt_develop_t *dev)
   // Benefit is atomics are de-facto thread-safe.
   if(dt_atomic_get_int(&dev->pipe->shutdown)) dt_dev_process_image(dev);
   if(dt_atomic_get_int(&dev->preview_pipe->shutdown)) dt_dev_process_preview(dev);
+
+  dt_print(DT_DEBUG_DEV, "[dev_process_image] starting a pipeline process from %s:%i\n", file, line);
 }
 
 void dt_dev_pixelpipe_rebuild(dt_develop_t *dev)
@@ -559,13 +561,13 @@ void dt_dev_configure(dt_develop_t *dev, int wd, int ht)
   {
     dev->width = wd;
     dev->height = ht;
-    dt_dev_invalidate_zoom(dev, __FUNCTION__, __FILE__, __LINE__);
 
     if(dev->image_storage.id > -1 && darktable.mipmap_cache)
     {
       // Only if it's not our initial configure call, aka if we already have an image
       dt_control_queue_redraw_center();
       dt_dev_refresh_ui_images(dev);
+      dt_dev_reprocess_center(dev);
     }
   }
 }
@@ -843,8 +845,9 @@ void _dev_add_history_item(dt_develop_t *dev, dt_iop_module_t *module, gboolean 
 // This is why they directly start a pipeline recompute.
 // Otherwise, please keep GUI and pipeline fully separated.
 
-void dt_dev_add_history_item(dt_develop_t *dev, dt_iop_module_t *module, gboolean enable)
+void dt_dev_add_history_item_real(dt_develop_t *dev, dt_iop_module_t *module, gboolean enable, const char *file, const int line)
 {
+  dt_print(DT_DEBUG_DEV, "[dev_add_history_item] adding an history item from %s:%i\n", file, line);
   _dev_add_history_item(dev, module, enable, FALSE);
   dt_dev_invalidate_all(dev, __FUNCTION__, __FILE__, __LINE__);
   dt_control_queue_redraw_center();
