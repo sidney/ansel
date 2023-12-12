@@ -1642,7 +1642,7 @@ static int dt_dev_pixelpipe_process_rec(dt_dev_pixelpipe_t *pipe, dt_develop_t *
   {
     if(module)
       dt_print(DT_DEBUG_DEV, "[pixelpipe] dt_dev_pixelpipe_process_rec, cache available for pipe %i and module %s with hash %llu\n",
-             pipe->type, module->op, hash);
+             pipe->type, module->op, (long long unsigned int)hash);
     else
       dt_print(DT_DEBUG_DEV, "[pixelpipe] dt_dev_pixelpipe_process_rec has no module at pos %i\n", pos);
 
