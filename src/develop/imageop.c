@@ -149,6 +149,7 @@ static void default_init_pipe(struct dt_iop_module_t *self, dt_dev_pixelpipe_t *
                               dt_dev_pixelpipe_iop_t *piece)
 {
   piece->data = calloc(1,self->params_size);
+  piece->data_size = self->params_size;
 }
 
 static void default_cleanup_pipe(struct dt_iop_module_t *self, dt_dev_pixelpipe_t *pipe,
@@ -1654,8 +1655,13 @@ void dt_iop_commit_params(dt_iop_module_t *module, dt_iop_params_t *params,
   module->commit_params(module, params, pipe, piece);
 
   // 2. compute the hash
-  /* construct module params data for hash calc */
-  int length = module->params_size;
+  /** Construct module internal representation for hash computation.
+  * We need both the user-defined params (module->params) and the pipeline params (piece->data),
+  * because some pipeline params may be defined or sanitized at runtime (color profiles),
+  * but some pipeline params are allocated on the stack (LUTs) from user params (graph nodes),
+  * meaning they are not written in piece->data struct.
+  */
+  size_t length = module->params_size + piece->data_size;
   dt_masks_form_t *grp = NULL;
   if(module->flags() & IOP_FLAGS_SUPPORTS_BLENDING)
   {
@@ -1664,22 +1670,30 @@ void dt_iop_commit_params(dt_iop_module_t *module, dt_iop_params_t *params,
     length += dt_masks_group_get_hash_buffer_length(grp);
   }
 
+  // Buffer to hash
   char *str = malloc(length);
+  size_t pos = 0;
+
+  // Copy user-defined params
   memcpy(str, module->params, module->params_size);
-  int pos = module->params_size;
+  pos += module->params_size;
+
+  // Copy runtime pipeline params
+  memcpy(str + pos, piece->data, piece->data_size);
+  pos += piece->data_size;
 
   /* if module supports blend op */
   if(module->flags() & IOP_FLAGS_SUPPORTS_BLENDING)
   {
-    /* add blend params into account */
-    memcpy(str + module->params_size, blendop_params, sizeof(dt_develop_blend_params_t));
+    // Copy blend params
+    memcpy(str + pos, blendop_params, sizeof(dt_develop_blend_params_t));
     pos += sizeof(dt_develop_blend_params_t);
 
     /* and we add masks */
     if(grp) dt_masks_group_get_hash_buffer(grp, str + pos);
   }
 
-  // Get the hash
+  // Finally, get the hash
   piece->hash = piece->global_hash = dt_hash(5381, str, length);
 
   free(str);
