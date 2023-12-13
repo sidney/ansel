@@ -78,7 +78,7 @@ static void _lib_snapshots_toggled_callback(GtkToggleButton *widget, gpointer us
 
 const char *name(dt_lib_module_t *self)
 {
-  return _("snapshots");
+  return _("Snapshots");
 }
 
 const char **views(dt_lib_module_t *self)
@@ -94,7 +94,7 @@ uint32_t container(dt_lib_module_t *self)
 
 int position()
 {
-  return 1000;
+  return 800;
 }
 
 // draw snapshot sign

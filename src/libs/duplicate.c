@@ -57,7 +57,7 @@ typedef struct dt_lib_duplicate_t
 
 const char *name(dt_lib_module_t *self)
 {
-  return _("duplicate manager");
+  return _("Duplicates");
 }
 
 const char **views(dt_lib_module_t *self)
