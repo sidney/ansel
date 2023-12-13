@@ -561,6 +561,7 @@ void dt_dev_configure(dt_develop_t *dev, int wd, int ht)
   {
     dev->width = wd;
     dev->height = ht;
+    dt_dev_invalidate_zoom(dev, __FUNCTION__, __FILE__, __LINE__);
 
     if(dev->image_storage.id > -1 && darktable.mipmap_cache)
     {
