@@ -2248,6 +2248,31 @@ static void _unregister_modules_drag_n_drop(dt_view_t *self)
   }
 }
 
+// Kinda ugly to store that as a static global var
+// but the scope is local and it's not super important.
+static guint auto_save_timeout = 0;
+
+static int _auto_save_edit(gpointer data)
+{
+  static int history_top = 0;
+
+  dt_develop_t *dev = (dt_develop_t *)data;
+  dt_pthread_mutex_lock(&dev->history_mutex);
+
+  // Save dev history to DB and XMP (if enabled) only if history changed since previous save
+  // and it's not too heavy. Too heavy would freeze the GUI in operation, not cool.
+  if(dev->history_end != history_top && dt_dev_mask_history_overload(dev, 200) < 200)
+  {
+    history_top = dev->history_end;
+    dt_dev_write_history_ext(dev, dev->image_storage.id);
+    dt_image_write_sidecar_file(dev->image_storage.id);
+  }
+
+  dt_pthread_mutex_unlock(&dev->history_mutex);
+
+  return G_SOURCE_CONTINUE;
+}
+
 void enter(dt_view_t *self)
 {
   // prevent accels_window to refresh
@@ -2392,12 +2417,20 @@ void enter(dt_view_t *self)
   // Init the starting point of undo/redo
   dt_dev_undo_start_record(dev);
   dt_dev_undo_end_record(dev);
+
+  // Auto-save every 30 s
+  auto_save_timeout = g_timeout_add(30000, _auto_save_edit, dev);
 }
 
 void leave(dt_view_t *self)
 {
   dt_develop_t *dev = (dt_develop_t *)self->data;
   dev->gui_leaving = 1; // shutdown all running pipelines ASAP
+
+  // Remove the autosave timeout first thing because it locks the dev->history_mutex
+  // and could interfere with the following.
+  if(auto_save_timeout) g_source_remove(auto_save_timeout);
+  auto_save_timeout = 0;
 
   dt_iop_color_picker_cleanup();
   if(darktable.lib->proxy.colorpicker.picker_proxy)

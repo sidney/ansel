@@ -1129,6 +1129,20 @@ static void _cleanup_history(const int imgid)
   sqlite3_finalize(stmt);
 }
 
+guint dt_dev_mask_history_overload(dt_develop_t *dev, guint threshold)
+{
+  // Count all the mask forms used × history entries, up to a certain threshold.
+  // Stop counting when the threshold is reached, for performance.
+  guint states = 0;
+  for(GList *history = g_list_first(dev->history); history; history = g_list_next(history))
+  {
+    dt_dev_history_item_t *hist_item = (dt_dev_history_item_t *)(history->data);
+    states += g_list_length(hist_item->forms);
+    if(states > threshold) break;
+  }
+  return states;
+}
+
 static void _warn_about_history_overuse(dt_develop_t *dev)
 {
   /* History stores one entry per module, everytime a parameter is changed.
@@ -1136,22 +1150,12 @@ static void _warn_about_history_overuse(dt_develop_t *dev)
   *  All that is saved into database and XMP. When history entries × number of mask > 250,
   *  we get a really bad performance penalty.
   */
-  gint states = 0;
-
-  GList *history = dev->history;
-  while(history)
-  {
-    dt_dev_history_item_t *hist_item = (dt_dev_history_item_t *)(history->data);
-    states += g_list_length(hist_item->forms);
-    history = g_list_next(history);
-  }
+  guint states = dt_dev_mask_history_overload(dev, 250);
 
   if(states > 250)
-  {
     dt_toast_log(_("Your history is storing %d mask states. To ensure smooth operation, consider compressing "
                    "history and removing unused masks."),
                  states);
-  }
 }
 
 void dt_dev_write_history_ext(dt_develop_t *dev, const int imgid)

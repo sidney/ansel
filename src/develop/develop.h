@@ -505,6 +505,10 @@ void dt_dev_undo_end_record(dt_develop_t *dev);
 gboolean dt_masks_get_lock_mode(dt_develop_t *dev);
 void dt_masks_set_lock_mode(dt_develop_t *dev, gboolean mode);
 
+// Count all the mask forms used × history entries, up to a certain threshold.
+// Stop counting when the threshold is reached, for performance.
+guint dt_dev_mask_history_overload(dt_develop_t *dev, guint threshold);
+
 // clang-format off
 // modelines: These editor modelines have been set for all relevant files by tools/update_modelines.py
 // vim: shiftwidth=2 expandtab tabstop=2 cindent
