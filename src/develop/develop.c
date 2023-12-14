@@ -272,7 +272,6 @@ void dt_dev_invalidate_all_real(dt_develop_t *dev)
 void dt_dev_process_preview_job(dt_develop_t *dev)
 {
   if(dev->gui_leaving) return;
-  if(!dev->small_buf.buf) return;
 
   dt_pthread_mutex_lock(&dev->preview_pipe_mutex);
   dt_control_log_busy_enter();
@@ -280,8 +279,20 @@ void dt_dev_process_preview_job(dt_develop_t *dev)
   dev->preview_status = DT_DEV_PIXELPIPE_RUNNING;
 
   // init pixel pipeline for preview.
-  dt_dev_pixelpipe_set_input(dev->preview_pipe, dev, (float *)dev->small_buf.buf, dev->small_buf.width,
-                             dev->small_buf.height, dev->small_buf.iscale);
+  dt_mipmap_buffer_t buf;
+  dt_mipmap_cache_get(darktable.mipmap_cache, &buf, dev->image_storage.id, DT_MIPMAP_F, DT_MIPMAP_BLOCKING, 'r');
+
+  if(!buf.buf || !buf.width || !buf.height)
+  {
+    dt_control_log_busy_leave();
+    dt_control_toast_busy_leave();
+    dt_mipmap_cache_release(darktable.mipmap_cache, &buf);
+    dt_pthread_mutex_unlock(&dev->preview_pipe_mutex);
+    return;
+  }
+
+  dt_dev_pixelpipe_set_input(dev->preview_pipe, dev, (float *)buf.buf, buf.width,
+                             buf.height, buf.iscale);
 
 // always process the whole downsampled mipf buffer, to allow for fast scrolling and mip4 write-through.
 restart:
@@ -294,6 +305,7 @@ restart:
     dt_control_log_busy_leave();
     dt_control_toast_busy_leave();
     dev->preview_status = DT_DEV_PIXELPIPE_INVALID;
+    dt_mipmap_cache_release(darktable.mipmap_cache, &buf);
     dt_pthread_mutex_unlock(&dev->preview_pipe_mutex);
     return;
   }
@@ -317,6 +329,7 @@ restart:
       dt_control_log_busy_leave();
       dt_control_toast_busy_leave();
       dev->preview_status = DT_DEV_PIXELPIPE_INVALID;
+      dt_mipmap_cache_release(darktable.mipmap_cache, &buf);
       dt_pthread_mutex_unlock(&dev->preview_pipe_mutex);
       return;
     }
@@ -330,6 +343,7 @@ restart:
   // if a widget needs to be redraw there's the DT_SIGNAL_*_PIPE_FINISHED signals
   dt_control_log_busy_leave();
   dt_control_toast_busy_leave();
+  dt_mipmap_cache_release(darktable.mipmap_cache, &buf);
   dt_pthread_mutex_unlock(&dev->preview_pipe_mutex);
 
   DT_DEBUG_CONTROL_SIGNAL_RAISE(darktable.signals, DT_SIGNAL_DEVELOP_PREVIEW_PIPE_FINISHED);
@@ -339,7 +353,6 @@ restart:
 void dt_dev_process_image_job(dt_develop_t *dev)
 {
   if(dev->gui_leaving) return;
-  if(!dev->full_buf.buf) return;
 
   dt_pthread_mutex_lock(&dev->pipe_mutex);
   dt_control_log_busy_enter();
@@ -349,7 +362,20 @@ void dt_dev_process_image_job(dt_develop_t *dev)
 
   dt_times_t start;
   dt_get_times(&start);
-  dt_dev_pixelpipe_set_input(dev->pipe, dev, (float *)dev->full_buf.buf, dev->full_buf.width, dev->full_buf.height, 1.0);
+
+  dt_mipmap_buffer_t buf;
+  dt_mipmap_cache_get(darktable.mipmap_cache, &buf, dev->image_storage.id, DT_MIPMAP_FULL, DT_MIPMAP_BLOCKING, 'r');
+
+  if(!buf.buf || !buf.width || !buf.height)
+  {
+    dt_control_log_busy_leave();
+    dt_control_toast_busy_leave();
+    dt_mipmap_cache_release(darktable.mipmap_cache, &buf);
+    dt_pthread_mutex_unlock(&dev->pipe_mutex);
+    return;
+  }
+
+  dt_dev_pixelpipe_set_input(dev->pipe, dev, (float *)buf.buf, buf.width, buf.height, 1.0);
 
   dt_dev_zoom_t zoom;
   float zoom_x = 0.0f, zoom_y = 0.0f, scale = 0.0f;
@@ -367,6 +393,7 @@ restart:
     dt_control_log_busy_leave();
     dt_control_toast_busy_leave();
     dev->image_status = DT_DEV_PIXELPIPE_INVALID;
+    dt_mipmap_cache_release(darktable.mipmap_cache, &buf);
     dt_pthread_mutex_unlock(&dev->pipe_mutex);
     return;
   }
@@ -416,6 +443,7 @@ restart:
       dt_control_log_busy_leave();
       dt_control_toast_busy_leave();
       dev->image_status = DT_DEV_PIXELPIPE_INVALID;
+      dt_mipmap_cache_release(darktable.mipmap_cache, &buf);
       dt_pthread_mutex_unlock(&dev->pipe_mutex);
       return;
     }
@@ -437,6 +465,7 @@ restart:
   // if a widget needs to be redrawn there's the DT_SIGNAL_*_PIPE_FINISHED signals
   dt_control_log_busy_leave();
   dt_control_toast_busy_leave();
+  dt_mipmap_cache_release(darktable.mipmap_cache, &buf);
   dt_pthread_mutex_unlock(&dev->pipe_mutex);
 
   if(dev->gui_attached && !dev->gui_leaving)
@@ -460,8 +489,15 @@ static inline int _dt_dev_load_raw(dt_develop_t *dev, const uint32_t imgid)
   dt_times_t start;
   dt_get_times(&start);
 
-  dt_mipmap_cache_get(darktable.mipmap_cache, &(dev->full_buf), imgid, DT_MIPMAP_FULL, DT_MIPMAP_BLOCKING, 'r');
-  dt_mipmap_cache_get(darktable.mipmap_cache, &(dev->small_buf), imgid, DT_MIPMAP_F, DT_MIPMAP_BLOCKING, 'r');
+  // Test we got images. Also that populates the cache for later.
+  dt_mipmap_buffer_t buf;
+  dt_mipmap_cache_get(darktable.mipmap_cache, &buf, imgid, DT_MIPMAP_FULL, DT_MIPMAP_BLOCKING, 'r');
+  gboolean no_valid_image = buf.buf == NULL;
+  dt_mipmap_cache_release(darktable.mipmap_cache, &buf);
+
+  dt_mipmap_cache_get(darktable.mipmap_cache, &buf, imgid, DT_MIPMAP_F, DT_MIPMAP_BLOCKING, 'r');
+  gboolean no_valid_thumb = buf.buf == NULL;
+  dt_mipmap_cache_release(darktable.mipmap_cache, &buf);
 
   dt_show_times_f(&start, "[dev]", "to load the image.");
 
@@ -469,13 +505,11 @@ static inline int _dt_dev_load_raw(dt_develop_t *dev, const uint32_t imgid)
   dev->image_storage = *image;
   dt_image_cache_read_release(darktable.image_cache, image);
 
-  return (dev->small_buf.buf == NULL || dev->full_buf.buf == NULL);
+  return (no_valid_image || no_valid_thumb);
 }
 
 void dt_dev_unload_image(dt_develop_t *dev)
 {
-  dt_mipmap_cache_release(darktable.mipmap_cache, &dev->full_buf);
-  dt_mipmap_cache_release(darktable.mipmap_cache, &dev->small_buf);
 }
 
 void dt_dev_reload_image(dt_develop_t *dev, const uint32_t imgid)
