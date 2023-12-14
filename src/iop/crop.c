@@ -990,6 +990,7 @@ static void _event_commit_clicked(GtkButton *button, dt_iop_module_t *self)
 
   // Close edit mode on commit
   g->editing = FALSE;
+  gtk_widget_set_sensitive(g->commit_button, FALSE);
 
   // Commit history and refresh view
   dt_dev_add_history_item(darktable.develop, self, TRUE);
@@ -998,6 +999,7 @@ static void _event_commit_clicked(GtkButton *button, dt_iop_module_t *self)
   // Prevent the callback to revert the param change.
   g_signal_handlers_block_by_func(g->edit_button, _enter_edit_mode, self);
   gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(g->edit_button), FALSE);
+  gtk_button_set_label(GTK_BUTTON(g->edit_button), _("Edit"));
   g_signal_handlers_unblock_by_func(g->edit_button, _enter_edit_mode, self);
 }
 
@@ -1056,7 +1058,9 @@ void gui_init(struct dt_iop_module_t *self)
     { _("freehand"), 0, 0 },
     { _("original image"), 1, 0 },
     { _("square"), 1, 1 },
+    { _("7:6, 6x7"), 7, 6 },
     { _("10:8 in print"), 2445, 2032 },
+    { _("6:5, 5x6"), 6, 5 },
     { _("5:4, 4x5, 8x10"), 5, 4 },
     { _("11x14"), 14, 11 },
     { _("8.5x11, letter"), 110, 85 },
@@ -1066,13 +1070,16 @@ void gui_init(struct dt_iop_module_t *self)
     { _("3:2, 4x6, 35mm"), 3, 2 },
     { _("16:10, 8x5"), 16, 10 },
     { _("golden cut"), 16180340, 10000000 },
+    { _("5:3, 12x20"), 5, 3 },
     { _("16:9, HDTV"), 16, 9 },
     { _("widescreen"), 185, 100 },
-    { _("2:1, univisium"), 2, 1 },
-    { _("cinemascope"), 235, 100 },
-    { _("21:9"), 237, 100 },
-    { _("anamorphic"), 239, 100 },
-    { _("3:1, panorama"), 300, 100 },
+    { _("2:1, Univisium"), 2, 1 },
+    { _("Cinemascope"), 235, 100 },
+    { _("21:9"), 7, 3 },
+    { _("Anamorphic"), 239, 100 },
+    { _("65:24, XPan"), 65, 24 },
+    { _("3:1, panorama"), 3, 1 },
+    { _("4:1, Polyvision"), 4, 1 },
   };
 
   const int aspects_count = sizeof(aspects) / sizeof(dt_iop_crop_aspect_t);
