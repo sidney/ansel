@@ -791,8 +791,6 @@ static void _event_aspect_presets_changed(GtkWidget *combo, dt_iop_module_t *sel
     dt_conf_set_int("plugins/darkroom/crop/ratio_d", abs(p->ratio_d));
     dt_conf_set_int("plugins/darkroom/crop/ratio_n", abs(p->ratio_n));
     if(darktable.gui->reset) return;
-    _aspect_apply(self, GRAB_HORIZONTAL);
-    dt_control_queue_redraw_center();
   }
 
   // Search if current aspect ratio matches something known
@@ -825,6 +823,8 @@ static void _event_aspect_presets_changed(GtkWidget *combo, dt_iop_module_t *sel
     dt_bauhaus_combobox_set(g->aspect_presets, act);
 
   --darktable.gui->reset;
+
+  if(!darktable.gui->reset) gui_changed(self, g->aspect_presets, NULL);
 }
 
 void gui_changed(dt_iop_module_t *self, GtkWidget *w, void *previous)
@@ -856,6 +856,10 @@ void gui_changed(dt_iop_module_t *self, GtkWidget *w, void *previous)
     g->clip_h = p->ch - g->clip_y;
     _aspect_apply(self, GRAB_BOTTOM);
   }
+  else if(w == g->aspect_presets)
+  {
+    _aspect_apply(self, GRAB_ALL);
+  }
 
   // update all sliders, as their values may have change to keep aspect ratio
   dt_bauhaus_slider_set(g->cx, g->clip_x);
@@ -870,6 +874,8 @@ void gui_changed(dt_iop_module_t *self, GtkWidget *w, void *previous)
   --darktable.gui->reset;
 
   _commit_box(self, g, p);
+  dt_control_queue_redraw_center();
+  dt_control_navigation_redraw();
 }
 
 void gui_reset(struct dt_iop_module_t *self)
@@ -935,8 +941,8 @@ static void _event_key_swap(dt_iop_module_t *self)
 {
   dt_iop_crop_params_t *p = (dt_iop_crop_params_t *)self->params;
   p->ratio_d = -p->ratio_d;
-  _aspect_apply(self, GRAB_HORIZONTAL);
-  dt_control_queue_redraw_center();
+  _aspect_apply(self, GRAB_ALL);
+  gui_changed(self, NULL, NULL);
 }
 
 static void _enter_edit_mode(GtkToggleButton* button, struct dt_iop_module_t *self)
@@ -955,6 +961,8 @@ static void _enter_edit_mode(GtkToggleButton* button, struct dt_iop_module_t *se
     g->cropping = GRAB_CENTER;
     gtk_button_set_label(GTK_BUTTON(button), _("Cancel"));
     gtk_widget_set_sensitive(g->commit_button, TRUE);
+    dt_control_queue_redraw_center();
+    dt_control_navigation_redraw();
   }
   else
   {
@@ -973,15 +981,12 @@ static void _enter_edit_mode(GtkToggleButton* button, struct dt_iop_module_t *se
 
   // It sucks that we need to invalidate the preview too but we need its final dimension.
   dt_dev_invalidate_all(self->dev);
-  dt_control_queue_redraw_center();
-  dt_control_navigation_redraw();
   dt_dev_refresh_ui_images(self->dev);
 }
 
 static void _event_commit_clicked(GtkButton *button, dt_iop_module_t *self)
 {
   dt_iop_crop_gui_data_t *g = (dt_iop_crop_gui_data_t *)self->gui_data;
-  dt_iop_crop_params_t *p = (dt_iop_crop_params_t *)self->params;
 
   // Close edit mode on commit
   g->editing = FALSE;
@@ -991,8 +996,9 @@ static void _event_commit_clicked(GtkButton *button, dt_iop_module_t *self)
 
   // The following will de-activate the edit button and trigger the callback.
   // Prevent the callback to revert the param change.
-  memcpy(&g->previous_params, p, sizeof(dt_iop_crop_params_t));
+  g_signal_handlers_block_by_func(g->edit_button, _enter_edit_mode, self);
   gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(g->edit_button), FALSE);
+  g_signal_handlers_unblock_by_func(g->edit_button, _enter_edit_mode, self);
 }
 
 static void _event_aspect_flip(GtkWidget *button, dt_iop_module_t *self)
