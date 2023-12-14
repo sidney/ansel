@@ -1499,27 +1499,14 @@ static gboolean _dev_auto_apply_presets(dt_develop_t *dev)
 
 static void _dev_add_default_modules(dt_develop_t *dev, const int imgid)
 {
-  //start with those modules that cannot be disabled
+  // modules that cannot be disabled
+  // or modules that can be disabled but are auto-on
   for(GList *modules = dev->iop; modules; modules = g_list_next(modules))
   {
     dt_iop_module_t *module = (dt_iop_module_t *)modules->data;
 
     if(!dt_history_check_module_exists(imgid, module->op, FALSE)
        && module->default_enabled
-       && module->hide_enable_button
-       && !(module->flags() & IOP_FLAGS_NO_HISTORY_STACK))
-    {
-      _dev_insert_module(dev, module, imgid);
-    }
-  }
-  //now modules that can be disabled but are auto-on
-  for(GList *modules = dev->iop; modules; modules = g_list_next(modules))
-  {
-    dt_iop_module_t *module = (dt_iop_module_t *)modules->data;
-
-    if(!dt_history_check_module_exists(imgid, module->op, FALSE)
-       && module->default_enabled
-       && !module->hide_enable_button
        && !(module->flags() & IOP_FLAGS_NO_HISTORY_STACK))
     {
       _dev_insert_module(dev, module, imgid);
