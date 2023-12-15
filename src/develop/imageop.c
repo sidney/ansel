@@ -1661,45 +1661,24 @@ void dt_iop_commit_params(dt_iop_module_t *module, dt_iop_params_t *params,
   * but some pipeline params are allocated on the stack (LUTs) from user params (graph nodes),
   * meaning they are not written in piece->data struct.
   */
-  size_t length = module->params_size + piece->data_size;
-  dt_masks_form_t *grp = NULL;
+
+  uint64_t hash = dt_hash(5381, (char *)module->params, module->params_size);
+
   if(module->flags() & IOP_FLAGS_SUPPORTS_BLENDING)
   {
-    length += sizeof(dt_develop_blend_params_t);
-    grp = dt_masks_get_from_id(darktable.develop, blendop_params->mask_id);
-    length += dt_masks_group_get_hash_buffer_length(grp);
+    dt_masks_form_t *grp = dt_masks_get_from_id(darktable.develop, blendop_params->mask_id);
+    hash = dt_masks_group_get_hash(hash, grp);
+    hash = dt_hash(hash, (char *)blendop_params, sizeof(dt_develop_blend_params_t));
   }
 
-  // Buffer to hash
-  char *str = malloc(length);
-  size_t pos = 0;
+  hash = dt_hash(hash, (char *)&module->instance, sizeof(int32_t));
+  hash = dt_hash(hash, (char *)&module->multi_priority, sizeof(int));
+  hash = dt_hash(hash, (char *)&module->iop_order, sizeof(int));
 
-  // Copy user-defined params
-  memcpy(str, module->params, module->params_size);
-  pos += module->params_size;
-
-  // Copy runtime pipeline params
-  memcpy(str + pos, piece->data, piece->data_size);
-  pos += piece->data_size;
-
-  /* if module supports blend op */
-  if(module->flags() & IOP_FLAGS_SUPPORTS_BLENDING)
-  {
-    // Copy blend params
-    memcpy(str + pos, blendop_params, sizeof(dt_develop_blend_params_t));
-    pos += sizeof(dt_develop_blend_params_t);
-
-    /* and we add masks */
-    if(grp) dt_masks_group_get_hash_buffer(grp, str + pos);
-  }
-
-  // Finally, get the hash
-  piece->hash = piece->global_hash = dt_hash(5381, str, length);
-
-  free(str);
+  hash = dt_hash(hash, (char *)piece->data, piece->data_size);
+  piece->hash = piece->global_hash = hash;
 
   dt_print(DT_DEBUG_PARAMS, "[params] commit for %s in pipe %i with hash %lu\n", module->op, pipe->type, (long unsigned int)piece->hash);
-
 }
 
 void dt_iop_gui_cleanup_module(dt_iop_module_t *module)
