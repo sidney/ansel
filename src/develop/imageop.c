@@ -1813,7 +1813,6 @@ void dt_iop_request_focus(dt_iop_module_t *module)
   if(darktable.gui->reset || (out_focus_module == module)) return;
 
   darktable.develop->gui_module = module;
-  darktable.develop->focus_hash++;
 
   /* lets lose the focus of previous focus module*/
   if(out_focus_module)
