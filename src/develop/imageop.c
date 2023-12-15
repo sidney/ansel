@@ -1626,6 +1626,30 @@ gboolean _iop_validate_params(dt_introspection_field_t *field, gpointer params, 
   return all_ok;
 }
 
+uint64_t dt_iop_module_hash(dt_iop_module_t *module)
+{
+  // Uniform way of getting the full state hash of user-defined parameters,
+  // including masks and blending.
+  // WARNING: doesn't take into account parameters dynamically set at runtime.
+
+  uint64_t hash = dt_hash(5381, (char *)module->params, module->params_size);
+  hash = dt_hash(hash, (char *)&module->instance, sizeof(int32_t));
+  hash = dt_hash(hash, (char *)&module->multi_priority, sizeof(int));
+  hash = dt_hash(hash, (char *)&module->iop_order, sizeof(int));
+
+  if(module->flags() & IOP_FLAGS_SUPPORTS_BLENDING)
+  {
+    if(module->dev)
+    {
+      dt_masks_form_t *grp = dt_masks_get_from_id(module->dev, module->blend_params->mask_id);
+      hash = dt_masks_group_get_hash(hash, grp);
+    }
+    hash = dt_hash(hash, (char *)module->blend_params, sizeof(dt_develop_blend_params_t));
+  }
+
+  return hash;
+}
+
 void dt_iop_commit_params(dt_iop_module_t *module, dt_iop_params_t *params,
                           dt_develop_blend_params_t *blendop_params, dt_dev_pixelpipe_t *pipe,
                           dt_dev_pixelpipe_iop_t *piece)
@@ -1661,22 +1685,8 @@ void dt_iop_commit_params(dt_iop_module_t *module, dt_iop_params_t *params,
   * but some pipeline params are allocated on the stack (LUTs) from user params (graph nodes),
   * meaning they are not written in piece->data struct.
   */
-
-  uint64_t hash = dt_hash(5381, (char *)module->params, module->params_size);
-
-  if(module->flags() & IOP_FLAGS_SUPPORTS_BLENDING)
-  {
-    dt_masks_form_t *grp = dt_masks_get_from_id(darktable.develop, blendop_params->mask_id);
-    hash = dt_masks_group_get_hash(hash, grp);
-    hash = dt_hash(hash, (char *)blendop_params, sizeof(dt_develop_blend_params_t));
-  }
-
-  hash = dt_hash(hash, (char *)&module->instance, sizeof(int32_t));
-  hash = dt_hash(hash, (char *)&module->multi_priority, sizeof(int));
-  hash = dt_hash(hash, (char *)&module->iop_order, sizeof(int));
-
-  hash = dt_hash(hash, (char *)piece->data, piece->data_size);
-  piece->hash = piece->global_hash = hash;
+  uint64_t hash = dt_iop_module_hash(module);
+  piece->hash = piece->global_hash = dt_hash(hash, (char *)piece->data, piece->data_size);
 
   dt_print(DT_DEBUG_PARAMS, "[params] commit for %s in pipe %i with hash %lu\n", module->op, pipe->type, (long unsigned int)piece->hash);
 }
