@@ -745,9 +745,6 @@ static void _dev_add_history_item_ext(dt_develop_t *dev, dt_iop_module_t *module
     }
   }
 
-  // FIXME: get rid of that stupid focus_hash, it's GUI.
-  hist->focus_hash = dev->focus_hash;
-
   g_strlcpy(hist->multi_name, module->multi_name, sizeof(hist->multi_name));
   memcpy(hist->params, module->params, module->params_size);
 
@@ -919,8 +916,6 @@ void dt_dev_free_history_item(gpointer data)
 void dt_dev_reload_history_items(dt_develop_t *dev)
 {
   // FIXME: [CRITICAL] should lock the image history at the app level
-  dev->focus_hash = 0;
-
   dt_ioppr_set_default_iop_order(dev, dev->image_storage.id);
   dt_dev_pop_history_items(dev, 0);
 
