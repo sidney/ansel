@@ -1626,6 +1626,16 @@ gboolean _iop_validate_params(dt_introspection_field_t *field, gpointer params, 
   return all_ok;
 }
 
+
+gboolean dt_iop_check_modules_equal(dt_iop_module_t *mod_1, dt_iop_module_t *mod_2)
+{
+  // Use module fingerprints to determine if two instances are actually the same
+  return mod_1 == mod_2
+          && mod_1->instance == mod_2->instance
+          && mod_1->multi_priority == mod_2->multi_priority
+          && mod_1->iop_order == mod_2->iop_order;
+}
+
 uint64_t dt_iop_module_hash(dt_iop_module_t *module)
 {
   // Uniform way of getting the full state hash of user-defined parameters,
