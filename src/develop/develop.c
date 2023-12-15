@@ -723,8 +723,7 @@ static void _dev_add_history_item_ext(dt_develop_t *dev, dt_iop_module_t *module
     hist->iop_order = module->iop_order;
     hist->multi_priority = module->multi_priority;
 
-    if(module->flags() & IOP_FLAGS_SUPPORTS_BLENDING)
-      hist->blend_params = malloc(sizeof(dt_develop_blend_params_t));
+    hist->blend_params = malloc(sizeof(dt_develop_blend_params_t));
 
     dev->history = g_list_append(dev->history, hist);
 
@@ -748,8 +747,9 @@ static void _dev_add_history_item_ext(dt_develop_t *dev, dt_iop_module_t *module
   g_strlcpy(hist->multi_name, module->multi_name, sizeof(hist->multi_name));
   memcpy(hist->params, module->params, module->params_size);
 
-  if(module->flags() & IOP_FLAGS_SUPPORTS_BLENDING)
-    memcpy(hist->blend_params, module->blend_params, sizeof(dt_develop_blend_params_t));
+  // We copy blending params even if the module doesn't support blending.
+  // It's stupid but other parts of the soft rely on that.
+  memcpy(hist->blend_params, module->blend_params, sizeof(dt_develop_blend_params_t));
 
   if(include_masks)
   {
