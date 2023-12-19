@@ -723,8 +723,6 @@ dt_iop_module_t *dt_iop_gui_duplicate(dt_iop_module_t *base, gboolean copy_param
 
     // we save the new instance creation
     dt_dev_add_history_item(module->dev, module, TRUE);
-
-    dt_iop_gui_update_blending(module);
   }
 
   // we update show params for multi-instances for each other instances
