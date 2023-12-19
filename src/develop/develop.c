@@ -1029,7 +1029,6 @@ void dt_dev_pop_history_items(dt_develop_t *dev, int32_t cnt)
   ++darktable.gui->reset;
 
   dt_pthread_mutex_lock(&dev->history_mutex);
-  GList *dev_iop = g_list_copy(dev->iop);
   dt_dev_pop_history_items_ext(dev, cnt);
 
   // update all gui modules
@@ -1041,39 +1040,8 @@ void dt_dev_pop_history_items(dt_develop_t *dev, int32_t cnt)
     modules = g_list_next(modules);
   }
 
-  // check if the order of modules has changed
-  int dev_iop_changed = (g_list_length(dev_iop) != g_list_length(dev->iop));
-  if(!dev_iop_changed)
-  {
-    modules = dev->iop;
-    GList *modules_old = dev_iop;
-    while(modules && modules_old)
-    {
-      dt_iop_module_t *module = (dt_iop_module_t *)(modules->data);
-      dt_iop_module_t *module_old = (dt_iop_module_t *)(modules_old->data);
-
-      if(module->iop_order != module_old->iop_order)
-      {
-        dev_iop_changed = 1;
-        break;
-      }
-
-      modules = g_list_next(modules);
-      modules_old = g_list_next(modules_old);
-    }
-  }
-  g_list_free(dev_iop);
-
-  if(dev_iop_changed)
-  {
-    dev->pipe->changed |= DT_DEV_PIPE_REMOVE;
-    dev->preview_pipe->changed |= DT_DEV_PIPE_REMOVE;
-  }
-  else
-  {
-    dev->pipe->changed |= DT_DEV_PIPE_SYNCH;
-    dev->preview_pipe->changed |= DT_DEV_PIPE_SYNCH;
-  }
+  dev->pipe->changed |= DT_DEV_PIPE_REMOVE;
+  dev->preview_pipe->changed |= DT_DEV_PIPE_REMOVE;
 
   dt_atomic_set_int(&dev->pipe->shutdown, TRUE);
   dt_atomic_set_int(&dev->preview_pipe->shutdown, TRUE);
