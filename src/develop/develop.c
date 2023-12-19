@@ -1747,6 +1747,9 @@ void dt_dev_read_history_ext(dt_develop_t *dev, const int imgid, gboolean no_ima
       memcpy(hist->blend_params, hist->module->default_blendop_params, sizeof(dt_develop_blend_params_t));
     }
 
+    // Copy and publish the masks on the raster stack for other modules to find
+    dt_iop_commit_blend_params(hist->module, hist->blend_params);
+
     // Copy module params if valid, else try to convert legacy params
     if(is_valid_module_version && is_valid_params_size && is_valid_module_name)
     {

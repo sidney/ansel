@@ -1485,7 +1485,9 @@ void dt_iop_commit_blend_params(dt_iop_module_t *module, const dt_develop_blend_
   if(module->raster_mask.sink.source)
     g_hash_table_remove(module->raster_mask.sink.source->raster_mask.source.users, module);
 
-  memcpy(module->blend_params, blendop_params, sizeof(dt_develop_blend_params_t));
+  if(module->blend_params != blendop_params)
+    memcpy(module->blend_params, blendop_params, sizeof(dt_develop_blend_params_t));
+
   if(blendop_params->blend_cst == DEVELOP_BLEND_CS_NONE)
   {
     module->blend_params->blend_cst = dt_develop_blend_default_module_blend_colorspace(module);
@@ -1666,10 +1668,7 @@ void dt_iop_commit_params(dt_iop_module_t *module, dt_iop_params_t *params,
   if(!piece->enabled) return;
 
   // 1. commit params
-
   memcpy(piece->blendop_data, blendop_params, sizeof(dt_develop_blend_params_t));
-  // this should be redundant! (but is not)
-  dt_iop_commit_blend_params(module, blendop_params);
 
 #ifdef HAVE_OPENCL
   // assume process_cl is ready, commit_params can overwrite this.
