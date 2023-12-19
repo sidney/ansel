@@ -672,10 +672,19 @@ static void _dev_add_history_item_ext(dt_develop_t *dev, dt_iop_module_t *module
   // look for leaks on top of history in two steps
   // first remove obsolete items above history_end
   // but keep the always-on modules
-  for(GList *history = g_list_nth(dev->history, dev->history_end); history; history = g_list_next(history))
+  module->hash = dt_iop_module_hash(module);
+
+  // WARNING: dev->history_item refers to GUI index of history lib module ,
+  // where 0 is the original image.
+  // It is offset by 1 compared to the history GList, aka last GUI index = length of GList.
+  // So here, dev->history_item is the index of the new history entry to append
+  // printf("history is at index %i\n", dev->history_end - 1);
+  for(GList *history = g_list_nth(dev->history, dev->history_end);
+      history;
+      history = g_list_nth(dev->history, dev->history_end))
   {
     dt_dev_history_item_t *hist = (dt_dev_history_item_t *)(history->data);
-    // printf("removing obsoleted history item: %s\n", hist->module->op);
+    // printf("history item %s at %i\n", hist->module->op, g_list_index(dev->history, hist));
 
     // Check if an earlier instance of the module exists.
     // FIXME: Why do we delete only non-existing instances ?
@@ -692,30 +701,66 @@ static void _dev_add_history_item_ext(dt_develop_t *dev, dt_iop_module_t *module
     if((!hist->module->hide_enable_button && !hist->module->default_enabled)
         || earlier_entry)
     {
+      // printf("removing obsoleted history item: %s at %i\n", hist->module->op, g_list_index(dev->history, hist));
       dt_dev_free_history_item(hist);
       dev->history = g_list_delete_link(dev->history, history);
     }
   }
 
-  dt_dev_history_item_t *hist = (dt_dev_history_item_t *)calloc(1, sizeof(dt_dev_history_item_t));
-
-  // Init name
-  g_strlcpy(hist->op_name, module->op, sizeof(hist->op_name));
-
-  // Init buffers
-  hist->params = malloc(module->params_size);
-
-  // Init base params
-  hist->module = module;
-  hist->iop_order = module->iop_order;
-  hist->multi_priority = module->multi_priority;
-
-  hist->blend_params = malloc(sizeof(dt_develop_blend_params_t));
-
-  if(!no_image)
+  // Check if the current module to append to history is actually the same as the last one in history,
+  // and the internal parameters (aka module hash) are the same.
+  GList *last = g_list_last(dev->history);
+  gboolean new_is_old = FALSE;
+  if(last && last->data)
   {
-    dev->pipe->changed |= DT_DEV_PIPE_SYNCH;
-    dev->preview_pipe->changed |= DT_DEV_PIPE_SYNCH;
+    dt_dev_history_item_t *last_item = (dt_dev_history_item_t *)last->data;
+    dt_iop_module_t *last_module = last_item->module;
+    // fprintf(stdout, "history has hash %lu, new module %s has %lu\n", last_item->hash, module->op, module->hash);
+    if(dt_iop_check_modules_equal(module, last_module))
+    {
+      new_is_old = (module->hash == last_item->hash);
+    }
+  }
+  // new_is_old will be true only if the module got its ON/OFF state switched
+  // since the immediate previous history entry, but everything else is equal,
+  // including masks and blending.
+
+  dt_dev_history_item_t *hist;
+  if(force_new_item || !new_is_old)
+  {
+    hist = (dt_dev_history_item_t *)calloc(1, sizeof(dt_dev_history_item_t));
+
+    // Init name
+    g_strlcpy(hist->op_name, module->op, sizeof(hist->op_name));
+
+    // Init buffers
+    hist->params = malloc(module->params_size);
+    hist->blend_params = malloc(sizeof(dt_develop_blend_params_t));
+
+    // Init base params
+    hist->module = module;
+    hist->iop_order = module->iop_order;
+    hist->multi_priority = module->multi_priority;
+
+    dev->history = g_list_append(dev->history, hist);
+
+    if(!no_image)
+    {
+      // FIXME: if module was just enabled and is in default pipeline order,
+      // do we need to rebuild ? Aka are disabled modules added to pipeline still ?
+      dev->pipe->changed |= DT_DEV_PIPE_SYNCH;
+      dev->preview_pipe->changed |= DT_DEV_PIPE_SYNCH;
+    }
+  }
+  else
+  {
+    hist = (dt_dev_history_item_t *)last->data;
+
+    if(!no_image)
+    {
+      dev->pipe->changed |= DT_DEV_PIPE_TOP_CHANGED;
+      dev->preview_pipe->changed |= DT_DEV_PIPE_TOP_CHANGED;
+    }
   }
 
   g_strlcpy(hist->multi_name, module->multi_name, sizeof(hist->multi_name));
@@ -724,6 +769,9 @@ static void _dev_add_history_item_ext(dt_develop_t *dev, dt_iop_module_t *module
   // We copy blending params even if the module doesn't support blending.
   // It's stupid but other parts of the soft rely on that.
   memcpy(hist->blend_params, module->blend_params, sizeof(dt_develop_blend_params_t));
+
+  // Publish the masks on the raster stack for other modules to find
+  dt_iop_commit_blend_params(module, module->blend_params);
 
   if(include_masks)
   {
@@ -738,7 +786,11 @@ static void _dev_add_history_item_ext(dt_develop_t *dev, dt_iop_module_t *module
   if(enable) hist->enabled = module->enabled = TRUE;
   else       hist->enabled = module->enabled;
 
-  dev->history = g_list_append(dev->history, hist);
+  hist->hash = module->hash;
+
+  // WARNING: dev->history_item refers to GUI index where 0 is the original image.
+  // It is offset by 1 compared to the history GList,
+  // meaning dev->history_item is the index of the entry button in the history lib module GUI.
   dev->history_end = g_list_length(dev->history);
 }
 
@@ -828,6 +880,7 @@ void dt_dev_add_history_item_real(dt_develop_t *dev, dt_iop_module_t *module, gb
   dt_dev_refresh_ui_images(dev);
 }
 
+// FIXME : merge that with the generic add_history_item_ext()
 void dt_dev_add_masks_history_item_ext(dt_develop_t *dev, dt_iop_module_t *_module, gboolean _enable, gboolean no_image)
 {
   dt_iop_module_t *module = _module;
@@ -898,6 +951,7 @@ void dt_dev_reload_history_items(dt_develop_t *dev)
   dt_pthread_mutex_lock(&dev->history_mutex);
 
   // remove unused history items:
+  // FIXME: factorize with add_history_item cleaning
   GList *history = g_list_nth(dev->history, dev->history_end);
   while(history)
   {
@@ -991,6 +1045,10 @@ void dt_dev_pop_history_items_ext(dt_develop_t *dev, int32_t cnt)
 
     hist->module->iop_order = hist->iop_order;
     hist->module->enabled = hist->enabled;
+
+    //fprintf(stdout, "history has hash %lu, new module %s has %lu\n", hist->hash, hist->module->op, hist->module->hash);
+
+    hist->module->hash = hist->hash;
     g_strlcpy(hist->module->multi_name, hist->multi_name, sizeof(hist->module->multi_name));
     if(hist->forms) forms = hist->forms;
 
@@ -1801,6 +1859,9 @@ void dt_dev_read_history_ext(dt_develop_t *dev, const int imgid, gboolean no_ima
     if(hist->module->default_enabled == 1 && hist->module->hide_enable_button == 1)
       hist->enabled = 1;
 
+    // Compute the history params hash
+    hist->hash = hist->module->hash = dt_iop_module_hash(hist->module);
+
     dev->history = g_list_append(dev->history, hist);
     dev->history_end++;
   }
@@ -2094,6 +2155,7 @@ void dt_dev_snapshot_request(dt_develop_t *dev, const char *filename)
   dt_control_queue_redraw_center();
 }
 
+// FIXME: this is used in colorpicker API. WTF ?
 void dt_dev_invalidate_from_gui(dt_develop_t *dev)
 {
   dt_dev_pop_history_items(darktable.develop, darktable.develop->history_end);

@@ -44,6 +44,8 @@ typedef struct dt_dev_history_item_t
   char multi_name[128];
   GList *forms; // snapshot of dt_develop_t->forms
   int num; // num of history on database
+
+  uint64_t hash; // module params hash.
 } dt_dev_history_item_t;
 
 typedef enum dt_dev_overexposed_colorscheme_t
