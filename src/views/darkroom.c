@@ -2412,8 +2412,6 @@ void enter(dt_view_t *self)
   dt_pthread_mutex_unlock(&dev->pipe_mutex);
   dt_pthread_mutex_unlock(&dev->preview_pipe_mutex);
 
-  dt_dev_reprocess_preview(dev);
-
   // Init the starting point of undo/redo
   dt_dev_undo_start_record(dev);
   dt_dev_undo_end_record(dev);

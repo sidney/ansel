@@ -1051,6 +1051,7 @@ void dt_dev_pop_history_items(dt_develop_t *dev, int32_t cnt)
   dt_pthread_mutex_unlock(&dev->history_mutex);
 
   dt_dev_masks_list_change(dev);
+  dt_dev_refresh_ui_images(dev);
 }
 
 static void _cleanup_history(const int imgid)
