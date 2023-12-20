@@ -531,6 +531,7 @@ void dt_dev_pixelpipe_change(dt_dev_pixelpipe_t *pipe, struct dt_develop_t *dev)
   dt_get_times(&start);
 
   dt_pthread_mutex_lock(&dev->history_mutex);
+  dt_atomic_set_int(&pipe->shutdown, FALSE);
 
   dt_print(DT_DEBUG_DEV, "[dt_dev_pixelpipe_change] pipeline state changing for pipe %i, flag %i\n", pipe->type, pipe->changed);
 
