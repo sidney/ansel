@@ -2761,10 +2761,8 @@ int button_released(dt_view_t *self, double x, double y, int which, uint32_t sta
   if(dev->gui_module && dev->gui_module->button_released
      && dev->gui_module->button_released(dev->gui_module, x, y, which, state))
   {
-    // Click in modules should handle history changes internally. Only update zoom here.
-    dt_dev_invalidate_zoom(dev);
+    // Click in modules should handle history changes internally.
     dt_control_queue_redraw_center();
-    dt_dev_refresh_ui_images(dev);
     return 1;
   }
 
@@ -3004,10 +3002,8 @@ void scrolled(dt_view_t *self, double x, double y, int up, int state)
   // module
   if(dev->gui_module && dev->gui_module->scrolled && dev->gui_module->scrolled(dev->gui_module, x, y, up, state))
   {
-    // Scroll in modules should handle history changes internally. Only update zoom here.
-    dt_dev_invalidate_zoom(dev);
+    // Scroll in modules should handle history changes internally.
     dt_control_queue_redraw_center();
-    dt_dev_refresh_ui_images(dev);
     return;
   }
   // free zoom
