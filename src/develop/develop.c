@@ -1046,11 +1046,14 @@ void dt_dev_pop_history_items_ext(dt_develop_t *dev, int32_t cnt)
     hist->module->iop_order = hist->iop_order;
     hist->module->enabled = hist->enabled;
 
-    //fprintf(stdout, "history has hash %lu, new module %s has %lu\n", hist->hash, hist->module->op, hist->module->hash);
-
-    hist->module->hash = hist->hash;
     g_strlcpy(hist->module->multi_name, hist->multi_name, sizeof(hist->module->multi_name));
     if(hist->forms) forms = hist->forms;
+
+    // this function is called on freshly-loaded histories, we don't necessarily have a hash yet
+    // FIXME: save the hash in DB and get it from there at this point.
+    hist->module->hash = hist->hash = dt_iop_module_hash(hist->module);
+
+    //fprintf(stdout, "history has hash %lu, new module %s has %lu\n", hist->hash, hist->module->op, hist->module->hash);
 
     history = g_list_next(history);
   }

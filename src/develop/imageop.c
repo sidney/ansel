@@ -1721,7 +1721,7 @@ void dt_iop_commit_params(dt_iop_module_t *module, dt_iop_params_t *params,
   *      most-downstream module which _node_hash() is known in cache, to spare computations, or recomputed entirely if
   *      the cache is empty or entirely out-of-sync.
   */
-  piece->hash = dt_hash(module->hash, (char *)piece->data, piece->data_size);
+  piece->hash = piece->global_hash = dt_hash(module->hash, (char *)piece->data, piece->data_size);
 
   dt_print(DT_DEBUG_PARAMS, "[params] commit for %s in pipe %i with hash %lu\n", module->op, pipe->type, (long unsigned int)piece->hash);
 }
