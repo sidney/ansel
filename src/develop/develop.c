@@ -582,8 +582,8 @@ void dt_dev_configure(dt_develop_t *dev, int wd, int ht)
 
   if(dev->width != wd || dev->height != ht)
   {
-    dev->width = wd;
-    dev->height = ht;
+    dev->width = DT_PIXEL_APPLY_DPI(wd);
+    dev->height = DT_PIXEL_APPLY_DPI(ht);
     dt_dev_invalidate_zoom(dev);
 
     if(dev->image_storage.id > -1 && darktable.mipmap_cache)
