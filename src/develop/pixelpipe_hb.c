@@ -129,11 +129,15 @@ int dt_dev_pixelpipe_init_preview(dt_dev_pixelpipe_t *pipe)
 
 int dt_dev_pixelpipe_init(dt_dev_pixelpipe_t *pipe)
 {
-  // Init with the size of a screen.
+  // Init with the max size of a screen.
   int32_t cachelines = MAX(dt_conf_get_int("cachelines"), 8);
-  const int width = DT_PIXEL_APPLY_DPI(1920);
-  const int height = DT_PIXEL_APPLY_DPI(1080);
-  const int res = dt_dev_pixelpipe_init_cached(pipe, sizeof(float) * 4 * width * height, cachelines);
+  gint width = 1920;
+  gint height = 1080;
+
+  if(darktable.gui)
+    gtk_window_get_size(GTK_WINDOW(dt_ui_main_window(darktable.gui->ui)), &width, &height);
+
+  const int res = dt_dev_pixelpipe_init_cached(pipe, sizeof(float) * 4 * width * height * darktable.gui->ppd * darktable.gui->ppd, cachelines);
   pipe->type = DT_DEV_PIXELPIPE_FULL;
   return res;
 }
