@@ -184,7 +184,7 @@ void dt_dev_cleanup(dt_develop_t *dev)
 
 void dt_dev_process_image(dt_develop_t *dev)
 {
-  if(!dev->gui_attached || dev->pipe->processing) return;
+  if(!dev->gui_attached) return;
   const int err
       = dt_control_add_job_res(darktable.control, dt_dev_process_image_job_create(dev), DT_CTL_WORKER_ZOOM_1);
   if(err) fprintf(stderr, "[dev_process_image] job queue exceeded!\n");
@@ -192,7 +192,7 @@ void dt_dev_process_image(dt_develop_t *dev)
 
 void dt_dev_process_preview(dt_develop_t *dev)
 {
-  if(!dev->gui_attached || dev->preview_pipe->processing) return;
+  if(!dev->gui_attached) return;
   const int err
       = dt_control_add_job_res(darktable.control, dt_dev_process_preview_job_create(dev), DT_CTL_WORKER_ZOOM_FILL);
   if(err) fprintf(stderr, "[dev_process_preview] job queue exceeded!\n");
@@ -204,8 +204,16 @@ void dt_dev_refresh_ui_images_real(dt_develop_t *dev)
   // which is handled everytime history is changed,
   // including when initing a new pipeline (from scratch or from user history).
   // Benefit is atomics are de-facto thread-safe.
-  if(dt_atomic_get_int(&dev->pipe->shutdown)) dt_dev_process_image(dev);
-  if(dt_atomic_get_int(&dev->preview_pipe->shutdown)) dt_dev_process_preview(dev);
+  if(dt_atomic_get_int(&dev->pipe->shutdown))
+  {
+    dt_atomic_set_int(&dev->pipe->shutdown, FALSE);
+    dt_dev_process_image(dev);
+  }
+  if(dt_atomic_get_int(&dev->preview_pipe->shutdown))
+  {
+    dt_atomic_set_int(&dev->preview_pipe->shutdown, FALSE);
+    dt_dev_process_preview(dev);
+  }
 }
 
 void dt_dev_pixelpipe_rebuild(dt_develop_t *dev)
@@ -295,11 +303,6 @@ void dt_dev_process_preview_job(dt_develop_t *dev)
                              buf.height, buf.iscale);
 
 // always process the whole downsampled mipf buffer, to allow for fast scrolling and mip4 write-through.
-restart:
-  dt_pthread_mutex_lock(&dev->preview_pipe->busy_mutex);
-  dt_atomic_set_int(&dev->preview_pipe->shutdown, FALSE);
-  dt_pthread_mutex_unlock(&dev->preview_pipe->busy_mutex);
-
   if(dev->gui_leaving)
   {
     dt_control_log_busy_leave();
@@ -318,21 +321,13 @@ restart:
          dev->preview_pipe, dev, 0, 0, dev->preview_pipe->processed_width,
          dev->preview_pipe->processed_height, 1.f))
   {
-    // Interrupted because the pipeline changed?
-    if(dt_atomic_get_int(&dev->preview_pipe->shutdown))
-    {
-      goto restart;
-    }
-    else
-    {
-      // interrupted because image changed?
-      dt_control_log_busy_leave();
-      dt_control_toast_busy_leave();
-      dev->preview_status = DT_DEV_PIXELPIPE_INVALID;
-      dt_mipmap_cache_release(darktable.mipmap_cache, &buf);
-      dt_pthread_mutex_unlock(&dev->preview_pipe_mutex);
-      return;
-    }
+    // interrupted because image changed?
+    dt_control_log_busy_leave();
+    dt_control_toast_busy_leave();
+    dev->preview_status = DT_DEV_PIXELPIPE_INVALID;
+    dt_mipmap_cache_release(darktable.mipmap_cache, &buf);
+    dt_pthread_mutex_unlock(&dev->preview_pipe_mutex);
+    return;
   }
 
   dev->preview_status = DT_DEV_PIXELPIPE_VALID;
@@ -382,12 +377,6 @@ void dt_dev_process_image_job(dt_develop_t *dev)
   int window_width, window_height, x, y, closeup;
   dt_dev_pixelpipe_change_t pipe_changed;
 
-// adjust pipeline according to changed flag set by {add,pop}_history_item.
-restart:
-  dt_pthread_mutex_lock(&dev->pipe->busy_mutex);
-  dt_atomic_set_int(&dev->pipe->shutdown, FALSE);
-  dt_pthread_mutex_unlock(&dev->pipe->busy_mutex);
-
   if(dev->gui_leaving)
   {
     dt_control_log_busy_leave();
@@ -397,6 +386,8 @@ restart:
     dt_pthread_mutex_unlock(&dev->pipe_mutex);
     return;
   }
+
+  // adjust pipeline according to changed flag set by {add,pop}_history_item.
   // dt_dev_pixelpipe_change() will clear the changed value
   pipe_changed = dev->pipe->changed;
   // this locks dev->history_mutex.
@@ -432,28 +423,16 @@ restart:
   dt_get_times(&start);
   if(dt_dev_pixelpipe_process(dev->pipe, dev, x, y, wd, ht, scale))
   {
-    // Interrupted because the pipeline changed?
-    if(dt_atomic_get_int(&dev->pipe->shutdown))
-    {
-      goto restart;
-    }
-    else
-    {
-      // interrupted because image changed?
-      dt_control_log_busy_leave();
-      dt_control_toast_busy_leave();
-      dev->image_status = DT_DEV_PIXELPIPE_INVALID;
-      dt_mipmap_cache_release(darktable.mipmap_cache, &buf);
-      dt_pthread_mutex_unlock(&dev->pipe_mutex);
-      return;
-    }
+    dt_control_log_busy_leave();
+    dt_control_toast_busy_leave();
+    dev->image_status = DT_DEV_PIXELPIPE_INVALID;
+    dt_mipmap_cache_release(darktable.mipmap_cache, &buf);
+    dt_pthread_mutex_unlock(&dev->pipe_mutex);
+    return;
   }
 
   dt_show_times(&start, "[dev_process_image] pixel pipeline processing");
   dt_dev_average_delay_update(&start, &dev->average_delay);
-
-  // maybe we got zoomed/panned in the meantime?
-  if(dev->pipe->changed != DT_DEV_PIPE_UNCHANGED) goto restart;
 
   // cool, we got a new image!
   dev->pipe->backbuf_scale = scale;
