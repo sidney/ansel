@@ -69,7 +69,6 @@ void dt_dev_init(dt_develop_t *dev, int32_t gui_attached)
   dev->image_invalid_cnt = 0;
   dev->pipe = dev->preview_pipe = NULL;
   dt_pthread_mutex_init(&dev->pipe_mutex, NULL);
-  dt_pthread_mutex_init(&dev->preview_pipe_mutex, NULL);
   dev->histogram_pre_tonecurve = NULL;
   dev->histogram_pre_levels = NULL;
   dev->forms = NULL;
@@ -128,7 +127,6 @@ void dt_dev_cleanup(dt_develop_t *dev)
   if(!dev) return;
   // image_cache does not have to be unref'd, this is done outside develop module.
   dt_pthread_mutex_destroy(&dev->pipe_mutex);
-  dt_pthread_mutex_destroy(&dev->preview_pipe_mutex);
   dev->proxy.chroma_adaptation = NULL;
   dev->proxy.wb_coeffs[0] = 0.f;
   if(dev->pipe)
@@ -281,7 +279,7 @@ void dt_dev_process_preview_job(dt_develop_t *dev)
 {
   if(dev->gui_leaving) return;
 
-  dt_pthread_mutex_lock(&dev->preview_pipe_mutex);
+  dt_pthread_mutex_lock(&dev->pipe_mutex);
   dt_control_log_busy_enter();
   dt_control_toast_busy_enter();
   dev->preview_status = DT_DEV_PIXELPIPE_RUNNING;
@@ -295,7 +293,7 @@ void dt_dev_process_preview_job(dt_develop_t *dev)
     dt_control_log_busy_leave();
     dt_control_toast_busy_leave();
     dt_mipmap_cache_release(darktable.mipmap_cache, &buf);
-    dt_pthread_mutex_unlock(&dev->preview_pipe_mutex);
+    dt_pthread_mutex_unlock(&dev->pipe_mutex);
     return;
   }
 
@@ -309,7 +307,7 @@ void dt_dev_process_preview_job(dt_develop_t *dev)
     dt_control_toast_busy_leave();
     dev->preview_status = DT_DEV_PIXELPIPE_INVALID;
     dt_mipmap_cache_release(darktable.mipmap_cache, &buf);
-    dt_pthread_mutex_unlock(&dev->preview_pipe_mutex);
+    dt_pthread_mutex_unlock(&dev->pipe_mutex);
     return;
   }
   // adjust pipeline according to changed flag set by {add,pop}_history_item.
@@ -326,7 +324,7 @@ void dt_dev_process_preview_job(dt_develop_t *dev)
     dt_control_toast_busy_leave();
     dev->preview_status = DT_DEV_PIXELPIPE_INVALID;
     dt_mipmap_cache_release(darktable.mipmap_cache, &buf);
-    dt_pthread_mutex_unlock(&dev->preview_pipe_mutex);
+    dt_pthread_mutex_unlock(&dev->pipe_mutex);
     return;
   }
 
@@ -339,7 +337,7 @@ void dt_dev_process_preview_job(dt_develop_t *dev)
   dt_control_log_busy_leave();
   dt_control_toast_busy_leave();
   dt_mipmap_cache_release(darktable.mipmap_cache, &buf);
-  dt_pthread_mutex_unlock(&dev->preview_pipe_mutex);
+  dt_pthread_mutex_unlock(&dev->pipe_mutex);
 
   DT_DEBUG_CONTROL_SIGNAL_RAISE(darktable.signals, DT_SIGNAL_DEVELOP_PREVIEW_PIPE_FINISHED);
 }
