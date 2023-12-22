@@ -135,9 +135,13 @@ int dt_dev_pixelpipe_init(dt_dev_pixelpipe_t *pipe)
   gint height = 1080;
 
   if(darktable.gui)
+  {
     gtk_window_get_size(GTK_WINDOW(dt_ui_main_window(darktable.gui->ui)), &width, &height);
+    width *= darktable.gui->ppd;
+    height *= darktable.gui->ppd;
+  }
 
-  const int res = dt_dev_pixelpipe_init_cached(pipe, sizeof(float) * 4 * width * height * darktable.gui->ppd * darktable.gui->ppd, cachelines);
+  const int res = dt_dev_pixelpipe_init_cached(pipe, sizeof(float) * 4 * width * height, cachelines);
   pipe->type = DT_DEV_PIXELPIPE_FULL;
   return res;
 }
