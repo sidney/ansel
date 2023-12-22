@@ -312,10 +312,11 @@ void dt_dev_process_preview_job(dt_develop_t *dev)
   }
 
 restart:
-  // adjust pipeline according to changed flag set by {add,pop}_history_item.
-  // this locks dev->history_mutex.
   dt_times_t start;
   dt_get_times(&start);
+
+  // adjust pipeline according to changed flag set by {add,pop}_history_item.
+  // this locks dev->history_mutex.
   dt_dev_pixelpipe_change(dev->preview_pipe, dev);
   if(dt_dev_pixelpipe_process(
          dev->preview_pipe, dev, 0, 0, dev->preview_pipe->processed_width,
