@@ -337,26 +337,16 @@ static uint64_t _node_hash(dt_dev_pixelpipe_t *pipe, const dt_dev_pixelpipe_iop_
 {
   // to be called at runtime, not at pipe init.
 
-  uint64_t hash = piece
-                    ? piece->global_hash
-                    : dt_hash(_default_pipe_hash(pipe), (const char *)&pos, sizeof(int));
+  // Only at the first step of pipe, we don't have a module because we init the base buffer.
+  uint64_t hash = piece ? piece->global_hash : _default_pipe_hash(pipe);
 
-  // For panned/zoomed preview in darkroom, the global hash doesn't account for
-  // coordinates changes in viewport, since roi_out computed from commit_params
-  // accounts only for geometric distortions (perspective, crop, liquify).
-  // The roi_out passed from here as parameter accounts for zoom and pan.
-  // We need to amend our module global_hash to represent that.
-  hash = dt_hash(hash, (const char *)roi_out, sizeof(dt_iop_roi_t));
-
-  if(pipe->type == DT_DEV_PIXELPIPE_FULL)
-  {
-    // Mask display option is a sequential property of full preview pipeline,
-    // meaning it can be set by a module process() method at any node at runtime.
-    // Since we don't have it at commit_params() time, we need to be handle it here.
-    hash = dt_hash(hash, (const char *)&pipe->mask_display, sizeof(int));
-    hash = dt_hash(hash, (const char *)&pipe->bypass_blendif, sizeof(int));
-  }
-
+  // module->hash represents user params for a module.
+  // piece->hash represents user params and runtime pipeline params for a module.
+  // piece->global_hash is the cumulative piece->hash across the pipe, it tracks pipeline order.
+  // pipe->hash represents the output size and position.
+  // So when we mix piece->global_hash with pipe->hash, we have the complete integrity checksum
+  // for a pixel buffer cache line, including pipe order, upstream module params, and image size.
+  hash = dt_hash(hash, (const char *)&pipe->hash, sizeof(uint64_t));
   return hash;
 }
 
@@ -380,43 +370,29 @@ void dt_pixelpipe_get_global_hash(dt_dev_pixelpipe_t *pipe, dt_develop_t *dev)
   {
     dt_dev_pixelpipe_iop_t *piece = (dt_dev_pixelpipe_iop_t *)node->data;
 
-    // Combine with the previous modules hashes : have an unique step hash even when disabled
-    hash = dt_hash(hash, (const char *)&piece->hash, sizeof(uint64_t));
-
     // Combine with the previous bypass states
     bypass_cache |= piece->module->bypass_cache;
     piece->bypass_cache = bypass_cache;
 
+    // Combine with the previous modules hashes : have an unique step hash even when disabled
+    hash = dt_hash(hash, (const char *)&piece->hash, sizeof(uint64_t));
+
     if(piece->enabled)
     {
-      hash = dt_hash(hash, (const char *)&piece->enabled, sizeof(int));
+      // if modify_roi_in/out are implented, buf_in/out sizes will change.
+      // Though they should change according to user params.
+      // So this should be redundant with piece->hash. Is it ?
       hash = dt_hash(hash, (const char *)&piece->buf_in, sizeof(dt_iop_roi_t));
       hash = dt_hash(hash, (const char *)&piece->buf_out, sizeof(dt_iop_roi_t));
-
-      if(pipe->type & DT_DEV_PIXELPIPE_PREVIEW)
-      {
-        // Preview-centric tweaks : color-pickers and histograms
-        hash = dt_hash(hash, (const char *)&piece->module->request_color_pick, sizeof(dt_dev_request_colorpick_flags_t));
-        hash = dt_hash(hash, (const char *)&piece->module->request_histogram, sizeof(dt_dev_request_flags_t));
-
-        if(piece->module->request_color_pick != DT_REQUEST_COLORPICK_OFF)
-        {
-          if(darktable.lib->proxy.colorpicker.primary_sample->size == DT_LIB_COLORPICKER_SIZE_BOX)
-            hash = dt_hash(hash, (const char *)darktable.lib->proxy.colorpicker.primary_sample->box, sizeof(float) * 4);
-          else if(darktable.lib->proxy.colorpicker.primary_sample->size == DT_LIB_COLORPICKER_SIZE_POINT)
-            hash = dt_hash(hash, (const char *)darktable.lib->proxy.colorpicker.primary_sample->point, sizeof(float) * 2);
-        }
-      }
 
       if(pipe->type & DT_DEV_PIXELPIPE_FULL)
       {
         // Full-preview-centric tweaks : mask display
-        hash = dt_hash(hash, (const char *)&piece->module->request_mask_display, sizeof(int));
-        hash = dt_hash(hash, (const char *)&piece->module->suppress_mask, sizeof(uint32_t));
-
         if(dev->gui_module && dev->gui_module != piece->module)
         {
           // Crop and perspective need a full ROI to set-up bounds in GUI, but only temporarily
+          // FIXME: this should probably use dt_iop_set_bypass_cache because there is no point
+          // caching setting intermediate steps.
           const int distort_tags = dev->gui_module->operation_tags_filter() & piece->module->operation_tags();
           hash = dt_hash(hash, (const char *)&distort_tags, sizeof(int));
         }

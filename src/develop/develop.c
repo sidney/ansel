@@ -318,6 +318,15 @@ restart:;
   // adjust pipeline according to changed flag set by {add,pop}_history_item.
   // this locks dev->history_mutex.
   dt_dev_pixelpipe_change(dev->preview_pipe, dev);
+
+  // Get the roi_out hash
+  dt_iop_roi_t roi_out = { .x = 0,
+                           .y = 0,
+                           .width = dev->preview_pipe->processed_width,
+                           .height = dev->preview_pipe->processed_height,
+                           .scale = 1.f };
+  dev->preview_pipe->hash = dt_hash(5381, (const char *)&roi_out, sizeof(dt_iop_roi_t));
+
   if(dt_dev_pixelpipe_process(
          dev->preview_pipe, dev, 0, 0, dev->preview_pipe->processed_width,
          dev->preview_pipe->processed_height, 1.f))
@@ -393,6 +402,7 @@ restart:;
   dt_dev_pixelpipe_change_t pipe_changed = dev->pipe->changed;
   // this locks dev->history_mutex and resets pipe->shutdown
   dt_dev_pixelpipe_change(dev->pipe, dev);
+
   // determine scale according to new dimensions
   dt_dev_zoom_t zoom = dt_control_get_dev_zoom();
   int closeup = dt_control_get_dev_closeup();
@@ -420,6 +430,10 @@ restart:;
   const int ht = MIN(window_height, dev->pipe->processed_height * scale);
   int x = MAX(0, scale * dev->pipe->processed_width  * (.5 + zoom_x) - wd / 2);
   int y = MAX(0, scale * dev->pipe->processed_height * (.5 + zoom_y) - ht / 2);
+
+  // Get the roi_out hash
+  dt_iop_roi_t roi_out = { .x = x, .y = y, .width = wd, .height = ht, .scale = scale };
+  dev->pipe->hash = dt_hash(5381, (const char *)&roi_out, sizeof(dt_iop_roi_t));
 
   dt_get_times(&start);
 
