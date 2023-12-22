@@ -79,6 +79,9 @@ typedef struct dt_dev_pixelpipe_iop_t
   // the following are used internally for caching:
   dt_iop_buffer_dsc_t dsc_in, dsc_out;
 
+  // bypass the cache for this module
+  gboolean bypass_cache;
+
   GHashTable *raster_masks; // GList* of dt_dev_pixelpipe_raster_mask_t
 } dt_dev_pixelpipe_iop_t;
 

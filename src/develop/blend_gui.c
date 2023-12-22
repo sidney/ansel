@@ -1138,6 +1138,24 @@ static void _blendop_blendif_details_callback(GtkWidget *slider, dt_iop_gui_blen
 
 static gboolean _blendop_blendif_showmask_clicked(GtkToggleButton *button, GdkEventButton *event, dt_iop_module_t *module)
 {
+  // FIXME : there are more than 3 functions getting clever about how to setup module->request_mask_display depending on user input.
+  // These should all use an uniform setter function.
+  //
+  // The lack of setter implies we don't guaranty that only 1 module can request mask display at a time.
+  // The consequence is pipeline needs to check if module->request_mask_display AND module == dev->gui_module,
+  // but the global pipe->mask_display is set from *_blend_process() at runtime, so it's a pipe property
+  // that changes over the pipe lifecycle.
+  //
+  // This is a self-feeding loop of madness because it ties the pipeline to GUI states
+  // (but not all pipes are connected to a GUI, so you need to cover all cases all the time and don't forget to test everything),
+  // and because the pipeline is executed recursively from the end, but pipe->mask_display is set in the middle,
+  // when it reaches the process() method of the module capturing mask preview, so you don't have this info when
+  // planning for pipeline execution.
+  // And you need to plan for mask preview ahead in pipe because mask preview needs to work
+  // without using the pixelpipe cache, at least between the module requiring mask preview and gamma.c, which will actually render
+  // the preview at the far end of the pipe.
+  // So the not-so-clever workaround inherited from darktable was to flush all cache lines when requesting mask preview,
+  // which flushed lines that could be reused later and were only temporarily not needed.
   if(darktable.gui->reset) return TRUE;
 
   if(event->button == 1)
@@ -1158,6 +1176,7 @@ static gboolean _blendop_blendif_showmask_clicked(GtkToggleButton *button, GdkEv
     gtk_toggle_button_set_active(button,
                                  module->request_mask_display != DT_DEV_PIXELPIPE_DISPLAY_NONE);
 
+    module->enabled = TRUE;
     if(module->off) gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(module->off), TRUE);
 
     ++darktable.gui->reset;
@@ -1167,6 +1186,7 @@ static gboolean _blendop_blendif_showmask_clicked(GtkToggleButton *button, GdkEv
                                    module->request_mask_display != DT_DEV_PIXELPIPE_DISPLAY_NONE);
     --darktable.gui->reset;
 
+    dt_iop_set_cache_bypass(module, module->request_mask_display != DT_DEV_PIXELPIPE_DISPLAY_NONE);
     dt_iop_request_focus(module);
     dt_iop_refresh_center(module);
   }
@@ -1755,6 +1775,25 @@ static void _blendif_options_callback(GtkButton *button, GdkEventButton *event, 
 // activate channel/mask view
 static void _blendop_blendif_channel_mask_view(GtkWidget *widget, dt_iop_module_t *module, dt_dev_pixelpipe_display_mask_t mode)
 {
+  // FIXME : there are more than 3 functions getting clever about how to setup module->request_mask_display depending on user input.
+  // These should all use an uniform setter function.
+  //
+  // The lack of setter implies we don't guaranty that only 1 module can request mask display at a time.
+  // The consequence is pipeline needs to check if module->request_mask_display AND module == dev->gui_module,
+  // but the global pipe->mask_display is set from *_blend_process() at runtime, so it's a pipe property
+  // that changes over the pipe lifecycle.
+  //
+  // This is a self-feeding loop of madness because it ties the pipeline to GUI states
+  // (but not all pipes are connected to a GUI, so you need to cover all cases all the time and don't forget to test everything),
+  // and because the pipeline is executed recursively from the end, but pipe->mask_display is set in the middle,
+  // when it reaches the process() method of the module capturing mask preview, so you don't have this info when
+  // planning for pipeline execution.
+  // And you need to plan for mask preview ahead in pipe because mask preview needs to work
+  // without using the pixelpipe cache, at least between the module requiring mask preview and gamma.c, which will actually render
+  // the preview at the far end of the pipe.
+  // So the not-so-clever workaround inherited from darktable was to flush all cache lines when requesting mask preview,
+  // which flushed lines that could be reused later and were only temporarily not needed.
+
   dt_iop_gui_blend_data_t *data = module->blend_data;
 
   dt_dev_pixelpipe_display_mask_t new_request_mask_display = module->request_mask_display | mode;
@@ -1775,6 +1814,7 @@ static void _blendop_blendif_channel_mask_view(GtkWidget *widget, dt_iop_module_
   if(new_request_mask_display != module->request_mask_display)
   {
     module->request_mask_display = new_request_mask_display;
+    dt_iop_set_cache_bypass(module, module->request_mask_display != DT_DEV_PIXELPIPE_DISPLAY_NONE);
     dt_iop_refresh_center(module);
   }
 }
@@ -1782,6 +1822,25 @@ static void _blendop_blendif_channel_mask_view(GtkWidget *widget, dt_iop_module_
 // toggle channel/mask view
 static void _blendop_blendif_channel_mask_view_toggle(GtkWidget *widget, dt_iop_module_t *module, dt_dev_pixelpipe_display_mask_t mode)
 {
+  // FIXME : there are more than 3 functions getting clever about how to setup module->request_mask_display depending on user input.
+  // These should all use an uniform setter function.
+  //
+  // The lack of setter implies we don't guaranty that only 1 module can request mask display at a time.
+  // The consequence is pipeline needs to check if module->request_mask_display AND module == dev->gui_module,
+  // but the global pipe->mask_display is set from *_blend_process() at runtime, so it's a pipe property
+  // that changes over the pipe lifecycle.
+  //
+  // This is a self-feeding loop of madness because it ties the pipeline to GUI states
+  // (but not all pipes are connected to a GUI, so you need to cover all cases all the time and don't forget to test everything),
+  // and because the pipeline is executed recursively from the end, but pipe->mask_display is set in the middle,
+  // when it reaches the process() method of the module capturing mask preview, so you don't have this info when
+  // planning for pipeline execution.
+  // And you need to plan for mask preview ahead in pipe because mask preview needs to work
+  // without using the pixelpipe cache, at least between the module requiring mask preview and gamma.c, which will actually render
+  // the preview at the far end of the pipe.
+  // So the not-so-clever workaround inherited from darktable was to flush all cache lines when requesting mask preview,
+  // which flushed lines that could be reused later and were only temporarily not needed.
+
   dt_iop_gui_blend_data_t *data = module->blend_data;
 
   dt_dev_pixelpipe_display_mask_t new_request_mask_display = module->request_mask_display & ~DT_DEV_PIXELPIPE_DISPLAY_STICKY;
@@ -1816,6 +1875,7 @@ static void _blendop_blendif_channel_mask_view_toggle(GtkWidget *widget, dt_iop_
   if(new_request_mask_display != module->request_mask_display)
   {
     module->request_mask_display = new_request_mask_display;
+    dt_iop_set_cache_bypass(module, module->request_mask_display != DT_DEV_PIXELPIPE_DISPLAY_NONE);
     dt_iop_refresh_center(module);
   }
 }
@@ -1825,6 +1885,25 @@ static void _blendop_blendif_channel_mask_view_toggle(GtkWidget *widget, dt_iop_
 // enter channel display and/or mask display mode
 static gboolean _blendop_blendif_enter(GtkWidget *widget, GdkEventCrossing *event, dt_iop_module_t *module)
 {
+  // FIXME : there are more than 3 functions getting clever about how to setup module->request_mask_display depending on user input.
+  // These should all use an uniform setter function.
+  //
+  // The lack of setter implies we don't guaranty that only 1 module can request mask display at a time.
+  // The consequence is pipeline needs to check if module->request_mask_display AND module == dev->gui_module,
+  // but the global pipe->mask_display is set from *_blend_process() at runtime, so it's a pipe property
+  // that changes over the pipe lifecycle.
+  //
+  // This is a self-feeding loop of madness because it ties the pipeline to GUI states
+  // (but not all pipes are connected to a GUI, so you need to cover all cases all the time and don't forget to test everything),
+  // and because the pipeline is executed recursively from the end, but pipe->mask_display is set in the middle,
+  // when it reaches the process() method of the module capturing mask preview, so you don't have this info when
+  // planning for pipeline execution.
+  // And you need to plan for mask preview ahead in pipe because mask preview needs to work
+  // without using the pixelpipe cache, at least between the module requiring mask preview and gamma.c, which will actually render
+  // the preview at the far end of the pipe.
+  // So the not-so-clever workaround inherited from darktable was to flush all cache lines when requesting mask preview,
+  // which flushed lines that could be reused later and were only temporarily not needed.
+
   if(darktable.gui->reset) return FALSE;
   dt_iop_gui_blend_data_t *data = module->blend_data;
 
@@ -1868,6 +1947,25 @@ static gboolean _blendop_blendif_enter(GtkWidget *widget, GdkEventCrossing *even
 // handler for delayed mask/channel display mode switch-off
 static gboolean _blendop_blendif_leave_delayed(gpointer data)
 {
+  // FIXME : there are more than 3 functions getting clever about how to setup module->request_mask_display depending on user input.
+  // These should all use an uniform setter function.
+  //
+  // The lack of setter implies we don't guaranty that only 1 module can request mask display at a time.
+  // The consequence is pipeline needs to check if module->request_mask_display AND module == dev->gui_module,
+  // but the global pipe->mask_display is set from *_blend_process() at runtime, so it's a pipe property
+  // that changes over the pipe lifecycle.
+  //
+  // This is a self-feeding loop of madness because it ties the pipeline to GUI states
+  // (but not all pipes are connected to a GUI, so you need to cover all cases all the time and don't forget to test everything),
+  // and because the pipeline is executed recursively from the end, but pipe->mask_display is set in the middle,
+  // when it reaches the process() method of the module capturing mask preview, so you don't have this info when
+  // planning for pipeline execution.
+  // And you need to plan for mask preview ahead in pipe because mask preview needs to work
+  // without using the pixelpipe cache, at least between the module requiring mask preview and gamma.c, which will actually render
+  // the preview at the far end of the pipe.
+  // So the not-so-clever workaround inherited from darktable was to flush all cache lines when requesting mask preview,
+  // which flushed lines that could be reused later and were only temporarily not needed.
+
   dt_iop_module_t *module = (dt_iop_module_t *)data;
   dt_iop_gui_blend_data_t *bd = module->blend_data;
   int reprocess = 0;
@@ -1877,6 +1975,7 @@ static gboolean _blendop_blendif_leave_delayed(gpointer data)
   if(bd->timeout_handle && (module->request_mask_display != (bd->save_for_leave & ~DT_DEV_PIXELPIPE_DISPLAY_STICKY)))
   {
     module->request_mask_display = bd->save_for_leave & ~DT_DEV_PIXELPIPE_DISPLAY_STICKY;
+    dt_iop_set_cache_bypass(module, module->request_mask_display != DT_DEV_PIXELPIPE_DISPLAY_NONE);
     reprocess = 1;
   }
   bd->timeout_handle = 0;
@@ -2030,6 +2129,24 @@ const char *slider_tooltip[] = { N_("adjustment based on input received by this 
 
 void dt_iop_gui_update_blendif(dt_iop_module_t *module)
 {
+  // FIXME : there are more than 3 functions getting clever about how to setup module->request_mask_display depending on user input.
+  // These should all use an uniform setter function.
+  //
+  // The lack of setter implies we don't guaranty that only 1 module can request mask display at a time.
+  // The consequence is pipeline needs to check if module->request_mask_display AND module == dev->gui_module,
+  // but the global pipe->mask_display is set from *_blend_process() at runtime, so it's a pipe property
+  // that changes over the pipe lifecycle.
+  //
+  // This is a self-feeding loop of madness because it ties the pipeline to GUI states
+  // (but not all pipes are connected to a GUI, so you need to cover all cases all the time and don't forget to test everything),
+  // and because the pipeline is executed recursively from the end, but pipe->mask_display is set in the middle,
+  // when it reaches the process() method of the module capturing mask preview, so you don't have this info when
+  // planning for pipeline execution.
+  // And you need to plan for mask preview ahead in pipe because mask preview needs to work
+  // without using the pixelpipe cache, at least between the module requiring mask preview and gamma.c, which will actually render
+  // the preview at the far end of the pipe.
+  // So the not-so-clever workaround inherited from darktable was to flush all cache lines when requesting mask preview,
+  // which flushed lines that could be reused later and were only temporarily not needed.
   dt_iop_gui_blend_data_t *bd = module->blend_data;
 
   if(!bd || !bd->blendif_support || !bd->blendif_inited) return;
@@ -2044,6 +2161,7 @@ void dt_iop_gui_update_blendif(dt_iop_module_t *module)
     if(module->request_mask_display != (bd->save_for_leave & ~DT_DEV_PIXELPIPE_DISPLAY_STICKY))
     {
       module->request_mask_display = bd->save_for_leave & ~DT_DEV_PIXELPIPE_DISPLAY_STICKY;
+      dt_iop_set_cache_bypass(module, module->request_mask_display != DT_DEV_PIXELPIPE_DISPLAY_NONE);
       dt_dev_invalidate_all(module->dev);//DBG
       dt_dev_refresh_ui_images(module->dev);
     }
@@ -2772,6 +2890,7 @@ void dt_iop_gui_update_blending(dt_iop_module_t *module)
     if(module->blend_colorspace(module, NULL, NULL) == IOP_CS_RAW)
     {
       module->request_mask_display = DT_DEV_PIXELPIPE_DISPLAY_NONE;
+      dt_iop_set_cache_bypass(module, FALSE);
       gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(bd->showmask), FALSE);
       // (re)set the header mask indicator too
       if(module->mask_indicator)
@@ -2788,6 +2907,7 @@ void dt_iop_gui_update_blending(dt_iop_module_t *module)
   else
   {
     module->request_mask_display = DT_DEV_PIXELPIPE_DISPLAY_NONE;
+    dt_iop_set_cache_bypass(module, FALSE);
     gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(bd->showmask), FALSE);
     // (re)set the header mask indicator too
     if(module->mask_indicator)
@@ -2854,6 +2974,25 @@ void dt_iop_gui_update_blending(dt_iop_module_t *module)
 
 void dt_iop_gui_blending_lose_focus(dt_iop_module_t *module)
 {
+  // FIXME : there are more than 3 functions getting clever about how to setup module->request_mask_display depending on user input.
+  // These should all use an uniform setter function.
+  //
+  // The lack of setter implies we don't guaranty that only 1 module can request mask display at a time.
+  // The consequence is pipeline needs to check if module->request_mask_display AND module == dev->gui_module,
+  // but the global pipe->mask_display is set from *_blend_process() at runtime, so it's a pipe property
+  // that changes over the pipe lifecycle.
+  //
+  // This is a self-feeding loop of madness because it ties the pipeline to GUI states
+  // (but not all pipes are connected to a GUI, so you need to cover all cases all the time and don't forget to test everything),
+  // and because the pipeline is executed recursively from the end, but pipe->mask_display is set in the middle,
+  // when it reaches the process() method of the module capturing mask preview, so you don't have this info when
+  // planning for pipeline execution.
+  // And you need to plan for mask preview ahead in pipe because mask preview needs to work
+  // without using the pixelpipe cache, at least between the module requiring mask preview and gamma.c, which will actually render
+  // the preview at the far end of the pipe.
+  // So the not-so-clever workaround inherited from darktable was to flush all cache lines when requesting mask preview,
+  // which flushed lines that could be reused later and were only temporarily not needed.
+
   if(darktable.gui->reset) return;
   if(!module) return;
 
@@ -2866,6 +3005,7 @@ void dt_iop_gui_blending_lose_focus(dt_iop_module_t *module)
     gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(bd->showmask), FALSE);
     gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(bd->suppress), FALSE);
     module->request_mask_display = DT_DEV_PIXELPIPE_DISPLAY_NONE;
+    dt_iop_set_cache_bypass(module, FALSE);
     module->suppress_mask = 0;
 
     // (re)set the header mask indicator too

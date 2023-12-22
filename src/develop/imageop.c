@@ -86,6 +86,7 @@ void dt_iop_load_default_params(dt_iop_module_t *module)
   dt_develop_blend_init_blend_parameters(module->default_blendop_params, cst);
   dt_iop_commit_blend_params(module, module->default_blendop_params);
   dt_iop_gui_blending_reload_defaults(module);
+  dt_iop_module_hash(module);
 }
 
 static void _iop_modify_roi_in(struct dt_iop_module_t *self, struct dt_dev_pixelpipe_iop_t *piece,
@@ -363,6 +364,7 @@ int dt_iop_load_module_by_so(dt_iop_module_t *module, dt_iop_module_so_t *so, dt
   module->histogram_middle_grey = FALSE;
   module->request_mask_display = DT_DEV_PIXELPIPE_DISPLAY_NONE;
   module->suppress_mask = 0;
+  module->bypass_cache = FALSE;
   module->enabled = module->default_enabled = 0; // all modules disabled by default.
   g_strlcpy(module->op, so->op, 20);
   module->raster_mask.source.users = g_hash_table_new(NULL, NULL);
@@ -1095,6 +1097,7 @@ void dt_iop_reload_defaults(dt_iop_module_t *module)
     }
   }
   dt_iop_load_default_params(module);
+
   if(darktable.gui) --darktable.gui->reset;
 
   if(module->header) dt_iop_gui_update_header(module);
@@ -1672,7 +1675,9 @@ void dt_iop_commit_params(dt_iop_module_t *module, dt_iop_params_t *params,
                           dt_develop_blend_params_t *blendop_params, dt_dev_pixelpipe_t *pipe,
                           dt_dev_pixelpipe_iop_t *piece)
 {
-  piece->hash = piece->global_hash = 0;
+  assert(piece->pipe == pipe);
+
+  piece->hash = piece->global_hash = module->hash;
   if(!piece->enabled) return;
 
   // 1. commit params
@@ -1721,7 +1726,7 @@ void dt_iop_commit_params(dt_iop_module_t *module, dt_iop_params_t *params,
   *      most-downstream module which _node_hash() is known in cache, to spare computations, or recomputed entirely if
   *      the cache is empty or entirely out-of-sync.
   */
-  piece->hash = piece->global_hash = dt_hash(module->hash, (char *)piece->data, piece->data_size);
+  piece->hash = piece->global_hash = dt_hash(module->hash, (const char *)piece->data, piece->data_size);
 
   dt_print(DT_DEBUG_PARAMS, "[params] commit for %s in pipe %i with hash %lu\n", module->op, pipe->type, (long unsigned int)piece->hash);
 }
@@ -2239,6 +2244,8 @@ static void _display_mask_indicator_callback(GtkToggleButton *bt, dt_iop_module_
   module->request_mask_display &= ~DT_DEV_PIXELPIPE_DISPLAY_MASK;
   module->request_mask_display |= (is_active ? DT_DEV_PIXELPIPE_DISPLAY_MASK : 0);
 
+  dt_iop_set_cache_bypass(module, module->request_mask_display != DT_DEV_PIXELPIPE_DISPLAY_NONE);
+
   // set the module show mask button too
   if(bd->showmask)
     gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(bd->showmask), is_active);
@@ -2570,6 +2577,29 @@ void dt_iop_nap(int32_t usec)
   // additionally wait the given amount of time
   g_usleep(usec);
 }
+
+gboolean dt_iop_get_cache_bypass(dt_iop_module_t *module)
+{
+  return module->bypass_cache;
+}
+
+void dt_iop_set_cache_bypass(dt_iop_module_t *module, gboolean state)
+{
+  module->bypass_cache = state;
+
+  if(state && module->dev)
+  {
+    // Disable other modules bypass if set.
+    for(GList *iop = g_list_last(module->dev->iop);
+        iop;
+        iop = g_list_previous(iop))
+    {
+      dt_iop_module_t *current = (dt_iop_module_t *)iop->data;
+      if(current != module && current->bypass_cache) current->bypass_cache = FALSE;
+    }
+  }
+}
+
 
 dt_iop_module_t *dt_iop_get_colorout_module(void)
 {
