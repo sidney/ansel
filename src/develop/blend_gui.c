@@ -2426,7 +2426,6 @@ void dt_iop_gui_init_masks(GtkBox *blendw, dt_iop_module_t *module)
 
     bd->masks_combo = dt_bauhaus_combobox_new(module);
     dt_bauhaus_widget_set_label(bd->masks_combo, N_("blend"), N_("drawn mask"));
-    dt_bauhaus_widget_set_section(bd->masks_combo, TRUE);
 
     dt_bauhaus_combobox_add(bd->masks_combo, _("no mask used"));
     g_signal_connect(G_OBJECT(bd->masks_combo), "value-changed",
@@ -2730,20 +2729,16 @@ void dt_iop_gui_update_blending(dt_iop_module_t *module)
        || bd->csp == DEVELOP_BLEND_CS_RGB_DISPLAY
        || bd->csp == DEVELOP_BLEND_CS_RAW )
     {
-      dt_bauhaus_combobox_add_section(bd->blend_modes_combo, _("normal & difference modes"));
       _add_blendmode_combo(bd->blend_modes_combo, DEVELOP_BLEND_NORMAL2);
       _add_blendmode_combo(bd->blend_modes_combo, DEVELOP_BLEND_BOUNDED);
       _add_blendmode_combo(bd->blend_modes_combo, DEVELOP_BLEND_AVERAGE);
       _add_blendmode_combo(bd->blend_modes_combo, DEVELOP_BLEND_DIFFERENCE2);
-      dt_bauhaus_combobox_add_section(bd->blend_modes_combo, _("lighten modes"));
       _add_blendmode_combo(bd->blend_modes_combo, DEVELOP_BLEND_LIGHTEN);
       _add_blendmode_combo(bd->blend_modes_combo, DEVELOP_BLEND_ADD);
       _add_blendmode_combo(bd->blend_modes_combo, DEVELOP_BLEND_SCREEN);
-      dt_bauhaus_combobox_add_section(bd->blend_modes_combo, _("darken modes"));
       _add_blendmode_combo(bd->blend_modes_combo, DEVELOP_BLEND_DARKEN);
       _add_blendmode_combo(bd->blend_modes_combo, DEVELOP_BLEND_SUBTRACT);
       _add_blendmode_combo(bd->blend_modes_combo, DEVELOP_BLEND_MULTIPLY);
-      dt_bauhaus_combobox_add_section(bd->blend_modes_combo, _("contrast enhancing modes"));
       _add_blendmode_combo(bd->blend_modes_combo, DEVELOP_BLEND_OVERLAY);
       _add_blendmode_combo(bd->blend_modes_combo, DEVELOP_BLEND_SOFTLIGHT);
       _add_blendmode_combo(bd->blend_modes_combo, DEVELOP_BLEND_HARDLIGHT);
@@ -2753,7 +2748,6 @@ void dt_iop_gui_update_blending(dt_iop_module_t *module)
 
       if(bd->csp == DEVELOP_BLEND_CS_LAB)
       {
-        dt_bauhaus_combobox_add_section(bd->blend_modes_combo, _("color channel modes"));
         _add_blendmode_combo(bd->blend_modes_combo, DEVELOP_BLEND_LAB_LIGHTNESS);
         _add_blendmode_combo(bd->blend_modes_combo, DEVELOP_BLEND_LAB_A);
         _add_blendmode_combo(bd->blend_modes_combo, DEVELOP_BLEND_LAB_B);
@@ -2766,7 +2760,6 @@ void dt_iop_gui_update_blending(dt_iop_module_t *module)
       }
       else if(bd->csp == DEVELOP_BLEND_CS_RGB_DISPLAY)
       {
-        dt_bauhaus_combobox_add_section(bd->blend_modes_combo, _("color channel modes"));
         _add_blendmode_combo(bd->blend_modes_combo, DEVELOP_BLEND_RGB_R);
         _add_blendmode_combo(bd->blend_modes_combo, DEVELOP_BLEND_RGB_G);
         _add_blendmode_combo(bd->blend_modes_combo, DEVELOP_BLEND_RGB_B);
@@ -2781,7 +2774,6 @@ void dt_iop_gui_update_blending(dt_iop_module_t *module)
     }
     else if(bd->csp == DEVELOP_BLEND_CS_RGB_SCENE)
     {
-      dt_bauhaus_combobox_add_section(bd->blend_modes_combo, _("normal & arithmetic modes"));
       _add_blendmode_combo(bd->blend_modes_combo, DEVELOP_BLEND_NORMAL2);
       _add_blendmode_combo(bd->blend_modes_combo, DEVELOP_BLEND_MULTIPLY);
       _add_blendmode_combo(bd->blend_modes_combo, DEVELOP_BLEND_DIVIDE);
@@ -2791,11 +2783,9 @@ void dt_iop_gui_update_blending(dt_iop_module_t *module)
       _add_blendmode_combo(bd->blend_modes_combo, DEVELOP_BLEND_AVERAGE);
       _add_blendmode_combo(bd->blend_modes_combo, DEVELOP_BLEND_GEOMETRIC_MEAN);
       _add_blendmode_combo(bd->blend_modes_combo, DEVELOP_BLEND_HARMONIC_MEAN);
-      dt_bauhaus_combobox_add_section(bd->blend_modes_combo, _("color channel modes"));
       _add_blendmode_combo(bd->blend_modes_combo, DEVELOP_BLEND_RGB_R);
       _add_blendmode_combo(bd->blend_modes_combo, DEVELOP_BLEND_RGB_G);
       _add_blendmode_combo(bd->blend_modes_combo, DEVELOP_BLEND_RGB_B);
-      dt_bauhaus_combobox_add_section(bd->blend_modes_combo, _("chromaticity & lightness modes"));
       _add_blendmode_combo(bd->blend_modes_combo, DEVELOP_BLEND_LIGHTNESS);
       _add_blendmode_combo(bd->blend_modes_combo, DEVELOP_BLEND_CHROMATICITY);
     }
@@ -2806,7 +2796,6 @@ void dt_iop_gui_update_blending(dt_iop_module_t *module)
   if(!dt_bauhaus_combobox_set_from_value(bd->blend_modes_combo, blend_mode))
   {
     // add deprecated blend mode
-    dt_bauhaus_combobox_add_section(bd->blend_modes_combo, _("deprecated modes"));
     if(!_add_blendmode_combo(bd->blend_modes_combo, blend_mode))
     {
       // should never happen: unknown blend mode
