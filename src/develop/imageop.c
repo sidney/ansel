@@ -546,10 +546,10 @@ static void _gui_delete_callback(GtkButton *button, dt_iop_module_t *module)
   // we update show params for multi-instances for each other instances
   dt_dev_modules_update_multishow(dev);
 
-  dt_dev_pixelpipe_rebuild(dev);
-
   /* redraw */
+  dt_dev_pixelpipe_rebuild(dev);
   dt_control_queue_redraw_center();
+  dt_dev_refresh_ui_images(dev);
 
   --darktable.gui->reset;
 }
@@ -1799,6 +1799,7 @@ static void _gui_reset_callback(GtkButton *button, GdkEventButton *event, dt_iop
 
   //Ctrl is used to apply any auto-presets to the current module
   //If Ctrl was not pressed, or no auto-presets were applied, reset the module parameters
+  // FIXME: can we stop with all the easter-eggs key modifiers doing undocumented stuff all along ?
   if(!(event && dt_modifier_is(event->state, GDK_CONTROL_MASK)) || !dt_gui_presets_autoapply_for_module(module))
   {
     // if a drawn mask is set, remove it from the list
