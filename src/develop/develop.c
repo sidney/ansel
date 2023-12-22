@@ -311,7 +311,7 @@ void dt_dev_process_preview_job(dt_develop_t *dev)
     return;
   }
 
-restart:
+restart:;
   dt_times_t start;
   dt_get_times(&start);
 
@@ -384,7 +384,7 @@ void dt_dev_process_image_job(dt_develop_t *dev)
     return;
   }
 
-restart:
+restart:;
   dt_times_t start;
   dt_get_times(&start);
 

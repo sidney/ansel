@@ -2128,7 +2128,7 @@ int dt_dev_pixelpipe_process(dt_dev_pixelpipe_t *pipe, dt_develop_t *dev, int x,
   GList *pieces = g_list_last(pipe->nodes);
 
 // re-entry point: in case of late opencl errors we start all over again with opencl-support disabled
-restart:
+restart:;
   void *buf = NULL;
   void *cl_mem_out = NULL;
 
