@@ -9,7 +9,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-01-01 17:55+0100\n"
+"POT-Creation-Date: 2024-01-01 18:09+0100\n"
 "PO-Revision-Date: 2020-12-31 20:18+0100\n"
 "Last-Translator: Miroslav Fikar <miroslav.fikar@gmail.com>\n"
 "Language-Team: \n"
@@ -4293,36 +4293,35 @@ msgstr ""
 "max dE: %.02f"
 
 #: ../src/cli/main.c:247
-#, fuzzy, c-format
+#, c-format
 msgid ""
 "TODO: sorry, due to API restrictions we currently cannot set the BPP to %d.\n"
 msgstr ""
-"TODO: Ľutujeme, ale prei API obmedzenia nemôžme momentálne nastaviť BPP na"
 
 #: ../src/cli/main.c:259
-#, fuzzy, c-format
+#, c-format
 msgid "unknown option for --hq: %s.\n"
-msgstr "neznáma voľba pre --hq"
+msgstr ""
 
 #: ../src/cli/main.c:275
-#, fuzzy, c-format
+#, c-format
 msgid "unknown option for --export_masks: %s.\n"
-msgstr "neznáma voľba pre --export_masks"
+msgstr ""
 
 #: ../src/cli/main.c:291
-#, fuzzy, c-format
+#, c-format
 msgid "unknown option for --upscale: %s.\n"
-msgstr "neznáma voľba pre --upscale"
+msgstr ""
 
 #: ../src/cli/main.c:316
-#, fuzzy, c-format
+#, c-format
 msgid "unknown option for --apply-custom-presets: %s.\n"
-msgstr "neznáma voľba pre --apply-custom-presets"
+msgstr ""
 
 #: ../src/cli/main.c:327
-#, fuzzy, c-format
+#, c-format
 msgid "too long ext for --out-ext: %s.\n"
-msgstr "príliš dlhá prípona pre --out-ext"
+msgstr ""
 
 #: ../src/cli/main.c:344
 #, c-format
@@ -6370,14 +6369,14 @@ msgstr[1] "odstraňujú sa %d obrázky"
 msgstr[2] "odstraňuje sa %d obrázkov"
 
 #: ../src/control/jobs/control_jobs.c:848
-#, fuzzy, c-format
+#, c-format
 msgid "could not send %s to trash.%s%s"
-msgstr "nie je možné presunúť  %s do koša%s%s"
+msgstr ""
 
 #: ../src/control/jobs/control_jobs.c:849
 #, fuzzy, c-format
 msgid "could not physically delete %s.%s%s"
-msgstr "nemožno fyziky zmazať %s%s%s"
+msgstr "fyzicky odstrániť"
 
 #: ../src/control/jobs/control_jobs.c:859
 msgid "physically delete"
@@ -16052,12 +16051,12 @@ msgstr "prekladatelia"
 #: ../src/iop/flip.c:553
 #, fuzzy
 msgid "rotate 90 degrees CCW."
-msgstr "otočiť o 90 stupňov doľava"
+msgstr "otočiť o 90 stupňov"
 
 #: ../src/iop/flip.c:557
 #, fuzzy
 msgid "rotate 90 degrees CW."
-msgstr "otočiť o 90 stupňov doprava"
+msgstr "otočiť o 90 stupňov"
 
 #: ../src/iop/flip.c:561
 #, fuzzy

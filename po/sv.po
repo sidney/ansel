@@ -28,7 +28,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: darktable 2.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-01-01 17:55+0100\n"
+"POT-Creation-Date: 2024-01-01 18:09+0100\n"
 "PO-Revision-Date: 2021-10-01 09:46+0200\n"
 "Last-Translator: Richard Levitte <richard@levitte.org>\n"
 "Language-Team: \n"
@@ -4340,32 +4340,30 @@ msgstr ""
 "dE max: %.02f"
 
 #: ../src/cli/main.c:247
-#, fuzzy, c-format
+#, c-format
 msgid ""
 "TODO: sorry, due to API restrictions we currently cannot set the BPP to %d.\n"
 msgstr ""
-"ATT GÖRA: ledsen, på grund av begränsningar i programmeringsgränssnittet kan "
-"vi för närvarande inte sätta BPP till"
 
 #: ../src/cli/main.c:259
-#, fuzzy, c-format
+#, c-format
 msgid "unknown option for --hq: %s.\n"
-msgstr "okänt val för --hq"
+msgstr ""
 
 #: ../src/cli/main.c:275
-#, fuzzy, c-format
+#, c-format
 msgid "unknown option for --export_masks: %s.\n"
-msgstr "okänt val för --upscale"
+msgstr ""
 
 #: ../src/cli/main.c:291
-#, fuzzy, c-format
+#, c-format
 msgid "unknown option for --upscale: %s.\n"
-msgstr "okänt val för --upscale"
+msgstr ""
 
 #: ../src/cli/main.c:316
-#, fuzzy, c-format
+#, c-format
 msgid "unknown option for --apply-custom-presets: %s.\n"
-msgstr "okänt val för --upscale"
+msgstr ""
 
 #: ../src/cli/main.c:327
 #, c-format
@@ -6425,14 +6423,14 @@ msgstr[0] "tar bort %d bild"
 msgstr[1] "tar bort %d bilder"
 
 #: ../src/control/jobs/control_jobs.c:848
-#, fuzzy, c-format
+#, c-format
 msgid "could not send %s to trash.%s%s"
-msgstr "kunde inte skicka %s till papperskorgen%s%s"
+msgstr ""
 
 #: ../src/control/jobs/control_jobs.c:849
 #, fuzzy, c-format
 msgid "could not physically delete %s.%s%s"
-msgstr "kunde inte radera från disk %s%s%s"
+msgstr "radera fysiskt"
 
 #: ../src/control/jobs/control_jobs.c:859
 msgid "physically delete"
@@ -15979,7 +15977,7 @@ msgstr ""
 #: ../src/iop/flip.c:553
 #, fuzzy
 msgid "rotate 90 degrees CCW."
-msgstr "rotera 90 grader moturs"
+msgstr "rotera 90 grader medurs"
 
 #: ../src/iop/flip.c:557
 #, fuzzy

@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: darktable 3.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-01-01 17:55+0100\n"
+"POT-Creation-Date: 2024-01-01 18:09+0100\n"
 "PO-Revision-Date: 2019-12-14 23:12+0100\n"
 "Last-Translator: Josep V. Moragues <josepvm@arakis.es>\n"
 "Language-Team: Josep Vicenç Moragues Pastor <josepvm2@gmail.com>\n"
@@ -4328,31 +4328,30 @@ msgstr ""
 "dE max: %.02f"
 
 #: ../src/cli/main.c:247
-#, fuzzy, c-format
+#, c-format
 msgid ""
 "TODO: sorry, due to API restrictions we currently cannot set the BPP to %d.\n"
 msgstr ""
-"PENDENT: ho sentim, per restriccions d'API actualment no es pot ajustar BPP a"
 
 #: ../src/cli/main.c:259
-#, fuzzy, c-format
+#, c-format
 msgid "unknown option for --hq: %s.\n"
-msgstr "opció desconeguda per --hq"
+msgstr ""
 
 #: ../src/cli/main.c:275
-#, fuzzy, c-format
+#, c-format
 msgid "unknown option for --export_masks: %s.\n"
-msgstr "opció desconeguda per --upscale"
+msgstr ""
 
 #: ../src/cli/main.c:291
-#, fuzzy, c-format
+#, c-format
 msgid "unknown option for --upscale: %s.\n"
-msgstr "opció desconeguda per --upscale"
+msgstr ""
 
 #: ../src/cli/main.c:316
-#, fuzzy, c-format
+#, c-format
 msgid "unknown option for --apply-custom-presets: %s.\n"
-msgstr "opció desconeguda per --apply-custom-presets"
+msgstr ""
 
 #: ../src/cli/main.c:327
 #, c-format
@@ -6406,14 +6405,14 @@ msgstr[0] "s'està suprimint %d imatge"
 msgstr[1] "s'estan suprimint %d imatges"
 
 #: ../src/control/jobs/control_jobs.c:848
-#, fuzzy, c-format
+#, c-format
 msgid "could not send %s to trash.%s%s"
-msgstr "no s'ha pogut enviar %s a la paperera%s%s"
+msgstr ""
 
 #: ../src/control/jobs/control_jobs.c:849
 #, fuzzy, c-format
 msgid "could not physically delete %s.%s%s"
-msgstr "no s'ha pogut eliminar físicament  %s%s%s"
+msgstr "elimineu físicament"
 
 #: ../src/control/jobs/control_jobs.c:859
 msgid "physically delete"
@@ -15973,12 +15972,12 @@ msgstr "transferència de color"
 #: ../src/iop/flip.c:553
 #, fuzzy
 msgid "rotate 90 degrees CCW."
-msgstr "gira 90 graus sentit antihorari"
+msgstr "gira 90 graus"
 
 #: ../src/iop/flip.c:557
 #, fuzzy
 msgid "rotate 90 degrees CW."
-msgstr "gira 90 graus sentit horari"
+msgstr "gira 90 graus"
 
 #: ../src/iop/flip.c:561
 #, fuzzy

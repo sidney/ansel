@@ -9,7 +9,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-01-01 17:55+0100\n"
+"POT-Creation-Date: 2024-01-01 18:09+0100\n"
 "PO-Revision-Date: 2019-11-27 21:40+0100\n"
 "Last-Translator: Ragnar Wisløff <ragnar@wisloff.no>\n"
 "Language-Team: \n"
@@ -4320,30 +4320,30 @@ msgstr ""
 "maks dE: %.02f"
 
 #: ../src/cli/main.c:247
-#, fuzzy, c-format
+#, c-format
 msgid ""
 "TODO: sorry, due to API restrictions we currently cannot set the BPP to %d.\n"
-msgstr "TODO: beklager, men av tekniske årsaker kan vi ikke sette BPP til"
+msgstr ""
 
 #: ../src/cli/main.c:259
-#, fuzzy, c-format
+#, c-format
 msgid "unknown option for --hq: %s.\n"
-msgstr "ukjent valg av -hq"
+msgstr ""
 
 #: ../src/cli/main.c:275
-#, fuzzy, c-format
+#, c-format
 msgid "unknown option for --export_masks: %s.\n"
-msgstr "ukjent valg av -upscale"
+msgstr ""
 
 #: ../src/cli/main.c:291
-#, fuzzy, c-format
+#, c-format
 msgid "unknown option for --upscale: %s.\n"
-msgstr "ukjent valg av -upscale"
+msgstr ""
 
 #: ../src/cli/main.c:316
-#, fuzzy, c-format
+#, c-format
 msgid "unknown option for --apply-custom-presets: %s.\n"
-msgstr "ukjent valg av -upscale"
+msgstr ""
 
 #: ../src/cli/main.c:327
 #, c-format
@@ -6390,14 +6390,14 @@ msgstr[0] "fjerner %d bilde"
 msgstr[1] "fjerner %d bilder"
 
 #: ../src/control/jobs/control_jobs.c:848
-#, fuzzy, c-format
+#, c-format
 msgid "could not send %s to trash.%s%s"
-msgstr "kunne ikke legge %s i papirkurven%s%s"
+msgstr ""
 
 #: ../src/control/jobs/control_jobs.c:849
 #, fuzzy, c-format
 msgid "could not physically delete %s.%s%s"
-msgstr "kunne ikke fysisk slette%s%s%s"
+msgstr "fysisk slette"
 
 #: ../src/control/jobs/control_jobs.c:859
 msgid "physically delete"
@@ -15929,12 +15929,12 @@ msgstr "fargeoverføring"
 #: ../src/iop/flip.c:553
 #, fuzzy
 msgid "rotate 90 degrees CCW."
-msgstr "roter 90 grader mot klokken"
+msgstr "roter 90 grader"
 
 #: ../src/iop/flip.c:557
 #, fuzzy
 msgid "rotate 90 degrees CW."
-msgstr "roter 90 grader med klokken"
+msgstr "roter 90 grader"
 
 #: ../src/iop/flip.c:561
 #, fuzzy

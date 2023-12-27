@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: darktable masster\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-01-01 17:55+0100\n"
+"POT-Creation-Date: 2024-01-01 18:09+0100\n"
 "PO-Revision-Date: 2021-02-01 22:01+0100\n"
 "Last-Translator: Miloš Popović <gpopac@gmail.com>\n"
 "Language-Team: Serbian <gnome-sr@googlegroups.com>\n"
@@ -4297,37 +4297,35 @@ msgstr ""
 "najveći dE: %.02f"
 
 #: ../src/cli/main.c:247
-#, fuzzy, c-format
+#, c-format
 msgid ""
 "TODO: sorry, due to API restrictions we currently cannot set the BPP to %d.\n"
 msgstr ""
-"NEDOVRŠENO: izvinjavamo se, zbog ograničenja API-ja ne možemo da postavimo "
-"BPP u"
 
 #: ../src/cli/main.c:259
-#, fuzzy, c-format
+#, c-format
 msgid "unknown option for --hq: %s.\n"
-msgstr "nepoznata opcija za --hq"
+msgstr ""
 
 #: ../src/cli/main.c:275
-#, fuzzy, c-format
+#, c-format
 msgid "unknown option for --export_masks: %s.\n"
-msgstr "nepoznata opcija za --export_masks"
+msgstr ""
 
 #: ../src/cli/main.c:291
-#, fuzzy, c-format
+#, c-format
 msgid "unknown option for --upscale: %s.\n"
-msgstr "nepoznata opcija za --upscale"
+msgstr ""
 
 #: ../src/cli/main.c:316
-#, fuzzy, c-format
+#, c-format
 msgid "unknown option for --apply-custom-presets: %s.\n"
-msgstr "nepoznata opcija za --apply-custom-presets"
+msgstr ""
 
 #: ../src/cli/main.c:327
 #, fuzzy, c-format
 msgid "too long ext for --out-ext: %s.\n"
-msgstr "predugačka enstenzija za --out-ext"
+msgstr "predugačka ekstenzija izlazne datoteke: %s\n"
 
 #: ../src/cli/main.c:344
 #, c-format
@@ -6411,14 +6409,14 @@ msgstr[2] "uklanjam %d slika"
 msgstr[3] "uklanjam %d sliku"
 
 #: ../src/control/jobs/control_jobs.c:848
-#, fuzzy, c-format
+#, c-format
 msgid "could not send %s to trash.%s%s"
-msgstr "ne mogu da pošaljem %s u smeće%s%s"
+msgstr ""
 
 #: ../src/control/jobs/control_jobs.c:849
 #, fuzzy, c-format
 msgid "could not physically delete %s.%s%s"
-msgstr "ne mogu da obrišem sa diska %s%s%s"
+msgstr "obriši"
 
 #: ../src/control/jobs/control_jobs.c:859
 msgid "physically delete"
@@ -16172,12 +16170,12 @@ msgstr "prevodioci"
 #: ../src/iop/flip.c:553
 #, fuzzy
 msgid "rotate 90 degrees CCW."
-msgstr "rotiraj za 90 stepeni u levo"
+msgstr "rotiraj za 90 stepeni"
 
 #: ../src/iop/flip.c:557
 #, fuzzy
 msgid "rotate 90 degrees CW."
-msgstr "rotiraj za 90 stepeni u desno"
+msgstr "rotiraj za 90 stepeni"
 
 #: ../src/iop/flip.c:561
 #, fuzzy

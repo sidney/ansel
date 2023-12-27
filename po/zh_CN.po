@@ -14,8 +14,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: darktable 3.6.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-01-01 17:55+0100\n"
-"PO-Revision-Date: 2024-01-01 01:45+0800\n"
+"POT-Creation-Date: 2024-01-01 18:09+0100\n"
+"PO-Revision-Date: 2023-12-26 00:24+0800\n"
 "Last-Translator: Alynx Zhou <alynx.zhou@gmail.com>\n"
 "Language-Team: Chinese - China <>\n"
 "Language: zh_CN\n"
@@ -1831,12 +1831,12 @@ msgstr "包含在推荐列表里的最近添加的标签个数。“-1”关闭�
 #: ../build/src/iop/introspection_ashift.c:130
 #: ../build/src/iop/introspection_ashift.c:279
 msgid "lens shift (vertical)"
-msgstr "镜头偏移（垂直）"
+msgstr "镜头平移（垂直）"
 
 #: ../build/src/iop/introspection_ashift.c:136
 #: ../build/src/iop/introspection_ashift.c:283
 msgid "lens shift (horizontal)"
-msgstr "镜头偏移（水平）"
+msgstr "镜头平移（水平）"
 
 #: ../build/src/iop/introspection_ashift.c:142
 #: ../build/src/iop/introspection_ashift.c:287
@@ -5365,9 +5365,9 @@ msgid "you need to copy history from an image before you paste it onto another"
 msgstr "你需要复制一张图片的历史，然后才能用在另一张上。"
 
 #: ../src/common/http_server.c:95
-#, fuzzy, c-format
+#, c-format
 msgid "ansel >> %s"
-msgstr "Ansel » %s"
+msgstr ""
 
 #: ../src/common/http_server.c:97
 msgid "<h1>Sorry,</h1><p>something went wrong. Please try again.</p>"
@@ -5617,14 +5617,14 @@ msgid "%i files selected"
 msgstr "已选择 %i 个文件。"
 
 #: ../src/common/import.c:614
-#, fuzzy, c-format
+#, c-format
 msgid "Detection in progress... (%i files found so far)"
-msgstr "正在进行检测……（目前已找到 %i 个文件）"
+msgstr ""
 
 #: ../src/common/import.c:624
 #, fuzzy
 msgid "Detecting candidate files for import..."
-msgstr "正在检测要导入的候选文件……"
+msgstr "选择导入文件"
 
 #: ../src/common/import.c:686
 msgid ""
@@ -5641,13 +5641,11 @@ msgstr ""
 "YYYY-MM-DDTHH:mm:ss"
 
 #: ../src/common/import.c:733
-#, fuzzy, c-format
+#, c-format
 msgid ""
 "Crawling your selection for recursive folder detection... %i pictures found "
 "so far. <i>(This can take some time for large folders)</i>"
 msgstr ""
-"正在对您选择的目录进行递归文件检测……已找到 %i 张图片。<i>（对于大的目录这可能"
-"需要花费一些时间。）</i>"
 
 #: ../src/common/import.c:755
 msgid "invalid date/time format for import"
@@ -5658,18 +5656,15 @@ msgid "No files to import. Check your selection."
 msgstr "没有可导入的文件。请检查您的已选择目录。"
 
 #: ../src/common/import.c:806
-#, fuzzy
 msgid ""
 "Crawling your selection for recursive folder detection... <i>(This can take "
 "some time for large folders)</i>"
 msgstr ""
-"正在对您选择的目录进行递归文件检测……<i>（对于大的目录这可能需要花费一些时"
-"间。）</i>"
 
 #: ../src/common/import.c:828
 #, fuzzy
 msgid "Ansel - Open pictures"
-msgstr "Ansel - 导入图片"
+msgstr "Ansel 首选项"
 
 #: ../src/common/import.c:829 ../src/iop/ashift.c:5140 ../src/iop/crop.c:962
 msgid "Cancel"
@@ -5729,7 +5724,6 @@ msgid "Imported"
 msgstr "已导入"
 
 #: ../src/common/import.c:921
-#, fuzzy
 msgid ""
 "Images already in the library will not be imported again, selected or not. "
 "Remove them from the library first, or use the menu `Run → Resynchronize "
@@ -5744,9 +5738,6 @@ msgid ""
 "including the metadata and settings stored in it. If it is not what you "
 "want, you can reset metadata in the lighttable."
 msgstr ""
-"已经位于照片库中的图片将不会被再次导入，无论是否被选中。如果想通过 XMP 文件更"
-"新本地数据库，需要先从照片库中移除图片，或者使用“运行”菜单中的“重新同步 XMP "
-"文件与照片库”。"
 
 #: ../src/common/import.c:954
 msgid "<b>File handling</b>"
@@ -8802,7 +8793,7 @@ msgstr " 但非 "
 #: ../src/gui/actions/file.h:153
 #, fuzzy
 msgid "Ansel - Export images"
-msgstr "Ansel - 导出图片"
+msgstr "导出图片"
 
 #: ../src/gui/actions/file.h:175
 msgid "File"
@@ -9258,7 +9249,7 @@ msgstr "旋转"
 #: ../src/gui/actions/image.h:164
 #, fuzzy
 msgid "90° counter-clockwise"
-msgstr "⭯ 90° 逆时针"
+msgstr "逆时针旋转 90°"
 
 #: ../src/gui/actions/image.h:166
 msgid "Rotate 90° counter-clockwise"
@@ -9267,7 +9258,7 @@ msgstr "逆时针旋转 90°"
 #: ../src/gui/actions/image.h:169
 #, fuzzy
 msgid "90° clockwise"
-msgstr "⭮ 90° 顺时针"
+msgstr "顺时针旋转 90°"
 
 #: ../src/gui/actions/image.h:171
 msgid "Rotate 90° clockwise"
@@ -9338,7 +9329,7 @@ msgstr "评分"
 #: ../src/gui/actions/image.h:221
 #, fuzzy
 msgid "Reject"
-msgstr "⦻ 拒绝"
+msgstr "拒绝图像"
 
 #: ../src/gui/actions/image.h:223
 msgid "Reject image"
@@ -11070,12 +11061,14 @@ msgid "Prevent accidental masks displacement when moving the view"
 msgstr "防止在移动视图时意外移动蒙版。"
 
 #: ../src/iop/ashift.c:121
+#, fuzzy
 msgid "Horizon and perspective"
-msgstr "水平与透视"
+msgstr "旋转与透视"
 
 #: ../src/iop/ashift.c:126
+#, fuzzy
 msgid "rotation|keystone|distortion|crop|reframe|horizon"
-msgstr "旋转|平移|扭曲|裁剪|边框|水平"
+msgstr "旋转|平移|扭曲|裁剪|边框"
 
 #: ../src/iop/ashift.c:131
 msgid "rotate or distort perspective"
@@ -11152,7 +11145,7 @@ msgstr "参数内仅可保存 %d 行。"
 #: ../src/iop/ashift.c:5442
 #, c-format
 msgid "lens shift (%s)"
-msgstr "镜头偏移（%s）"
+msgstr "镜头平移（%s）"
 
 #: ../src/iop/ashift.c:5508 ../src/iop/crop.c:1188
 msgid "Apply"
@@ -11163,40 +11156,47 @@ msgid "Apply changes"
 msgstr "应用修改"
 
 #: ../src/iop/ashift.c:5519
+#, fuzzy
 msgid "Manual settings"
-msgstr "手动设置"
+msgstr "常规设置"
 
 #: ../src/iop/ashift.c:5568
+#, fuzzy
 msgid "Mark reference lines"
-msgstr "标记参考线"
+msgstr "相机参考"
 
 #: ../src/iop/ashift.c:5582
+#, fuzzy
 msgid "Fit perspective transform"
-msgstr "拟合透视变换"
+msgstr "白平衡自适应变换"
 
 #: ../src/iop/ashift.c:5599
+#, fuzzy
 msgid "Fitting options"
-msgstr "拟合选项"
+msgstr "混合选项"
 
 #: ../src/iop/ashift.c:5602
 msgid "rotation, lens shift, shear"
-msgstr "旋转，镜头偏移，剪切"
+msgstr ""
 
 #: ../src/iop/ashift.c:5603
+#, fuzzy
 msgid "rotation, lens shift"
-msgstr "旋转，镜头偏移"
+msgstr "旋转|翻转"
 
 #: ../src/iop/ashift.c:5604
+#, fuzzy
 msgid "rotation only"
-msgstr "仅旋转"
+msgstr "仅饱和度"
 
 #: ../src/iop/ashift.c:5605
+#, fuzzy
 msgid "lens shift only"
-msgstr "仅镜头偏移"
+msgstr "镜头平移（水平）"
 
 #: ../src/iop/ashift.c:5607
 msgid "Fit for"
-msgstr "拟合于"
+msgstr ""
 
 #: ../src/iop/ashift.c:5616
 msgid ""
@@ -12567,7 +12567,7 @@ msgstr "成功从 RAW 图像中提取白平衡。"
 #: ../src/iop/channelmixerrgb.c:3596
 #, fuzzy
 msgid "auto-detection of white balance started..."
-msgstr "开始自动检测白平衡……"
+msgstr "白平衡的自动检测已完成。"
 
 #: ../src/iop/channelmixerrgb.c:3662
 msgid ""
@@ -12576,15 +12576,12 @@ msgid ""
 msgstr "颜色校准：灰度通道参数之和为零，正常化将被禁用。"
 
 #: ../src/iop/channelmixerrgb.c:3701
-#, fuzzy, c-format
+#, c-format
 msgid ""
 "L: \t%.1f %%\n"
 "h: \t%.1f °\n"
 "c: \t%.1f"
 msgstr ""
-"L: \t%.1f %%\n"
-"h: \t%.1f °\n"
-"c: \t%.1f"
 
 #. //////////////////////// PAGE SETTINGS
 #: ../src/iop/channelmixerrgb.c:3957 ../src/iop/clipping.c:2105
@@ -12609,7 +12606,6 @@ msgid "adaptation"
 msgstr "适应"
 
 #: ../src/iop/channelmixerrgb.c:3964
-#, fuzzy
 msgid ""
 "choose the method to adapt the illuminant\n"
 "and the colorspace in which the module works: \n"
@@ -12620,14 +12616,6 @@ msgid ""
 "- XYZ is a simple scaling in XYZ space. It is not recommended in general.\n"
 "- none disables any adaptation and uses pipeline working RGB."
 msgstr ""
-"选择适应光照的方式，以及模块工作的颜色空间：\n"
-"• linear Bradford（1985）对接近日光的光照更精确，但面对复杂光照会产生超色域的"
-"颜色。\n"
-"• CAT16（2016）在处理大范围或饱和的青色和紫色时，更能避免假想颜色。\n"
-"• non-linear Bradford（1985）是 Bradford 的原始版本，它可以产生比线性版本更好"
-"的结果，但不可靠。\n"
-"• XYZ 是 XYZ 空间的简单缩放。一般不推荐使用。\n"
-"• none 禁用任何自适应并使用 RGB 流水线工作。"
 
 #: ../src/iop/channelmixerrgb.c:3982
 msgid ""
@@ -12712,9 +12700,8 @@ msgstr ""
 "c: \tN/A"
 
 #: ../src/iop/channelmixerrgb.c:4070 ../src/iop/exposure.c:1077
-#, fuzzy
 msgid "these LCh coordinates are computed from CIE Lab 1976 coordinates"
-msgstr "LCh 值基于 CIE Lab 1976 计算。"
+msgstr ""
 
 #: ../src/iop/channelmixerrgb.c:4083
 msgid "the desired target color after mapping"
@@ -14054,7 +14041,7 @@ msgstr "应优先于其他色调的色调。"
 #: ../src/iop/colorreconstruction.c:1310 ../src/iop/demosaic.c:1604
 #: ../src/iop/highlights.c:2290
 msgid "not applicable"
-msgstr "不可用。"
+msgstr "不可用"
 
 #: ../src/iop/colorreconstruction.c:1311 ../src/iop/highlights.c:2291
 msgid "no highlights reconstruction for monochrome images"
@@ -16094,8 +16081,8 @@ msgid ""
 "hot pixel correction\n"
 "only works for raw images."
 msgstr ""
-"热像素校正。\n"
-"只适用于 RAW 图像。"
+"自动热像素校正\n"
+"只作用于 RAW 图"
 
 #: ../src/iop/invert.c:95 ../src/iop/invert.c:527
 #, c-format
@@ -17213,8 +17200,8 @@ msgid ""
 "raw black/white point correction\n"
 "only works for the sensors that need it."
 msgstr ""
-"RAW 黑/白点校正。\n"
-"只适用于需要它的传感器。"
+"RAW 黑/白点校正\n"
+"只对需要它的传感器起作用"
 
 #: ../src/iop/relight.c:54
 msgid "fill-light 0.25EV with 4 zones"
@@ -17485,7 +17472,7 @@ msgstr "RGB 曲线"
 #: ../src/iop/rgbcurve.c:141
 #, fuzzy
 msgid "alter an image's tones using curves in RGB color space"
-msgstr "在 RGB 色彩空间中使用曲线改变图像的色调。"
+msgstr "调整 RGB 色彩空间中的黑、白和中间灰点位置。"
 
 #: ../src/iop/rgbcurve.c:192 ../src/iop/tonecurve.c:563
 msgid "gamma 1.0 (linear)"
@@ -17945,9 +17932,8 @@ msgid "tone curve"
 msgstr "色调曲线"
 
 #: ../src/iop/tonecurve.c:212
-#, fuzzy
 msgid "alter an image's tones using curves"
-msgstr "使用曲线改变图像的色调。"
+msgstr ""
 
 #: ../src/iop/tonecurve.c:1151
 msgid ""
@@ -18006,12 +17992,12 @@ msgstr "蒙版混合：人物背光"
 #: ../src/iop/toneequal.c:459
 #, fuzzy
 msgid "compress shadows/highlights (eigf): strong"
-msgstr "压缩阴影/高光（eigf）：强烈"
+msgstr "压缩阴影/高光（gf）：柔和"
 
 #: ../src/iop/toneequal.c:463
 #, fuzzy
 msgid "compress shadows/highlights (gf): strong"
-msgstr "压缩阴影/高光（gf）：强烈"
+msgstr "压缩阴影/高光（gf）：柔和"
 
 #: ../src/iop/toneequal.c:471
 msgid "compress shadows/highlights (eigf): medium"
@@ -18047,11 +18033,10 @@ msgid "relight: fill-in"
 msgstr "重新打光：填充"
 
 #: ../src/iop/toneequal.c:575
-#, fuzzy
 msgid ""
 "tone equalizer needs to be after distortion modules in the pipeline - "
 "disabled"
-msgstr "在处理管线中，色调均衡器需要置于失真模块之后 - 已禁用。"
+msgstr ""
 
 #. Pointers are not 64-bits aligned, and SSE code will segfault
 #: ../src/iop/toneequal.c:921
@@ -18686,7 +18671,7 @@ msgstr "树"
 #: ../src/libs/collect.c:2357
 #, fuzzy
 msgid "Search a folder..."
-msgstr "搜索一个文件夹……"
+msgstr "搜索胶卷……"
 
 #: ../src/libs/collect.c:2372 ../src/libs/collect.c:3214
 msgid "Collections"
@@ -18695,12 +18680,11 @@ msgstr "集合"
 #: ../src/libs/collect.c:2379
 #, fuzzy
 msgid "Search a collection..."
-msgstr "搜索一个集合……"
+msgstr "最近用过的集合"
 
 #: ../src/libs/collect.c:2391 ../src/libs/collect.c:3246
-#, fuzzy
 msgid "Search..."
-msgstr "搜索……"
+msgstr ""
 
 #: ../src/libs/collect.c:3042
 msgid "narrow down search"
@@ -20226,7 +20210,7 @@ msgstr "模块集合"
 #: ../src/libs/modulegroups.c:230
 #, fuzzy
 msgid "Search a module..."
-msgstr "搜索一个模块……"
+msgstr "搜索模块"
 
 #: ../src/libs/modulegroups.c:239
 msgid "clear text"
@@ -21151,7 +21135,7 @@ msgstr "查找"
 #: ../src/libs/tools/filter.c:523
 #, fuzzy
 msgid "Search an image..."
-msgstr "搜索一张图片……"
+msgstr "搜索图片"
 
 #: ../src/libs/tools/filter.c:530
 #, no-c-format
@@ -21835,26 +21819,5 @@ msgctxt "preferences"
 msgid "</xsl:text><xsl:value-of select="
 msgstr ""
 
-#~ msgid "Import…"
-#~ msgstr "导入……"
-
-#~ msgid "Export…"
-#~ msgstr "导出……"
-
-#~ msgid "Copy files on disk…"
-#~ msgstr "复制磁盘上的文件……"
-
-#~ msgid "Move files on disk…"
-#~ msgstr "移动磁盘上的文件……"
-
-#~ msgid "Paste development (parts)…"
-#~ msgstr "粘贴修改（部分）……"
-
-#~ msgid "Load development from XMP…"
-#~ msgstr "从 XMP 文件中加载修改……"
-
-#~ msgid "⭘ Clear rating"
-#~ msgstr "⭘ 清除评分"
-
-#~ msgid "compress shadows/highlights (eigf): soft"
-#~ msgstr "压缩阴影/高光（eigf）：柔和"
+#~ msgid "manual perspective"
+#~ msgstr "人工视角"
