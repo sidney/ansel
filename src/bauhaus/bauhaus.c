@@ -108,7 +108,7 @@ static void _margins_retrieve(struct dt_bauhaus_widget_t *w)
  */
 static float _bh_get_row_height()
 {
-  return darktable.bauhaus->line_height + INTERNAL_PADDING;
+  return darktable.bauhaus->line_height * 1.4;
 }
 
 /**
@@ -175,7 +175,7 @@ static double _get_combobox_height(GtkWidget *widget)
 {
   struct dt_bauhaus_widget_t *w = (struct dt_bauhaus_widget_t *)widget;
   return w->margin->top + w->padding->top + w->margin->bottom + w->padding->bottom
-         + darktable.bauhaus->line_height;
+         + _bh_get_row_height();
 }
 
 static double _get_slider_height(GtkWidget *widget)
@@ -888,7 +888,7 @@ void dt_bauhaus_load_theme()
   cairo_surface_t *cst = cairo_image_surface_create(CAIRO_FORMAT_ARGB32, 128, 128);
   cairo_t *cr = cairo_create(cst);
   PangoLayout *layout = pango_cairo_create_layout(cr);
-  pango_layout_set_text(layout, "M", -1);
+  pango_layout_set_text(layout, "XMp", -1);
   pango_layout_set_font_description(layout, darktable.bauhaus->pango_font_desc);
   pango_cairo_context_set_resolution(pango_layout_get_context(layout), darktable.gui->dpi);
   int pango_width;
@@ -903,7 +903,7 @@ void dt_bauhaus_load_theme()
 
   darktable.bauhaus->baseline_size = DT_PIXEL_APPLY_DPI(5); // absolute size in Cairo unit
   darktable.bauhaus->border_width = DT_PIXEL_APPLY_DPI(2); // absolute size in Cairo unit
-  darktable.bauhaus->marker_size = pango_width / PANGO_SCALE * 0.8;
+  darktable.bauhaus->marker_size = pango_height / PANGO_SCALE * 0.6;
 }
 
 void dt_bauhaus_init()
@@ -1880,7 +1880,7 @@ static void dt_bauhaus_draw_quad(struct dt_bauhaus_widget_t *w, cairo_t *cr, con
   else if(w->type == DT_BAUHAUS_COMBOBOX)
   {
     // draw combobox chevron
-    cairo_translate(cr, x + darktable.bauhaus->quad_width / 2., y + darktable.bauhaus->quad_width / 2.);
+    cairo_translate(cr, x + darktable.bauhaus->quad_width / 2., y + _bh_get_row_height() / 2.);
     const float r = darktable.bauhaus->quad_width * .2f;
     cairo_move_to(cr, -r, -r * .5f);
     cairo_line_to(cr, 0, r * .5f);
@@ -2231,7 +2231,7 @@ static gboolean dt_bauhaus_popup_draw(GtkWidget *widget, cairo_t *crf, gpointer 
                                           .y = cumulative_height,
                                           .width = main_width,
                                           .height = _bh_get_row_height() };
-          show_pango_text(w, context, cr, &bounding_label, entry->label, BH_ALIGN_RIGHT, BH_ALIGN_TOP,
+          show_pango_text(w, context, cr, &bounding_label, entry->label, BH_ALIGN_RIGHT, BH_ALIGN_MIDDLE,
                           d->entries_ellipsis, bg_color, NULL, NULL, ignore_font_style);
           cumulative_height += bounding_label.height;
         }
