@@ -99,7 +99,7 @@ typedef struct dt_iop_highlights_params_t
   // params of v2
   float clip; // $MIN: 0.0 $MAX: 2.0 $DEFAULT: 1.0 $DESCRIPTION: "clipping threshold"
   // params of v3
-  float noise_level; // $MIN: 0. $MAX: 0.5 $DEFAULT: 0.00 $DESCRIPTION: "noise level"
+  float noise_level; // $MIN: 0. $MAX: 1.0 $DEFAULT: 0.00 $DESCRIPTION: "noise level"
   int iterations; // $MIN: 1 $MAX: 512 $DEFAULT: 30 $DESCRIPTION: "iterations"
   dt_atrous_wavelets_scales_t scales; // $DEFAULT: 8 $DESCRIPTION: "diameter of reconstruction"
   float reconstructing;    // $MIN: 0.0 $MAX: 1.0  $DEFAULT: 0.4 $DESCRIPTION: "cast balance"
