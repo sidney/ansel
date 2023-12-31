@@ -192,10 +192,10 @@ typedef enum dt_iop_ashift_linetype_t
 
 typedef enum dt_iop_ashift_fitting_t
 {
-  ASHIFT_FITTING_ALL = 0,           // $DESCRIPTION: rotation, lens shift, perspective
-  ASHIFT_FITTING_ROTATION = 1,      // $DESCRIPTION: rotation only
-  ASHIFT_FITTING_LENS = 2,          // $DESCRIPTION: lens shift only
-  ASHIFT_FITTING_LENS_ROTATION = 3  // $DESCRIPTION: lens shift and rotation
+  ASHIFT_FITTING_ALL = 0,           // $DESCRIPTION: rotation, lens shift, shear
+  ASHIFT_FITTING_LENS_ROTATION = 1, // $DESCRIPTION: rotation, lens shift
+  ASHIFT_FITTING_ROTATION = 2,      // $DESCRIPTION: rotation only
+  ASHIFT_FITTING_LENS = 3,          // $DESCRIPTION: lens shift only
 } dt_iop_ashift_fitting_t;
 
 typedef enum dt_iop_ashift_linecolor_t
@@ -5594,8 +5594,10 @@ void gui_init(struct dt_iop_module_t *self)
   GtkWidget *helpers = dt_ui_section_label_new(_("Fitting options"));
   gtk_box_pack_start(GTK_BOX(self->widget), helpers, TRUE, TRUE, 0);
 
-  const gchar *option_labels[] = { _("horizon, lens shift, shear"), _("horizon only"), _("lens shift only"),
-                                   _("horizon, lens shift"), NULL };
+  const gchar *option_labels[] = { _("rotation, lens shift, shear"),
+                                   _("rotation, lens shift"),
+                                   _("rotation only"),
+                                   _("lens shift only"), NULL };
   g->fitting_option
       = dt_bauhaus_combobox_new_full((dt_action_t *)self, NULL, _("Fit for"), NULL, ASHIFT_FITTING_ALL,
                                      (GtkCallback)fitting_option_changed, self, option_labels);
