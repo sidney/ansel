@@ -4552,21 +4552,17 @@ int button_released(struct dt_iop_module_t *self, double x, double y, int which,
 
     ++darktable.gui->reset;
     a -= dt_bauhaus_slider_get(g->rotation);
-    dt_bauhaus_slider_set(g->rotation, -a);
+    p->rotation = -a;
+    dt_bauhaus_slider_set(g->rotation, p->rotation);
     --darktable.gui->reset;
 
-    p->rotation = -a;
+    do_crop(self, p);
+    dt_dev_invalidate_all(self->dev);
+    dt_control_queue_redraw_center();
+    dt_dev_refresh_ui_images(self->dev);
 
-    if(g->editing)
-    {
-      dt_dev_invalidate_all(self->dev);
-      dt_control_queue_redraw_center();
-      dt_dev_refresh_ui_images(self->dev);
-    }
-    else
-    {
+    if(!g->editing)
       dt_dev_add_history_item(self->dev, self, FALSE);
-    }
 
     return TRUE;
   }
