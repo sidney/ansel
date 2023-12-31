@@ -4556,13 +4556,20 @@ int button_released(struct dt_iop_module_t *self, double x, double y, int which,
     dt_bauhaus_slider_set(g->rotation, p->rotation);
     --darktable.gui->reset;
 
-    do_crop(self, p);
+    if(g->buf_height > 0 && g->buf_width > 0)
+      do_crop(self, p);
+    else
+      g->jobcode = ASHIFT_JOBCODE_DO_CROP;
+
     dt_dev_invalidate_all(self->dev);
     dt_control_queue_redraw_center();
-    dt_dev_refresh_ui_images(self->dev);
 
-    if(!g->editing)
+
+    if(g->editing)
+      dt_dev_refresh_ui_images(self->dev);
+    else
       dt_dev_add_history_item(self->dev, self, FALSE);
+
 
     return TRUE;
   }
@@ -4761,17 +4768,6 @@ void gui_changed(dt_iop_module_t *self, GtkWidget *w, void *previous)
 #ifdef ASHIFT_DEBUG
   model_probe(self, p, g->lastfit);
 #endif
-  if(g->buf_height > 0 && g->buf_width > 0)
-  {
-    do_crop(self, p);
-  }
-  else
-  {
-    g->jobcode = ASHIFT_JOBCODE_DO_CROP;
-    dt_control_queue_redraw_center();
-    dt_dev_invalidate_preview(self->dev);
-    dt_dev_refresh_ui_images(self->dev);
-  }
 
   if(w == g->rotation)
     p->rotation = dt_bauhaus_slider_get(g->rotation);
@@ -4796,6 +4792,15 @@ void gui_changed(dt_iop_module_t *self, GtkWidget *w, void *previous)
     p->aspect = dt_bauhaus_slider_get(g->aspect);
 
   _make_controls_sensitive(self, g->editing);
+
+  if(g->buf_height > 0 && g->buf_width > 0)
+    do_crop(self, p);
+  else
+    g->jobcode = ASHIFT_JOBCODE_DO_CROP;
+
+  dt_control_queue_redraw_center();
+  dt_dev_invalidate_all(self->dev);
+  dt_dev_refresh_ui_images(self->dev);
 }
 
 void gui_reset(struct dt_iop_module_t *self)
