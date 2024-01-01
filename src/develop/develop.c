@@ -818,29 +818,14 @@ void dt_dev_add_history_item_ext(dt_develop_t *dev, dt_iop_module_t *module, gbo
 
 void _dev_add_history_item(dt_develop_t *dev, dt_iop_module_t *module, gboolean enable, gboolean new_item)
 {
-  if(!darktable.gui || darktable.gui->reset) return;
+  // FIXME: not quite sure why we could not add an history item without a GUI
+  if(!darktable.gui) return;
 
   dt_dev_undo_start_record(dev);
 
   dt_pthread_mutex_lock(&dev->history_mutex);
 
-  if(dev->gui_attached)
-  {
-    _dev_add_history_item_ext(dev, module, enable, new_item, FALSE, FALSE);
-  }
-#if 0
-  {
-    // debug:
-    printf("remaining %d history items:\n", dev->history_end);
-    int i = 0;
-    for(GList *history = dev->history; history; history = g_list_next(history))
-    {
-      dt_dev_history_item_t *hist = (dt_dev_history_item_t *)(history->data);
-      printf("%d %s\n", i, hist->module->op);
-      i++;
-    }
-  }
-#endif
+  _dev_add_history_item_ext(dev, module, enable, new_item, FALSE, FALSE);
 
   /* attach changed tag reflecting actual change */
   const int imgid = dev->image_storage.id;
@@ -853,13 +838,10 @@ void _dev_add_history_item(dt_develop_t *dev, dt_iop_module_t *module, gboolean 
 
   dt_pthread_mutex_unlock(&dev->history_mutex);
 
-  if(dev->gui_attached)
-  {
-    /* signal that history has changed */
-    dt_dev_undo_end_record(dev);
+  /* signal that history has changed */
+  dt_dev_undo_end_record(dev);
 
-    if(tag_change) DT_DEBUG_CONTROL_SIGNAL_RAISE(darktable.signals, DT_SIGNAL_TAG_CHANGED);
-  }
+  if(tag_change) DT_DEBUG_CONTROL_SIGNAL_RAISE(darktable.signals, DT_SIGNAL_TAG_CHANGED);
 }
 
 // The next 2 functions are always called from GUI controls setting parameters
