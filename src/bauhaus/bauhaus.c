@@ -455,7 +455,7 @@ static void show_pango_text(struct dt_bauhaus_widget_t *w, GtkStyleContext *cont
   int pango_height;
   pango_layout_get_size(layout, &pango_width, &pango_height);
   double text_width = (double)pango_width / PANGO_SCALE;
-  double text_height = (double)pango_height / PANGO_SCALE;
+  double text_height = fmax((double)pango_height / PANGO_SCALE, darktable.bauhaus->line_height);
   if(width) *width = text_width;
   if(height) *height = text_height;
 
