@@ -996,13 +996,15 @@ void dt_dev_reload_history_items(dt_develop_t *dev)
   dt_dev_invalidate_all(dev);
 }
 
-void dt_dev_pop_history_items_ext(dt_develop_t *dev, int32_t cnt)
+static inline void _dt_dev_modules_reload_defaults(dt_develop_t *dev)
 {
-  dt_ioppr_check_iop_order(dev, 0, "dt_dev_pop_history_items_ext begin");
-  const int end_prev = dev->history_end;
-  dev->history_end = cnt;
-
-  // reset gui params for all modules
+  // The reason for this is modules mandatorily ON don't leave history.
+  // We therefore need to init modules containers to the defaults.
+  // This is of course shit because it relies on the fact that defaults will never change in the future.
+  // As a result, changing defaults needs to be handled on a case-by-case basis, by first adding the affected
+  // modules to history, then setting said history to the previous defaults.
+  // Worse, some modules (temperature.c) grabbed their params at runtime (WB as shot in camera),
+  // meaning the defaults were not even static values.
   for(GList *modules = dev->iop; modules; modules = g_list_next(modules))
   {
     dt_iop_module_t *module = (dt_iop_module_t *)(modules->data);
@@ -1013,10 +1015,18 @@ void dt_dev_pop_history_items_ext(dt_develop_t *dev, int32_t cnt)
     if(module->multi_priority == 0)
       module->iop_order = dt_ioppr_get_iop_order(dev->iop_order_list, module->op, module->multi_priority);
     else
-    {
       module->iop_order = INT_MAX;
-    }
   }
+}
+
+void dt_dev_pop_history_items_ext(dt_develop_t *dev, int32_t cnt)
+{
+  dt_ioppr_check_iop_order(dev, 0, "dt_dev_pop_history_items_ext begin");
+  const int end_prev = dev->history_end;
+  dev->history_end = cnt;
+
+  // reset gui params for all modules
+  _dt_dev_modules_reload_defaults(dev);
 
   // go through history and set gui params
   GList *forms = NULL;
