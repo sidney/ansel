@@ -444,9 +444,6 @@ static void show_pango_text(struct dt_bauhaus_widget_t *w, GtkStyleContext *cont
   gtk_style_context_get(context, state, "font", &font_desc, NULL);
   pango_layout_set_font_description(layout, font_desc);
 
-  // FIXME: Is that still needed in 2023 ?
-  pango_cairo_context_set_resolution(pango_layout_get_context(layout), darktable.gui->dpi);
-
   // Set the actual text
   pango_layout_set_text(layout, text, -1);
 
@@ -890,7 +887,7 @@ void dt_bauhaus_load_theme()
   PangoLayout *layout = pango_cairo_create_layout(cr);
   pango_layout_set_text(layout, "XMp", -1);
   pango_layout_set_font_description(layout, darktable.bauhaus->pango_font_desc);
-  pango_cairo_context_set_resolution(pango_layout_get_context(layout), darktable.gui->dpi);
+
   int pango_width;
   int pango_height;
   pango_layout_get_size(layout, &pango_width, &pango_height);
