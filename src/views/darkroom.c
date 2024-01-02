@@ -2750,7 +2750,7 @@ int button_released(dt_view_t *self, double x, double y, int which, uint32_t sta
   }
 
   // module
-  if(dev->gui_module && dev->gui_module->button_released
+  if(dev->gui_module && dev->gui_module->enabled && dev->gui_module->button_released
      && dev->gui_module->button_released(dev->gui_module, x, y, which, state))
   {
     // Click in modules should handle history changes internally.
@@ -2956,7 +2956,7 @@ int button_pressed(dt_view_t *self, double x, double y, double pressure, int whi
     return 1;
 
   // module
-  if(dev->gui_module && dev->gui_module->button_pressed
+  if(dev->gui_module && dev->gui_module->enabled && dev->gui_module->button_pressed
      && dev->gui_module->button_pressed(dev->gui_module, x, y, pressure, which, type, state))
      return 1;
 
@@ -2992,7 +2992,7 @@ void scrolled(dt_view_t *self, double x, double y, int up, int state)
   }
 
   // module
-  if(dev->gui_module && dev->gui_module->scrolled && dev->gui_module->scrolled(dev->gui_module, x, y, up, state))
+  if(dev->gui_module && dev->gui_module->enabled && dev->gui_module->scrolled && dev->gui_module->scrolled(dev->gui_module, x, y, up, state))
   {
     // Scroll in modules should handle history changes internally.
     dt_control_queue_redraw_center();
