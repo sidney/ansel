@@ -3674,7 +3674,6 @@ void gui_post_expose(struct dt_iop_module_t *self, cairo_t *cr, int32_t width, i
   dt_develop_t *dev = self->dev;
   dt_iop_ashift_gui_data_t *g = (dt_iop_ashift_gui_data_t *)self->gui_data;
   dt_iop_ashift_params_t *p = _get_ashift_params(self);
-  if(!g->editing && !g->straightening) return;
 
   // the usual rescaling stuff
   const float wd = dev->preview_pipe->backbuf_width;
@@ -3686,115 +3685,9 @@ void gui_post_expose(struct dt_iop_module_t *self, cairo_t *cr, int32_t width, i
   const int closeup = dt_control_get_dev_closeup();
   const float zoom_scale = dt_dev_get_zoom_scale(dev, zoom, 1<<closeup, 1);
 
-  // we draw the cropping area; we need x_off/y_off/width/height which is only available
-  // after g->buf has been processed
-  if(g->buf && self->enabled)
-  {
-    // roi data of the preview pipe input buffer
-
-    const float iwd = g->buf_width;
-    const float iht = g->buf_height;
-    const float ixo = g->buf_x_off;
-    const float iyo = g->buf_y_off;
-
-    // the four corners of the input buffer of this module
-    float V[4][2] = { { ixo,        iyo       },
-                      { ixo,        iyo + iht },
-                      { ixo + iwd,  iyo + iht },
-                      { ixo + iwd,  iyo       } };
-
-    // convert coordinates of corners to coordinates of this module's output
-    if(!call_distort_transform(self->dev, self->dev->preview_pipe, self, (float *)V, 4))
-      return;
-
-    // get x/y-offset as well as width and height of output buffer
-    float xmin = FLT_MAX, ymin = FLT_MAX, xmax = FLT_MIN, ymax = FLT_MIN;
-    for(int n = 0; n < 4; n++)
-    {
-      xmin = MIN(xmin, V[n][0]);
-      xmax = MAX(xmax, V[n][0]);
-      ymin = MIN(ymin, V[n][1]);
-      ymax = MAX(ymax, V[n][1]);
-    }
-    const float owd = xmax - xmin;
-    const float oht = ymax - ymin;
-
-    // the four clipping corners
-    float C[4][2] = { { xmin + p->cl * owd, ymin + p->ct * oht },
-                      { xmin + p->cl * owd, ymin + p->cb * oht },
-                      { xmin + p->cr * owd, ymin + p->cb * oht },
-                      { xmin + p->cr * owd, ymin + p->ct * oht } };
-
-    // convert clipping corners to final output image
-    if(!dt_dev_distort_transform_plus(self->dev, self->dev->preview_pipe, self->iop_order,
-                                     DT_DEV_TRANSFORM_DIR_FORW_EXCL, (float *)C, 4))
-      return;
-
-    cairo_save(cr);
-
-    double dashes = DT_PIXEL_APPLY_DPI(5.0) / zoom_scale;
-    cairo_set_dash(cr, &dashes, 0, 0);
-
-    float cl_x = 0.0f, cl_y = 0.0f, cl_width = 0.0f, cl_height = 0.0f;
-
-    if(wd / (float)width > ht / (float)height)
-    {
-      // more spaces top/bottom
-      cl_x      = self->dev->border_size;
-      cl_y      = ((float)height - (ht * zoom_scale)) / 2.0f;
-      cl_width  = width - 2.0f * self->dev->border_size;
-      cl_height = ht * zoom_scale;
-    }
-    else
-    {
-      // more spaces left/right
-      cl_y      = self->dev->border_size;
-      cl_x      = ((float)width - (wd * zoom_scale)) / 2.0f;
-      cl_height = height - (2.0f * self->dev->border_size);
-      cl_width  = wd * zoom_scale;
-    }
-
-    cairo_rectangle(cr, cl_x, cl_y, cl_width, cl_height);
-    cairo_clip(cr);
-
-    // mask parts of image outside of clipping area in dark grey
-    cairo_set_source_rgba(cr, .2, .2, .2, .8);
-    cairo_set_fill_rule(cr, CAIRO_FILL_RULE_EVEN_ODD);
-    cairo_rectangle(cr, 0, 0, width, height);
-    cairo_translate(cr, width / 2.0, height / 2.0);
-    cairo_scale(cr, zoom_scale, zoom_scale);
-    cairo_translate(cr, -.5f * wd - zoom_x * wd, -.5f * ht - zoom_y * ht);
-
-    cairo_move_to(cr, C[0][0], C[0][1]);
-    cairo_line_to(cr, C[1][0], C[1][1]);
-    cairo_line_to(cr, C[2][0], C[2][1]);
-    cairo_line_to(cr, C[3][0], C[3][1]);
-    cairo_close_path(cr);
-    cairo_fill(cr);
-
-    // draw white outline around clipping area
-    dt_draw_set_color_overlay(cr, TRUE, 1.0);
-    cairo_set_line_width(cr, 2.0 / zoom_scale);
-    cairo_move_to(cr, C[0][0], C[0][1]);
-    cairo_line_to(cr, C[1][0], C[1][1]);
-    cairo_line_to(cr, C[2][0], C[2][1]);
-    cairo_line_to(cr, C[3][0], C[3][1]);
-    cairo_close_path(cr);
-    cairo_stroke(cr);
-
-    // we draw the guides correctly scaled here instead of using the darkroom expose callback
-
-    const float cx = fminf(C[0][0], fminf(C[1][0], fminf(C[2][0], C[3][0])));
-    const float cy = fminf(C[0][1], fminf(C[1][1], fminf(C[2][1], C[3][1])));
-    const float cw = fmaxf(C[0][0], fmaxf(C[1][0], fmaxf(C[2][0], C[3][0]))) - cx;
-    const float ch = fmaxf(C[0][1], fmaxf(C[1][1], fmaxf(C[2][1], C[3][1]))) - cy;
-    dt_guides_draw(cr, cx, cy, cw, ch, zoom_scale);
-
-    cairo_restore(cr);
-  }
-
-  // we draw the straightening line
-  if(g->straightening)
+  // Fast path: rotation setting by inputting horizon line.
+  // Conflicts with editing mode where painting with button pressed is understood as validating lines.
+  if(g->straightening && !g->editing)
   {
     cairo_save(cr);
     cairo_translate(cr, width / 2.0, height / 2.0);
@@ -3854,13 +3747,115 @@ void gui_post_expose(struct dt_iop_module_t *self, cairo_t *cr, int32_t width, i
     pango_font_description_free(desc);
     g_object_unref(layout);
     cairo_restore(cr);
+    return;
   }
 
   // structural data are currently being collected or fit procedure is running? -> skip
-  if(g->fitting) return;
-
   // no structural data or visibility switched off? -> stop here
-  if(g->lines == NULL) return;
+  if(!g->editing || g->fitting || g->lines == NULL || !g->buf || !self->enabled) return;
+
+  // we draw the cropping area; we need x_off/y_off/width/height which is only available
+  // after g->buf has been processed
+  // roi data of the preview pipe input buffer
+  const float iwd = g->buf_width;
+  const float iht = g->buf_height;
+  const float ixo = g->buf_x_off;
+  const float iyo = g->buf_y_off;
+
+  // the four corners of the input buffer of this module
+  float V[4][2] = { { ixo,        iyo       },
+                    { ixo,        iyo + iht },
+                    { ixo + iwd,  iyo + iht },
+                    { ixo + iwd,  iyo       } };
+
+  // convert coordinates of corners to coordinates of this module's output
+  if(!call_distort_transform(self->dev, self->dev->preview_pipe, self, (float *)V, 4))
+    return;
+
+  // get x/y-offset as well as width and height of output buffer
+  float xmin = FLT_MAX, ymin = FLT_MAX, xmax = FLT_MIN, ymax = FLT_MIN;
+  for(int n = 0; n < 4; n++)
+  {
+    xmin = MIN(xmin, V[n][0]);
+    xmax = MAX(xmax, V[n][0]);
+    ymin = MIN(ymin, V[n][1]);
+    ymax = MAX(ymax, V[n][1]);
+  }
+  const float owd = xmax - xmin;
+  const float oht = ymax - ymin;
+
+  // the four clipping corners
+  float C[4][2] = { { xmin + p->cl * owd, ymin + p->ct * oht },
+                    { xmin + p->cl * owd, ymin + p->cb * oht },
+                    { xmin + p->cr * owd, ymin + p->cb * oht },
+                    { xmin + p->cr * owd, ymin + p->ct * oht } };
+
+  // convert clipping corners to final output image
+  if(!dt_dev_distort_transform_plus(self->dev, self->dev->preview_pipe, self->iop_order,
+                                    DT_DEV_TRANSFORM_DIR_FORW_EXCL, (float *)C, 4))
+    return;
+
+  cairo_save(cr);
+
+  double dashes = DT_PIXEL_APPLY_DPI(5.0) / zoom_scale;
+  cairo_set_dash(cr, &dashes, 0, 0);
+
+  float cl_x = 0.0f, cl_y = 0.0f, cl_width = 0.0f, cl_height = 0.0f;
+
+  if(wd / (float)width > ht / (float)height)
+  {
+    // more spaces top/bottom
+    cl_x      = self->dev->border_size;
+    cl_y      = ((float)height - (ht * zoom_scale)) / 2.0f;
+    cl_width  = width - 2.0f * self->dev->border_size;
+    cl_height = ht * zoom_scale;
+  }
+  else
+  {
+    // more spaces left/right
+    cl_y      = self->dev->border_size;
+    cl_x      = ((float)width - (wd * zoom_scale)) / 2.0f;
+    cl_height = height - (2.0f * self->dev->border_size);
+    cl_width  = wd * zoom_scale;
+  }
+
+  cairo_rectangle(cr, cl_x, cl_y, cl_width, cl_height);
+  cairo_clip(cr);
+
+  // mask parts of image outside of clipping area in dark grey
+  cairo_set_source_rgba(cr, .2, .2, .2, .8);
+  cairo_set_fill_rule(cr, CAIRO_FILL_RULE_EVEN_ODD);
+  cairo_rectangle(cr, 0, 0, width, height);
+  cairo_translate(cr, width / 2.0, height / 2.0);
+  cairo_scale(cr, zoom_scale, zoom_scale);
+  cairo_translate(cr, -.5f * wd - zoom_x * wd, -.5f * ht - zoom_y * ht);
+
+  cairo_move_to(cr, C[0][0], C[0][1]);
+  cairo_line_to(cr, C[1][0], C[1][1]);
+  cairo_line_to(cr, C[2][0], C[2][1]);
+  cairo_line_to(cr, C[3][0], C[3][1]);
+  cairo_close_path(cr);
+  cairo_fill(cr);
+
+  // draw white outline around clipping area
+  dt_draw_set_color_overlay(cr, TRUE, 1.0);
+  cairo_set_line_width(cr, 2.0 / zoom_scale);
+  cairo_move_to(cr, C[0][0], C[0][1]);
+  cairo_line_to(cr, C[1][0], C[1][1]);
+  cairo_line_to(cr, C[2][0], C[2][1]);
+  cairo_line_to(cr, C[3][0], C[3][1]);
+  cairo_close_path(cr);
+  cairo_stroke(cr);
+
+  // we draw the guides correctly scaled here instead of using the darkroom expose callback
+
+  const float cx = fminf(C[0][0], fminf(C[1][0], fminf(C[2][0], C[3][0])));
+  const float cy = fminf(C[0][1], fminf(C[1][1], fminf(C[2][1], C[3][1])));
+  const float cw = fmaxf(C[0][0], fmaxf(C[1][0], fmaxf(C[2][0], C[3][0]))) - cx;
+  const float ch = fmaxf(C[0][1], fmaxf(C[1][1], fmaxf(C[2][1], C[3][1]))) - cy;
+  dt_guides_draw(cr, cx, cy, cw, ch, zoom_scale);
+
+  cairo_restore(cr);
 
   // get hash value that changes if distortions from here to the end of the pixelpipe changed
   const uint64_t hash = dt_dev_hash(dev, dev->preview_pipe);
@@ -4314,7 +4309,7 @@ int button_pressed(struct dt_iop_module_t *self, double x, double y, double pres
   if(wd < 1.0 || ht < 1.0) return 1;
 
   // if we start to draw a straightening line
-  if(!g->lines && which == 3)
+  if(!g->lines && which == 3 && !g->editing)
   {
     dt_control_change_cursor(GDK_CROSSHAIR);
     g->straightening = TRUE;
@@ -4510,16 +4505,7 @@ int button_released(struct dt_iop_module_t *self, double x, double y, int which,
 
   dt_control_change_cursor(GDK_LEFT_PTR);
 
-  // ends eventual line move
-  if(g->draw_line_move >= 0)
-  {
-    g->draw_line_move = -1;
-    // we save the lines in params
-    _draw_save_lines_to_params(self);
-    return TRUE;
-  }
-
-  if(g->straightening)
+  if(g->straightening && !g->editing)
   {
     g->straightening = FALSE;
     // adjust the line with possible current angle and flip on this module
@@ -4561,16 +4547,16 @@ int button_released(struct dt_iop_module_t *self, double x, double y, int which,
     else
       g->jobcode = ASHIFT_JOBCODE_DO_CROP;
 
-    dt_dev_invalidate_all(self->dev);
-    dt_control_queue_redraw_center();
+    dt_dev_add_history_item(self->dev, self, FALSE);
+    return TRUE;
+  }
 
-
-    if(g->editing)
-      dt_dev_refresh_ui_images(self->dev);
-    else
-      dt_dev_add_history_item(self->dev, self, FALSE);
-
-
+  // ends eventual line move
+  if(g->draw_line_move >= 0)
+  {
+    g->draw_line_move = -1;
+    // we save the lines in params
+    _draw_save_lines_to_params(self);
     return TRUE;
   }
 
