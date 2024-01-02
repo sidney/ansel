@@ -860,6 +860,7 @@ void dt_dev_add_history_item_real(dt_develop_t *dev, dt_iop_module_t *module, gb
   dev->preview_status = DT_DEV_PIXELPIPE_DIRTY;
   dt_pthread_mutex_unlock(&dev->history_mutex);
 
+  dt_dev_invalidate_all(dev);
   dt_control_queue_redraw_center();
   dt_dev_refresh_ui_images(dev);
 }

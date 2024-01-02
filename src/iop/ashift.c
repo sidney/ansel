@@ -138,7 +138,7 @@ const char **description(struct dt_iop_module_t *self)
 int flags()
 {
   return IOP_FLAGS_ALLOW_TILING | IOP_FLAGS_TILING_FULL_ROI | IOP_FLAGS_ONE_INSTANCE | IOP_FLAGS_ALLOW_FAST_PIPE
-         | IOP_FLAGS_GUIDES_SPECIAL_DRAW | IOP_FLAGS_GUIDES_WIDGET;
+         | IOP_FLAGS_GUIDES_SPECIAL_DRAW;
 }
 
 int default_group()
@@ -3685,6 +3685,20 @@ void gui_post_expose(struct dt_iop_module_t *self, cairo_t *cr, int32_t width, i
   const int closeup = dt_control_get_dev_closeup();
   const float zoom_scale = dt_dev_get_zoom_scale(dev, zoom, 1<<closeup, 1);
 
+  cairo_save(cr);
+  cairo_translate(cr, width / 2.0, height / 2.0);
+  cairo_scale(cr, zoom_scale, zoom_scale);
+  cairo_translate(cr, -.5f * wd - zoom_x * wd, -.5f * ht - zoom_y * ht);
+
+  // draw crop area guides
+  if(g->editing)
+    dt_guides_draw(cr, p->cl * wd, p->ct * ht, (p->cr - p->cl) * wd, (p->cb - p->ct) * ht, zoom_scale);
+  else
+    dt_guides_draw(cr, 0, 0, wd, ht, zoom_scale);
+
+  cairo_restore(cr);
+  dt_draw_set_color_overlay(cr, FALSE, 1.0);
+
   // Fast path: rotation setting by inputting horizon line.
   // Conflicts with editing mode where painting with button pressed is understood as validating lines.
   if(g->straightening && !g->editing)
@@ -3750,9 +3764,8 @@ void gui_post_expose(struct dt_iop_module_t *self, cairo_t *cr, int32_t width, i
     return;
   }
 
-  // structural data are currently being collected or fit procedure is running? -> skip
-  // no structural data or visibility switched off? -> stop here
-  if(!g->editing || g->fitting || g->lines == NULL || !g->buf || !self->enabled) return;
+  // Not editing : nothing more to show
+  if(!g->editing) return;
 
   // we draw the cropping area; we need x_off/y_off/width/height which is only available
   // after g->buf has been processed
@@ -3856,6 +3869,10 @@ void gui_post_expose(struct dt_iop_module_t *self, cairo_t *cr, int32_t width, i
   dt_guides_draw(cr, cx, cy, cw, ch, zoom_scale);
 
   cairo_restore(cr);
+
+  // structural data are currently being collected or fit procedure is running? -> skip
+  // no structural data or visibility switched off? -> stop here
+  if(g->fitting || g->lines == NULL || !g->buf || !self->enabled) return;
 
   // get hash value that changes if distortions from here to the end of the pixelpipe changed
   const uint64_t hash = dt_dev_hash(dev, dev->preview_pipe);
