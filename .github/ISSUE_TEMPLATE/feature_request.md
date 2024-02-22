@@ -3,15 +3,10 @@ name: Feature Request
 about: Suggest an idea or a change for this project
 title: ''
 labels: ''
-assignees: 'aurelienpierre'
+assignees: ''
+
 ---
 
-**What is the current problem you are facing ?**
-<!-- A clear and concise description of what the problem is. Please keep away from solutions, focus on the problem. -->
+Ansel does __not__ take feature requests.
 
-**Where in your workflow does your problem occur ?**
-<!-- Describe the tasks you typically do before and after, for context. -->
-
-**Additional context**
-<!-- Add any other context or screenshots about the feature request here. -->
-
+If you have a __workflow__ problem (some specific task that can't be achieved or takes too much steps to achieve), please discuss it on https://community.ansel.photos/discussions-category?category=6.
