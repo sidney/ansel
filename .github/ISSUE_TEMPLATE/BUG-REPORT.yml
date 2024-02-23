@@ -22,12 +22,13 @@ body:
 
         - the software produces images that don't look like out-of-camera JPEG files,
         - the software doesn't magically fix images that were damaged to begin with (clipped highlights, high-ISO noise),
-        - the software is slow to process some specific module on some specific hardware, with no proof that is has ever been faster.
+        - the software is slow to process some specific module on some specific hardware, with no proof that is has ever been faster,
+        - insane module settings produce insane image results.
         
         Ansel has a codebase of more than 300k lines. Chasing bugs in here requires proper methodology: minimal reproducing examples.
 
-        - if you are using custom ICC color profiles on your desktop, disable them or reset them to sRGB (default).
-        - if you are using OpenCL, disable it.
+        - if you are using custom ICC color profiles on your desktop, disable them or reset them to sRGB (default), and see if that fixes your issue.
+        - if you are using OpenCL, disable it, and see if that fixes your issue.
         - if you are facing image/preview issues, disable all modules, then enable only one at a time, until you find the culprit. If you don't, re-enable them all, one by one, in pipeline order, until you find the culprit. Report here which one it was. 
         _Modules that come late in the pipeline inherit earlier module's problems. Because a problem is made obvious/magnified at some late step doesn't mean it was created there._
 
@@ -47,6 +48,10 @@ body:
       options:
         - label: I have searched my issue
           required: true  
+  - type: markdown
+    attributes:
+      value: ---
+          
   - type: dropdown
     id: os
     attributes:
@@ -58,6 +63,20 @@ body:
         - MacOS Intel x86
         - MacOS ARM64
       default: 1
+  - type: dropdown
+    id: gpu
+    attributes:
+      label: What GPU do you have ?
+      description: If more than one GPU (embedded/discrete), report the brand of the discrete GPU.
+        - No GPU
+        - I don't know
+        - Nvidia
+        - AMD/ATI
+        - Intel
+        - Other
+      default: 1
+    validations:
+      required: true
   - type: input
     id: version
     attributes:
@@ -72,8 +91,8 @@ body:
       description: What kind of Ansel executable do you run ? Problems with packages from distributions's repositories need to be reported to package maintainers.
       options:
         - Self-compiled (GCC or Clang)
-        - Pre-built packages provided by the Ansel project (AppImage, .EXE)
-        - Linux packages from distribution or third-party packagers (Suse, Fedora, etc.)
+        - Pre-built packages provided by the Ansel project (.AppImage, .EXE)
+        - Linux packages from distributions or third-party packagers (Suse, Fedora, etc.)
       default: 1
     validations:
       required: true
@@ -81,7 +100,7 @@ body:
     id: what-happened
     attributes:
       label: What happened?
-      description: Also tell us, what did you expect to happen?
+      description: Also tell us, what did you expect to happen ?
       placeholder: Tell us what you see!
       value: "A bug happened!"
     validations:
@@ -113,6 +132,13 @@ body:
       default: 1
     validations:
       required: true
+  - type: input
+    id: bisect
+    attributes:
+      label: Previous Ansel version that use to work
+      description: If you did not face this issue with a previous Ansel issue, report here the last-known working version number. You can try [older packages](https://github.com/aurelienpierreeng/ansel/releases/tag/v0.0.0) or use `git bisect`.
+    validations:
+      required: false
   - type: textarea
     id: logs
     attributes:
@@ -123,5 +149,5 @@ body:
     id: backtrace
     attributes:
       label: Backtrace
-      description: In case of a crash, please copy and paste the content of the backtrace file, usually stored in `/tmp/ansel_backtrace_xxxx_txt`. This will be automatically formatted into code, so no need for backticks.
+      description: In case of a crash, please copy and paste the content of the backtrace file, usually stored in `/tmp/ansel_backtrace_xxxx_txt`. If no backtrace is produced, you can try to launch Ansel with `gdb ansel`, then type `run`. When it crashes, type `bt full` and copy-paste the output here. This will be automatically formatted into code, so no need for backticks.
       render: shell
