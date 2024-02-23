@@ -92,8 +92,8 @@ body:
       label: Does your problem occur with OpenCL enabled ?
       description: OpenCL relies on a graphic card (GPU) and proper drivers installed.
       options:
-        - Yes
-        - No 
+        - "Yes"
+        - "No"
         - I don't know
       default: 1
     validations:
@@ -104,8 +104,8 @@ body:
       label: Does your problem occur with OpenCL disabled ?
       description: OpenCL disabled means the software runs on CPU only. Ansel has an option in global menu "Edit" -> "Preferences" -> "Performance" to disable OpenCL. If you don't have a GPU, OpenCL is disabled by default.
       options:
-        - Yes
-        - No 
+        - "Yes"
+        - "No"
         - I don't know
       default: 1
     validations:
