@@ -29,9 +29,8 @@ body:
 
         - if you are using custom ICC color profiles on your desktop, disable them or reset them to sRGB (default).
         - if you are using OpenCL, disable it.
-        - if you are facing image/preview issues, disable all modules, then enable only one at a time, until you find the culprit. If you don't, re-enable them all, 
-        one by one, in pipeline order, until you find the culprit. Report here which one it was. _Modules that come late in the pipeline inherit earlier module's problems.
-        Because a problem is made obvious/magnified at some late step doesn't mean it was created there._
+        - if you are facing image/preview issues, disable all modules, then enable only one at a time, until you find the culprit. If you don't, re-enable them all, one by one, in pipeline order, until you find the culprit. Report here which one it was. 
+        _Modules that come late in the pipeline inherit earlier module's problems. Because a problem is made obvious/magnified at some late step doesn't mean it was created there._
 
   - type: checkboxes
     id: terms
@@ -39,7 +38,7 @@ body:
       label: Code of Conduct
       description: Please read [A culture of problem solving in open-source projects](https://community.ansel.photos/view-discussion/a-culture-of-problem-solving-in).
       options:
-        - label: I have read this document
+        - label: I have read this document and I accept the conditions
           required: true
   - type: checkboxes
     id: search
@@ -49,6 +48,38 @@ body:
       options:
         - label: I have searched my issue
           required: true  
+  - type: dropdown
+    id: os
+    attributes:
+      label: Computer's operating system
+      description: What OS are you using ?
+      options:
+        - Windows 7, 8, 10, or 11
+        - Linux
+        - MacOS Intel x86
+        - MacOS ARM64
+      default: 1
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Ansel version
+      description: You can find the version number or commit hash in the name of the [pre-built binary](https://github.com/aurelienpierreeng/ansel/releases/tag/v0.0.0), in the app global menu "Help" -> "About", or with `git rev-parse --short HEAD`
+      validations:
+        required: true
+  - type: dropdown
+    id: binary
+    attributes:
+      label: Type of binary
+      description: What kind of Ansel executable do you run ? Problems with packages from distributions's repositories need to be reported to package maintainers.
+      options:
+        - Self-compiled (GCC or Clang)
+        - Pre-built packages provided by the Ansel project (AppImage, .EXE)
+        - Linux packages from distribution or third-party packagers (Suse, Fedora, etc.)
+      default: 1
+    validations:
+      required: true
   - type: textarea
     id: what-happened
     attributes:
@@ -56,17 +87,6 @@ body:
       description: Also tell us, what did you expect to happen?
       placeholder: Tell us what you see!
       value: "A bug happened!"
-    validations:
-      required: true
-  - type: dropdown
-    id: version
-    attributes:
-      label: Version
-      description: What version of our software are you running?
-      options:
-        - 1.0.2 (Default)
-        - 1.0.3 (Edge)
-      default: 0
     validations:
       required: true
   - type: textarea
