@@ -86,11 +86,14 @@ body:
       value: "A bug happened!"
     validations:
       required: true
+  - type: markdown
+    attributes:
+      value: If you need to upload images and XMP files, please zip them together under a meaningful name and drop them above or on [Aurélien Pierre's private cloud](https://cloud.apmlt.net/s/YAdfYajPkE5nLyW). Files uploaded to AP's private cloud remain strictly confidential.
   - type: dropdown
     id: with-opencl
     attributes:
       label: Does your problem occur with OpenCL enabled ?
-      description: OpenCL relies on a graphic card (GPU) and proper drivers installed.
+      description: OpenCL use relies on a graphic card (GPU), proper GPU OpenCL drivers installed, and the software preference enabled.
       options:
         - "Yes"
         - "No"
@@ -113,6 +116,12 @@ body:
   - type: textarea
     id: logs
     attributes:
-      label: Relevant log output
-      description: Please copy and paste any relevant log output. This will be automatically formatted into code, so no need for backticks.
+      label: Output of `ansel -d all`
+      description: Please copy and paste the output of Ansel started in command line if you can. This will be automatically formatted into code, so no need for backticks.
+      render: shell
+  - type: textarea
+    id: backtrace
+    attributes:
+      label: Backtrace
+      description: In case of a crash, please copy and paste the content of the backtrace file, usually stored in `/tmp/ansel_backtrace_xxxx_txt`. This will be automatically formatted into code, so no need for backticks.
       render: shell
