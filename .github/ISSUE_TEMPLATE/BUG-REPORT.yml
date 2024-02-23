@@ -10,8 +10,9 @@ body:
       value: |
         Thanks for taking the time to fill out this bug report !
         
-        Please use [Chantal search engine](https://chantal.aurelienpierre.com) to find out if another user has already faced, reported (and perhaps solved) your issue. 
-        Avoiding duplicates spares everybody's time. 
+        Please use [Chantal search engine](https://chantal.aurelienpierre.com) to find out if another user has already faced, reported (and perhaps solved) your issue. Avoiding duplicates spares everybody's time. 
+        
+        If you find an older report for the same issue happening in the same context, and the suggested solution doesn't work for you, add your own info on it.
 
         __What is a bug ?__
 
