@@ -68,6 +68,7 @@ body:
     attributes:
       label: What GPU do you have ?
       description: If more than one GPU (embedded/discrete), report the brand of the discrete GPU.
+      options:
         - No GPU
         - I don't know
         - Nvidia
