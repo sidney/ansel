@@ -1,7 +1,6 @@
 name: Bug Report
 description: File a bug report
-title: "[Bug]: "
-labels: ["bug", "triage"]
+title: ""
 body:
   - type: markdown
     attributes:
@@ -64,8 +63,8 @@ body:
     attributes:
       label: Ansel version
       description: You can find the version number or commit hash in the name of the [pre-built binary](https://github.com/aurelienpierreeng/ansel/releases/tag/v0.0.0), in the app global menu "Help" -> "About", or with `git rev-parse --short HEAD`
-      validations:
-        required: true
+    validations:
+      required: true
   - type: dropdown
     id: binary
     attributes:
