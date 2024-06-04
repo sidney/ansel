@@ -49,6 +49,7 @@ jobs:
             cc:p
             cmake:p
             cmocka:p
+            curl:p
             ninja:p
             nsis:p
             dbus-glib:p
