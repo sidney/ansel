@@ -111,8 +111,6 @@ typedef struct dt_lib_import_t
   GtkWidget *test_path;
   GtkWidget *selected_files;
 
-  GtkWidget *modal;
-
   gboolean shutdown;
 
   dt_pthread_mutex_t lock;
@@ -199,7 +197,7 @@ static void _recurse_selection(GSList *selection, dt_import_t *const import)
 
   for(GSList *file = selection; file; file = g_slist_next(file))
     _filter_document((GFile *)file->data, import);
-  
+
   import->files = g_list_sort(import->files, (GCompareFunc) g_strcmp0);
 }
 
@@ -613,13 +611,13 @@ static void _set_test_path(dt_lib_import_t *d)
     params->filename = g_strdup(file.data);
     params->sequence = 1;
     params->jobcode = g_strdup(data.jobcode);
-    
+
     gchar *fake_path = dt_build_filename_from_pattern(params, &data);
 
     gtk_label_set_text(GTK_LABEL(d->test_path), (fake_path && fake_path != NULL)
                   ? g_strdup_printf(_("Result of the pattern : ...%s"), fake_path)
                   : g_strdup(_("Can't build a valid path.")));
-    
+
     g_free(fake_path);
     dt_variables_params_destroy(params);
   }
@@ -743,63 +741,14 @@ static void _file_activated(GtkFileChooser *chooser, GtkDialog *dialog)
   }
 }
 
-static void _import_set_collection(const char *dirname)
-{
-  if(dirname)
-  {
-    dt_conf_set_int("plugins/lighttable/collect/num_rules", 1);
-    dt_conf_set_int("plugins/lighttable/collect/item0", 1);
-    dt_conf_set_string("plugins/lighttable/collect/string0", g_strdup_printf("%s*", dirname));
-  }
-}
-
-static void _update_progress_message(gpointer instance, GList *files, int elements, gboolean finished, gpointer user_data)
-{
-  if(finished) return; // Should be fired only when detecting stuff
-
-  dt_lib_import_t *d = (dt_lib_import_t *)user_data;
-  gtk_message_dialog_set_markup(
-      GTK_MESSAGE_DIALOG(d->modal),
-      g_strdup_printf(_("Crawling your selection for recursive folder detection... %i pictures found so far. <i>(This "
-                        "can take some time for large folders)</i>"),
-                      elements));
-}
-
-void _set_collection_focus_on_img(const int32_t imgid, const gboolean duplicate)
-{
-  gchar first_directory[PATH_MAX] = { 0 };
-  dt_get_dirname_from_imgid(first_directory, imgid);
-
-  const char* dir = duplicate && dt_util_dir_exist(first_directory) ?
-                    g_strdup(first_directory)
-                  : g_strdup(dt_conf_get_string("ui_last/import_last_directory"));
-
-  fprintf(stdout, "Try to focus collection on `%s`\n", dir);
-  _import_set_collection(dir);
-
-  dt_collection_update_query(darktable.collection, DT_COLLECTION_CHANGE_NEW_QUERY, DT_COLLECTION_PROP_UNDEF, NULL);
-  dt_view_filter_reset(darktable.view_manager, TRUE);
-}
-
-void _open_img(const int32_t imgid)
-{
-  if(imgid != -1)
-  {
-    fprintf(stdout, "Open image %i in darkroom...\n", imgid);
-    dt_control_set_mouse_over_id(imgid);
-    dt_selection_select_single(darktable.selection, imgid);
-    dt_ctl_switch_mode_to("darkroom");
-  }
-  else  fprintf(stdout, "Can't open image in darkroom... imgd: %i  \n", imgid);
-}
 
 /**
  * @brief Import a list of file by copying them or not, and adding them to database.
- * 
+ *
  * @param instance not used here.
  * @param files the GList of files.
  * @param elements number of files to import.
- * @param finished 
+ * @param finished
  * @param user_data data from the module.
  */
 static void _process_file_list(gpointer instance, GList *files, int elements, gboolean finished, gpointer user_data)
@@ -807,31 +756,15 @@ static void _process_file_list(gpointer instance, GList *files, int elements, gb
   if(!finished) return; // Should be fired only when we are done detecting stuff
 
   dt_lib_import_t *d = (dt_lib_import_t *)user_data;
-  DT_DEBUG_CONTROL_SIGNAL_DISCONNECT(darktable.signals, G_CALLBACK(_update_progress_message), (gpointer)d);
-
-  // Import params
-  const gboolean duplicate = dt_conf_get_bool("ui_last/import_copy");
-  char datetime_override[DT_DATETIME_LENGTH] = { 0 };
-  const char *date = gtk_entry_get_text(GTK_ENTRY(d->datetime));
-
-  if(duplicate && date[0] && !dt_datetime_entry_to_exif(datetime_override, sizeof(datetime_override), date))
-  {
-    dt_control_log(_("invalid date/time format for import"));
-    g_list_free(files);
-    return;
-  }
 
   fprintf(stdout, "Nb Elements: %i\n", elements);
 
   if(elements > 0)
   {
-    // WARNING: the GList files is freed in control import,
-    // everything needs to be accessed before.
-
-    int _total_imported_elements = 0;
+    // TODO: copy data into the importer so we can kill this popup and *d
     dt_control_import_t data = {.imgs = files,
-                                .datetime = dt_string_to_datetime(date),
-                                .copy = duplicate,
+                                .datetime = dt_string_to_datetime(gtk_entry_get_text(GTK_ENTRY(d->datetime))),
+                                .copy = dt_conf_get_bool("ui_last/import_copy"),
                                 .jobcode = dt_conf_get_string("ui_last/import_jobcode"),
                                 .target_folder = dt_conf_get_string("session/base_directory_pattern"),
                                 .target_subfolder_pattern = dt_conf_get_string("session/sub_directory_pattern"),
@@ -846,7 +779,7 @@ static void _process_file_list(gpointer instance, GList *files, int elements, gb
     dt_control_import(data);
   }
   else dt_control_log(_("No files to import. Check your selection."));
-  
+
   fprintf(stdout, ":END:\n\n");
   DT_DEBUG_CONTROL_SIGNAL_DISCONNECT(darktable.signals, G_CALLBACK(_process_file_list), (gpointer)d);
   gui_cleanup(d);
@@ -855,6 +788,7 @@ static void _process_file_list(gpointer instance, GList *files, int elements, gb
 
 void _file_chooser_response(GtkDialog *dialog, gint response_id, dt_lib_import_t *d)
 {
+  // Stop capturing the filelist changes for the in-popup label file counter.
   DT_DEBUG_CONTROL_SIGNAL_DISCONNECT(darktable.signals, G_CALLBACK(_filelist_changed_callback), (gpointer)d);
   d->shutdown = TRUE;
 
@@ -862,23 +796,18 @@ void _file_chooser_response(GtkDialog *dialog, gint response_id, dt_lib_import_t
   {
     case GTK_RESPONSE_ACCEPT:
     {
+      // The next file list change will now only fire the importer job
+      DT_DEBUG_CONTROL_SIGNAL_CONNECT(darktable.signals, DT_SIGNAL_FILELIST_CHANGED, G_CALLBACK(_process_file_list), (gpointer)d);
+
       // It would be swell if we could just re-use the file list computed on "select" callback.
       // However, it depends on the file filter used, and we can't refresh the list when
       // filter is changed (no callback to connect to).
       // To be safe, we need to start again here, from scratch.
-      d->modal = gtk_message_dialog_new_with_markup(
-          GTK_WINDOW(dt_ui_main_window(darktable.gui->ui)), GTK_DIALOG_DESTROY_WITH_PARENT | GTK_DIALOG_MODAL, GTK_MESSAGE_INFO,
-          GTK_BUTTONS_NONE,
-          _("Crawling your selection for recursive folder detection... <i>(This can take some time for large folders)</i>"));
-      gtk_widget_show_all(d->modal);
-
       dt_control_get_selected_files(d, TRUE);
-      DT_DEBUG_CONTROL_SIGNAL_CONNECT(darktable.signals, DT_SIGNAL_FILELIST_CHANGED, G_CALLBACK(_process_file_list), (gpointer)d);
-      DT_DEBUG_CONTROL_SIGNAL_CONNECT(darktable.signals, DT_SIGNAL_FILELIST_CHANGED, G_CALLBACK(_update_progress_message), (gpointer)d);
 
+      // TODO: print "pending" message on modal window
       break;
     }
-
     case GTK_RESPONSE_CANCEL:
     default:
       gui_cleanup(d);
@@ -898,9 +827,9 @@ static void gui_init(dt_lib_import_t *d)
 
 #ifdef GDK_WINDOWING_QUARTZ
 // TODO: On MacOS (at least on version 13) the dialog windows doesn't behave as expected. The dialog
-// needs to have a parent window. "set_parent_window" wasn't working, so set_transient_for is 
-// the way to go. Still the window manager isn't dealing with the dialog properly, when the dialog 
-// is shifted outside its parent. The dialog isn't visible any longer but still listed as a window 
+// needs to have a parent window. "set_parent_window" wasn't working, so set_transient_for is
+// the way to go. Still the window manager isn't dealing with the dialog properly, when the dialog
+// is shifted outside its parent. The dialog isn't visible any longer but still listed as a window
 // of the app.
   dt_osx_disallow_fullscreen(d->dialog);
   gtk_window_set_transient_for(GTK_WINDOW(d->dialog), GTK_WINDOW(dt_ui_main_window(darktable.gui->ui)));
@@ -1116,7 +1045,7 @@ static void gui_init(dt_lib_import_t *d)
 
   // create text box with label and attach on grid directly
   //dt_gui_preferences_string(grid, "ui_last/import_jobcode", 2, 0);
-  
+
   // Row 2: separator
   _attach_grid_separator(GTK_WIDGET(grid), 2, 5);
 
@@ -1205,7 +1134,6 @@ static void gui_cleanup(dt_lib_import_t *d)
   // and then the widgets supposed to be updated in callback will be undefined (but not NULL... WTF Gtk ?)
   dt_pthread_mutex_lock(&d->lock);
   gtk_widget_destroy(d->dialog);
-  if(d->modal) gtk_widget_destroy(d->modal);
   dt_pthread_mutex_unlock(&d->lock);
 }
 
@@ -1213,7 +1141,6 @@ static dt_lib_import_t * _init()
 {
   dt_lib_import_t *d = malloc(sizeof(dt_lib_import_t));
   d->shutdown = FALSE;
-  d->modal = NULL;
   dt_pthread_mutex_init(&d->lock, NULL);
   d->path_file = NULL;
 
