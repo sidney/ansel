@@ -448,10 +448,7 @@ static int _is_in_library_by_path(const gchar *folder, const char *filename)
 {
   int32_t filmroll_id = dt_film_get_id(folder);
   int32_t image_id = dt_image_get_id(filmroll_id, filename);
-  if(filmroll_id > -1 && image_id > -1)
-    return image_id;
-  else
-    return -1;
+  return image_id;
 }
 
 static int _is_in_library_by_metadata(GFile *file)
@@ -495,10 +492,14 @@ static void update_preview_cb (GtkFileChooser *file_chooser, gpointer userdata)
 
   /* Do we already have this picture in library ? */
   gchar *folder = gtk_file_chooser_get_current_folder(file_chooser);
-  const int is_path_in_lib = _is_in_library_by_path(folder, filename);
+  GFile *in = g_file_new_for_path(filename);
+  gchar *basename = g_file_get_basename(in);
+  g_object_unref(in);
+  const int is_path_in_lib = _is_in_library_by_path(folder, basename);
   const int is_metadata_in_lib = _is_in_library_by_metadata(gtk_file_chooser_get_file(file_chooser));
   const gboolean is_in_lib = (is_path_in_lib > -1) || (is_metadata_in_lib > -1);
   g_free(folder);
+  g_free(basename);
 
   /* If alread imported, find out where */
   int imgid = -1;
@@ -943,6 +944,7 @@ static void gui_init(dt_lib_import_t *d)
   d->exif_info[EXIF_EXPOSURE_FIELD] = _attach_aligned_grid_item(d->exif, 7, 0, "", GTK_ALIGN_CENTER, TRUE, TRUE);
   d->exif_info[EXIF_INLIB_FIELD] = _attach_aligned_grid_item(d->exif, 9, 1, "", GTK_ALIGN_START, FALSE, TRUE);
   d->exif_info[EXIF_PATH_FIELD] = _attach_aligned_grid_item(d->exif, 10, 0, "", GTK_ALIGN_START, FALSE, TRUE);
+  gtk_label_set_ellipsize(GTK_LABEL(d->exif_info[EXIF_PATH_FIELD]), PANGO_ELLIPSIZE_MIDDLE);
 
   gtk_box_pack_start(GTK_BOX(preview_box), d->exif, TRUE, TRUE, 0);
   gtk_widget_show_all(d->exif);
