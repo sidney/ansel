@@ -2270,6 +2270,34 @@ int _import_job_copy(dt_variables_params_t *params, dt_control_import_t *data, g
   return !process;
 }
 
+void _write_xmp_id(const char *filename, int32_t imgid)
+{
+  GList *res = dt_metadata_get(imgid, "Xmp.darktable.image_id", NULL);
+  if(res != NULL)
+  {
+    // Image ID is already set in metadata, don't overwrite it
+    g_list_free_full(res, g_free);
+    return;
+  }
+  // else : init it
+  GError *error = NULL;
+  GFile *gfile = g_file_new_for_path(filename);
+  GFileInfo *info = g_file_query_info(gfile,
+                            G_FILE_ATTRIBUTE_STANDARD_NAME ","
+                            G_FILE_ATTRIBUTE_TIME_MODIFIED,
+                            G_FILE_QUERY_INFO_NONE, NULL, &error);
+  const char *fn = g_file_info_get_name(info);
+
+  const time_t datetime = g_file_info_get_attribute_uint64(info, G_FILE_ATTRIBUTE_TIME_MODIFIED);
+  char dt_txt[DT_DATETIME_EXIF_LENGTH];
+  dt_datetime_unix_to_exif(dt_txt, sizeof(dt_txt), &datetime);
+  const char *id = g_strconcat(fn, "-", dt_txt, NULL);
+  dt_metadata_set(imgid, "Xmp.darktable.image_id", id, FALSE);
+  g_object_unref(info);
+  g_object_unref(gfile);
+  g_clear_error(&error);
+}
+
 /**
  * @brief process to copy (or not) and import an image to database. 
  * 
@@ -2314,28 +2342,14 @@ gboolean _import_image(const GList *img, dt_control_import_t *data, const int in
       dt_control_log(_("\nError importing file in collection (imgid: %i)."), imgid);
       process_error = 1;
     }
-    else if(data->copy)
+    else
     {
-      GError *error = NULL;
-      GFile *gfile = g_file_new_for_path(filename);
-      GFileInfo *info = g_file_query_info(gfile,
-                                G_FILE_ATTRIBUTE_STANDARD_NAME ","
-                                G_FILE_ATTRIBUTE_TIME_MODIFIED,
-                                G_FILE_QUERY_INFO_NONE, NULL, &error);
-      const char *fn = g_file_info_get_name(info);
-
-      const time_t datetime = g_file_info_get_attribute_uint64(info, G_FILE_ATTRIBUTE_TIME_MODIFIED);
-      char dt_txt[DT_DATETIME_EXIF_LENGTH];
-      dt_datetime_unix_to_exif(dt_txt, sizeof(dt_txt), &datetime);
-      const char *id = g_strconcat(fn, "-", dt_txt, NULL);
-      dt_metadata_set(imgid, "Xmp.darktable.image_id", id, FALSE);
-      g_object_unref(info);
-      g_object_unref(gfile);
+      _write_xmp_id(filename, imgid);
+      fprintf(stdout, "imgid: %i\n", imgid);
+      dt_conf_set_int("ui_last/import_last_image", imgid);
     }
-    fprintf(stdout, "imgid: %i\n", imgid);
-    dt_control_queue_redraw_center();
-    dt_conf_set_int("ui_last/import_last_image", imgid);
   }
+
   dt_variables_params_destroy(params);
   fprintf(stdout, "::End of import_image.\n");
 
