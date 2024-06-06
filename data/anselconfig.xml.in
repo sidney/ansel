@@ -814,6 +814,20 @@
     <shortdescription>Copy the files</shortdescription>
     <longdescription>Duplicate the original files on the filesystem, using naming patterns. Useful when the original files are on a temporary storage, like a flash drive or a memory card.</longdescription>
   </dtconfig>
+  <dtconfig>
+    <name>ui_last/import_last_image</name>
+    <type>int</type>
+    <default>-1</default>
+    <shortdescription>Image ID of the last imported image</shortdescription>
+    <longdescription />
+  </dtconfig>
+  <dtconfig>
+    <name>ui_last/nb_imported</name>
+    <type>int</type>
+    <default>0</default>
+    <shortdescription>Number of images imported in the last fileroll</shortdescription>
+    <longdescription />
+  </dtconfig>
   <dtconfig ui="yes">
     <name>ui_last/import_jobcode</name>
     <type>string</type>

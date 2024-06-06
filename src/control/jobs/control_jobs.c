@@ -2085,9 +2085,9 @@ static GList *_apply_lua_filter(GList *images)
 /**
  * @brief Creates folders from path.
  * Returns TRUE if success.
- * 
+ *
  * @param path a valid folders path to create.
- * @return gboolean 
+ * @return gboolean
  */
 gboolean create_dir(const char *path)
 {
@@ -2102,9 +2102,9 @@ gboolean create_dir(const char *path)
 /**
  * @brief Replaces separator depending of the current OS
  * and removes whitespaces.
- * 
+ *
  * @param path
- * @return gchar* 
+ * @return gchar*
  */
 gchar *_path_cleanup(gchar *path_in)
 {
@@ -2119,7 +2119,7 @@ gchar *dt_build_filename_from_pattern(dt_variables_params_t *params, dt_control_
   gchar *file_expand = dt_variables_expand(params, data->target_file_pattern, FALSE);
   gchar *path_expand = dt_variables_expand(params, data->target_subfolder_pattern, FALSE);
 
-  // remove this if we decide to do the correction on user's settings directly 
+  // remove this if we decide to do the correction on user's settings directly
   gchar *file = _path_cleanup(file_expand);
   gchar *path = _path_cleanup(path_expand);
   g_free(file_expand);
@@ -2149,9 +2149,9 @@ gchar *dt_build_filename_from_pattern(dt_variables_params_t *params, dt_control_
 
 /**
  * @brief Tests if file exist. Returns 1 if so.
- * 
- * @param dest_file_path 
- * @return gboolean 
+ *
+ * @param dest_file_path
+ * @return gboolean
  */
 gboolean _file_exist(const char *dest_file_path)
 {
@@ -2162,15 +2162,15 @@ gboolean _file_exist(const char *dest_file_path)
   }
   else
     fprintf(stderr, "Target file doesn't exist yet.\n");
-  
+
   return 0;
 }
 
 /**
  * @brief just create a folder. Returns 0 if success.
- * 
- * @param target_dir 
- * @return gboolean 
+ *
+ * @param target_dir
+ * @return gboolean
  */
 gboolean _create_folder(const char *target_dir)
 {
@@ -2186,10 +2186,10 @@ gboolean _create_folder(const char *target_dir)
 
 /**
  * @brief Just copy a file. Returns 1 if success.
- * 
- * @param filename 
- * @param dest_file_path 
- * @return gboolean 
+ *
+ * @param filename
+ * @param dest_file_path
+ * @return gboolean
  */
 gboolean _copy_file(const char *filename, const char *dest_file_path)
 {
@@ -2201,7 +2201,7 @@ gboolean _copy_file(const char *filename, const char *dest_file_path)
     fprintf(stdout, "File copied successfully.\n");
   else
     fprintf(stdout, "Error while copying file.\n");
-  
+
   g_object_unref(in);
   g_object_unref(out);
 
@@ -2209,13 +2209,13 @@ gboolean _copy_file(const char *filename, const char *dest_file_path)
 }
 
 /**
- * @brief Add an image entry in the database and returns its imgID 
- * 
+ * @brief Add an image entry in the database and returns its imgID
+ *
  * @param data informations from the import module
  * @param img_path_to_db the file path to import
- * @return const int32_t 
+ * @return const int32_t
  */
-const int32_t _import_job_inplace(dt_control_import_t *data, gchar *img_path_to_db)
+const int32_t _import_job(dt_control_import_t *data, gchar *img_path_to_db)
 {
   fprintf(stdout, "::IMPORT FILE::\n%s to DB\n", img_path_to_db);
 
@@ -2225,7 +2225,7 @@ const int32_t _import_job_inplace(dt_control_import_t *data, gchar *img_path_to_
   dt_film_t film;
   data->filmid = dt_film_new(&film, dirname);
 
-  fprintf(stdout, "dirname: %s\tfilmid: %li\n", dirname, data->filmid);
+  fprintf(stdout, "dirname: %s\tfilmid: %i\n", dirname, data->filmid);
 
   const int32_t imgid = dt_image_import((int32_t)data->filmid, img_path_to_db, FALSE);
   g_free(dirname);
@@ -2234,14 +2234,14 @@ const int32_t _import_job_inplace(dt_control_import_t *data, gchar *img_path_to_
 
 /**
  * @brief copy a file to a destination path after checking if everything is allright.
- * 
+ *
  * @param params job informations.
  * @param data import module information.
  * @param img_path_to_db will be set to the file path for import.
  * @param pathname_len the `img_path_to_db` size.
- * @return int 
+ * @return int
  */
-int _import_job_copy(dt_variables_params_t *params, dt_control_import_t *data, gchar *img_path_to_db, size_t pathname_len)
+int _import_copy_file(dt_variables_params_t *params, dt_control_import_t *data, gchar *img_path_to_db, size_t pathname_len)
 {
   gchar *dest_file_path = dt_build_filename_from_pattern(params, data);
   fprintf(stdout, "Pattern to path: %s\n", dest_file_path);
@@ -2299,12 +2299,12 @@ void _write_xmp_id(const char *filename, int32_t imgid)
 }
 
 /**
- * @brief process to copy (or not) and import an image to database. 
- * 
+ * @brief process to copy (or not) and import an image to database.
+ *
  * @param img the current image.
  * @param data info from import module.
  * @param index current loop's index.
- * @return gboolean 
+ * @return gboolean
  */
 gboolean _import_image(const GList *img, dt_control_import_t *data, const int index)
 {
@@ -2326,18 +2326,22 @@ gboolean _import_image(const GList *img, dt_control_import_t *data, const int in
   gboolean process_error = 0;
 
   if(data->copy)
-    process_error = _import_job_copy(params, data, img_path_to_db, sizeof(img_path_to_db));
+    // Copy the file to destination folder, expanding variables internally
+    process_error = _import_copy_file(params, data, img_path_to_db, sizeof(img_path_to_db));
   else
+    // destination = origin, nothing to do
     g_strlcpy(img_path_to_db, filename, sizeof(img_path_to_db));
+
+  // TODO: valid way of checking if all chars are 0 ?
   process_error |= !g_strcmp0(img_path_to_db, NULL);
-  
+
   if(process_error)
     fprintf(stdout, "Process Error\n");
   else
   {
-    const int32_t imgid = _import_job_inplace(data, img_path_to_db);
+    const int32_t imgid = _import_job(data, img_path_to_db);
 
-    if(!imgid)
+    if(imgid == -1)
     {
       dt_control_log(_("\nError importing file in collection (imgid: %i)."), imgid);
       process_error = 1;
@@ -2385,32 +2389,31 @@ static int32_t _control_import_job_run(dt_job_t *job)
       fprintf(stderr, "Skipping this one.\n");
     else
     {
-      *data->total_imported_elements += 1;
-      fprintf(stdout, "N: %i\n", *data->total_imported_elements);
+      data->total_imported_elements += 1;
+      fprintf(stdout, "N: %i\n", data->total_imported_elements);
     }
     index++;
-   
+
     fprintf(stdout, "BOTTOM LOOP.\n\n");
   }
 
-  if(*data->total_imported_elements == 0)
+  if(data->total_imported_elements == 0 && data->filmid == -1)
   {
     dt_control_log("No image imported!");
     fprintf(stderr, "No image imported!\n\n");
   }
-  else
+  else if(data->filmid > -1)
   {
-    dt_control_log(ngettext("imported %d image", "imported %d images", *data->total_imported_elements), *data->total_imported_elements);
-    fprintf(stdout, "%d files imported in database.\n\n", *data->total_imported_elements);
-    dt_control_queue_redraw_center();
-    DT_DEBUG_CONTROL_SIGNAL_RAISE(darktable.signals, DT_SIGNAL_TAG_CHANGED);
-    DT_DEBUG_CONTROL_SIGNAL_RAISE(darktable.signals, DT_SIGNAL_GEOTAG_CHANGED, data->imgs, 0);
+    dt_control_log(ngettext("imported %d image", "imported %d images", data->total_imported_elements), data->total_imported_elements);
+    fprintf(stdout, "%d files imported in database.\n\n", data->total_imported_elements);
     DT_DEBUG_CONTROL_SIGNAL_RAISE(darktable.signals, DT_SIGNAL_FILMROLLS_IMPORTED, data->filmid); // refresh lighttable
   }
 
   fprintf(stdout,":::END OF IMPORT:::\n\n");
 
-  return *data->total_imported_elements >= 1 ? 0 : 1;
+  dt_conf_set_int("ui_last/nb_imported", data->total_imported_elements);
+
+  return data->total_imported_elements >= 1 ? 0 : 1;
 }
 
 static void _control_import_job_cleanup(void *p)

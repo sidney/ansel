@@ -38,9 +38,9 @@ typedef struct dt_control_import_t
   char *target_file_pattern;
   char *target_dir;
   const int elements;
-  int *total_imported_elements;
+  int total_imported_elements;
 
-  size_t filmid;
+  int32_t filmid;
 
 } dt_control_import_t;
 
@@ -82,4 +82,3 @@ gchar *dt_build_filename_from_pattern(dt_variables_params_t *params, dt_control_
 // vim: shiftwidth=2 expandtab tabstop=2 cindent
 // kate: tab-indents: off; indent-width 2; replace-tabs on; indent-mode cstyle; remove-trailing-spaces modified;
 // clang-format on
-
