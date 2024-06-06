@@ -2634,7 +2634,6 @@ static void _dt_collection_filmroll_imported_callback(gpointer instance, const i
     dt_selection_select_single(darktable.selection, last_image);
 
     DT_DEBUG_CONTROL_SIGNAL_RAISE(darktable.signals, DT_SIGNAL_TAG_CHANGED);
-    DT_DEBUG_CONTROL_SIGNAL_RAISE(darktable.signals, DT_SIGNAL_GEOTAG_CHANGED, dt_collection_get_all(collection, -1), 0);
 
     if(dt_conf_get_int("ui_last/nb_imported") == 1)
       dt_ctl_switch_mode_to("darkroom");
