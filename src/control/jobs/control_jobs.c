@@ -175,7 +175,7 @@ static void dt_control_image_enumerator_cleanup(void *p)
 {
   dt_control_image_enumerator_t *params = p;
 
-  g_list_free(params->index);
+  g_list_free_full(params->index, g_free);
   params->index = NULL;
   //FIXME: we need to free params->data to avoid a memory leak, but doing so here causes memory corruption....
 //  g_free(params->data);
@@ -2418,8 +2418,6 @@ static void _control_import_job_cleanup(void *p)
   dt_control_image_enumerator_t *params = (dt_control_image_enumerator_t *)p;
   dt_control_import_t *data = params->data;
   free(data);
-  for(GList *img = params->index; img; img = g_list_next(img))
-    g_free(img->data);
   dt_control_image_enumerator_cleanup(params);
 }
 
@@ -2437,7 +2435,7 @@ static void *_control_import_alloc()
   return params;
 }
 
-static dt_job_t *_control_import_job_create(dt_control_import_t *data)
+static dt_job_t *_control_import_job_create(dt_control_import_t data)
 {
   dt_job_t *job = dt_control_job_create(&_control_import_job_run, "import");
   if(!job) return NULL;
@@ -2447,15 +2445,15 @@ static dt_job_t *_control_import_job_create(dt_control_import_t *data)
     dt_control_job_dispose(job);
     return NULL;
   }
+  memcpy(params->data, &data, sizeof(dt_control_import_t));
+  params->index = ((dt_control_import_t *)params->data)->imgs;
   dt_control_job_add_progress(job, _("import"), FALSE);
   dt_control_job_set_params(job, params, _control_import_job_cleanup);
-
-  memcpy(params->data, data, sizeof(dt_control_import_t));
   fprintf(stdout, "END Job create.\n");
   return job;
 }
 
-void dt_control_import(dt_control_import_t *data)
+void dt_control_import(dt_control_import_t data)
 {
   dt_control_add_job(darktable.control, DT_JOB_QUEUE_USER_FG, _control_import_job_create(data));
 }

@@ -594,7 +594,6 @@ static void _set_test_path(dt_lib_import_t *d)
   }
   else
   {
-    int _total_imported_elements = 0;
     dt_control_import_t data = {.imgs = file.data,
                                 .datetime = dt_string_to_datetime(date),
                                 .copy = 0,
@@ -604,7 +603,7 @@ static void _set_test_path(dt_lib_import_t *d)
                                 .target_file_pattern = dt_conf_get_string("session/filename_pattern"),
                                 .target_dir = NULL,
                                 .elements = 1,
-                                .total_imported_elements = &_total_imported_elements,
+                                .total_imported_elements = 0,
                                 .filmid = -1,
                                 };
 
@@ -839,21 +838,12 @@ static void _process_file_list(gpointer instance, GList *files, int elements, gb
                                 .target_file_pattern = dt_conf_get_string("session/filename_pattern"),
                                 .target_dir = NULL,
                                 .elements = elements,
-                                .total_imported_elements = &_total_imported_elements,
+                                .total_imported_elements = 0,
                                 .filmid = -1,
                                 };
-                                
-    dt_control_import(&data);
 
-    while(_total_imported_elements == 0) g_usleep(100);
-
-    if(_total_imported_elements >= 1)
-    { 
-      const int32_t imgid = dt_conf_get_int("ui_last/import_last_image");
-      
-      _set_collection_focus_on_img(imgid, duplicate);
-      if(elements == 1) _open_img(imgid);
-    }
+    // Prepare to catch the end of import signal
+    dt_control_import(data);
   }
   else dt_control_log(_("No files to import. Check your selection."));
   

@@ -68,10 +68,10 @@ void dt_control_merge_hdr();
 
 /**
  * @brief Process a list of images to import with or without copying the files on an arbitrary hard-drive.
- * 
+ *
  * @param data import informations to transmit through the functions
  */
-void dt_control_import(dt_control_import_t *data);
+void dt_control_import(dt_control_import_t data);
 void dt_control_seed_denoise();
 void dt_control_denoise();
 void dt_control_refresh_exif();
