@@ -141,27 +141,25 @@ static void _init_expansion(dt_variables_params_t *params, gboolean iterate)
   params->data->latitude = NAN;
   params->data->elevation = NAN;
   params->data->show_msec = dt_conf_get_bool("lighttable/ui/milliseconds");
-  
+
   dt_image_t *img = NULL;
   _image_case release = NONE;
 
   if(params->img)
-    img = (dt_image_t *) params->img;
-  
-  else if (params->filename)
   {
-    img = malloc(sizeof(dt_image_t));
-
-    dt_exif_read(img, params->filename);
-    dt_exif_xmp_read(img, params->filename, 0);
-    params->img = img;
-    release = FILENAME;
+    img = (dt_image_t *) params->img;
   }
-
-  else if(params->imgid)
+  else if(params->imgid > -1)
   {
     img = dt_image_cache_get(darktable.image_cache, params->imgid, 'r');
     release = IMGID;
+  }
+  else if (params->filename)
+  {
+    img = malloc(sizeof(dt_image_t));
+    dt_exif_read(img, params->filename);
+    dt_exif_xmp_read(img, params->filename, 0);
+    release = FILENAME;
   }
 
   if(img)
@@ -214,7 +212,6 @@ static void _init_expansion(dt_variables_params_t *params, gboolean iterate)
       }
     }
   }
-  // FIXME: do we have a deadlock if params->img != NULL ??
 
   switch (release)
   {
@@ -224,12 +221,13 @@ static void _init_expansion(dt_variables_params_t *params, gboolean iterate)
     }
     case FILENAME:
     {
-      free(params->img);
+      free(img);
       break;
     }
     case IMGID:
     {
       dt_image_cache_read_release(darktable.image_cache, img);
+      break;
     }
   }
 }
@@ -1057,7 +1055,7 @@ char *dt_variables_expand(dt_variables_params_t *params, gchar *source, gboolean
   _init_expansion(params, iterate);
 
   char *result = _expand_source(params, &source, '\0');
-  
+
   _cleanup_expansion(params);
   return result;
 }
