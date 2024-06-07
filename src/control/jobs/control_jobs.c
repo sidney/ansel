@@ -175,7 +175,8 @@ static void dt_control_image_enumerator_cleanup(void *p)
 {
   dt_control_image_enumerator_t *params = p;
 
-  g_list_free_full(params->index, g_free);
+  // TODO: fix the fucking mess in jobs because each one cleans up its own way
+  g_list_free(params->index);
   params->index = NULL;
   //FIXME: we need to free params->data to avoid a memory leak, but doing so here causes memory corruption....
 //  g_free(params->data);
@@ -2421,6 +2422,10 @@ static void _control_import_job_cleanup(void *p)
 {
   dt_control_image_enumerator_t *params = (dt_control_image_enumerator_t *)p;
   dt_control_import_t *data = params->data;
+
+  for(GList *img = g_list_first(data->imgs); img; img = g_list_next(img))
+    free(img->data);
+
   free(data);
   dt_control_image_enumerator_cleanup(params);
 }
