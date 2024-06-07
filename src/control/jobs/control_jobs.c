@@ -2273,7 +2273,7 @@ int _import_copy_file(dt_variables_params_t *params, dt_control_import_t *data, 
         _("<tt>%s</tt> already exists on the destination and will not be overwritten with <tt>%s</tt>.\n"
           "The file will still be added to the current filmroll, with its editing history if there is one.\n\n"
           "Ensure this is appropriate, or manually empty the target folder and retry an import."),
-        dest_file_path, params->filename, );
+        dest_file_path, params->filename);
 
 #ifdef GDK_WINDOWING_QUARTZ
     dt_osx_disallow_fullscreen(dialog);
