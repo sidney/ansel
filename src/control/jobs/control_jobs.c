@@ -178,6 +178,7 @@ static void dt_control_image_enumerator_cleanup(void *p)
   // TODO: fix the fucking mess in jobs because each one cleans up its own way
   g_list_free(params->index);
   params->index = NULL;
+
   //FIXME: we need to free params->data to avoid a memory leak, but doing so here causes memory corruption....
 //  g_free(params->data);
 
@@ -2156,15 +2157,7 @@ gchar *dt_build_filename_from_pattern(dt_variables_params_t *params, dt_control_
  */
 gboolean _file_exist(const char *dest_file_path)
 {
-  if(!dest_file_path || g_file_test(dest_file_path, G_FILE_TEST_EXISTS))
-  {
-    fprintf(stderr, "Target file with that name already exist and will not be imported.\n");
-    return 1;
-  }
-  else
-    fprintf(stderr, "Target file doesn't exist yet.\n");
-
-  return 0;
+  return dest_file_path != NULL && dest_file_path[0] && g_file_test(dest_file_path, G_FILE_TEST_EXISTS);
 }
 
 /**
@@ -2247,25 +2240,51 @@ int _import_copy_file(dt_variables_params_t *params, dt_control_import_t *data, 
   gchar *dest_file_path = dt_build_filename_from_pattern(params, data);
   fprintf(stdout, "Pattern to path: %s\n", dest_file_path);
 
-  int process = !_file_exist(dest_file_path);
+  int process = TRUE;
 
-  if(process && !dt_util_dir_exist(data->target_dir))
-    process = !_create_folder(data->target_dir); // _create_folder returns 0 when OK
-  else if(process)
-    fprintf(stdout, "The folder already exist.\n");
+  if(!_file_exist(dest_file_path))
+  {
+    if(!dt_util_dir_exist(data->target_dir))
+      process = !_create_folder(data->target_dir); // _create_folder returns 0 when OK
+    else
+      fprintf(stdout, "The folder already exist.\n");
+
+    if(process)
+      process = dt_util_test_writable_dir(data->target_dir);
+    else
+      fprintf(stdout, "Unable to create the target folder.\n");
+
+    if(process)
+      process = _copy_file(params->filename, dest_file_path);
+    else
+      fprintf(stdout, "Not allowed to write in the folder.\n");
+
+    if(process)
+      g_strlcpy(img_path_to_db, dest_file_path, pathname_len);
+    else
+      fprintf(stderr, "Unable to copy the file.\n");
+  }
   else
   {
-    fprintf(stdout, "Skip.\n");
-    g_free(dest_file_path);
-    return 1;
+    g_strlcpy(img_path_to_db, dest_file_path, pathname_len);
+    GtkWidget *dialog = gtk_message_dialog_new_with_markup(
+        GTK_WINDOW(dt_ui_main_window(darktable.gui->ui)), GTK_DIALOG_DESTROY_WITH_PARENT, GTK_MESSAGE_WARNING,
+        GTK_BUTTONS_OK,
+        _("<tt>%s</tt> already exists on the destination and will not be overwritten with <tt>%s</tt>.\n"
+          "The file will still be added to the current filmroll, with its editing history if there is one.\n\n"
+          "Ensure this is appropriate, or manually empty the target folder and retry an import."),
+        dest_file_path, params->filename, );
+
+#ifdef GDK_WINDOWING_QUARTZ
+    dt_osx_disallow_fullscreen(dialog);
+#endif
+
+    gtk_window_set_title(GTK_WINDOW(dialog), _("Target file already exists"));
+    gtk_dialog_run(GTK_DIALOG(dialog));
+    gtk_widget_destroy(dialog);
+
+    fprintf(stderr, "File copy skipped, the target file already exist.\n");
   }
-
-  if(process) process = dt_util_test_writable_dir(data->target_dir);
-  if(!process) fprintf(stdout, "Not allowed to write in the folder.\n");
-  else process = _copy_file(params->filename, dest_file_path);
-
-  if(process) g_strlcpy(img_path_to_db, dest_file_path, pathname_len);
-  else fprintf(stderr, "The file has not been copied.\n");
 
   g_free(dest_file_path);
   return !process;
