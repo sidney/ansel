@@ -2079,7 +2079,7 @@ static GList *_apply_lua_filter(GList *images)
   dt_lua_unlock();
 
   /* we got ourself a list of images, lets sort and start import */
-  images = g_list_sort(images, (GCompareFunc)_sort_filename);
+  images = g_list_sort(images, (GCompareFunc)g_strcmp0);
   return images;
 }
 #endif
