@@ -2341,6 +2341,8 @@ gboolean _import_image(const GList *img, dt_control_import_t *data, const int in
   params->filename = g_strdup(filename);
   params->sequence = index;
   params->jobcode = g_strdup(data->jobcode);
+  params->imgid = -1;
+  dt_variables_set_datetime(params, data->datetime);
 
   gchar img_path_to_db[PATH_MAX] = { 0 };
   gboolean process_error = 0;
