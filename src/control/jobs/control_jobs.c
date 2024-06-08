@@ -2258,22 +2258,6 @@ int _import_copy_file(dt_variables_params_t *params, dt_control_import_t *data, 
   else
   {
     g_strlcpy(img_path_to_db, dest_file_path, pathname_len);
-    GtkWidget *dialog = gtk_message_dialog_new_with_markup(
-        GTK_WINDOW(dt_ui_main_window(darktable.gui->ui)), GTK_DIALOG_DESTROY_WITH_PARENT, GTK_MESSAGE_WARNING,
-        GTK_BUTTONS_OK,
-        _("<tt>%s</tt> already exists on the destination and will not be overwritten with <tt>%s</tt>.\n"
-          "The file will still be added to the current filmroll, with its editing history if there is one.\n\n"
-          "Ensure this is appropriate, or manually empty the target folder and retry an import."),
-        dest_file_path, params->filename);
-
-#ifdef GDK_WINDOWING_QUARTZ
-    dt_osx_disallow_fullscreen(dialog);
-#endif
-
-    gtk_window_set_title(GTK_WINDOW(dialog), _("Target file already exists"));
-    gtk_dialog_run(GTK_DIALOG(dialog));
-    gtk_widget_destroy(dialog);
-
     fprintf(stderr, "File copy skipped, the target file already exist.\n");
   }
 
