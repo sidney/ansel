@@ -40,6 +40,8 @@
 #include "gui/preferences.h"
 #include "gui/gtkentry.h"
 
+#include <gio/gio.h>
+
 #ifdef GDK_WINDOWING_QUARTZ
 #include "osx/osx.h"
 #endif
@@ -132,13 +134,21 @@ static void _do_select_all(dt_lib_import_t *d);
 static void _do_select_none(dt_lib_import_t *d);
 static void _do_select_new(dt_lib_import_t *d);
 
-static void _recurse_folder(GFile *folder, dt_import_t *const import);
+static void _recurse_folder(GVfs *vfs, GFile *folder, dt_import_t *const import);
 
-static void _filter_document(GFile *document, dt_import_t *import)
+static void _filter_document(GVfs *vfs, GFile *document, dt_import_t *import)
 {
   if(*(import->shutdown)) return;
 
   gchar *pathname = g_file_get_path(document);
+  fprintf(stdout, "URI: %s\n", g_file_get_uri(document));
+  fprintf(stdout, "PATHNAME: %s\n", pathname);
+  /*
+  fprintf(stdout, "FILENAME: %s\n", g_filename_from_uri(g_file_get_uri(document), NULL, NULL));
+  fprintf(stdout, "BASENAME: %s\n", g_file_get_basename(document));
+  fprintf(stdout, "PARSENAME: %s\n", g_file_get_parse_name(document));
+  */
+
   GtkFileFilterInfo filter_info = { gtk_file_filter_get_needed(import->filter),
                                     g_file_get_parse_name(document),
                                     g_file_get_uri(document),
@@ -147,18 +157,33 @@ static void _filter_document(GFile *document, dt_import_t *import)
   // Check that document is a real file (not directory) and it passes the type check defined by user in GUI filters.
   // gtk_file_chooser_get_files() applies the filters on the first level of recursivity,
   // so this test is only useful for the next levels if folders are selected at the first level.
-  if(g_file_test(pathname, G_FILE_TEST_IS_REGULAR) && gtk_file_filter_filter(import->filter, &filter_info))
+  if(pathname && g_file_test(pathname, G_FILE_TEST_IS_REGULAR) && gtk_file_filter_filter(import->filter, &filter_info))
   {
+    //fprintf(stdout, "is regular file\n");
     import->files = g_list_prepend(import->files, pathname);
     // prepend is more efficient than append. Import control reorders alphabetically anyway.
   }
-  else if(g_file_test(pathname, G_FILE_TEST_IS_DIR))
+  else if(pathname && g_file_test(pathname, G_FILE_TEST_IS_DIR))
   {
-    _recurse_folder(document, import);
+    //fprintf(stdout, "is dir\n");
+    _recurse_folder(vfs, document, import);
+    g_free(pathname);
   }
+  /*
+  else if(gtk_file_filter_filter(import->filter, &filter_info))
+  {
+    fprintf(stdout, "passed filter\n");
+    g_free(pathname);
+  }
+  else
+  {
+    fprintf(stdout, "is nothing\n");
+    g_free(pathname);
+  }
+  */
 }
 
-static void _recurse_folder(GFile *folder, dt_import_t *const import)
+static void _recurse_folder(GVfs *vfs, GFile *folder, dt_import_t *const import)
 {
   // Get subfolders and files from current folder
   if(*(import->shutdown)) return;
@@ -181,7 +206,7 @@ static void _recurse_folder(GFile *folder, dt_import_t *const import)
       return;
     }
 
-    _filter_document(file, import);
+    _filter_document(vfs, file, import);
   }
 
   g_object_unref(files);
@@ -195,8 +220,13 @@ static void _recurse_selection(GSList *selection, dt_import_t *const import)
 
   if(*(import->shutdown)) return;
 
-  for(GSList *file = selection; file; file = g_slist_next(file))
-    _filter_document((GFile *)file->data, import);
+  GVfs *vfs = g_vfs_get_default();
+  for(GSList *uri = selection; uri; uri = g_slist_next(uri))
+  {
+    GFile *file = g_vfs_get_file_for_uri(vfs, (const char *)uri->data);
+    _filter_document(vfs, file, import);
+    g_object_unref(file);
+  }
 
   import->files = g_list_sort(import->files, (GCompareFunc) g_strcmp0);
 }
@@ -466,10 +496,10 @@ static int _is_in_library_by_metadata(GFile *file)
   return res;
 }
 
-static void update_preview_cb (GtkFileChooser *file_chooser, gpointer userdata, const GList *files)
+static void update_preview_cb(GtkFileChooser *file_chooser, gpointer userdata, const GList *files)
 {
   dt_lib_import_t *d = (dt_lib_import_t *)userdata;
-  if(files->data == NULL) return;
+  if(files == NULL || files->data == NULL) return;
   gchar *filename = g_strdup(files->data);
   gboolean have_file = (filename != NULL) && filename[0] && g_file_test(filename, G_FILE_TEST_IS_REGULAR);
 
@@ -873,6 +903,7 @@ static void gui_init(dt_lib_import_t *d)
   gtk_file_chooser_set_use_preview_label(GTK_FILE_CHOOSER(d->file_chooser), FALSE);
   gtk_file_chooser_set_current_folder(GTK_FILE_CHOOSER(d->file_chooser),
                                       dt_conf_get_string("ui_last/import_last_directory"));
+  gtk_file_chooser_set_local_only(GTK_FILE_CHOOSER(d->file_chooser), FALSE);
   gtk_box_pack_start(GTK_BOX(rbox), d->file_chooser, TRUE, TRUE, 0);
   g_signal_connect(G_OBJECT(d->file_chooser), "current-folder-changed", G_CALLBACK(_update_directory), NULL);
   g_signal_connect(G_OBJECT(d->file_chooser), "file-activated", G_CALLBACK(_file_activated), GTK_DIALOG(d->dialog));
@@ -1179,7 +1210,7 @@ static dt_import_t * dt_import_init(dt_lib_import_t *d)
   import->timeout = 0;
 
   // selection is owned here and will need to be freed.
-  import->selection = gtk_file_chooser_get_files(GTK_FILE_CHOOSER(d->file_chooser));
+  import->selection = gtk_file_chooser_get_uris(GTK_FILE_CHOOSER(d->file_chooser));
 
   // Need to tell Gtk to not destroy the filter in case we close the file chooser widget,
   // because we only capture a reference to the original (we don't own it).
@@ -1195,7 +1226,7 @@ static void dt_import_cleanup(void *data)
   // import->files needs to be freed manually
   // it is freed by the import job if used
   dt_import_t *import = (dt_import_t *)data;
-  g_slist_free(import->selection);
+  g_slist_free_full(import->selection, g_free);
   import->selection = NULL;
   g_object_unref(import->filter);
   g_free(import);
