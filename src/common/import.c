@@ -130,6 +130,8 @@ static void _cleanup(dt_lib_import_t *d);
 static void gui_init(dt_lib_import_t *d);
 static void gui_cleanup(dt_lib_import_t *d);
 
+static void _set_test_path(dt_lib_import_t *d);
+
 static void _do_select_all(dt_lib_import_t *d);
 static void _do_select_none(dt_lib_import_t *d);
 static void _do_select_new(dt_lib_import_t *d);
@@ -496,12 +498,28 @@ static int _is_in_library_by_metadata(GFile *file)
   return res;
 }
 
-static void update_preview_cb(GtkFileChooser *file_chooser, gpointer userdata, const GList *files)
+static void update_preview_cb(GtkFileChooser *file_chooser, gpointer userdata)
 {
   dt_lib_import_t *d = (dt_lib_import_t *)userdata;
-  if(files == NULL || files->data == NULL) return;
-  gchar *filename = g_strdup(files->data);
-  gboolean have_file = (filename != NULL) && filename[0] && g_file_test(filename, G_FILE_TEST_IS_REGULAR);
+  char *uri = gtk_file_chooser_get_preview_uri(file_chooser);
+  if(uri == NULL)
+  {
+    gtk_file_chooser_set_preview_widget_active(file_chooser, FALSE);
+    return; // nothing to do, nothing to free.
+  }
+
+  GVfs *vfs = g_vfs_get_default();
+  GFile *in = g_vfs_get_file_for_uri(vfs, (const char *)uri);
+  char *filename = g_file_get_path(in);
+
+  gboolean have_file = (filename != NULL);
+  if(have_file)
+  {
+    g_free(d->path_file);
+    d->path_file = g_strdup(filename);
+    _set_test_path(d);
+  }
+  gtk_file_chooser_set_preview_widget_active(file_chooser, have_file);
 
   /* Get the thumbnail */
   GdkPixbuf *pixbuf = _import_get_thumbnail(filename, (int) DT_PIXEL_APPLY_DPI(180), (int) DT_PIXEL_APPLY_DPI(180));
@@ -519,11 +537,8 @@ static void update_preview_cb(GtkFileChooser *file_chooser, gpointer userdata, c
   gtk_label_set_text(GTK_LABEL(d->exif_info[EXIF_INLIB_FIELD]), _("No"));
   gtk_label_set_text(GTK_LABEL(d->exif_info[EXIF_PATH_FIELD]), "");
 
-  if(!have_file) return; // Nothing more we can do
-
   /* Do we already have this picture in library ? */
-  gchar *folder = dt_util_path_get_dirname(files->data);
-  GFile *in = g_file_new_for_path(filename);
+  gchar *folder = dt_util_path_get_dirname(filename);
   gchar *basename = g_file_get_basename(in);
   g_object_unref(in);
   const int is_path_in_lib = _is_in_library_by_path(folder, basename);
@@ -552,6 +567,7 @@ static void update_preview_cb(GtkFileChooser *file_chooser, gpointer userdata, c
 
   /* Get EXIF info */
   dt_image_t img = { 0 };
+  dt_image_init(&img);
   if(!dt_exif_read(&img, filename))
   {
     char datetime[200];
@@ -571,7 +587,7 @@ static void update_preview_cb(GtkFileChooser *file_chooser, gpointer userdata, c
   }
 
   g_free(filename);
-  gtk_file_chooser_set_preview_widget_active(file_chooser, have_file);
+  g_free(uri);
 }
 
 static void _update_directory(GtkWidget *file_chooser, dt_lib_import_t *d)
@@ -669,17 +685,9 @@ static void _filelist_changed_callback(gpointer instance, GList *files, guint el
   gtk_label_set_text(GTK_LABEL(d->selected_files), finished ? g_strdup_printf(_("%i files selected"), elements)
                                                             : g_strdup_printf(_("Detection in progress... (%i files found so far)"), elements));
 
-  if(files != NULL)
-  {
-    g_free(d->path_file);
-    d->path_file = g_strdup((char *)files->data);
-    _set_test_path(d);
-    update_preview_cb(GTK_FILE_CHOOSER(d->file_chooser), d, files);
-  }
-
   // The list of files is not used in GUI. It's not freed in the job either.
   if(finished)
-    g_list_free(files);
+    g_list_free_full(files, g_free);
 }
 
 static void _selection_changed(GtkWidget *filechooser, dt_lib_import_t *d)
@@ -908,6 +916,7 @@ static void gui_init(dt_lib_import_t *d)
   g_signal_connect(G_OBJECT(d->file_chooser), "current-folder-changed", G_CALLBACK(_update_directory), NULL);
   g_signal_connect(G_OBJECT(d->file_chooser), "file-activated", G_CALLBACK(_file_activated), GTK_DIALOG(d->dialog));
   g_signal_connect(G_OBJECT(d->file_chooser), "selection-changed", G_CALLBACK(_selection_changed), d);
+  g_signal_connect(G_OBJECT(d->file_chooser), "update-preview", G_CALLBACK(update_preview_cb), d);
 
   // file extension filters
   _file_filters(d->file_chooser);
