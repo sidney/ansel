@@ -157,8 +157,8 @@ static void _init_expansion(dt_variables_params_t *params, gboolean iterate)
   else if (params->filename)
   {
     img = malloc(sizeof(dt_image_t));
+    dt_image_init(img);
     dt_exif_read(img, params->filename);
-    dt_exif_xmp_read(img, params->filename, 0);
     release = FILENAME;
   }
 
