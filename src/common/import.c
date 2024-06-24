@@ -130,7 +130,7 @@ static void _cleanup(dt_lib_import_t *d);
 static void gui_init(dt_lib_import_t *d);
 static void gui_cleanup(dt_lib_import_t *d);
 
-static void _set_test_path(dt_lib_import_t *d);
+static void _set_test_path(dt_lib_import_t *d, dt_image_t *img);
 
 static void _do_select_all(dt_lib_import_t *d);
 static void _do_select_none(dt_lib_import_t *d);
@@ -521,14 +521,27 @@ static void update_preview_cb(GtkFileChooser *file_chooser, gpointer userdata)
   GFile *in = g_vfs_get_file_for_uri(vfs, (const char *)uri);
   char *filename = g_file_get_path(in);
 
-  gboolean have_file = (filename != NULL);
+  gboolean have_file = (filename != NULL) && g_file_test(filename, G_FILE_TEST_IS_REGULAR);
+  gtk_file_chooser_set_preview_widget_active(file_chooser, have_file);
+
+  dt_image_t *img = NULL;
+  int valid_exif = 0;
   if(have_file)
   {
     g_free(d->path_file);
     d->path_file = g_strdup(filename);
-    _set_test_path(d);
+
+    img = malloc(sizeof(dt_image_t));
+    dt_image_init(img);
+    valid_exif = dt_exif_read(img, filename);
+    _set_test_path(d, img);
   }
-  gtk_file_chooser_set_preview_widget_active(file_chooser, have_file);
+  else
+  {
+    g_object_unref(in);
+    g_free(filename);
+    return;
+  }
 
   /* Get the thumbnail */
   GdkPixbuf *pixbuf = _import_get_thumbnail(filename, (int) DT_PIXEL_APPLY_DPI(180), (int) DT_PIXEL_APPLY_DPI(180));
@@ -566,28 +579,26 @@ static void update_preview_cb(GtkFileChooser *file_chooser, gpointer userdata)
   char path[512];
   if(imgid > -1)
   {
-    const dt_image_t *img = dt_image_cache_get(darktable.image_cache, imgid, 'r');
-    if(img)
+    dt_image_t *lib_img = dt_image_cache_get(darktable.image_cache, imgid, 'r');
+    if(lib_img)
     {
-      dt_image_film_roll_directory(img, path, sizeof(path));
-      dt_image_cache_read_release(darktable.image_cache, img);
+      dt_image_film_roll_directory(lib_img, path, sizeof(path));
+      dt_image_cache_read_release(darktable.image_cache, lib_img);
     }
   }
 
   /* Get EXIF info */
-  dt_image_t img = { 0 };
-  dt_image_init(&img);
-  if(!dt_exif_read(&img, filename))
+  if(!valid_exif)
   {
     char datetime[200];
-    const gboolean valid = dt_datetime_img_to_local(datetime, sizeof(datetime), &img, FALSE);
-    const gchar *exposure_field = g_strdup_printf("%.0f ISO - f/%.1f - %s", img.exif_iso, img.exif_aperture,
-                                                  dt_util_format_exposure(img.exif_exposure));
+    const gboolean valid = dt_datetime_img_to_local(datetime, sizeof(datetime), img, FALSE);
+    const gchar *exposure_field = g_strdup_printf("%.0f ISO - f/%.1f - %s", img->exif_iso, img->exif_aperture,
+                                                  dt_util_format_exposure(img->exif_exposure));
     gtk_label_set_text(GTK_LABEL(d->exif_info[EXIF_DATETIME_FIELD]), g_strdup_printf(" %s", valid ? datetime : "-"));
-    gtk_label_set_text(GTK_LABEL(d->exif_info[EXIF_MODEL_FIELD]), g_strdup_printf(" %s", (img.exif_model[0] != '\0') ? img.exif_model : "-"));
-    gtk_label_set_text(GTK_LABEL(d->exif_info[EXIF_MAKER_FIELD]), g_strdup_printf(" %s", (img.exif_maker[0] != '\0') ? img.exif_maker : "-"));
-    gtk_label_set_text(GTK_LABEL(d->exif_info[EXIF_LENS_FIELD]),  g_strdup_printf(" %s", (img.exif_lens[0]  != '\0') ? img.exif_lens  : "-"));
-    gtk_label_set_text(GTK_LABEL(d->exif_info[EXIF_FOCAL_LENS_FIELD]), g_strdup_printf(" %0.f mm", img.exif_focal_length));
+    gtk_label_set_text(GTK_LABEL(d->exif_info[EXIF_MODEL_FIELD]), g_strdup_printf(" %s", (img->exif_model[0] != '\0') ? img->exif_model : "-"));
+    gtk_label_set_text(GTK_LABEL(d->exif_info[EXIF_MAKER_FIELD]), g_strdup_printf(" %s", (img->exif_maker[0] != '\0') ? img->exif_maker : "-"));
+    gtk_label_set_text(GTK_LABEL(d->exif_info[EXIF_LENS_FIELD]),  g_strdup_printf(" %s", (img->exif_lens[0]  != '\0') ? img->exif_lens  : "-"));
+    gtk_label_set_text(GTK_LABEL(d->exif_info[EXIF_FOCAL_LENS_FIELD]), g_strdup_printf(" %0.f mm", img->exif_focal_length));
     gtk_label_set_text(GTK_LABEL(d->exif_info[EXIF_EXPOSURE_FIELD]), exposure_field);
     gtk_label_set_text(GTK_LABEL(d->exif_info[EXIF_INLIB_FIELD]), (is_in_lib) ? g_strdup_printf(_(" Yes (ID %i), in"), imgid) : _(" No"));
 
@@ -597,6 +608,7 @@ static void update_preview_cb(GtkFileChooser *file_chooser, gpointer userdata)
 
   g_free(filename);
   g_free(uri);
+  g_free(img);
 }
 
 static void _update_directory(GtkWidget *file_chooser, dt_lib_import_t *d)
@@ -617,7 +629,7 @@ static void _set_help_string(dt_lib_import_t *d, gboolean copy)
         _("<i>The files will stay at their original location</i>"));
 }
 
-static void _set_test_path(dt_lib_import_t *d)
+static void _set_test_path(dt_lib_import_t *d, dt_image_t *img)
 {
   if(!d->path_file || d->path_file == NULL)
     return;
@@ -661,9 +673,27 @@ static void _set_test_path(dt_lib_import_t *d)
                                 .discarded = NULL,
                                 };
 
-    gchar *_path = dt_build_filename_from_pattern((const char *const)file->data, 1, &data);
+    gboolean free_after = FALSE;
+    if(img == NULL)
+    {
+      img = malloc(sizeof(dt_image_t));
+      dt_image_init(img);
+
+      // Generate file I/O only if the pattern is using EXIF variables.
+      // Otherwise, discard it since it's really expensive if the file is on external/remote storage.
+      // This is mandatory BEFORE expanding variables in pattern
+      if(strstr(data.target_file_pattern, "$(EXIF") != NULL
+        || strstr(data.target_subfolder_pattern, "$(EXIF") != NULL )
+        dt_exif_read(img, (const char*)file->data);
+
+      free_after = TRUE;
+    }
+
+    gchar *_path = dt_build_filename_from_pattern((const char *const)file->data, 1, img, &data);
     gchar * cut = g_strdup(g_strrstr(basedir, G_DIR_SEPARATOR_S));
     gchar *fake_path = g_strdup(g_strrstr(_path, cut));
+
+    if(free_after) g_free(img);
 
     gtk_label_set_text(GTK_LABEL(d->test_path), (fake_path && fake_path != NULL)
                   ? g_strdup_printf(_("Result of the pattern : ...%s"), fake_path)
@@ -707,31 +737,31 @@ static void _copy_toggled_callback(GtkWidget *combobox, dt_lib_import_t *d)
   gtk_widget_set_visible(GTK_WIDGET(d->grid), state);
   gtk_widget_set_visible(GTK_WIDGET(d->test_path), state);
   _set_help_string(d, state);
-  _set_test_path(d);
+  _set_test_path(d, NULL);
 }
 
 static void _jobcode_changed(GtkFileChooserButton* widget, dt_lib_import_t *d)
 {
   dt_conf_set_string("ui_last/import_jobcode", gtk_entry_get_text(GTK_ENTRY(widget)));
-  _set_test_path(d);
+  _set_test_path(d, NULL);
 }
 
 static void _base_dir_changed(GtkFileChooserButton* self, dt_lib_import_t *d)
 {
   dt_conf_set_string("session/base_directory_pattern", gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(self)));
-  _set_test_path(d);
+  _set_test_path(d, NULL);
 }
 
 static void _project_dir_changed(GtkWidget *widget, dt_lib_import_t *d)
 {
   dt_conf_set_string("session/sub_directory_pattern", gtk_entry_get_text(GTK_ENTRY(widget)));
-  _set_test_path(d);
+  _set_test_path(d, NULL);
 }
 
 static void _filename_changed(GtkWidget *widget, dt_lib_import_t *d)
 {
   dt_conf_set_string("session/filename_pattern", gtk_entry_get_text(GTK_ENTRY(widget)));
-  _set_test_path(d);
+  _set_test_path(d, NULL);
 }
 
 static void _update_date(GtkCalendar *calendar, GtkWidget *entry)
@@ -773,7 +803,7 @@ static void _datetime_changed_callback(GtkEntry *entry, dt_lib_import_t *d)
     }
   }
   gtk_entry_set_icon_from_icon_name(entry, GTK_ENTRY_ICON_PRIMARY, NULL);
-  _set_test_path(d);
+  _set_test_path(d, NULL);
 }
 
 static void _file_activated(GtkFileChooser *chooser, GtkDialog *dialog)
@@ -1115,7 +1145,7 @@ static void gui_init(dt_lib_import_t *d)
   d->test_path = gtk_label_new("");
   gtk_box_pack_start(GTK_BOX(rbox), GTK_WIDGET(d->test_path), FALSE, FALSE, 0);
   gtk_widget_set_halign(d->test_path, GTK_ALIGN_START);
-  _set_test_path(d);
+  _set_test_path(d, NULL);
 
   gtk_widget_show_all(d->dialog);
 

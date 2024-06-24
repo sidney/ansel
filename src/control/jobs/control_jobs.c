@@ -2116,20 +2116,8 @@ gchar *_path_cleanup(gchar *path_in)
   return path_out;
 }
 
-gchar *dt_build_filename_from_pattern(const char *const filename, const int index, dt_control_import_t *data)
+gchar *dt_build_filename_from_pattern(const char *const filename, const int index, dt_image_t *img, dt_control_import_t *data)
 {
-  dt_image_t *img = malloc(sizeof(dt_image_t));
-  dt_image_init(img);
-
-  // Generate file I/O only if the pattern is using EXIF variables.
-  // Otherwise, discard it since it's really expensive if the file is on external/remote storage.
-  if(strstr(data->target_file_pattern, "$(EXIF") != NULL
-    || strstr(data->target_subfolder_pattern, "$(EXIF") != NULL )
-  {
-    fprintf(stdout, "reading EXIF\n");
-    dt_exif_read(img, filename);
-  }
-
   dt_variables_params_t *params;
   dt_variables_params_init(&params);
   params->filename = g_strdup(filename);
@@ -2141,7 +2129,6 @@ gchar *dt_build_filename_from_pattern(const char *const filename, const int inde
 
   gchar *file_expand = dt_variables_expand(params, data->target_file_pattern, FALSE);
   gchar *path_expand = dt_variables_expand(params, data->target_subfolder_pattern, FALSE);
-  free(img);
 
   // remove this if we decide to do the correction on user's settings directly
   gchar *file = _path_cleanup(file_expand);
@@ -2252,8 +2239,22 @@ const int32_t _import_job(dt_control_import_t *data, gchar *img_path_to_db)
  */
 int _import_copy_file(const char *const filename, const int index, dt_control_import_t *data, gchar *img_path_to_db, size_t pathname_len, GList **discarded)
 {
-  gchar *dest_file_path = dt_build_filename_from_pattern(filename, index, data);
+  dt_image_t *img = malloc(sizeof(dt_image_t));
+  dt_image_init(img);
+
+  // Generate file I/O only if the pattern is using EXIF variables.
+  // Otherwise, discard it since it's really expensive if the file is on external/remote storage.
+  // This is mandatory BEFORE expanding variables in pattern
+  if(strstr(data->target_file_pattern, "$(EXIF") != NULL
+    || strstr(data->target_subfolder_pattern, "$(EXIF") != NULL )
+  {
+    fprintf(stdout, "reading EXIF\n");
+    dt_exif_read(img, filename);
+  }
+
+  gchar *dest_file_path = dt_build_filename_from_pattern(filename, index, img, data);
   fprintf(stdout, "Pattern to path: %s\n", dest_file_path);
+  free(img);
 
   int process = TRUE;
 
