@@ -787,7 +787,7 @@ int dt_imageio_export_with_flags(const int32_t imgid, const char *filename,
     if(!strncmp(filter, "post:", 5)) dt_dev_pixelpipe_disable_before(&pipe, filter + 5);
   }
 
-  dt_dev_pixelpipe_get_dimensions(&pipe, &dev, pipe.iwidth, pipe.iheight, &pipe.processed_width,
+  dt_dev_pixelpipe_get_roi_out(&pipe, &dev, pipe.iwidth, pipe.iheight, &pipe.processed_width,
                                   &pipe.processed_height);
 
   dt_show_times(&start, "[export] creating pixelpipe");

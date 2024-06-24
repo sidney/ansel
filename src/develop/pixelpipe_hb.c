@@ -548,7 +548,16 @@ void dt_dev_pixelpipe_change(dt_dev_pixelpipe_t *pipe, struct dt_develop_t *dev)
   }
 
   pipe->changed = DT_DEV_PIPE_UNCHANGED;
-  dt_dev_pixelpipe_get_dimensions(pipe, dev, pipe->iwidth, pipe->iheight, &pipe->processed_width,
+
+  // Get the final output size of the pipe, for GUI coordinates mapping between image buffer and window
+  dt_dev_pixelpipe_get_roi_out(pipe, dev, pipe->iwidth, pipe->iheight, &pipe->processed_width,
+                                  &pipe->processed_height);
+
+  // Get the previous output size of the module, for cache invalidation.
+  dt_dev_pixelpipe_get_roi_in(pipe, dev, pipe->processed_width, pipe->processed_height);
+
+  // Need to run that again. Why ?
+  dt_dev_pixelpipe_get_roi_out(pipe, dev, pipe->iwidth, pipe->iheight, &pipe->processed_width,
                                   &pipe->processed_height);
 
   // This needs correct roi_out, so run get_dimensions before
@@ -1475,7 +1484,7 @@ static int pixelpipe_process_on_GPU(dt_dev_pixelpipe_t *pipe, dt_develop_t *dev,
       {
         /* Nice, everything went fine */
 
-        /* OLD COMMENT: 
+        /* OLD COMMENT:
            this is reasonable on slow GPUs only, where it's more expensive to reprocess the whole pixelpipe
            than regularly copying device buffers back to host. This would slow down fast GPUs considerably.
            NEW COMMENT:
@@ -2221,14 +2230,14 @@ void dt_dev_pixelpipe_flush_caches(dt_dev_pixelpipe_t *pipe)
   dt_dev_pixelpipe_cache_flush(&pipe->cache);
 }
 
-void dt_dev_pixelpipe_get_dimensions(dt_dev_pixelpipe_t *pipe, struct dt_develop_t *dev, int width_in,
+void dt_dev_pixelpipe_get_roi_out(dt_dev_pixelpipe_t *pipe, struct dt_develop_t *dev, int width_in,
                                      int height_in, int *width, int *height)
 {
   dt_pthread_mutex_lock(&pipe->busy_mutex);
   dt_iop_roi_t roi_in = (dt_iop_roi_t){ 0, 0, width_in, height_in, 1.0 };
   dt_iop_roi_t roi_out;
-  GList *modules = pipe->iop;
-  GList *pieces = pipe->nodes;
+  GList *modules = g_list_first(pipe->iop);
+  GList *pieces = g_list_first(pipe->nodes);
   while(modules)
   {
     dt_iop_module_t *module = (dt_iop_module_t *)modules->data;
@@ -2257,6 +2266,46 @@ void dt_dev_pixelpipe_get_dimensions(dt_dev_pixelpipe_t *pipe, struct dt_develop
   }
   *width = roi_out.width;
   *height = roi_out.height;
+  dt_pthread_mutex_unlock(&pipe->busy_mutex);
+}
+
+void dt_dev_pixelpipe_get_roi_in(dt_dev_pixelpipe_t *pipe, struct dt_develop_t *dev, int width_out, int height_out)
+{
+  // while module->modify_roi_out describes how the current module will change the size of
+  // the output buffer depending on its parameters (pretty intuitive),
+  // module->modify_roi_in describes "how much material" the current module needs from the previous one,
+  // because some modules (lens correction) need a padding on their input.
+  // The tricky part is therefore that the effect of the current module->modify_roi_in() needs to be repercuted
+  // upstream in the pipeline for proper pipeline cache invalidation, so we need to browse the pipeline
+  // backwards.
+
+  dt_pthread_mutex_lock(&pipe->busy_mutex);
+  dt_iop_roi_t roi_out = (dt_iop_roi_t){ 0, 0, width_out, height_out, 1.0 };
+  dt_iop_roi_t roi_in;
+  GList *modules = g_list_last(pipe->iop);
+  GList *pieces = g_list_last(pipe->nodes);
+  while(modules)
+  {
+    dt_iop_module_t *module = (dt_iop_module_t *)modules->data;
+    dt_dev_pixelpipe_iop_t *piece = (dt_dev_pixelpipe_iop_t *)pieces->data;
+
+    // skip this module?
+    if(piece->enabled)
+    {
+      module->modify_roi_in(module, piece, &roi_out, &roi_in);
+    }
+    else
+    {
+      // pass through regions of interest for gui post expose events
+      roi_in = roi_out;
+    }
+
+    piece->buf_in = roi_in;
+    roi_out = roi_in;
+
+    modules = g_list_previous(modules);
+    pieces = g_list_previous(pieces);
+  }
   dt_pthread_mutex_unlock(&pipe->busy_mutex);
 }
 
