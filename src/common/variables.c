@@ -118,7 +118,7 @@ gboolean dt_get_user_pictures_dir(const gchar *homedir, gchar *picdir, size_t pi
   if(*dir == 0)
     fprintf(stderr,"Error: Can't get user's pictures folder.\n");
   else
-    return g_strlcpy(picdir, dir, picdir_size) >= 1; 
+    return g_strlcpy(picdir, dir, picdir_size) >= 1;
 
   return 0;
 }
@@ -171,13 +171,6 @@ static void _init_expansion(dt_variables_params_t *params, gboolean iterate)
   {
     img = dt_image_cache_get(darktable.image_cache, params->imgid, 'r');
     release = IMGID;
-  }
-  else if (params->filename)
-  {
-    img = malloc(sizeof(dt_image_t));
-    dt_image_init(img);
-    dt_exif_read(img, params->filename);
-    release = FILENAME;
   }
 
   if(img)
@@ -234,12 +227,8 @@ static void _init_expansion(dt_variables_params_t *params, gboolean iterate)
   switch (release)
   {
     case NONE:
-    {
-      break;
-    }
     case FILENAME:
     {
-      free(img);
       break;
     }
     case IMGID:

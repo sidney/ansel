@@ -2118,16 +2118,30 @@ gchar *_path_cleanup(gchar *path_in)
 
 gchar *dt_build_filename_from_pattern(const char *const filename, const int index, dt_control_import_t *data)
 {
+  dt_image_t *img = malloc(sizeof(dt_image_t));
+  dt_image_init(img);
+
+  // Generate file I/O only if the pattern is using EXIF variables.
+  // Otherwise, discard it since it's really expensive if the file is on external/remote storage.
+  if(strstr(data->target_file_pattern, "$(EXIF") != NULL
+    || strstr(data->target_subfolder_pattern, "$(EXIF") != NULL )
+  {
+    fprintf(stdout, "reading EXIF\n");
+    dt_exif_read(img, filename);
+  }
+
   dt_variables_params_t *params;
   dt_variables_params_init(&params);
   params->filename = g_strdup(filename);
   params->sequence = index;
   params->jobcode = g_strdup(data->jobcode);
   params->imgid = -1;
+  params->img = img;
   dt_variables_set_datetime(params, data->datetime);
 
   gchar *file_expand = dt_variables_expand(params, data->target_file_pattern, FALSE);
   gchar *path_expand = dt_variables_expand(params, data->target_subfolder_pattern, FALSE);
+  free(img);
 
   // remove this if we decide to do the correction on user's settings directly
   gchar *file = _path_cleanup(file_expand);
