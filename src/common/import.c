@@ -143,9 +143,9 @@ static void _filter_document(GVfs *vfs, GFile *document, dt_import_t *import)
   if(*(import->shutdown)) return;
 
   gchar *pathname = g_file_get_path(document);
+  /*
   fprintf(stdout, "URI: %s\n", g_file_get_uri(document));
   fprintf(stdout, "PATHNAME: %s\n", pathname);
-  /*
   fprintf(stdout, "FILENAME: %s\n", g_filename_from_uri(g_file_get_uri(document), NULL, NULL));
   fprintf(stdout, "BASENAME: %s\n", g_file_get_basename(document));
   fprintf(stdout, "PARSENAME: %s\n", g_file_get_parse_name(document));
@@ -372,7 +372,7 @@ void _dt_check_basedir()
 {
   gchar basedir[PATH_MAX] = { 0 };
   g_strlcpy(basedir, dt_conf_get_string("session/base_directory_pattern"), sizeof(basedir));
-  
+
   if(*basedir == 0 && dt_get_user_pictures_dir(dt_loc_get_home_dir(NULL), basedir, sizeof(basedir)))
     dt_conf_set_string("session/base_directory_pattern", basedir);
 }
@@ -661,16 +661,7 @@ static void _set_test_path(dt_lib_import_t *d)
                                 .discarded = NULL,
                                 };
 
-    dt_variables_params_t *params;
-    dt_variables_params_init(&params);
-
-    params->filename = g_strdup(file->data);
-    params->sequence = 1;
-    params->jobcode = g_strdup(data.jobcode);
-    params->imgid = -1;
-    dt_variables_set_datetime(params, data.datetime);
-
-    gchar *_path = dt_build_filename_from_pattern(params, &data);
+    gchar *_path = dt_build_filename_from_pattern((const char *const)file->data, 1, &data);
     gchar * cut = g_strdup(g_strrstr(basedir, G_DIR_SEPARATOR_S));
     gchar *fake_path = g_strdup(g_strrstr(_path, cut));
 
@@ -682,7 +673,6 @@ static void _set_test_path(dt_lib_import_t *d)
     g_free(cut);
     g_free(_path);
     g_free(fake_path);
-    dt_variables_params_destroy(params);
     g_list_free_full(file, g_free);
   }
 }
@@ -817,7 +807,6 @@ static void _process_file_list(gpointer instance, GList *files, int elements, gb
 
   if(elements > 0)
   {
-    // TODO: copy data into the importer so we can kill this popup and *d
     dt_control_import_t data = {.imgs = files,
                                 .datetime = dt_string_to_datetime(gtk_entry_get_text(GTK_ENTRY(d->datetime))),
                                 .copy = dt_conf_get_bool("ui_last/import_copy"),

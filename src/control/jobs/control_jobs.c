@@ -2116,8 +2116,16 @@ gchar *_path_cleanup(gchar *path_in)
   return path_out;
 }
 
-gchar *dt_build_filename_from_pattern(dt_variables_params_t *params, dt_control_import_t *data)
+gchar *dt_build_filename_from_pattern(const char *const filename, const int index, dt_control_import_t *data)
 {
+  dt_variables_params_t *params;
+  dt_variables_params_init(&params);
+  params->filename = g_strdup(filename);
+  params->sequence = index;
+  params->jobcode = g_strdup(data->jobcode);
+  params->imgid = -1;
+  dt_variables_set_datetime(params, data->datetime);
+
   gchar *file_expand = dt_variables_expand(params, data->target_file_pattern, FALSE);
   gchar *path_expand = dt_variables_expand(params, data->target_subfolder_pattern, FALSE);
 
@@ -2137,6 +2145,7 @@ gchar *dt_build_filename_from_pattern(dt_variables_params_t *params, dt_control_
   g_free(file);
   g_free(path);
   g_free(dir);
+  dt_variables_params_destroy(params);
   return res;
 }
 
@@ -2227,9 +2236,9 @@ const int32_t _import_job(dt_control_import_t *data, gchar *img_path_to_db)
  * @param discarded the list of file pathes discarded because the target already exists
  * @return int
  */
-int _import_copy_file(dt_variables_params_t *params, dt_control_import_t *data, gchar *img_path_to_db, size_t pathname_len, GList **discarded)
+int _import_copy_file(const char *const filename, const int index, dt_control_import_t *data, gchar *img_path_to_db, size_t pathname_len, GList **discarded)
 {
-  gchar *dest_file_path = dt_build_filename_from_pattern(params, data);
+  gchar *dest_file_path = dt_build_filename_from_pattern(filename, index, data);
   fprintf(stdout, "Pattern to path: %s\n", dest_file_path);
 
   int process = TRUE;
@@ -2247,7 +2256,7 @@ int _import_copy_file(dt_variables_params_t *params, dt_control_import_t *data, 
       fprintf(stdout, "Unable to create the target folder.\n");
 
     if(process)
-      process = _copy_file(params->filename, dest_file_path);
+      process = _copy_file(filename, dest_file_path);
     else
       fprintf(stdout, "Not allowed to write in the folder.\n");
 
@@ -2258,7 +2267,7 @@ int _import_copy_file(dt_variables_params_t *params, dt_control_import_t *data, 
   }
   else
   {
-    *discarded = g_list_prepend(*discarded, g_strdup(params->filename));
+    *discarded = g_list_prepend(*discarded, g_strdup(filename));
     g_strlcpy(img_path_to_db, dest_file_path, pathname_len);
     fprintf(stderr, "File copy skipped, the target file already exist.\n");
   }
@@ -2305,28 +2314,15 @@ void _write_xmp_id(const char *filename, int32_t imgid)
  */
 gboolean _import_image(const GList *img, dt_control_import_t *data, const int index, GList **discarded)
 {
-  dt_variables_params_t *params;
-  dt_variables_params_init(&params);
-
   const char *filename = (const char*) img->data;
   fprintf(stdout, "Filename: %s\n", filename);
-  fprintf(stdout, "Copy?: %i\n", data->copy);
-  fprintf(stdout, "Jobcode: %s\n", data->jobcode);
-  fprintf(stdout, "Folder: %s\n", data->target_folder);
-  fprintf(stdout, "Subfolder: %s\n", data->target_subfolder_pattern);
-  fprintf(stdout, "File Pattern: %s\n", data->target_file_pattern);
-  params->filename = g_strdup(filename);
-  params->sequence = index;
-  params->jobcode = g_strdup(data->jobcode);
-  params->imgid = -1;
-  dt_variables_set_datetime(params, data->datetime);
 
   gchar img_path_to_db[PATH_MAX] = { 0 };
   gboolean process_error = 0;
 
   if(data->copy)
     // Copy the file to destination folder, expanding variables internally
-    process_error = _import_copy_file(params, data, img_path_to_db, sizeof(img_path_to_db), discarded);
+    process_error = _import_copy_file(filename, index, data, img_path_to_db, sizeof(img_path_to_db), discarded);
   else
     // destination = origin, nothing to do
     g_strlcpy(img_path_to_db, filename, sizeof(img_path_to_db));
@@ -2353,7 +2349,6 @@ gboolean _import_image(const GList *img, dt_control_import_t *data, const int in
     }
   }
 
-  dt_variables_params_destroy(params);
   fprintf(stdout, "::End of import_image.\n");
 
   return process_error;
