@@ -40,6 +40,8 @@ typedef struct dt_variables_data_t
 {
   /** cached values that shouldn't change between variables in the same expansion process */
   GDateTime *time;
+  GDateTime *file_datetime;
+
   char exif_time[DT_DATETIME_LENGTH];
   guint sequence;
 
@@ -138,6 +140,7 @@ static void _init_expansion(dt_variables_params_t *params, gboolean iterate)
   {
     params->data->file_ext = (g_strrstr(params->filename, ".") + 1);
     if(params->data->file_ext == (gchar *)1) params->data->file_ext = params->filename + strlen(params->filename);
+    params->data->file_datetime = dt_util_get_file_datetime(params->filename);
   }
   else
     params->data->file_ext = NULL;
@@ -481,6 +484,36 @@ static char *_get_base_value(dt_variables_params_t *params, char **variable)
   {
     if(params->filename)
       result = g_path_get_dirname(params->filename);
+  }
+  else if(_has_prefix(variable, "FILE.YEAR"))
+  {
+    if(params->data->file_datetime)
+      result = g_date_time_format(params->data->file_datetime, "%Y");
+  }
+  else if(_has_prefix(variable, "FILE.MONTH"))
+  {
+    if(params->data->file_datetime)
+      result = g_date_time_format(params->data->file_datetime, "%m");
+  }
+  else if(_has_prefix(variable, "FILE.DAY"))
+  {
+    if(params->data->file_datetime)
+      result = g_date_time_format(params->data->file_datetime, "%d");
+  }
+  else if(_has_prefix(variable, "FILE.HOUR"))
+  {
+    if(params->data->file_datetime)
+      result = g_date_time_format(params->data->file_datetime, "%H");
+  }
+  else if(_has_prefix(variable, "FILE.MINUTE"))
+  {
+    if(params->data->file_datetime)
+      result = g_date_time_format(params->data->file_datetime, "%M");
+  }
+  else if(_has_prefix(variable, "FILE.SECOND"))
+  {
+    if(params->data->file_datetime)
+      result = g_date_time_format(params->data->file_datetime, "%S");
   }
   // for watermark backward compatibility
   else if(_has_prefix(variable, "IMAGE.FILENAME"))
@@ -1072,6 +1105,7 @@ void dt_variables_params_init(dt_variables_params_t **params)
   *params = g_malloc0(sizeof(dt_variables_params_t));
   (*params)->data = g_malloc0(sizeof(dt_variables_data_t));
   (*params)->data->time = g_date_time_new_now_local();
+  (*params)->data->file_datetime = NULL;
   (*params)->data->exif_time[0] = 0;
   (*params)->sequence = -1;
   (*params)->img = NULL;
@@ -1081,6 +1115,10 @@ void dt_variables_params_destroy(dt_variables_params_t *params)
 {
   if(params->data->time)
     g_date_time_unref(params->data->time);
+
+  if(params->data->time)
+    g_date_time_unref(params->data->file_datetime);
+
   g_free(params->data);
   g_free(params);
 }

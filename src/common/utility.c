@@ -749,6 +749,22 @@ gchar *dt_util_path_get_dirname(const gchar *filename)
   return dirname;
 }
 
+
+GDateTime *dt_util_get_file_datetime(const char *const path)
+{
+  if(path == NULL) return NULL;
+
+  GFile *file = g_file_new_for_path(path);
+  GFileInfo *info = g_file_query_info(file, G_FILE_ATTRIBUTE_STANDARD_NAME "," G_FILE_ATTRIBUTE_TIME_MODIFIED,
+                                      G_FILE_QUERY_INFO_NONE, NULL, NULL);
+
+  const guint64 datetime = g_file_info_get_attribute_uint64(info, G_FILE_ATTRIBUTE_TIME_MODIFIED);
+  g_object_unref(file);
+  g_object_unref(info);
+  return g_date_time_new_from_unix_local(datetime);
+}
+
+
 guint dt_util_string_count_char(const char *text, const char needle)
 {
   guint count = 0;
