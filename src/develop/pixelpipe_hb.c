@@ -415,8 +415,9 @@ void dt_dev_pixelpipe_synch(dt_dev_pixelpipe_t *pipe, dt_develop_t *dev, GList *
   // find piece in nodes list
   dt_dev_pixelpipe_iop_t *piece = NULL;
 
+  // FIXME: this is not the place to handle masks.
+  // Shitty darktable code as usual: unable to do one thing at one time.
   const dt_image_t *img = &pipe->image;
-  const int32_t imgid = img->id;
   const gboolean rawprep_img = dt_image_is_rawprepare_supported(img);
   const gboolean raw_img     = dt_image_is_raw(img);
 
@@ -431,29 +432,7 @@ void dt_dev_pixelpipe_synch(dt_dev_pixelpipe_t *pipe, dt_develop_t *dev, GList *
 
     if(piece->module == hist->module)
     {
-      const gboolean active = hist->enabled;
-      piece->enabled = active;
-
-      // Styles, presets or history copy&paste might set history items not appropriate for the image.
-      // Fixing that seemed to be almost impossible after long discussions but at least we can test,
-      // correct and add a problem hint here.
-      if((strcmp(piece->module->op, "demosaic") == 0) || (strcmp(piece->module->op, "rawprepare") == 0))
-      {
-        if(rawprep_img && !active)
-          piece->enabled = TRUE;
-        else if(!rawprep_img && active)
-          piece->enabled = FALSE;
-      }
-      else if((strcmp(piece->module->op, "rawdenoise") == 0) ||
-              (strcmp(piece->module->op, "hotpixels") == 0) ||
-              (strcmp(piece->module->op, "cacorrect") == 0))
-      {
-        if(!rawprep_img && active) piece->enabled = FALSE;
-      }
-
-      if(piece->enabled != hist->enabled)
-        dt_print(DT_DEBUG_DEV, "[pixelpipe_synch] enabling mismatch for module %s in image %i\n", piece->module->op, imgid);
-
+      piece->enabled = hist->enabled;
       dt_iop_commit_params(hist->module, hist->params, hist->blend_params, pipe, piece);
 
       if(piece->blendop_data)
