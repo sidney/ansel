@@ -338,8 +338,16 @@ static uint64_t _node_hash(dt_dev_pixelpipe_t *pipe, const dt_dev_pixelpipe_iop_
   // to be called at runtime, not at pipe init.
 
   // Only at the first step of pipe, we don't have a module because we init the base buffer.
-  uint64_t hash = piece ? piece->global_hash : _default_pipe_hash(pipe);
-  return hash;
+  if(piece)
+    return piece->global_hash;
+  else
+  {
+    // This is used for the first step of the pipe, before modules, when initing base buffer
+    // We need to take care of the ROI manually
+    uint64_t hash = _default_pipe_hash(pipe);
+    hash = dt_hash(hash, (const char *)roi_out, sizeof(dt_iop_roi_t));
+    return dt_hash(hash, (const char *)&pos, sizeof(int));
+  }
 }
 
 
@@ -1633,8 +1641,6 @@ static int dt_dev_pixelpipe_process_rec(dt_dev_pixelpipe_t *pipe, dt_develop_t *
     if(module)
       dt_print(DT_DEBUG_DEV, "[pixelpipe] dt_dev_pixelpipe_process_rec, cache available for pipe %i and module %s with hash %llu\n",
              pipe->type, module->op, (long long unsigned int)hash);
-    else
-      dt_print(DT_DEBUG_DEV, "[pixelpipe] dt_dev_pixelpipe_process_rec has no module at pos %i\n", pos);
 
     (void)dt_dev_pixelpipe_cache_get(&(pipe->cache), hash, bufsize, output, out_format);
 
