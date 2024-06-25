@@ -340,6 +340,11 @@ static uint64_t _node_hash(dt_dev_pixelpipe_t *pipe, const dt_dev_pixelpipe_iop_
   // Only at the first step of pipe, we don't have a module because we init the base buffer.
   uint64_t hash = piece ? piece->global_hash : _default_pipe_hash(pipe);
 
+  // Apply image id
+  hash = dt_hash(hash, (const char *)&pipe->image.id, sizeof(uint32_t));
+  hash = dt_hash(hash, (const char *)&pipe->image.version, sizeof(uint32_t));
+  hash = dt_hash(hash, (const char *)&pipe->image.film_id, sizeof(uint32_t));
+
   // module->hash represents user params for a module.
   // piece->hash represents user params and runtime pipeline params for a module.
   // piece->global_hash is the cumulative piece->hash across the pipe, it tracks pipeline order.
@@ -374,16 +379,16 @@ void dt_pixelpipe_get_global_hash(dt_dev_pixelpipe_t *pipe, dt_develop_t *dev)
     bypass_cache |= piece->module->bypass_cache;
     piece->bypass_cache = bypass_cache;
 
-    // Combine with the previous modules hashes : have an unique step hash even when disabled
-    hash = dt_hash(hash, (const char *)&piece->hash, sizeof(uint64_t));
-
     if(piece->enabled)
     {
+      // Combine with the previous modules hashes : have an unique step hash even when disabled
+      uint64_t local_hash = dt_hash(hash, (const char *)&piece->hash, sizeof(uint64_t));
+
       // if modify_roi_in/out are implented, buf_in/out sizes will change.
       // Though they should change according to user params.
       // So this should be redundant with piece->hash. Is it ?
-      hash = dt_hash(hash, (const char *)&piece->buf_in, sizeof(dt_iop_roi_t));
-      hash = dt_hash(hash, (const char *)&piece->buf_out, sizeof(dt_iop_roi_t));
+      local_hash = dt_hash(local_hash, (const char *)&piece->processed_roi_in, sizeof(dt_iop_roi_t));
+      local_hash = dt_hash(local_hash, (const char *)&piece->processed_roi_out, sizeof(dt_iop_roi_t));
 
       if(pipe->type & DT_DEV_PIXELPIPE_FULL)
       {
@@ -394,13 +399,19 @@ void dt_pixelpipe_get_global_hash(dt_dev_pixelpipe_t *pipe, dt_develop_t *dev)
           // FIXME: this should probably use dt_iop_set_bypass_cache because there is no point
           // caching setting intermediate steps.
           const int distort_tags = dev->gui_module->operation_tags_filter() & piece->module->operation_tags();
-          hash = dt_hash(hash, (const char *)&distort_tags, sizeof(int));
+          hash = dt_hash(local_hash, (const char *)&distort_tags, sizeof(int));
         }
       }
-    }
 
-    // Write
-    piece->global_hash = hash;
+      piece->global_hash = local_hash;
+      hash = local_hash;
+
+      dt_print(DT_DEBUG_PARAMS, "[params] global hash for %s in pipe %i with hash %lu\n", piece->module->op, pipe->type, (long unsigned int)piece->global_hash);
+    }
+    else
+    {
+      piece->global_hash = hash;
+    }
   }
 }
 
@@ -532,17 +543,7 @@ void dt_dev_pixelpipe_change(dt_dev_pixelpipe_t *pipe, struct dt_develop_t *dev)
   dt_dev_pixelpipe_get_roi_out(pipe, dev, pipe->iwidth, pipe->iheight, &pipe->processed_width,
                                   &pipe->processed_height);
 
-  // Get the previous output size of the module, for cache invalidation.
-  dt_dev_pixelpipe_get_roi_in(pipe, dev, pipe->processed_width, pipe->processed_height);
-
-  // Need to run that again. Why ?
-  dt_dev_pixelpipe_get_roi_out(pipe, dev, pipe->iwidth, pipe->iheight, &pipe->processed_width,
-                                  &pipe->processed_height);
-
-  // This needs correct roi_out, so run get_dimensions before
   // TODO: if DT_DEV_PIPE_TOP_CHANGED, compute global hash only for the top ?
-  dt_pixelpipe_get_global_hash(pipe, dev);
-
   dt_pthread_mutex_unlock(&dev->history_mutex);
 
   dt_show_times(&start, "[dt_dev_pixelpipe_change] pipeline resync on the current modules stack");
@@ -1726,6 +1727,10 @@ static int dt_dev_pixelpipe_process_rec(dt_dev_pixelpipe_t *pipe, dt_develop_t *
 
   // get region of interest which is needed in input
   module->modify_roi_in(module, piece, roi_out, &roi_in);
+  /*
+  fprintf(stdout, "ROI IN Process for %s: %i × %i at (%i, %i) @ %f\n", module->op, roi_in.width, roi_in.height, roi_in.x, roi_in.y, roi_in.scale);
+  */
+
 
   // recurse to get actual data of input buffer
   dt_iop_buffer_dsc_t _input_format = { 0 };
@@ -2248,7 +2253,7 @@ void dt_dev_pixelpipe_get_roi_out(dt_dev_pixelpipe_t *pipe, struct dt_develop_t 
   dt_pthread_mutex_unlock(&pipe->busy_mutex);
 }
 
-void dt_dev_pixelpipe_get_roi_in(dt_dev_pixelpipe_t *pipe, struct dt_develop_t *dev, int width_out, int height_out)
+void dt_dev_pixelpipe_get_roi_in(dt_dev_pixelpipe_t *pipe, struct dt_develop_t *dev, const struct dt_iop_roi_t roi_out)
 {
   // while module->modify_roi_out describes how the current module will change the size of
   // the output buffer depending on its parameters (pretty intuitive),
@@ -2259,7 +2264,7 @@ void dt_dev_pixelpipe_get_roi_in(dt_dev_pixelpipe_t *pipe, struct dt_develop_t *
   // backwards.
 
   dt_pthread_mutex_lock(&pipe->busy_mutex);
-  dt_iop_roi_t roi_out = (dt_iop_roi_t){ 0, 0, width_out, height_out, 1.0 };
+  dt_iop_roi_t roi_out_temp = roi_out;
   dt_iop_roi_t roi_in;
   GList *modules = g_list_last(pipe->iop);
   GList *pieces = g_list_last(pipe->nodes);
@@ -2268,19 +2273,25 @@ void dt_dev_pixelpipe_get_roi_in(dt_dev_pixelpipe_t *pipe, struct dt_develop_t *
     dt_iop_module_t *module = (dt_iop_module_t *)modules->data;
     dt_dev_pixelpipe_iop_t *piece = (dt_dev_pixelpipe_iop_t *)pieces->data;
 
+    piece->processed_roi_out = roi_out_temp;
+
     // skip this module?
-    if(piece->enabled)
+    if(piece->enabled && !(dev->gui_module && dev->gui_module != module
+            && dev->gui_module->operation_tags_filter() & module->operation_tags()))
     {
-      module->modify_roi_in(module, piece, &roi_out, &roi_in);
+      module->modify_roi_in(module, piece, &roi_out_temp, &roi_in);
+
+      //fprintf(stdout, "ROI IN in for %s on pipe %i: %i × %i at (%i, %i) @ %f\n", module->op, dev->pipe->type, roi_in.width, roi_in.height, roi_in.x, roi_in.y, roi_in.scale);
+      //fprintf(stdout, "ROI IN out for %s on pipe %i: %i × %i at (%i, %i) @ %f\n", module->op, dev->pipe->type, roi_out_temp.width, roi_out_temp.height, roi_out_temp.x, roi_out_temp.y, roi_out_temp.scale);
     }
     else
     {
       // pass through regions of interest for gui post expose events
-      roi_in = roi_out;
+      roi_in = roi_out_temp;
     }
 
-    piece->buf_in = roi_in;
-    roi_out = roi_in;
+    piece->processed_roi_in = roi_in;
+    roi_out_temp = roi_in;
 
     modules = g_list_previous(modules);
     pieces = g_list_previous(pieces);
