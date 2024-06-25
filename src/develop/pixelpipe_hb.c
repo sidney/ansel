@@ -377,14 +377,13 @@ void dt_pixelpipe_get_global_hash(dt_dev_pixelpipe_t *pipe, dt_develop_t *dev)
     if(piece->enabled)
     {
       // Combine with the previous modules hashes
-      uint64_t local_hash = dt_hash(hash, (const char *)&piece->hash, sizeof(uint64_t));
+      uint64_t local_hash = piece->hash;
 
-      // if modify_roi_in/out are implented, buf_in/out sizes will change.
-      // Though they should change according to user params.
-      // So this should be redundant with piece->hash. Is it ?
+      // Panning and zooming change the ROI. Some GUI modes (crop in editing mode) too.
       local_hash = dt_hash(local_hash, (const char *)&piece->planned_roi_in, sizeof(dt_iop_roi_t));
       local_hash = dt_hash(local_hash, (const char *)&piece->planned_roi_out, sizeof(dt_iop_roi_t));
 
+      /*
       if((pipe->type & DT_DEV_PIXELPIPE_FULL) && dev->gui_module)
       {
         // Crop and perspective need a full ROI to set-up bounds in GUI, but only temporarily
@@ -393,16 +392,14 @@ void dt_pixelpipe_get_global_hash(dt_dev_pixelpipe_t *pipe, dt_develop_t *dev)
         const int distort_tags = dev->gui_module->operation_tags_filter() & piece->module->operation_tags();
         local_hash = dt_hash(local_hash, (const char *)&distort_tags, sizeof(int));
       }
+      */
 
-      piece->global_hash = local_hash;
-      hash = local_hash;
+      hash = dt_hash(hash, (const char *)&local_hash, sizeof(uint64_t));
 
-      dt_print(DT_DEBUG_PARAMS, "[params] global hash for %s in pipe %i with hash %lu\n", piece->module->op, pipe->type, (long unsigned int)piece->global_hash);
+      dt_print(DT_DEBUG_PARAMS, "[params] global hash for %s in pipe %i with hash %lu\n", piece->module->op, pipe->type, (long unsigned int)hash);
     }
-    else
-    {
-      piece->global_hash = hash;
-    }
+
+    piece->global_hash = hash;
   }
 }
 
@@ -1016,8 +1013,6 @@ static void collect_histogram_on_CPU(dt_dev_pixelpipe_t *pipe, dt_develop_t *dev
 #define KILL_SWITCH_AND_FLUSH_CACHE                                     \
   if(dt_atomic_get_int(&pipe->shutdown))                                \
   {                                                                     \
-    dt_dev_pixelpipe_cache_invalidate(&(pipe->cache), input);           \
-    dt_dev_pixelpipe_cache_invalidate(&(pipe->cache), *output);         \
     if (*cl_mem_output != NULL)                                         \
     {                                                                   \
       dt_opencl_release_mem_object(*cl_mem_output);                     \
@@ -1866,12 +1861,6 @@ static int dt_dev_pixelpipe_process_rec(dt_dev_pixelpipe_t *pipe, dt_develop_t *
   // in case we get this buffer from the cache in the future, cache some stuff:
   **out_format = piece->dsc_out = pipe->dsc;
 
-  if(dev->gui_attached && module == dev->gui_module)
-  {
-    // give the input buffer to the currently focused plugin more weight.
-    // the user is likely to change that one soon, so keep it in cache.
-    dt_dev_pixelpipe_cache_reweight(&(pipe->cache), input);
-  }
 
   // warn on NaN or infinity
 #ifndef _DEBUG
@@ -2270,8 +2259,10 @@ void dt_dev_pixelpipe_get_roi_in(dt_dev_pixelpipe_t *pipe, struct dt_develop_t *
     {
       module->modify_roi_in(module, piece, &roi_out_temp, &roi_in);
 
-      //fprintf(stdout, "ROI IN in for %s on pipe %i: %i × %i at (%i, %i) @ %f\n", module->op, dev->pipe->type, roi_in.width, roi_in.height, roi_in.x, roi_in.y, roi_in.scale);
-      //fprintf(stdout, "ROI IN out for %s on pipe %i: %i × %i at (%i, %i) @ %f\n", module->op, dev->pipe->type, roi_out_temp.width, roi_out_temp.height, roi_out_temp.x, roi_out_temp.y, roi_out_temp.scale);
+      /*
+      if(dev)
+        fprintf(stdout, "ROI IN in for %s on pipe %i: %i × %i at (%i, %i) @ %f\n", module->op, dev->pipe->type, roi_in.width, roi_in.height, roi_in.x, roi_in.y, roi_in.scale);
+      */
     }
     else
     {

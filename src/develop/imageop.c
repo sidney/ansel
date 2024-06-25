@@ -1651,7 +1651,6 @@ uint64_t dt_iop_module_hash(dt_iop_module_t *module)
   hash = dt_hash(hash, (char *)&module->instance, sizeof(int32_t));
   hash = dt_hash(hash, (char *)&module->multi_priority, sizeof(int));
   hash = dt_hash(hash, (char *)&module->iop_order, sizeof(int));
-  hash = dt_hash(hash, (char *)&module->enabled, sizeof(int32_t));
 
   if(module->flags() & IOP_FLAGS_SUPPORTS_BLENDING)
   {
@@ -1725,7 +1724,10 @@ void dt_iop_commit_params(dt_iop_module_t *module, dt_iop_params_t *params,
   *      most-downstream module which _node_hash() is known in cache, to spare computations, or recomputed entirely if
   *      the cache is empty or entirely out-of-sync.
   */
-  piece->hash = piece->global_hash = dt_hash(module->hash, (const char *)piece->data, piece->data_size);
+  piece->global_hash = piece->hash = module->hash;
+
+  // EDIT: piece->hash is neutered for now, set to module->hash. Seems like it's too aggressive.
+  // piece->hash = dt_hash(module->hash, (const char *)piece->data, piece->data_size);
 
   dt_print(DT_DEBUG_PARAMS, "[params] commit for %s in pipe %i with hash %lu\n", module->op, pipe->type, (long unsigned int)piece->hash);
 }
