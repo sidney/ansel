@@ -368,22 +368,22 @@ void dt_pixelpipe_get_global_hash(dt_dev_pixelpipe_t *pipe, dt_develop_t *dev)
 
     if(piece->enabled)
     {
-      // Combine with the previous modules hashes : have an unique step hash even when disabled
+      // Combine with the previous modules hashes
       uint64_t local_hash = dt_hash(hash, (const char *)&piece->hash, sizeof(uint64_t));
 
       // if modify_roi_in/out are implented, buf_in/out sizes will change.
       // Though they should change according to user params.
       // So this should be redundant with piece->hash. Is it ?
-      local_hash = dt_hash(local_hash, (const char *)&piece->processed_roi_in, sizeof(dt_iop_roi_t));
-      local_hash = dt_hash(local_hash, (const char *)&piece->processed_roi_out, sizeof(dt_iop_roi_t));
+      local_hash = dt_hash(local_hash, (const char *)&piece->planned_roi_in, sizeof(dt_iop_roi_t));
+      local_hash = dt_hash(local_hash, (const char *)&piece->planned_roi_out, sizeof(dt_iop_roi_t));
 
-      if((pipe->type & DT_DEV_PIXELPIPE_FULL) && dev->gui_module && (dev->gui_module != piece->module))
+      if((pipe->type & DT_DEV_PIXELPIPE_FULL) && dev->gui_module)
       {
         // Crop and perspective need a full ROI to set-up bounds in GUI, but only temporarily
         // FIXME: this should probably use dt_iop_set_bypass_cache because there is no point
         // caching setting intermediate steps.
         const int distort_tags = dev->gui_module->operation_tags_filter() & piece->module->operation_tags();
-        hash = dt_hash(local_hash, (const char *)&distort_tags, sizeof(int));
+        local_hash = dt_hash(local_hash, (const char *)&distort_tags, sizeof(int));
       }
 
       piece->global_hash = local_hash;
@@ -2256,7 +2256,7 @@ void dt_dev_pixelpipe_get_roi_in(dt_dev_pixelpipe_t *pipe, struct dt_develop_t *
     dt_iop_module_t *module = (dt_iop_module_t *)modules->data;
     dt_dev_pixelpipe_iop_t *piece = (dt_dev_pixelpipe_iop_t *)pieces->data;
 
-    piece->processed_roi_out = roi_out_temp;
+    piece->planned_roi_out = roi_out_temp;
 
     // skip this module?
     if(piece->enabled && !(dev->gui_module && dev->gui_module != module
@@ -2273,7 +2273,7 @@ void dt_dev_pixelpipe_get_roi_in(dt_dev_pixelpipe_t *pipe, struct dt_develop_t *
       roi_in = roi_out_temp;
     }
 
-    piece->processed_roi_in = roi_in;
+    piece->planned_roi_in = roi_in;
     roi_out_temp = roi_in;
 
     modules = g_list_previous(modules);
