@@ -344,14 +344,6 @@ static uint64_t _node_hash(dt_dev_pixelpipe_t *pipe, const dt_dev_pixelpipe_iop_
   hash = dt_hash(hash, (const char *)&pipe->image.id, sizeof(uint32_t));
   hash = dt_hash(hash, (const char *)&pipe->image.version, sizeof(uint32_t));
   hash = dt_hash(hash, (const char *)&pipe->image.film_id, sizeof(uint32_t));
-
-  // module->hash represents user params for a module.
-  // piece->hash represents user params and runtime pipeline params for a module.
-  // piece->global_hash is the cumulative piece->hash across the pipe, it tracks pipeline order.
-  // pipe->hash represents the output size and position.
-  // So when we mix piece->global_hash with pipe->hash, we have the complete integrity checksum
-  // for a pixel buffer cache line, including pipe order, upstream module params, and image size.
-  hash = dt_hash(hash, (const char *)&pipe->hash, sizeof(uint64_t));
   return hash;
 }
 
@@ -390,17 +382,13 @@ void dt_pixelpipe_get_global_hash(dt_dev_pixelpipe_t *pipe, dt_develop_t *dev)
       local_hash = dt_hash(local_hash, (const char *)&piece->processed_roi_in, sizeof(dt_iop_roi_t));
       local_hash = dt_hash(local_hash, (const char *)&piece->processed_roi_out, sizeof(dt_iop_roi_t));
 
-      if(pipe->type & DT_DEV_PIXELPIPE_FULL)
+      if((pipe->type & DT_DEV_PIXELPIPE_FULL) && dev->gui_module && (dev->gui_module != piece->module))
       {
-        // Full-preview-centric tweaks : mask display
-        if(dev->gui_module && dev->gui_module != piece->module)
-        {
-          // Crop and perspective need a full ROI to set-up bounds in GUI, but only temporarily
-          // FIXME: this should probably use dt_iop_set_bypass_cache because there is no point
-          // caching setting intermediate steps.
-          const int distort_tags = dev->gui_module->operation_tags_filter() & piece->module->operation_tags();
-          hash = dt_hash(local_hash, (const char *)&distort_tags, sizeof(int));
-        }
+        // Crop and perspective need a full ROI to set-up bounds in GUI, but only temporarily
+        // FIXME: this should probably use dt_iop_set_bypass_cache because there is no point
+        // caching setting intermediate steps.
+        const int distort_tags = dev->gui_module->operation_tags_filter() & piece->module->operation_tags();
+        hash = dt_hash(local_hash, (const char *)&distort_tags, sizeof(int));
       }
 
       piece->global_hash = local_hash;
