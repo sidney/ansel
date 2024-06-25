@@ -1651,6 +1651,7 @@ uint64_t dt_iop_module_hash(dt_iop_module_t *module)
   hash = dt_hash(hash, (char *)&module->instance, sizeof(int32_t));
   hash = dt_hash(hash, (char *)&module->multi_priority, sizeof(int));
   hash = dt_hash(hash, (char *)&module->iop_order, sizeof(int));
+  hash = dt_hash(hash, (char *)&module->enabled, sizeof(int32_t));
 
   if(module->flags() & IOP_FLAGS_SUPPORTS_BLENDING)
   {
@@ -1677,9 +1678,6 @@ void dt_iop_commit_params(dt_iop_module_t *module, dt_iop_params_t *params,
                           dt_dev_pixelpipe_iop_t *piece)
 {
   assert(piece->pipe == pipe);
-
-  piece->hash = piece->global_hash = module->hash;
-  if(!piece->enabled) return;
 
   // 1. commit params
   memcpy(piece->blendop_data, blendop_params, sizeof(dt_develop_blend_params_t));
