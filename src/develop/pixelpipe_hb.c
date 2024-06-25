@@ -339,11 +339,6 @@ static uint64_t _node_hash(dt_dev_pixelpipe_t *pipe, const dt_dev_pixelpipe_iop_
 
   // Only at the first step of pipe, we don't have a module because we init the base buffer.
   uint64_t hash = piece ? piece->global_hash : _default_pipe_hash(pipe);
-
-  // Apply image id
-  hash = dt_hash(hash, (const char *)&pipe->image.id, sizeof(uint32_t));
-  hash = dt_hash(hash, (const char *)&pipe->image.version, sizeof(uint32_t));
-  hash = dt_hash(hash, (const char *)&pipe->image.film_id, sizeof(uint32_t));
   return hash;
 }
 
