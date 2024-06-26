@@ -1011,6 +1011,8 @@ static void collect_histogram_on_CPU(dt_dev_pixelpipe_t *pipe, dt_develop_t *dev
 #define KILL_SWITCH_AND_FLUSH_CACHE                                     \
   if(dt_atomic_get_int(&pipe->shutdown))                                \
   {                                                                     \
+    dt_dev_pixelpipe_cache_invalidate(&(pipe->cache), input);           \
+    dt_dev_pixelpipe_cache_invalidate(&(pipe->cache), *output);         \
     if (*cl_mem_output != NULL)                                         \
     {                                                                   \
       dt_opencl_release_mem_object(*cl_mem_output);                     \
