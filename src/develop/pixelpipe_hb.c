@@ -383,7 +383,6 @@ void dt_pixelpipe_get_global_hash(dt_dev_pixelpipe_t *pipe, dt_develop_t *dev)
       local_hash = dt_hash(local_hash, (const char *)&piece->planned_roi_in, sizeof(dt_iop_roi_t));
       local_hash = dt_hash(local_hash, (const char *)&piece->planned_roi_out, sizeof(dt_iop_roi_t));
 
-      /*
       if((pipe->type & DT_DEV_PIXELPIPE_FULL) && dev->gui_module)
       {
         // Crop and perspective need a full ROI to set-up bounds in GUI, but only temporarily
@@ -392,7 +391,6 @@ void dt_pixelpipe_get_global_hash(dt_dev_pixelpipe_t *pipe, dt_develop_t *dev)
         const int distort_tags = dev->gui_module->operation_tags_filter() & piece->module->operation_tags();
         local_hash = dt_hash(local_hash, (const char *)&distort_tags, sizeof(int));
       }
-      */
 
       hash = dt_hash(hash, (const char *)&local_hash, sizeof(uint64_t));
 
