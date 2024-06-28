@@ -284,7 +284,7 @@ void append_edit(GtkWidget **menus, GList **lists, const dt_menus_t index)
   ac = dt_action_define(pnl, NULL, N_("Copy development (all)"), get_last_widget(lists), NULL);
   dt_action_register(ac, NULL, copy_callback, GDK_KEY_c, GDK_CONTROL_MASK);
 
-  add_sub_menu_entry(menus, lists, _("Copy development (parts)"), index, NULL, copy_parts_callback, NULL, NULL, copy_sensitive_callback);
+  add_sub_menu_entry(menus, lists, _("Copy development (parts)..."), index, NULL, copy_parts_callback, NULL, NULL, copy_sensitive_callback);
   ac = dt_action_define(pnl, NULL, N_("Copy development (parts)"), get_last_widget(lists), NULL);
   dt_action_register(ac, NULL, copy_callback, GDK_KEY_c, GDK_CONTROL_MASK | GDK_SHIFT_MASK);
 
