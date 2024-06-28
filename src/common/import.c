@@ -910,7 +910,6 @@ static void gui_init(dt_lib_import_t *d)
 // is shifted outside its parent. The dialog isn't visible any longer but still listed as a window
 // of the app.
   dt_osx_disallow_fullscreen(d->dialog);
-  gtk_window_set_transient_for(GTK_WINDOW(d->dialog), GTK_WINDOW(dt_ui_main_window(darktable.gui->ui)));
   gtk_window_set_position(GTK_WINDOW(d->dialog), GTK_WIN_POS_CENTER_ON_PARENT);
 #endif
 
@@ -918,6 +917,7 @@ static void gui_init(dt_lib_import_t *d)
                               dt_conf_get_int("ui_last/import_dialog_width"),
                               dt_conf_get_int("ui_last/import_dialog_height"));
   gtk_window_set_modal(GTK_WINDOW(d->dialog), FALSE);
+  gtk_window_set_transient_for(GTK_WINDOW(d->dialog), NULL);
   g_signal_connect(d->dialog, "response", G_CALLBACK(_file_chooser_response), d);
 
   GtkWidget *content = gtk_dialog_get_content_area(GTK_DIALOG(d->dialog));
