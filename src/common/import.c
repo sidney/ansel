@@ -374,7 +374,22 @@ void _dt_check_basedir()
   g_strlcpy(basedir, dt_conf_get_string("session/base_directory_pattern"), sizeof(basedir));
 
   if(*basedir == 0 && dt_get_user_pictures_dir(dt_loc_get_home_dir(NULL), basedir, sizeof(basedir)))
+  {
+    // Basedir is empty
     dt_conf_set_string("session/base_directory_pattern", basedir);
+  }
+  else if(strstr(basedir, "$(") != NULL)
+  {
+    // Basedir contains a pattern to expand - remnant of Darktable's defaults
+    dt_variables_params_t *params;
+    dt_variables_params_init(&params);
+
+    gchar *file_expand = dt_variables_expand(params, basedir, FALSE);
+    dt_conf_set_string("session/base_directory_pattern", file_expand);
+
+    g_free(file_expand);
+    dt_variables_params_destroy(params);
+  }
 }
 
 static void _do_select_all_clicked(GtkWidget *widget, dt_lib_import_t *d)
