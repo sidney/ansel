@@ -55,7 +55,6 @@ void dt_dev_init(dt_develop_t *dev, int32_t gui_attached)
   dev->gui_module = NULL;
   dev->average_delay = DT_DEV_AVERAGE_DELAY_START;
   dev->preview_average_delay = DT_DEV_PREVIEW_AVERAGE_DELAY_START;
-  dev->gui_leaving = 0;
   dt_pthread_mutex_init(&dev->history_mutex, NULL);
   dev->history_end = 0;
   dev->history = NULL; // empty list
@@ -277,8 +276,6 @@ void dt_dev_invalidate_all_real(dt_develop_t *dev)
 
 void dt_dev_process_preview_job(dt_develop_t *dev)
 {
-  if(dev->gui_leaving) return;
-
   dt_pthread_mutex_lock(&dev->pipe_mutex);
   dt_control_log_busy_enter();
   dt_control_toast_busy_enter();
@@ -301,15 +298,6 @@ void dt_dev_process_preview_job(dt_develop_t *dev)
                              buf.height, buf.iscale);
 
 // always process the whole downsampled mipf buffer, to allow for fast scrolling and mip4 write-through.
-  if(dev->gui_leaving)
-  {
-    dt_control_log_busy_leave();
-    dt_control_toast_busy_leave();
-    dev->preview_status = DT_DEV_PIXELPIPE_INVALID;
-    dt_mipmap_cache_release(darktable.mipmap_cache, &buf);
-    dt_pthread_mutex_unlock(&dev->pipe_mutex);
-    return;
-  }
 
   restart:;
   // adjust pipeline according to changed flag set by {add,pop}_history_item.
@@ -366,8 +354,6 @@ void dt_dev_process_preview_job(dt_develop_t *dev)
 
 void dt_dev_process_image_job(dt_develop_t *dev)
 {
-  if(dev->gui_leaving) return;
-
   dt_pthread_mutex_lock(&dev->pipe_mutex);
   dt_control_log_busy_enter();
   dt_control_toast_busy_enter();
@@ -387,16 +373,6 @@ void dt_dev_process_image_job(dt_develop_t *dev)
   }
 
   dt_dev_pixelpipe_set_input(dev->pipe, dev, (float *)buf.buf, buf.width, buf.height, 1.0);
-
-  if(dev->gui_leaving)
-  {
-    dt_control_log_busy_leave();
-    dt_control_toast_busy_leave();
-    dev->image_status = DT_DEV_PIXELPIPE_INVALID;
-    dt_mipmap_cache_release(darktable.mipmap_cache, &buf);
-    dt_pthread_mutex_unlock(&dev->pipe_mutex);
-    return;
-  }
 
 restart:;
   dt_times_t start;
@@ -476,7 +452,7 @@ restart:;
   dt_mipmap_cache_release(darktable.mipmap_cache, &buf);
   dt_pthread_mutex_unlock(&dev->pipe_mutex);
 
-  if(dev->gui_attached && !dev->gui_leaving)
+  if(dev->gui_attached)
     DT_DEBUG_CONTROL_SIGNAL_RAISE(darktable.signals, DT_SIGNAL_DEVELOP_UI_PIPE_FINISHED);
 }
 

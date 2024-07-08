@@ -1695,7 +1695,6 @@ static int dt_dev_pixelpipe_process_rec(dt_dev_pixelpipe_t *pipe, dt_develop_t *
   }
 
   // 2) if history changed or exit event, abort processing?
-  if(dev->gui_leaving) return 1;
   KILL_SWITCH_ABORT;
 
   // 3) input -> output
@@ -1937,7 +1936,7 @@ static int dt_dev_pixelpipe_process_rec(dt_dev_pixelpipe_t *pipe, dt_develop_t *
   }
 
   // 4) colorpicker and scopes:
-  if(dev->gui_attached && !dev->gui_leaving
+  if(dev->gui_attached
      && pipe == dev->preview_pipe
      && (strcmp(module->op, "gamma") == 0)) // only gamma provides meaningful RGB data
   {
