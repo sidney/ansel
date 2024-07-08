@@ -380,18 +380,9 @@ void dt_pixelpipe_get_global_hash(dt_dev_pixelpipe_t *pipe, dt_develop_t *dev)
       uint64_t local_hash = piece->hash;
 
       // Panning and zooming change the ROI. Some GUI modes (crop in editing mode) too.
+      // dt_dev_get_roi_in() should have run before
       local_hash = dt_hash(local_hash, (const char *)&piece->planned_roi_in, sizeof(dt_iop_roi_t));
       local_hash = dt_hash(local_hash, (const char *)&piece->planned_roi_out, sizeof(dt_iop_roi_t));
-
-      if((pipe->type & DT_DEV_PIXELPIPE_FULL) && dev->gui_module)
-      {
-        // Crop and perspective need a full ROI to set-up bounds in GUI, but only temporarily
-        // FIXME: this should probably use dt_iop_set_bypass_cache because there is no point
-        // caching setting intermediate steps.
-        const int distort_tags = dev->gui_module->operation_tags_filter() & piece->module->operation_tags();
-        local_hash = dt_hash(local_hash, (const char *)&distort_tags, sizeof(int));
-      }
-
       hash = dt_hash(hash, (const char *)&local_hash, sizeof(uint64_t));
 
       dt_print(DT_DEBUG_PARAMS, "[params] global hash for %s in pipe %i with hash %lu\n", piece->module->op, pipe->type, (long unsigned int)hash);
