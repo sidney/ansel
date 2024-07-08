@@ -1086,7 +1086,7 @@ finish:
 
 const cmsHPROFILE dt_colorspaces_get_embedded_profile(const int imgid, dt_colorspaces_color_profile_type_t *type)
 {
-  cmsHPROFILE output = NULL;
+  cmsHPROFILE output;
   *type = dt_image_find_best_color_profile(imgid, &output);
   return output;
 }
@@ -1099,7 +1099,7 @@ const dt_colorspaces_color_profile_t *_build_embedded_profile(const uint32_t img
   // create a dt profile object. -1 in all indices ensures it's hidden from GUI
   dt_colorspaces_color_profile_t *container = _create_profile(*type, profile, "", -1, -1, -1, -1, -1);
 
-  if(container)
+  if(profile && container)
   {
     // Set the name string for the profile
     char *lang = getenv("LANG");
