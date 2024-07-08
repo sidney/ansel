@@ -1631,6 +1631,83 @@ static void _print_perf_debug(dt_dev_pixelpipe_t *pipe, const dt_pixelpipe_flow_
 }
 
 
+static void _print_nan_debug(dt_dev_pixelpipe_t *pipe, void *cl_mem_output, void *output, const dt_iop_roi_t *roi_out, dt_iop_buffer_dsc_t *out_format, dt_iop_module_t *module, const size_t bpp)
+{
+  if((darktable.unmuted & DT_DEBUG_NAN) && strcmp(module->op, "gamma") != 0)
+  {
+
+#ifdef HAVE_OPENCL
+    if(cl_mem_output != NULL)
+      dt_opencl_copy_device_to_host(pipe->devid, output, cl_mem_output, roi_out->width, roi_out->height, bpp);
+#endif
+
+    gchar *module_label = dt_history_item_get_name(module);
+
+    if(out_format->datatype == TYPE_FLOAT && out_format->channels == 4)
+    {
+      int hasinf = 0, hasnan = 0;
+      dt_aligned_pixel_t min = { FLT_MAX };
+      dt_aligned_pixel_t max = { FLT_MIN };
+
+      for(int k = 0; k < 4 * roi_out->width * roi_out->height; k++)
+      {
+        if((k & 3) < 3)
+        {
+          float f = ((float *)(output))[k];
+          if(isnan(f))
+            hasnan = 1;
+          else if(isinf(f))
+            hasinf = 1;
+          else
+          {
+            min[k & 3] = fmin(f, min[k & 3]);
+            max[k & 3] = fmax(f, max[k & 3]);
+          }
+        }
+      }
+      if(hasnan)
+        fprintf(stderr, "[dev_pixelpipe] module `%s' outputs NaNs! [%s]\n", module_label,
+                _pipe_type_to_str(pipe->type));
+      if(hasinf)
+        fprintf(stderr, "[dev_pixelpipe] module `%s' outputs non-finite floats! [%s]\n", module_label,
+                _pipe_type_to_str(pipe->type));
+      fprintf(stderr, "[dev_pixelpipe] module `%s' min: (%f; %f; %f) max: (%f; %f; %f) [%s]\n", module_label,
+              min[0], min[1], min[2], max[0], max[1], max[2], _pipe_type_to_str(pipe->type));
+    }
+    else if(out_format->datatype == TYPE_FLOAT && out_format->channels == 1)
+    {
+      int hasinf = 0, hasnan = 0;
+      float min = FLT_MAX;
+      float max = FLT_MIN;
+
+      for(int k = 0; k < roi_out->width * roi_out->height; k++)
+      {
+        float f = ((float *)(output))[k];
+        if(isnan(f))
+          hasnan = 1;
+        else if(isinf(f))
+          hasinf = 1;
+        else
+        {
+          min = fmin(f, min);
+          max = fmax(f, max);
+        }
+      }
+      if(hasnan)
+        fprintf(stderr, "[dev_pixelpipe] module `%s' outputs NaNs! [%s]\n", module_label,
+                _pipe_type_to_str(pipe->type));
+      if(hasinf)
+        fprintf(stderr, "[dev_pixelpipe] module `%s' outputs non-finite floats! [%s]\n", module_label,
+                _pipe_type_to_str(pipe->type));
+      fprintf(stderr, "[dev_pixelpipe] module `%s' min: (%f) max: (%f) [%s]\n", module_label, min, max,
+              _pipe_type_to_str(pipe->type));
+    }
+
+    g_free(module_label);
+  }
+}
+
+
 // recursive helper for process:
 static int dt_dev_pixelpipe_process_rec(dt_dev_pixelpipe_t *pipe, dt_develop_t *dev, void **output,
                                         void **cl_mem_output, dt_iop_buffer_dsc_t **out_format,
@@ -1857,80 +1934,7 @@ static int dt_dev_pixelpipe_process_rec(dt_dev_pixelpipe_t *pipe, dt_develop_t *
   // in case we get this buffer from the cache in the future, cache some stuff:
   **out_format = piece->dsc_out = pipe->dsc;
 
-  // warn on NaN or infinity
-#ifndef _DEBUG
-  if((darktable.unmuted & DT_DEBUG_NAN) && strcmp(module->op, "gamma") != 0)
-#endif
-  {
-#ifdef HAVE_OPENCL
-    if(*cl_mem_output != NULL)
-      dt_opencl_copy_device_to_host(pipe->devid, *output, *cl_mem_output, roi_out->width, roi_out->height, bpp);
-#endif
-
-    if((*out_format)->datatype == TYPE_FLOAT && (*out_format)->channels == 4)
-    {
-      int hasinf = 0, hasnan = 0;
-      dt_aligned_pixel_t min = { FLT_MAX };
-      dt_aligned_pixel_t max = { FLT_MIN };
-
-      for(int k = 0; k < 4 * roi_out->width * roi_out->height; k++)
-      {
-        if((k & 3) < 3)
-        {
-          float f = ((float *)(*output))[k];
-          if(isnan(f))
-            hasnan = 1;
-          else if(isinf(f))
-            hasinf = 1;
-          else
-          {
-            min[k & 3] = fmin(f, min[k & 3]);
-            max[k & 3] = fmax(f, max[k & 3]);
-          }
-        }
-      }
-      gchar *module_label = dt_history_item_get_name(module);
-      if(hasnan)
-        fprintf(stderr, "[dev_pixelpipe] module `%s' outputs NaNs! [%s]\n", module_label,
-                _pipe_type_to_str(pipe->type));
-      if(hasinf)
-        fprintf(stderr, "[dev_pixelpipe] module `%s' outputs non-finite floats! [%s]\n", module_label,
-                _pipe_type_to_str(pipe->type));
-      fprintf(stderr, "[dev_pixelpipe] module `%s' min: (%f; %f; %f) max: (%f; %f; %f) [%s]\n", module_label,
-              min[0], min[1], min[2], max[0], max[1], max[2], _pipe_type_to_str(pipe->type));
-      g_free(module_label);
-    }
-    else if((*out_format)->datatype == TYPE_FLOAT && (*out_format)->channels == 1)
-    {
-      int hasinf = 0, hasnan = 0;
-      float min = FLT_MAX;
-      float max = FLT_MIN;
-
-      for(int k = 0; k < roi_out->width * roi_out->height; k++)
-      {
-        float f = ((float *)(*output))[k];
-        if(isnan(f))
-          hasnan = 1;
-        else if(isinf(f))
-          hasinf = 1;
-        else
-        {
-          min = fmin(f, min);
-          max = fmax(f, max);
-        }
-      }
-      gchar *module_label = dt_history_item_get_name(module);
-      if(hasnan)
-        fprintf(stderr, "[dev_pixelpipe] module `%s' outputs NaNs! [%s]\n", module_label,
-                _pipe_type_to_str(pipe->type));
-      if(hasinf)
-        fprintf(stderr, "[dev_pixelpipe] module `%s' outputs non-finite floats! [%s]\n", module_label,
-                _pipe_type_to_str(pipe->type));
-      fprintf(stderr, "[dev_pixelpipe] module `%s' min: (%f) max: (%f) [%s]\n", module_label, min, max,
-              _pipe_type_to_str(pipe->type));
-      g_free(module_label);
-    }
-  }
+  _print_nan_debug(pipe, *cl_mem_output, *output, roi_out, *out_format, module, bpp);
 
   // 4) colorpicker and scopes:
   if(dev->gui_attached
