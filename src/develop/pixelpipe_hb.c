@@ -1768,6 +1768,8 @@ static int dt_dev_pixelpipe_process_rec(dt_dev_pixelpipe_t *pipe, dt_develop_t *
   // 3) input -> output
   if(!modules)
   {
+    // If no modules, we are at the step 0 of the pipe:
+    // fetching input buffer.
     // 3a) import input array with given scale and roi
     dt_times_t start;
     dt_get_times(&start);
