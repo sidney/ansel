@@ -984,6 +984,44 @@ static inline void _dt_dev_modules_reload_defaults(dt_develop_t *dev)
   }
 }
 
+void _sanitize_modules(dt_iop_module_t *module)
+{
+  // Ensure mandatory modules are enabled and unapplicable modules are disabled
+  if(dt_image_is_monochrome(&module->dev->image_storage))
+  {
+    if(!strcmp(module->op, "demosaic") ||
+       !strcmp(module->op, "temperature") ||
+       !strcmp(module->op, "cacorrect")
+       !strcmp(module->op, "highlights"))
+      module->enabled = FALSE;
+
+  }
+  else if(dt_image_is_matrix_correction_supported(&module->dev->image_storage))
+  {
+    if(!strcmp(module->op, "demosaic"))
+      module->enabled = TRUE;
+  }
+  else
+  {
+    // JPG, PNG, etc.
+    if(!strcmp(module->op, "demosaic") ||
+       !strcmp(module->op, "cacorrect") ||
+       !strcmp(module->op, "rawdenoise") ||
+       !strcmp(module->op, "hotpixels") ||
+       !strcmp(module->op, "highlights") // FIXME: highlights should be allowed
+      module->enabled = FALSE;
+  }
+
+  if(!strcmp(module->op, "rawprepare"))
+    module->enabled = dt_image_is_rawprepare_supported(&module->dev->image_storage);
+
+  // Always on.
+  if(!strcmp(module->op, "colorin") ||
+     !strcmp(module->op, "colorout") ||
+     !strcmp(module->op, "dither"))
+    module->enabled = TRUE;
+}
+
 void dt_dev_pop_history_items_ext(dt_develop_t *dev, int32_t cnt)
 {
   dt_ioppr_check_iop_order(dev, 0, "dt_dev_pop_history_items_ext begin");
@@ -1004,6 +1042,8 @@ void dt_dev_pop_history_items_ext(dt_develop_t *dev, int32_t cnt)
 
     hist->module->iop_order = hist->iop_order;
     hist->module->enabled = hist->enabled;
+    _sanitize_modules(hist->module);
+    hist->enabled = hist->module->enabled;
 
     g_strlcpy(hist->module->multi_name, hist->multi_name, sizeof(hist->module->multi_name));
     if(hist->forms) forms = hist->forms;
