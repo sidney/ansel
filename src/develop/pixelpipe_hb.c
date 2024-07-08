@@ -1592,6 +1592,25 @@ static int pixelpipe_process_on_GPU(dt_dev_pixelpipe_t *pipe, dt_develop_t *dev,
 }
 #endif
 
+
+// Copy buffers
+inline static void _copy_buffer(const char *const input, char *const output,
+                           const size_t height, const size_t o_width, const size_t i_width,
+                           const size_t x_offset, const size_t y_offset,
+                           const size_t stride, const size_t bpp)
+{
+#ifdef _OPENMP
+#pragma omp parallel for default(none) \
+          dt_omp_firstprivate(input, output, bpp, o_width, i_width, height, x_offset, y_offset, stride) \
+          schedule(static)
+#endif
+  for(size_t j = 0; j < height; j++)
+    memcpy(output + bpp * j * o_width,
+           input + bpp * (x_offset + (y_offset + j) * i_width),
+           stride);
+}
+
+
 // recursive helper for process:
 static int dt_dev_pixelpipe_process_rec(dt_dev_pixelpipe_t *pipe, dt_develop_t *dev, void **output,
                                         void **cl_mem_output, dt_iop_buffer_dsc_t **out_format,
@@ -1668,27 +1687,17 @@ static int dt_dev_pixelpipe_process_rec(dt_dev_pixelpipe_t *pipe, dt_develop_t *
         if(roi_in.scale == 1.0f)
         {
           // fast branch for 1:1 pixel copies.
-
           // last minute clamping to catch potential out-of-bounds in roi_in and roi_out
-
           const int in_x = MAX(roi_in.x, 0);
           const int in_y = MAX(roi_in.y, 0);
           const int cp_width = MAX(0, MIN(roi_out->width, pipe->iwidth - in_x));
           const int cp_height = MIN(roi_out->height, pipe->iheight - in_y);
 
-          if (cp_width > 0)
-          {
-#ifdef _OPENMP
-#pragma omp parallel for default(none) \
-          dt_omp_firstprivate(bpp, cp_height, cp_width, in_x, in_y) \
-          shared(pipe, roi_out, roi_in, output) \
-          schedule(static)
-#endif
-            for(int j = 0; j < cp_height; j++)
-              memcpy(((char *)*output) + (size_t)bpp * j * roi_out->width,
-                     ((char *)pipe->input) + (size_t)bpp * (in_x + (in_y + j) * pipe->iwidth),
-                     (size_t)bpp * cp_width);
-          }
+          if(cp_width > 0)
+            _copy_buffer((const char *const)pipe->input, (char *const)*output, cp_height, roi_out->width,
+                         pipe->iwidth, in_x, in_y, bpp * cp_width, bpp);
+          else
+            return 1; // Something is wrong
         }
         else
         {
@@ -1711,10 +1720,7 @@ static int dt_dev_pixelpipe_process_rec(dt_dev_pixelpipe_t *pipe, dt_develop_t *
 
   // get region of interest which is needed in input
   module->modify_roi_in(module, piece, roi_out, &roi_in);
-  /*
-  fprintf(stdout, "ROI IN Process for %s: %i × %i at (%i, %i) @ %f\n", module->op, roi_in.width, roi_in.height, roi_in.x, roi_in.y, roi_in.scale);
-  */
-
+  //fprintf(stdout, "ROI IN Process for %s: %i × %i at (%i, %i) @ %f\n", module->op, roi_in.width, roi_in.height, roi_in.x, roi_in.y, roi_in.scale);
 
   // recurse to get actual data of input buffer
   dt_iop_buffer_dsc_t _input_format = { 0 };
@@ -1762,29 +1768,18 @@ static int dt_dev_pixelpipe_process_rec(dt_dev_pixelpipe_t *pipe, dt_develop_t *
     }
     else
     {
-      // FIXME: why not simply setting *output = input as for OpenCL path ?
-#ifdef _OPENMP
-#pragma omp parallel for default(none) \
-      dt_omp_firstprivate(in_bpp, out_bpp) \
-      shared(roi_out, roi_in, output, input) \
-      schedule(static)
-#endif
-      for(int j = 0; j < roi_out->height; j++)
-          memcpy(((char *)*output) + (size_t)out_bpp * j * roi_out->width,
-                 ((char *)input) + (size_t)in_bpp * j * roi_in.width,
-                 (size_t)in_bpp * roi_in.width);
+      /*
+      _copy_buffer((const char *const)input, (char *const)*output, roi_out->height, roi_out->width, roi_in.width,
+                   0, 0, in_bpp * roi_in.width, in_bpp);
+      */
+      *output = input;
     }
 #else // don't HAVE_OPENCL
-#ifdef _OPENMP
-#pragma omp parallel for default(none) \
-    dt_omp_firstprivate(in_bpp, out_bpp) \
-    shared(roi_out, roi_in, output, input) \
-    schedule(static)
-#endif
-    for(int j = 0; j < roi_out->height; j++)
-          memcpy(((char *)*output) + (size_t)out_bpp * j * roi_out->width,
-                 ((char *)input) + (size_t)in_bpp * j * roi_in.width,
-                 (size_t)in_bpp * roi_in.width);
+    /*
+    _copy_buffer((const char *const)input, (char *const)*output, roi_out->height, roi_out->width, roi_in.width,
+                   0, 0, in_bpp * roi_in.width, in_bpp);
+    */
+    *output = input;
 #endif
 
     return 0;
@@ -1824,11 +1819,11 @@ static int dt_dev_pixelpipe_process_rec(dt_dev_pixelpipe_t *pipe, dt_develop_t *
   if (pixelpipe_process_on_GPU(pipe, dev, input, cl_mem_input, input_format, &roi_in, output, cl_mem_output, out_format, roi_out,
                                module, piece, &tiling, &pixelpipe_flow, in_bpp, bpp))
     return 1;
-#else // HAVE_OPENCL
+#else
   if (pixelpipe_process_on_CPU(pipe, dev, input, input_format, &roi_in, output, out_format, roi_out,
                                module, piece, &tiling, &pixelpipe_flow))
     return 1;
-#endif // HAVE_OPENCL
+#endif
 
   KILL_SWITCH_AND_FLUSH_CACHE;
 
