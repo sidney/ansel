@@ -37,6 +37,19 @@
 #include "colord-gtk.h"
 #endif
 
+#ifdef HAVE_OPENJPEG
+#include "common/imageio_j2k.h"
+#endif
+#include "common/imageio_jpeg.h"
+#include "common/imageio_png.h"
+#include "common/imageio_tiff.h"
+#ifdef HAVE_LIBAVIF
+#include "common/imageio_avif.h"
+#endif
+#ifdef HAVE_LIBHEIF
+#include "common/imageio_heif.h"
+#endif
+
 #if 0
 #include <ApplicationServices/ApplicationServices.h>
 #include <Carbon/Carbon.h>
@@ -892,6 +905,153 @@ const dt_colorspaces_color_profile_t *dt_colorspaces_get_work_profile(const int 
 
   return p;
 }
+
+dt_colorspaces_color_profile_type_t dt_image_find_best_color_profile(uint32_t imgid)
+{
+  // Note : when the image has already been opened from cache on the current session,
+  // the embedded color profile is already inited and stored in img->profile.
+
+  // Untagged images should be assumed to be sRGB.
+  dt_colorspaces_color_profile_type_t color_profile = DT_COLORSPACE_SRGB;
+
+  // Fetch filename
+  char filename[PATH_MAX] = { 0 };
+  gboolean from_cache = TRUE;
+  dt_image_full_path(imgid,  filename,  sizeof(filename),  &from_cache, __FUNCTION__);
+
+  const gchar *cc = filename + strlen(filename);
+  for(; *cc != '.' && cc > filename; cc--);
+  gchar *ext = g_ascii_strdown(cc + 1, -1);
+
+  // Fetch actual image
+  dt_image_t *img = dt_image_cache_get(darktable.image_cache, imgid, 'w');
+  if(!img) goto finish;
+
+  // Image codecs doing their own colorspace detection should set this to TRUE
+  gboolean already_set = FALSE;
+
+  fprintf(stdout, "Color profile type for %s: \n", filename);
+
+  if(img->profile && img->profile_size > 0
+     && dt_colorspaces_get_rgb_profile_from_mem(img->profile, img->profile_size))
+  {
+    // Fast path : we already extracted ICC before. ICC profile is already inside.
+    color_profile = DT_COLORSPACE_EMBEDDED_ICC;
+    fprintf(stdout, "Embedded ICC profile (inline)\n");
+  }
+  else if(!isnan(img->d65_color_matrix[0])
+           && dt_colorspaces_create_xyzimatrix_profile((float(*)[3])img->d65_color_matrix))
+  {
+    // DNG and others : matrix inside EXIF
+    color_profile = DT_COLORSPACE_EMBEDDED_MATRIX;
+    fprintf(stdout, "Embedded EXIF matrix\n");
+  }
+  else if(dt_image_is_monochrome(img))
+  {
+    // Monochrome RAW - colorspace doesn't matter
+    color_profile = DT_COLORSPACE_LIN_REC709;
+    fprintf(stdout, "Monochrome RAW\n");
+  }
+  else if(dt_image_is_matrix_correction_supported(img))
+  {
+    // Color RAW
+    color_profile = DT_COLORSPACE_STANDARD_MATRIX;
+    fprintf(stdout, "Typical RAW\n");
+  }
+  else if(img->flags & DT_IMAGE_4BAYER)
+  {
+    // 4Bayer images have been pre-converted to rec2020
+    color_profile = DT_COLORSPACE_LIN_REC2020;
+    fprintf(stdout, "4Bayer RAW\n");
+  }
+  else if(img->colorspace == DT_IMAGE_COLORSPACE_SRGB)
+  {
+    color_profile = DT_COLORSPACE_SRGB;
+    fprintf(stdout, "Raster image tagged with sRGB\n");
+  }
+  else if(img->colorspace == DT_IMAGE_COLORSPACE_ADOBE_RGB)
+  {
+    color_profile = DT_COLORSPACE_ADOBERGB;
+    fprintf(stdout, "Raster image tagged with Adobe RGB\n");
+  }
+  else if(!strcmp(ext, "pfm"))
+  {
+    // PFM have no embedded color profile nor ICC tag, we can't know the color space
+    // but we can assume the are linear since it's a floating point format
+    color_profile = DT_COLORSPACE_LIN_REC709;
+    fprintf(stdout, "PFM untagged image\n");
+  }
+  else
+  {
+    // Extract embedded profiles from raster images
+    // Done only once : if everything goes well, the next time we access this image from cache,
+    // we will read img->profile directly (first branch here).
+
+
+    if(!strcmp(ext, "jpg") || !strcmp(ext, "jpeg"))
+    {
+      dt_imageio_jpeg_t jpg;
+      if(!dt_imageio_jpeg_read_header(filename, &jpg))
+        img->profile_size = dt_imageio_jpeg_read_profile(&jpg, &img->profile);
+    }
+#ifdef HAVE_OPENJPEG
+    else if(!strcmp(ext, "jp2") || !strcmp(ext, "j2k") || !strcmp(ext, "j2c") || !strcmp(ext, "jpc"))
+    {
+      img->profile_size = dt_imageio_j2k_read_profile(filename, &img->profile);
+    }
+#endif
+    else if((!strcmp(ext, "tif") || !strcmp(ext, "tiff")))
+    {
+      img->profile_size = dt_imageio_tiff_read_profile(filename, &img->profile);
+    }
+    else if(!strcmp(ext, "png"))
+    {
+      img->profile_size = dt_imageio_png_read_profile(filename, &img->profile);
+    }
+#ifdef HAVE_LIBAVIF
+    else if(!strcmp(ext, "avif"))
+    {
+      dt_colorspaces_cicp_t cicp;
+      img->profile_size = dt_imageio_avif_read_profile(filename, &img->profile, &cicp);
+
+      // try the nclx box before falling back to any ICC profile
+      color_profile = dt_colorspaces_cicp_to_type(&cicp, filename);
+
+      // If we found a basic RGB colorspace from private AVIF metadata,
+      // bypass generic LCMS2 reading below
+      if(color_profile != DT_COLORSPACE_NONE) already_set = TRUE;
+    }
+#endif
+#ifdef HAVE_LIBHEIF
+    else if(!strcmp(ext, "heif") || !strcmp(ext, "heic") || !strcmp(ext, "hif"))
+    {
+      dt_colorspaces_cicp_t cicp;
+      img->profile_size = dt_imageio_heif_read_profile(filename, &img->profile, &cicp);
+
+      // try the nclx box before falling back to any ICC profile
+      color_profile = dt_colorspaces_cicp_to_type(&cicp, filename);
+
+      // If we found a basic RGB colorspace from private AVIF metadata,
+      // bypass generic LCMS2 reading below
+      if(color_profile != DT_COLORSPACE_NONE) already_set = TRUE;
+    }
+#endif
+
+    // Finally, read the prepared embedded profile
+    if(!already_set && img ->profile && img->profile_size > 0
+       && dt_colorspaces_get_rgb_profile_from_mem(img->profile, img->profile_size))
+    {
+      color_profile = DT_COLORSPACE_EMBEDDED_ICC;
+      fprintf(stdout, "Embedded ICC (extracted)\n");
+    }
+  }
+
+finish:
+  dt_image_cache_write_release(darktable.image_cache, img, DT_IMAGE_CACHE_RELAXED);
+  g_free(ext);
+  return color_profile;
+}
+
 
 const cmsHPROFILE dt_colorspaces_get_embedded_profile(const int imgid, dt_colorspaces_color_profile_type_t *type)
 {

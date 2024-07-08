@@ -30,6 +30,8 @@
 
 // max iccprofile file name length
 #define DT_IOP_COLOR_ICC_LEN 512
+#define LUT_SAMPLES 0x10000
+
 
 // constants fit to the ones from lcms.h:
 typedef enum dt_iop_color_intent_t
@@ -295,6 +297,14 @@ static inline dt_colorspaces_color_profile_type_t sanitize_colorspaces(dt_colors
   else
     return (dt_colorspaces_color_profile_type_t)MIN(colorspace, DT_COLORSPACE_LAST - 1);
 }
+
+
+/** Best effort to find the relevant color profile type for a given image and load the embedded profile (if any) into image cache
+ *
+ * Note : the profile type returned has been tested and is guaranteed to work, so it can be used as-is.
+ *
+*/
+dt_colorspaces_color_profile_type_t dt_image_find_best_color_profile(uint32_t imgid);
 
 // clang-format off
 // modelines: These editor modelines have been set for all relevant files by tools/update_modelines.py
