@@ -299,12 +299,15 @@ static inline dt_colorspaces_color_profile_type_t sanitize_colorspaces(dt_colors
 }
 
 
-/** Best effort to find the relevant color profile type for a given image and load the embedded profile (if any) into image cache
+/**
+ * @brief Best effort to find a suitable (input) color profile for a given image, using embedded ICC or EXIF whenever possible.
+ * This will also init the profile in the image cache.
  *
- * Note : the profile type returned has been tested and is guaranteed to work, so it can be used as-is.
- *
-*/
-dt_colorspaces_color_profile_type_t dt_image_find_best_color_profile(uint32_t imgid);
+ * @param imgid ID of the picture
+ * @param output If not NULL, writes the generated color profile into this pointer.
+ * @return dt_colorspaces_color_profile_type_t type of profile detected. This type is tested internally and guaranteed to work.
+ */
+dt_colorspaces_color_profile_type_t dt_image_find_best_color_profile(uint32_t imgid, cmsHPROFILE *output);
 
 // clang-format off
 // modelines: These editor modelines have been set for all relevant files by tools/update_modelines.py
