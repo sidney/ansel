@@ -1611,6 +1611,35 @@ inline static void _copy_buffer(const char *const input, char *const output,
 }
 
 
+static void _print_perf_debug(dt_dev_pixelpipe_t *pipe, const dt_pixelpipe_flow_t pixelpipe_flow, dt_dev_pixelpipe_iop_t *piece, dt_iop_module_t *module, dt_times_t *start)
+{
+  char histogram_log[32] = "";
+  if(!(pixelpipe_flow & PIXELPIPE_FLOW_HISTOGRAM_NONE))
+  {
+    snprintf(histogram_log, sizeof(histogram_log), ", collected histogram on %s",
+             (pixelpipe_flow & PIXELPIPE_FLOW_HISTOGRAM_ON_GPU
+                  ? "GPU"
+                  : pixelpipe_flow & PIXELPIPE_FLOW_HISTOGRAM_ON_CPU ? "CPU" : ""));
+  }
+
+  gchar *module_label = dt_history_item_get_name(module);
+  dt_show_times_f(
+      start, "[dev_pixelpipe]", "processed `%s' on %s%s%s, blended on %s [%s]", module_label,
+      pixelpipe_flow & PIXELPIPE_FLOW_PROCESSED_ON_GPU
+          ? "GPU"
+          : pixelpipe_flow & PIXELPIPE_FLOW_PROCESSED_ON_CPU ? "CPU" : "",
+      pixelpipe_flow & PIXELPIPE_FLOW_PROCESSED_WITH_TILING ? " with tiling" : "",
+      (!(pixelpipe_flow & PIXELPIPE_FLOW_HISTOGRAM_NONE) && (piece->request_histogram & DT_REQUEST_ON))
+          ? histogram_log
+          : "",
+      pixelpipe_flow & PIXELPIPE_FLOW_BLENDED_ON_GPU
+          ? "GPU"
+          : pixelpipe_flow & PIXELPIPE_FLOW_BLENDED_ON_CPU ? "CPU" : "",
+      _pipe_type_to_str(pipe->type));
+  g_free(module_label);
+}
+
+
 // recursive helper for process:
 static int dt_dev_pixelpipe_process_rec(dt_dev_pixelpipe_t *pipe, dt_develop_t *dev, void **output,
                                         void **cl_mem_output, dt_iop_buffer_dsc_t **out_format,
@@ -1827,35 +1856,10 @@ static int dt_dev_pixelpipe_process_rec(dt_dev_pixelpipe_t *pipe, dt_develop_t *
 
   KILL_SWITCH_AND_FLUSH_CACHE;
 
-  char histogram_log[32] = "";
-  if(!(pixelpipe_flow & PIXELPIPE_FLOW_HISTOGRAM_NONE))
-  {
-    snprintf(histogram_log, sizeof(histogram_log), ", collected histogram on %s",
-             (pixelpipe_flow & PIXELPIPE_FLOW_HISTOGRAM_ON_GPU
-                  ? "GPU"
-                  : pixelpipe_flow & PIXELPIPE_FLOW_HISTOGRAM_ON_CPU ? "CPU" : ""));
-  }
-
-  gchar *module_label = dt_history_item_get_name(module);
-  dt_show_times_f(
-      &start, "[dev_pixelpipe]", "processed `%s' on %s%s%s, blended on %s [%s]", module_label,
-      pixelpipe_flow & PIXELPIPE_FLOW_PROCESSED_ON_GPU
-          ? "GPU"
-          : pixelpipe_flow & PIXELPIPE_FLOW_PROCESSED_ON_CPU ? "CPU" : "",
-      pixelpipe_flow & PIXELPIPE_FLOW_PROCESSED_WITH_TILING ? " with tiling" : "",
-      (!(pixelpipe_flow & PIXELPIPE_FLOW_HISTOGRAM_NONE) && (piece->request_histogram & DT_REQUEST_ON))
-          ? histogram_log
-          : "",
-      pixelpipe_flow & PIXELPIPE_FLOW_BLENDED_ON_GPU
-          ? "GPU"
-          : pixelpipe_flow & PIXELPIPE_FLOW_BLENDED_ON_CPU ? "CPU" : "",
-      _pipe_type_to_str(pipe->type));
-  g_free(module_label);
-  module_label = NULL;
+  _print_perf_debug(pipe, pixelpipe_flow, piece, module, &start);
 
   // in case we get this buffer from the cache in the future, cache some stuff:
   **out_format = piece->dsc_out = pipe->dsc;
-
 
   // warn on NaN or infinity
 #ifndef _DEBUG
@@ -1889,7 +1893,7 @@ static int dt_dev_pixelpipe_process_rec(dt_dev_pixelpipe_t *pipe, dt_develop_t *
           }
         }
       }
-      module_label = dt_history_item_get_name(module);
+      gchar *module_label = dt_history_item_get_name(module);
       if(hasnan)
         fprintf(stderr, "[dev_pixelpipe] module `%s' outputs NaNs! [%s]\n", module_label,
                 _pipe_type_to_str(pipe->type));
@@ -1919,7 +1923,7 @@ static int dt_dev_pixelpipe_process_rec(dt_dev_pixelpipe_t *pipe, dt_develop_t *
           max = fmax(f, max);
         }
       }
-      module_label = dt_history_item_get_name(module);
+      gchar *module_label = dt_history_item_get_name(module);
       if(hasnan)
         fprintf(stderr, "[dev_pixelpipe] module `%s' outputs NaNs! [%s]\n", module_label,
                 _pipe_type_to_str(pipe->type));
