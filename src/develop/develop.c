@@ -991,7 +991,7 @@ void _sanitize_modules(dt_iop_module_t *module)
   {
     if(!strcmp(module->op, "demosaic") ||
        !strcmp(module->op, "temperature") ||
-       !strcmp(module->op, "cacorrect")
+       !strcmp(module->op, "cacorrect") ||
        !strcmp(module->op, "highlights"))
       module->enabled = FALSE;
 
@@ -1008,7 +1008,7 @@ void _sanitize_modules(dt_iop_module_t *module)
        !strcmp(module->op, "cacorrect") ||
        !strcmp(module->op, "rawdenoise") ||
        !strcmp(module->op, "hotpixels") ||
-       !strcmp(module->op, "highlights") // FIXME: highlights should be allowed
+       !strcmp(module->op, "highlights")) // FIXME: highlights should be allowed
       module->enabled = FALSE;
   }
 
