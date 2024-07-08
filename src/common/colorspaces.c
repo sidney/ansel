@@ -1092,7 +1092,7 @@ const cmsHPROFILE dt_colorspaces_get_embedded_profile(const int imgid, dt_colors
 }
 
 
-dt_colorspaces_color_profile_t *_build_embedded_profile(const uint32_t imgid, dt_colorspaces_color_profile_type_t *type)
+const dt_colorspaces_color_profile_t *_build_embedded_profile(const uint32_t imgid, dt_colorspaces_color_profile_type_t *type)
 {
   cmsHPROFILE profile = dt_colorspaces_get_embedded_profile(imgid, type);
 
