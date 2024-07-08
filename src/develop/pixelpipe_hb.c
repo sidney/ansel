@@ -1847,6 +1847,9 @@ static int dt_dev_pixelpipe_process_rec(dt_dev_pixelpipe_t *pipe, dt_develop_t *
     return 1;
 #endif
 
+  // Don't cache outputs if we requested to bypass the cache
+  if(bypass_cache) dt_dev_pixelpipe_cache_invalidate(&(pipe->cache), *output);
+
   KILL_SWITCH_AND_FLUSH_CACHE;
 
   _print_perf_debug(pipe, pixelpipe_flow, piece, module, &start);
