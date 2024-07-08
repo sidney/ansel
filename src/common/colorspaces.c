@@ -1764,7 +1764,7 @@ void dt_colorspaces_cleanup(dt_colorspaces_t *self)
   for(GList *iter = self->profiles; iter; iter = g_list_next(iter))
   {
     dt_colorspaces_color_profile_t *p = (dt_colorspaces_color_profile_t *)iter->data;
-    dt_colorspaces_cleanup_profile(p->profile);
+    if(p) dt_colorspaces_cleanup_profile(p->profile);
   }
   g_list_free_full(self->profiles, free);
 
