@@ -1747,8 +1747,11 @@ static int dt_dev_pixelpipe_process_rec(dt_dev_pixelpipe_t *pipe, dt_develop_t *
   // 3b) recurse and obtain output array in &input
 
   // get region of interest which is needed in input
-  module->modify_roi_in(module, piece, roi_out, &roi_in);
-  //fprintf(stdout, "ROI IN Process for %s: %i × %i at (%i, %i) @ %f\n", module->op, roi_in.width, roi_in.height, roi_in.x, roi_in.y, roi_in.scale);
+  // This is already computed ahead of running at init time in _get_roi_in()
+  memcpy(&roi_in, &piece->planned_roi_in, sizeof(dt_iop_roi_t));
+
+  // Otherwise, run this:
+  // module->modify_roi_in(module, piece, roi_out, &roi_in);
 
   // recurse to get actual data of input buffer
   dt_iop_buffer_dsc_t _input_format = { 0 };
@@ -2093,6 +2096,11 @@ restart:;
   dt_iop_buffer_dsc_t _out_format = { 0 };
   dt_iop_buffer_dsc_t *out_format = &_out_format;
 
+  // Get the roi_out hash
+  // Get the previous output size of the module, for cache invalidation.
+  dt_dev_pixelpipe_get_roi_in(pipe, dev, roi);
+  dt_pixelpipe_get_global_hash(pipe, dev);
+
   // run pixelpipe recursively and get error status
   const int err =
     dt_dev_pixelpipe_process_rec_and_backcopy(pipe, dev, &buf, &cl_mem_out, &out_format, &roi, modules,
@@ -2131,6 +2139,9 @@ restart:;
 
     dt_dev_pixelpipe_flush_caches(pipe);
     dt_dev_pixelpipe_change(pipe, dev);
+    dt_dev_pixelpipe_get_roi_in(pipe, dev, roi);
+    dt_pixelpipe_get_global_hash(pipe, dev);
+
     dt_print(DT_DEBUG_OPENCL, "[pixelpipe_process] [%s] falling back to cpu path\n",
              _pipe_type_to_str(pipe->type));
     goto restart; // try again (this time without opencl)

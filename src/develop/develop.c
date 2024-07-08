@@ -309,17 +309,6 @@ void dt_dev_process_preview_job(dt_develop_t *dev)
   // this locks dev->history_mutex.
   dt_dev_pixelpipe_change(dev->preview_pipe, dev);
 
-  // Get the roi_out hash
-  dt_iop_roi_t roi_out = { .x = 0,
-                           .y = 0,
-                           .width = dev->preview_pipe->processed_width,
-                           .height = dev->preview_pipe->processed_height,
-                           .scale = 1.f };
-
-  // Get the previous output size of the module, for cache invalidation.
-  dt_dev_pixelpipe_get_roi_in(dev->preview_pipe, dev, roi_out);
-  dt_pixelpipe_get_global_hash(dev->preview_pipe, dev);
-
   if(dt_dev_pixelpipe_process(
          dev->preview_pipe, dev, 0, 0, dev->preview_pipe->processed_width,
          dev->preview_pipe->processed_height, 1.f))
@@ -411,13 +400,6 @@ restart:;
   const int ht = MIN(window_height, dev->pipe->processed_height * scale);
   int x = MAX(0, scale * dev->pipe->processed_width  * (.5 + zoom_x) - wd / 2);
   int y = MAX(0, scale * dev->pipe->processed_height * (.5 + zoom_y) - ht / 2);
-
-  // Get the roi_out hash
-  dt_iop_roi_t roi_out = { .x = x, .y = y, .width = wd, .height = ht, .scale = scale };
-
-  // Get the previous output size of the module, for cache invalidation.
-  dt_dev_pixelpipe_get_roi_in(dev->pipe, dev, roi_out);
-  dt_pixelpipe_get_global_hash(dev->pipe, dev);
 
   dt_get_times(&start);
 
