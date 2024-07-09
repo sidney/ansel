@@ -94,18 +94,21 @@ void dt_dev_init(dt_develop_t *dev, int32_t gui_attached)
   dev->raw_histogram.height = 0;
   dev->raw_histogram.width = 0;
   dev->raw_histogram.hash = -1;
+  dev->raw_histogram.bpp = 0;
 
   dev->output_histogram.buffer = NULL;
   dev->output_histogram.op = "colorout";
   dev->output_histogram.width = 0;
   dev->output_histogram.height = 0;
   dev->output_histogram.hash = -1;
+  dev->output_histogram.bpp = 0;
 
   dev->display_histogram.buffer = NULL;
   dev->display_histogram.op = "gamma";
   dev->display_histogram.width = 0;
   dev->display_histogram.height = 0;
   dev->display_histogram.hash = -1;
+  dev->display_histogram.bpp = 0;
 
   dev->iop_instance = 0;
   dev->iop = NULL;
@@ -145,9 +148,9 @@ void dt_dev_cleanup(dt_develop_t *dev)
   // image_cache does not have to be unref'd, this is done outside develop module.
   dt_pthread_mutex_destroy(&dev->pipe_mutex);
 
-  g_free(dev->raw_histogram.buffer);
-  g_free(dev->output_histogram.buffer);
-  g_free(dev->display_histogram.buffer);
+  dt_free_align(dev->raw_histogram.buffer);
+  dt_free_align(dev->output_histogram.buffer);
+  dt_free_align(dev->display_histogram.buffer);
 
   dev->proxy.chroma_adaptation = NULL;
   dev->proxy.wb_coeffs[0] = 0.f;

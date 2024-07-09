@@ -110,6 +110,27 @@ inline static void _copy_buffer(const char *const input, char *const output,
            stride);
 }
 
+
+inline static void _uint8_to_float(const uint8_t *const input, float *const output,
+                                   const size_t width, const size_t height, const size_t chan)
+{
+#ifdef _OPENMP
+#pragma omp parallel for default(none) \
+        dt_omp_firstprivate(input, output, width, height, chan) \
+        schedule(static)
+#endif
+  for(size_t k = 0; k < height * width; k++)
+  {
+    const size_t index = k * chan;
+    // Warning: we take BGRa and put it back into RGBa
+    output[index + 0] = (float)input[index + 2] / 255.f;
+    output[index + 1] = (float)input[index + 1] / 255.f;
+    output[index + 2] = (float)input[index + 0] / 255.f;
+    output[index + 3] = 0.f;
+  }
+}
+
+
 int dt_dev_pixelpipe_init_export(dt_dev_pixelpipe_t *pipe, int32_t width, int32_t height, int levels,
                                  gboolean store_masks)
 {
@@ -664,28 +685,33 @@ static void pixelpipe_get_histogram_backbuf(dt_dev_pixelpipe_t *pipe, dt_develop
 {
   // Runs only on full image but downscaled for perf, aka preview pipe
   if(((pipe->type & DT_DEV_PIXELPIPE_PREVIEW) != DT_DEV_PIXELPIPE_PREVIEW) || !piece->enabled) return;
-  if(bpp != 4 * sizeof(float)) return; // not an RGBa float buffer
+
+  // Not an RGBa float buffer ?
+  if(!((bpp == 4 * sizeof(float)) || (bpp == 4 * sizeof(uint8_t)))) return;
 
   dt_backbuf_t *backbuf = _get_backuf(dev, module->op);
   if(backbuf == NULL) return; // This module is not wired to global histograms
+  if(backbuf->hash == hash) return; // Hash didn't change, nothing to update.
 
   // Prepare the buffer if needed
   if(backbuf->buffer == NULL)
   {
     // Buffer uninited
-    backbuf->buffer = dt_alloc_align_float(4 * roi->width * roi->height);
+    backbuf->buffer = dt_alloc_align(64, roi->width * roi->height * bpp);
     backbuf->height = roi->height;
     backbuf->width = roi->width;
+    backbuf->bpp = bpp;
   }
-  else if((backbuf->height != roi->height) || (backbuf->width != roi->width))
+  else if((backbuf->height != roi->height) || (backbuf->width != roi->width) || (backbuf->bpp != bpp))
   {
     // Cached buffer size doesn't match current one.
     // There is no reason yet why this should happen because the preview pipe doesn't change size during its lifetime.
     // But let's future-proof it in case someone gets creative.
     dt_free_align(backbuf->buffer); // maybe write a dt_realloc_align routine ?
-    backbuf->buffer = dt_alloc_align_float(4 * roi->width * roi->height);
+    backbuf->buffer = dt_alloc_align(64, roi->width * roi->height * bpp);
     backbuf->height = roi->height;
     backbuf->width = roi->width;
+    backbuf->bpp = bpp;
   }
 
   if(backbuf->buffer == NULL)
@@ -718,6 +744,19 @@ static void pixelpipe_get_histogram_backbuf(dt_dev_pixelpipe_t *pipe, dt_develop
   if(output)
     _copy_buffer(output, (char *)backbuf->buffer, roi->height, roi->width, roi->width, 0, 0, roi->width * bpp, bpp);
 #endif
+
+  // gamma outputs uint8, but its bpp count is still 16 like the modules outputting float32
+  if(!strcmp(module->op, "gamma") || bpp == 4 * sizeof(uint8_t))
+  {
+    // We got 8 bits data, we need to convert it back to float32 for uniform handling
+    float *new_buffer = dt_alloc_align(64, roi->width * roi->height * 4 * sizeof(float));
+    if(new_buffer == NULL) return;
+
+    uint8_t *old_buffer = (uint8_t *)backbuf->buffer;
+    _uint8_to_float(old_buffer, new_buffer, roi->width, roi->height, 4);
+    backbuf->buffer = (void *)new_buffer;
+    dt_free_align(old_buffer);
+  }
 
   dt_show_times_f(&start, "[dev_pixelpipe]", "copying global histogram for %s", module->op);
 
@@ -1841,6 +1880,10 @@ static int dt_dev_pixelpipe_process_rec(dt_dev_pixelpipe_t *pipe, dt_develop_t *
 
     (void)dt_dev_pixelpipe_cache_get(&(pipe->cache), hash, bufsize, output, out_format);
 
+    // Get the pipe-global histograms. We want float32 buffers, so we take all outputs
+    // except for gamma which outputs uint8 so we need to deal with that internally
+    pixelpipe_get_histogram_backbuf(pipe, dev, *output, NULL, *out_format, roi_out, module, piece, hash, bpp);
+
     KILL_SWITCH_AND_FLUSH_CACHE;
     return 0;
   }
@@ -2001,12 +2044,8 @@ static int dt_dev_pixelpipe_process_rec(dt_dev_pixelpipe_t *pipe, dt_develop_t *
 #endif
 
   // Get the pipe-global histograms. We want float32 buffers, so we take all outputs
-  // except for gamma which outputs uint8 so we take its input
-  if(!strcmp(module->op, "gamma"))
-    pixelpipe_get_histogram_backbuf(pipe, dev, input, cl_mem_input, input_format, roi_out, module, piece, hash, in_bpp);
-  else
-    pixelpipe_get_histogram_backbuf(pipe, dev, *output, *cl_mem_output, *out_format, roi_out, module, piece, hash, bpp);
-
+  // except for gamma which outputs uint8 so we need to deal with that internally
+  pixelpipe_get_histogram_backbuf(pipe, dev, *output, *cl_mem_output, *out_format, roi_out, module, piece, hash, bpp);
 
   // Don't cache outputs if we requested to bypass the cache
   if(bypass_cache) dt_dev_pixelpipe_cache_invalidate(&(pipe->cache), *output);
