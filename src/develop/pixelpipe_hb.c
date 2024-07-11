@@ -115,7 +115,8 @@ inline static void _uint8_to_float(const uint8_t *const input, float *const outp
                                    const size_t width, const size_t height, const size_t chan)
 {
 #ifdef _OPENMP
-#pragma omp parallel for default(none) \
+#pragma omp parallel for simd default(none) \
+        aligned(input, output: 64) \
         dt_omp_firstprivate(input, output, width, height, chan) \
         schedule(static)
 #endif
