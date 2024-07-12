@@ -2045,11 +2045,6 @@ static void _header_size_callback(GtkWidget *widget, GdkRectangle *allocation, G
   gtk_widget_show(GTK_WIDGET(button->data));
   gtk_widget_get_preferred_size(GTK_WIDGET(button->data), &button_size, NULL);
 
-  int num_buttons = 0;
-  for(button = g_list_last(children);
-      button && GTK_IS_BUTTON(button->data);
-      button = g_list_previous(button)) num_buttons++;
-
   gboolean hide_all = (allocation->width == 1);
   int num_to_unhide = (allocation->width - 2) / button_size.width;
   double opacity_leftmost = num_to_unhide > 0
