@@ -241,7 +241,6 @@ static void _process_histogram(dt_backbuf_t *backbuf, cairo_t *cr, const int wid
     cairo_translate(cr, 0, height);
     cairo_scale(cr, width / 255.0, - (double)height / (double)(1. + log(overall_histogram_max)));
     cairo_set_operator(cr, CAIRO_OPERATOR_ADD);
-    cairo_set_line_width(cr, DT_PIXEL_APPLY_DPI(1.));
 
     for(int k = 0; k < 3; k++)
     {
@@ -425,9 +424,9 @@ static void _process_waveform(dt_backbuf_t *backbuf, cairo_t *cr, const int widt
   {
     cairo_save(cr);
 
-    // Paint background
+    // Paint background - Color not exposed to user theme because this is tricky
     cairo_rectangle(cr, 0, 0, width, height);
-    set_color(cr, darktable.bauhaus->graph_bg);
+    cairo_set_source_rgb(cr, 0.3, 0.3, 0.3);
     cairo_fill(cr);
 
     if(parade)
@@ -557,18 +556,16 @@ static void _process_vectorscope(dt_backbuf_t *backbuf, cairo_t *cr, const int w
     cairo_fill(cr);
 
     // Center circle
+    cairo_set_source_rgb(cr, 0.2, 0.2, 0.2);
     cairo_arc(cr, x_center, x_center, 2., 0., 2. * M_PI);
     cairo_fill(cr);
 
     // Concentric circles
-    cairo_save(cr);
-    cairo_set_source_rgb(cr, 0.15, 0.15, 0.15);
     for(int k = 0; k < 4; k++)
     {
       cairo_arc(cr, x_center, x_center, (double)k * HISTOGRAM_BINS / 8., 0., 2. * M_PI);
       cairo_stroke(cr);
     }
-    cairo_restore(cr);
 
     // RGB space primaries and secondaries
     dt_aligned_pixel_t colors[6] = { { 1.f, 0.f, 0.f, 0.f }, { 1.f, 1.f, 0.f, 0.f }, { 0.f, 1.f, 0.f, 0.f },
@@ -577,6 +574,7 @@ static void _process_vectorscope(dt_backbuf_t *backbuf, cairo_t *cr, const int w
     cairo_save(cr);
     cairo_arc(cr, x_center, x_center, radius, 0., 2. * M_PI);
     cairo_clip(cr);
+
     for(size_t k = 0; k < 6; k++)
     {
       dt_aligned_pixel_t XYZ_D50 = { 0.f };
@@ -605,7 +603,7 @@ static void _process_vectorscope(dt_backbuf_t *backbuf, cairo_t *cr, const int w
       cairo_stroke(cr);
 
       // Then draw color squares and ensure center is filled with scope background color
-      const double half_square = DT_PIXEL_APPLY_DPI(3);
+      const double half_square = DT_PIXEL_APPLY_DPI(4);
       cairo_arc(cr, x, y, half_square, 0, 2. * M_PI);
       cairo_set_source_rgb(cr, 0.3, 0.3, 0.3);
       cairo_fill_preserve(cr);
@@ -617,7 +615,7 @@ static void _process_vectorscope(dt_backbuf_t *backbuf, cairo_t *cr, const int w
     // Hues ring
     for(size_t h = 0; h < 180; h++)
     {
-      dt_aligned_pixel_t Lch = { 50.f, 50.f, h / 180.f * 2.f * M_PI_F, 1.f };
+      dt_aligned_pixel_t Lch = { 50.f, 100.f, h / 180.f * 2.f * M_PI_F, 1.f };
       dt_aligned_pixel_t Luv = { 0.f };
       dt_aligned_pixel_t xyY = { 0.f };
       dt_aligned_pixel_t XYZ = { 0.f };
@@ -632,7 +630,7 @@ static void _process_vectorscope(dt_backbuf_t *backbuf, cairo_t *cr, const int w
       const double destination_x = x_center + delta_x;
       const double destination_y = (HISTOGRAM_BINS - 1) - (x_center + delta_y);
       cairo_set_source_rgb(cr, RGB[0] / max_RGB, RGB[1] / max_RGB, RGB[2] / max_RGB);
-      cairo_arc(cr, destination_x, destination_y, 1., 0, 2. * M_PI);
+      cairo_arc(cr, destination_x, destination_y, DT_PIXEL_APPLY_DPI(1.), 0, 2. * M_PI);
       cairo_fill(cr);
     }
 
@@ -670,7 +668,7 @@ static void _process_vectorscope(dt_backbuf_t *backbuf, cairo_t *cr, const int w
                       (HISTOGRAM_BINS - 1) - _Luv_to_vectorscope_coord_zoom(s_w_y, zoom));
     cairo_line_to(cr, _Luv_to_vectorscope_coord_zoom(n_w_x, zoom),
                       (HISTOGRAM_BINS - 1) - _Luv_to_vectorscope_coord_zoom(n_w_y, zoom));
-    cairo_set_source_rgb(cr, 0.9, 0.9, 0.9);
+    cairo_set_source_rgb(cr, 0.2, 0.2, 0.2);
     cairo_stroke(cr);
   }
 
@@ -732,7 +730,7 @@ static gboolean _draw_callback(GtkWidget *widget, cairo_t *crf, gpointer user_da
 
   // Paint background
   gtk_render_background(gtk_widget_get_style_context(widget), cr, 0, 0, width, height);
-  cairo_set_line_width(cr, DT_PIXEL_APPLY_DPI(0.5));
+  cairo_set_line_width(cr, 1.); // we want exactly 1 px no matter the resolution
 
   // Paint content
   switch(dt_bauhaus_combobox_get(d->display))
