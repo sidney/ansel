@@ -805,7 +805,7 @@ void _stage_callback(GtkWidget *widget, dt_lib_histogram_t *d)
   dt_conf_set_string("plugin/darkroom/histogram/op", d->op);
 
   // Disable vectorscope for RAW stage
-  dt_bauhaus_combobox_entry_set_sensitive(d->display, DT_LIB_HISTOGRAM_SCOPE_VECTORSCOPE, !strcmp(d->op, "demosaic"));
+  dt_bauhaus_combobox_entry_set_sensitive(d->display, DT_LIB_HISTOGRAM_SCOPE_VECTORSCOPE, strcmp(d->op, "demosaic"));
 
   d->backbuf = _get_backuf(darktable.develop, d->op);
   if(_is_backbuf_ready(d)) _redraw_scopes(d);
@@ -851,7 +851,7 @@ void _set_params(dt_lib_histogram_t *d)
   dt_bauhaus_combobox_entry_set_sensitive(d->stage, 0, dt_image_is_raw(&darktable.develop->image_storage));
 
   // Disable vectorscope if RAW stage is selected
-  dt_bauhaus_combobox_entry_set_sensitive(d->display, DT_LIB_HISTOGRAM_SCOPE_VECTORSCOPE, !strcmp(d->op, "demosaic"));
+  dt_bauhaus_combobox_entry_set_sensitive(d->display, DT_LIB_HISTOGRAM_SCOPE_VECTORSCOPE, strcmp(d->op, "demosaic"));
 
   dt_bauhaus_combobox_set(d->display, dt_conf_get_int("plugin/darkroom/histogram/display"));
   dt_bauhaus_combobox_set(d->stage, _backbuf_op_to_int(d));
