@@ -594,7 +594,7 @@ static void _process_vectorscope(dt_backbuf_t *backbuf, cairo_t *cr, const int w
       const double destination_y = (HISTOGRAM_BINS - 1) - (x_center + delta_y);
       cairo_move_to(cr, x_center, x_center);
       cairo_line_to(cr, destination_x, destination_y);
-      cairo_set_source_rgba(cr, colors[k][0], colors[k][1], colors[k][2], 0.4);
+      cairo_set_source_rgba(cr, colors[k][0], colors[k][1], colors[k][2], 0.5);
       cairo_stroke(cr);
 
       // Then draw color squares and ensure center is filled with scope background color
@@ -608,9 +608,16 @@ static void _process_vectorscope(dt_backbuf_t *backbuf, cairo_t *cr, const int w
     cairo_restore(cr);
 
     // Hues ring
+    cairo_save(cr);
+    cairo_arc(cr, x_center, x_center, radius - DT_PIXEL_APPLY_DPI(1.), 0., 2. * M_PI);
+    cairo_set_source_rgb(cr, 0.33, 0.33, 0.33);
+    cairo_set_line_width(cr, DT_PIXEL_APPLY_DPI(2.));
+    cairo_stroke(cr);
+    cairo_restore(cr);
+
     for(size_t h = 0; h < 180; h++)
     {
-      dt_aligned_pixel_t Lch = { 50.f, 75.f, h / 180.f * 2.f * M_PI_F, 1.f };
+      dt_aligned_pixel_t Lch = { 50.f, 110.f, h / 180.f * 2.f * M_PI_F, 1.f };
       dt_aligned_pixel_t Luv = { 0.f };
       dt_aligned_pixel_t xyY = { 0.f };
       dt_aligned_pixel_t XYZ = { 0.f };
@@ -620,11 +627,12 @@ static void _process_vectorscope(dt_backbuf_t *backbuf, cairo_t *cr, const int w
       dt_xyY_to_XYZ(xyY, XYZ);
       dt_apply_transposed_color_matrix(XYZ, profile->matrix_out_transposed, RGB);
       const float max_RGB = fmaxf(fmaxf(RGB[0], RGB[1]), RGB[2]);
-      const double delta_x = radius * cosf(Lch[2]);
-      const double delta_y = radius * sinf(Lch[2]);
+      for(int c = 0; c < 3; c++) RGB[c] /= max_RGB;
+      const double delta_x = (radius - DT_PIXEL_APPLY_DPI(1.)) * cosf(Lch[2]);
+      const double delta_y = (radius - DT_PIXEL_APPLY_DPI(1.)) * sinf(Lch[2]);
       const double destination_x = x_center + delta_x;
       const double destination_y = (HISTOGRAM_BINS - 1) - (x_center + delta_y);
-      cairo_set_source_rgb(cr, RGB[0] / max_RGB, RGB[1] / max_RGB, RGB[2] / max_RGB);
+      cairo_set_source_rgba(cr, RGB[0], RGB[1], RGB[2], 0.7);
       cairo_arc(cr, destination_x, destination_y, DT_PIXEL_APPLY_DPI(1.), 0, 2. * M_PI);
       cairo_fill(cr);
     }
