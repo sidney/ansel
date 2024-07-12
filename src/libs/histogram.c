@@ -876,6 +876,7 @@ void gui_init(dt_lib_module_t *self)
   d->scope_draw = gtk_drawing_area_new();
   gtk_widget_add_events(GTK_WIDGET(d->scope_draw), darktable.gui->scroll_mask);
   gtk_box_pack_start(GTK_BOX(self->widget), d->scope_draw, TRUE, TRUE, 0);
+  gtk_widget_set_size_request(d->scope_draw, -1, DT_PIXEL_APPLY_DPI(250));
   g_signal_connect(G_OBJECT(d->scope_draw), "draw", G_CALLBACK(_draw_callback), d);
   g_signal_connect(G_OBJECT(d->scope_draw), "scroll-event", G_CALLBACK(_area_scrolled_callback), d);
   g_signal_connect(G_OBJECT(d->scope_draw), "size-allocate", G_CALLBACK(_resize_callback), d);
