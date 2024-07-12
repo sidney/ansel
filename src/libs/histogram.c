@@ -502,7 +502,7 @@ static void _create_vectorscope_image(const uint32_t *const restrict vectorscope
       const float value = sqrtf((float)vectorscope[index] / (float)max_hist);
       dt_aligned_pixel_t RGB = { 0.f };
       // RGB gamuts tend to have a max chroma around L = 67
-      dt_aligned_pixel_t Luv = { 67.f, _vectorscope_coord_zoom_to_Luv(j, zoom), _vectorscope_coord_zoom_to_Luv(i, zoom), 1.f };
+      dt_aligned_pixel_t Luv = { 16.f, _vectorscope_coord_zoom_to_Luv(j, zoom), _vectorscope_coord_zoom_to_Luv(i, zoom), 1.f };
       dt_aligned_pixel_t xyY = { 0.f };
       dt_aligned_pixel_t XYZ = { 0.f };
       dt_Luv_to_xyY(Luv, xyY);
@@ -511,12 +511,13 @@ static void _create_vectorscope_image(const uint32_t *const restrict vectorscope
 
       // We will normalize RGB to get closer to display peak emission
       const float max_RGB = fmax(RGB[0], fmaxf(RGB[1], RGB[2]));
+      for(int c = 0; c < 3; c++) RGB[c] /= max_RGB;
 
       image[index * 4 + 3] = (uint8_t)roundf(value * 255.f); // alpha
       // Premultiply alpha
-      image[index * 4 + 2] = (uint8_t)roundf(powf(RGB[0] / max_RGB * value, 1.f / 2.2f) * 255.f);
-      image[index * 4 + 1] = (uint8_t)roundf(powf(RGB[1] / max_RGB * value, 1.f / 2.2f) * 255.f);
-      image[index * 4 + 0] = (uint8_t)roundf(powf(RGB[2] / max_RGB * value, 1.f / 2.2f) * 255.f);
+      image[index * 4 + 2] = (uint8_t)roundf(powf(RGB[0] * value, 1.f / 2.2f) * 255.f);
+      image[index * 4 + 1] = (uint8_t)roundf(powf(RGB[1] * value, 1.f / 2.2f) * 255.f);
+      image[index * 4 + 0] = (uint8_t)roundf(powf(RGB[2] * value, 1.f / 2.2f) * 255.f);
     }
 }
 
