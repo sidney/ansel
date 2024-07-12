@@ -502,14 +502,17 @@ static void _create_vectorscope_image(const uint32_t *const restrict vectorscope
       const float value = sqrtf((float)vectorscope[index] / (float)max_hist);
       dt_aligned_pixel_t RGB = { 0.f };
       // RGB gamuts tend to have a max chroma around L = 67
-      dt_aligned_pixel_t Luv = { 16.f, _vectorscope_coord_zoom_to_Luv(j, zoom), _vectorscope_coord_zoom_to_Luv(i, zoom), 1.f };
+      dt_aligned_pixel_t Luv = { 25.f, _vectorscope_coord_zoom_to_Luv(j, zoom), _vectorscope_coord_zoom_to_Luv(i, zoom), 1.f };
       dt_aligned_pixel_t xyY = { 0.f };
       dt_aligned_pixel_t XYZ = { 0.f };
       dt_Luv_to_xyY(Luv, xyY);
+      for(int c = 0; c < 2; c++) xyY[c] = fmaxf(xyY[c], 0.f);
       dt_xyY_to_XYZ(xyY, XYZ);
+      for(int c = 0; c < 3; c++) XYZ[c] = fmaxf(XYZ[c], 0.f);
       dt_apply_transposed_color_matrix(XYZ, profile->matrix_out_transposed, RGB);
 
       // We will normalize RGB to get closer to display peak emission
+      for(int c = 0; c < 3; c++) RGB[c] = fmaxf(RGB[c], 0.f);
       const float max_RGB = fmax(RGB[0], fmaxf(RGB[1], RGB[2]));
       for(int c = 0; c < 3; c++) RGB[c] /= max_RGB;
 
