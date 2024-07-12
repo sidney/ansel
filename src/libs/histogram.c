@@ -726,7 +726,7 @@ static gboolean _draw_callback(GtkWidget *widget, cairo_t *crf, gpointer user_da
   d->cache.zoom = d->zoom;
   d->cache.view = dt_bauhaus_combobox_get(d->display);
 
-  if(d->cst) cairo_surface_destroy(d->cst);
+  if(d->cst && cairo_surface_get_reference_count(d->cst) > 0) cairo_surface_destroy(d->cst);
   d->cst = dt_cairo_image_surface_create(CAIRO_FORMAT_ARGB32, width, height);
   cairo_t *cr = cairo_create(d->cst);
 
@@ -862,7 +862,7 @@ void gui_reset(dt_lib_module_t *self)
   dt_lib_histogram_t *d = self->data;
   _reset_cache(d);
   _set_params(d);
-  if(d->cst) cairo_surface_destroy(d->cst);
+  if(d->cst && cairo_surface_get_reference_count(d->cst) > 0) cairo_surface_destroy(d->cst);
 }
 
 void gui_init(dt_lib_module_t *self)
@@ -907,7 +907,7 @@ void gui_init(dt_lib_module_t *self)
 void gui_cleanup(dt_lib_module_t *self)
 {
   dt_lib_histogram_t *d = self->data;
-  if(d->cst) cairo_surface_destroy(d->cst);
+  if(d->cst && cairo_surface_get_reference_count(d->cst) > 0) cairo_surface_destroy(d->cst);
   dt_free_align(self->data);
   self->data = NULL;
 }
