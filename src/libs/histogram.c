@@ -429,6 +429,9 @@ static void _process_waveform(dt_backbuf_t *backbuf, cairo_t *cr, const int widt
     cairo_set_source_rgb(cr, 0.3, 0.3, 0.3);
     cairo_fill(cr);
 
+    cairo_set_source_rgb(cr, 0.21, 0.21, 0.21);
+    dt_draw_grid(cr, 4, 0, 0, width, height);
+
     if(parade)
       _paint_parade(cr, image, width, height, img_width, img_height, vertical);
     else
