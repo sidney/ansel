@@ -610,7 +610,7 @@ static void _process_vectorscope(dt_backbuf_t *backbuf, cairo_t *cr, const int w
     // Hues ring
     for(size_t h = 0; h < 180; h++)
     {
-      dt_aligned_pixel_t Lch = { 50.f, 100.f, h / 180.f * 2.f * M_PI_F, 1.f };
+      dt_aligned_pixel_t Lch = { 50.f, 75.f, h / 180.f * 2.f * M_PI_F, 1.f };
       dt_aligned_pixel_t Luv = { 0.f };
       dt_aligned_pixel_t xyY = { 0.f };
       dt_aligned_pixel_t XYZ = { 0.f };
