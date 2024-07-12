@@ -2040,9 +2040,6 @@ static gboolean _iop_plugin_header_button_press(GtkWidget *w, GdkEventButton *e,
 static void _header_size_callback(GtkWidget *widget, GdkRectangle *allocation, GtkWidget *header)
 {
   GList *children = gtk_container_get_children(GTK_CONTAINER(header));
-
-  const gint panel_trigger_width = 250;
-
   GList *button = children;
   GtkRequisition button_size;
   gtk_widget_show(GTK_WIDGET(button->data));
