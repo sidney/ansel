@@ -80,6 +80,7 @@ typedef struct dt_lib_histogram_t
   float zoom; // zoom level for the vectorscope
 
   dt_lib_histogram_cache_t cache;
+  cairo_surface_t *cst;
 } dt_lib_histogram_t;
 
 const char *name(dt_lib_module_t *self)
@@ -686,7 +687,8 @@ gboolean _needs_recompute(dt_lib_histogram_t *d, const int width, const int heig
            d->cache.width == width &&
            d->cache.height == height &&
            d->cache.view == view &&
-           d->cache.zoom == d->zoom);
+           d->cache.zoom == d->zoom &&
+           d->cst == NULL);
 }
 
 
@@ -708,7 +710,14 @@ static gboolean _draw_callback(GtkWidget *widget, cairo_t *crf, gpointer user_da
   gtk_widget_get_allocation(widget, &allocation);
   const int width = allocation.width;
   const int height = allocation.height;
-  if(!_needs_recompute(d, width, height)) return 0;
+
+  if(!_needs_recompute(d, width, height))
+  {
+    // Fast path: serve cached buffer
+    cairo_set_source_surface(crf, d->cst, 0, 0);
+    cairo_paint(crf);
+    return 1;
+  }
 
   // Save cache integrity
   d->cache.hash = d->backbuf->hash;
@@ -717,8 +726,9 @@ static gboolean _draw_callback(GtkWidget *widget, cairo_t *crf, gpointer user_da
   d->cache.zoom = d->zoom;
   d->cache.view = dt_bauhaus_combobox_get(d->display);
 
-  cairo_surface_t *cst = dt_cairo_image_surface_create(CAIRO_FORMAT_ARGB32, width, height);
-  cairo_t *cr = cairo_create(cst);
+  if(d->cst) cairo_surface_destroy(d->cst);
+  d->cst = dt_cairo_image_surface_create(CAIRO_FORMAT_ARGB32, width, height);
+  cairo_t *cr = cairo_create(d->cst);
 
   // Paint background
   gtk_render_background(gtk_widget_get_style_context(widget), cr, 0, 0, width, height);
@@ -762,9 +772,8 @@ static gboolean _draw_callback(GtkWidget *widget, cairo_t *crf, gpointer user_da
   }
 
   cairo_destroy(cr);
-  cairo_set_source_surface(crf, cst, 0, 0);
+  cairo_set_source_surface(crf, d->cst, 0, 0);
   cairo_paint(crf);
-  cairo_surface_destroy(cst);
   dt_show_times_f(&start, "[histogram]", "redraw");
   return 1;
 }
@@ -772,18 +781,19 @@ static gboolean _draw_callback(GtkWidget *widget, cairo_t *crf, gpointer user_da
 
 void view_enter(struct dt_lib_module_t *self, struct dt_view_t *old_view, struct dt_view_t *new_view)
 {
-  if(new_view->view(new_view) == DT_VIEW_DARKROOM)
-  {
-    DT_DEBUG_CONTROL_SIGNAL_CONNECT(darktable.signals, DT_SIGNAL_DEVELOP_PREVIEW_PIPE_FINISHED,
-                              G_CALLBACK(_lib_histogram_preview_updated_callback), self);
-  }
+  dt_lib_histogram_t *d = self->data;
+  _reset_cache(d);
+
+  DT_DEBUG_CONTROL_SIGNAL_CONNECT(darktable.signals, DT_SIGNAL_DEVELOP_PREVIEW_PIPE_FINISHED,
+                                  G_CALLBACK(_lib_histogram_preview_updated_callback), self);
 }
 
 void view_leave(struct dt_lib_module_t *self, struct dt_view_t *old_view, struct dt_view_t *new_view)
 {
-  DT_DEBUG_CONTROL_SIGNAL_DISCONNECT(darktable.signals,
-                               G_CALLBACK(_lib_histogram_preview_updated_callback),
-                               self);
+  dt_lib_histogram_t *d = self->data;
+  _reset_cache(d);
+
+  DT_DEBUG_CONTROL_SIGNAL_DISCONNECT(darktable.signals, G_CALLBACK(_lib_histogram_preview_updated_callback), self);
 }
 
 
@@ -852,6 +862,7 @@ void gui_reset(dt_lib_module_t *self)
   dt_lib_histogram_t *d = self->data;
   _reset_cache(d);
   _set_params(d);
+  if(d->cst) cairo_surface_destroy(d->cst);
 }
 
 void gui_init(dt_lib_module_t *self)
@@ -859,6 +870,7 @@ void gui_init(dt_lib_module_t *self)
   /* initialize ui widgets */
   dt_lib_histogram_t *d = (dt_lib_histogram_t *)dt_calloc_align(64, sizeof(dt_lib_histogram_t));
   self->data = (void *)d;
+  d->cst = NULL;
 
   self->widget = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
   d->scope_draw = gtk_drawing_area_new();
@@ -893,6 +905,8 @@ void gui_init(dt_lib_module_t *self)
 
 void gui_cleanup(dt_lib_module_t *self)
 {
+  dt_lib_histogram_t *d = self->data;
+  if(d->cst) cairo_surface_destroy(d->cst);
   dt_free_align(self->data);
   self->data = NULL;
 }
