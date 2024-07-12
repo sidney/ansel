@@ -174,21 +174,13 @@ static void _redraw_scopes(dt_lib_histogram_t *d)
   gtk_widget_queue_draw(d->scope_draw);
 }
 
+
 void _resize_scopes(dt_lib_histogram_t *d)
 {
+  // Set height = width no matter the width, aka make it square.
   GtkAllocation allocation;
   gtk_widget_get_allocation(d->scope_draw, &allocation);
-
-  if(dt_bauhaus_combobox_get(d->display) == DT_LIB_HISTOGRAM_SCOPE_VECTORSCOPE)
-  {
-    // For the vectorscope, force height = width
-    gtk_widget_set_size_request(d->scope_draw, -1, allocation.width);
-  }
-  else
-  {
-    // Force 3:2 format ratio
-    gtk_widget_set_size_request(d->scope_draw, -1, allocation.width * 2. / 3.);
-  }
+  gtk_widget_set_size_request(d->scope_draw, -1, allocation.width);
 }
 
 
