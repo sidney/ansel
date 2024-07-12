@@ -2039,8 +2039,6 @@ static gboolean _iop_plugin_header_button_press(GtkWidget *w, GdkEventButton *e,
 
 static void _header_size_callback(GtkWidget *widget, GdkRectangle *allocation, GtkWidget *header)
 {
-  gchar *config = dt_conf_get_string("darkroom/ui/hide_header_buttons");
-
   GList *children = gtk_container_get_children(GTK_CONTAINER(header));
 
   const gint panel_trigger_width = 250;
@@ -2062,44 +2060,6 @@ static void _header_size_callback(GtkWidget *widget, GdkRectangle *allocation, G
     : (double) allocation->width / button_size.width;
 
   double opacity_others = 1.0;
-
-  if(g_strcmp0(config, "glide")) // glide uses all defaults above
-  {
-    // these all (un)hide all buttons at the same time
-    if(num_to_unhide < num_buttons) num_to_unhide = 0;
-
-    if(!g_strcmp0(config, "smooth"))
-    {
-      opacity_others = opacity_leftmost;
-    }
-    else
-    {
-      if(!g_strcmp0(config, "fit"))
-      {
-        opacity_leftmost = 1.0;
-      }
-      else
-      {
-        GdkRectangle total_alloc;
-        gtk_widget_get_allocation(header, &total_alloc);
-
-        if(!g_strcmp0(config, "auto"))
-        {
-          opacity_leftmost = 1.0;
-          if(total_alloc.width < panel_trigger_width) hide_all = TRUE;
-        }
-        else if(!g_strcmp0(config, "fade"))
-        {
-          opacity_leftmost = opacity_others = (total_alloc.width - panel_trigger_width) / 100.;
-        }
-        else
-        {
-          fprintf(stderr, "unknown darkroom/ui/hide_header_buttons option %s\n", config);
-        }
-      }
-    }
-  }
-
   GList *prev_button = NULL;
 
   for(button = g_list_last(children);
@@ -2123,7 +2083,6 @@ static void _header_size_callback(GtkWidget *widget, GdkRectangle *allocation, G
     gtk_widget_set_opacity(GTK_WIDGET(prev_button->data), opacity_leftmost);
 
   g_list_free(children);
-  g_free(config);
 
   GtkAllocation header_allocation;
   gtk_widget_get_allocation(header, &header_allocation);
