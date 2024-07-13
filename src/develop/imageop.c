@@ -1677,6 +1677,11 @@ void dt_iop_commit_params(dt_iop_module_t *module, dt_iop_params_t *params,
                           dt_dev_pixelpipe_iop_t *piece)
 {
   assert(piece->pipe == pipe);
+  if(!piece->enabled)
+  {
+    piece->global_hash = piece->hash = 0;
+    return;
+  }
 
   // 1. commit params
   memcpy(piece->blendop_data, blendop_params, sizeof(dt_develop_blend_params_t));
