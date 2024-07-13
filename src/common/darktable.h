@@ -129,12 +129,6 @@ typedef unsigned int u_int;
 
 #if defined(__SSE__)
 #include <xmmintrin.h> // needed for _mm_stream_ps
-#else
-#ifdef __cplusplus
-#include <atomic>
-#else
-#include <stdatomic.h>
-#endif
 #endif
 
 /* Create cloned functions for various CPU SSE generations */
