@@ -1834,6 +1834,68 @@ static void _print_nan_debug(dt_dev_pixelpipe_t *pipe, void *cl_mem_output, void
 }
 
 
+static int _init_base_buffer(dt_dev_pixelpipe_t *pipe, dt_develop_t *dev, void **output,
+                             void **cl_mem_output, dt_iop_buffer_dsc_t **out_format,
+                             dt_iop_roi_t *roi_in, const dt_iop_roi_t *roi_out,
+                             const uint64_t hash,
+                             const gboolean bypass_cache,
+                             const size_t bufsize, const size_t bpp)
+{
+// we're looking for the full buffer
+  if(roi_out->scale == 1.0 && roi_out->x == 0 && roi_out->y == 0 && pipe->iwidth == roi_out->width
+      && pipe->iheight == roi_out->height)
+  {
+    *output = pipe->input;
+    return 0;
+  }
+  else if(bypass_cache || dt_dev_pixelpipe_cache_get(&(pipe->cache), hash, bufsize, output, out_format))
+  {
+    if(roi_in->scale == 1.0f)
+    {
+      // fast branch for 1:1 pixel copies.
+      // last minute clamping to catch potential out-of-bounds in roi_in and roi_out
+      const int in_x = MAX(roi_in->x, 0);
+      const int in_y = MAX(roi_in->y, 0);
+      const int cp_width = MAX(0, MIN(roi_out->width, pipe->iwidth - in_x));
+      const int cp_height = MIN(roi_out->height, pipe->iheight - in_y);
+
+      if(cp_width > 0 && cp_height > 0)
+      {
+        _copy_buffer((const char *const)pipe->input, (char *const)*output, cp_height, roi_out->width,
+                      pipe->iwidth, in_x, in_y, bpp * cp_width, bpp);
+        return 0;
+      }
+      else
+      {
+        // Invalid dimensions
+        return 1;
+      }
+    }
+    else if(bpp == 16)
+    {
+      // dt_iop_clip_and_zoom() expects 4 * float 32 only
+      roi_in->x /= roi_out->scale;
+      roi_in->y /= roi_out->scale;
+      roi_in->width = pipe->iwidth;
+      roi_in->height = pipe->iheight;
+      roi_in->scale = 1.0f;
+      dt_iop_clip_and_zoom(*output, pipe->input, roi_out, roi_in, roi_out->width, pipe->iwidth);
+      return 0;
+    }
+    else
+    {
+      fprintf(stdout,
+                "Base buffer init: scale %f != 1.0 but the input has %li bytes per pixel. This case is not "
+                "covered by the pipeline, please report the bug.\n",
+                roi_out->scale, bpp);
+      return 1;
+    }
+  }
+  // else found in cache.
+  return 0;
+}
+
+
 // recursive helper for process:
 static int dt_dev_pixelpipe_process_rec(dt_dev_pixelpipe_t *pipe, dt_develop_t *dev, void **output,
                                         void **cl_mem_output, dt_iop_buffer_dsc_t **out_format,
@@ -1900,43 +1962,9 @@ static int dt_dev_pixelpipe_process_rec(dt_dev_pixelpipe_t *pipe, dt_develop_t *
     // 3a) import input array with given scale and roi
     dt_times_t start;
     dt_get_times(&start);
-    // we're looking for the full buffer
-    {
-      if(roi_out->scale == 1.0 && roi_out->x == 0 && roi_out->y == 0 && pipe->iwidth == roi_out->width
-         && pipe->iheight == roi_out->height)
-      {
-        *output = pipe->input;
-      }
-      else if(bypass_cache || dt_dev_pixelpipe_cache_get(&(pipe->cache), hash, bufsize, output, out_format))
-      {
-        if(roi_in.scale == 1.0f)
-        {
-          // fast branch for 1:1 pixel copies.
-          // last minute clamping to catch potential out-of-bounds in roi_in and roi_out
-          const int in_x = MAX(roi_in.x, 0);
-          const int in_y = MAX(roi_in.y, 0);
-          const int cp_width = MAX(0, MIN(roi_out->width, pipe->iwidth - in_x));
-          const int cp_height = MIN(roi_out->height, pipe->iheight - in_y);
-
-          if(cp_width > 0)
-            _copy_buffer((const char *const)pipe->input, (char *const)*output, cp_height, roi_out->width,
-                         pipe->iwidth, in_x, in_y, bpp * cp_width, bpp);
-          else
-            return 1; // Something is wrong
-        }
-        else
-        {
-          roi_in.x /= roi_out->scale;
-          roi_in.y /= roi_out->scale;
-          roi_in.width = pipe->iwidth;
-          roi_in.height = pipe->iheight;
-          roi_in.scale = 1.0f;
-          dt_iop_clip_and_zoom(*output, pipe->input, roi_out, &roi_in, roi_out->width, pipe->iwidth);
-        }
-      }
-      // else found in cache.
-    }
-
+    if(_init_base_buffer(pipe, dev, output, cl_mem_output, out_format, &roi_in, roi_out, hash, bypass_cache, bufsize,
+                      bpp))
+      return 1;
     dt_show_times_f(&start, "[dev_pixelpipe]", "initing base buffer [%s]", _pipe_type_to_str(pipe->type));
     return 0;
   }
