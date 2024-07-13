@@ -1895,6 +1895,41 @@ static int _init_base_buffer(dt_dev_pixelpipe_t *pipe, dt_develop_t *dev, void *
   return 0;
 }
 
+static int _process_masks_preview(dt_dev_pixelpipe_t *pipe, dt_develop_t *dev, dt_dev_pixelpipe_iop_t *piece,
+                                  void *input, void **output,
+                                  void *cl_mem_input, void **cl_mem_output, dt_iop_buffer_dsc_t **out_format,
+                                  const dt_iop_roi_t *roi_in, const dt_iop_roi_t *roi_out,
+                                  const size_t in_bpp, const size_t out_bpp, dt_iop_module_t *module)
+{
+  // special case: user requests to see channel data in the parametric mask of a module, or the blending
+  // mask. In that case we skip all modules manipulating pixel content and only process image distorting
+  // modules. Finally "gamma" is responsible for displaying channel/mask data accordingly.
+  if(strcmp(module->op, "gamma") != 0
+     && (pipe->mask_display != DT_DEV_PIXELPIPE_DISPLAY_NONE)
+     && !(module->operation_tags() & IOP_TAG_DISTORT)
+     && (in_bpp == out_bpp) && !memcmp(roi_in, roi_out, sizeof(struct dt_iop_roi_t)))
+  {
+    // since we're not actually running the module, the output format is the same as the input format
+    **out_format = pipe->dsc = piece->dsc_out = piece->dsc_in;
+
+#ifdef HAVE_OPENCL
+    if(dt_opencl_is_inited() && pipe->opencl_enabled && pipe->devid >= 0 && (cl_mem_input != NULL))
+      *cl_mem_output = cl_mem_input;
+    else
+      *output = input;
+#else
+    *output = input;
+#endif
+    /* Previously: used full buffer copy on CPU:
+    _copy_buffer((const char *const)input, (char *const)*output, roi_out->height, roi_out->width, roi_in.width,
+                   0, 0, in_bpp * roi_in.width, in_bpp); */
+
+    return 0;
+  }
+
+  return 1;
+}
+
 
 // recursive helper for process:
 static int dt_dev_pixelpipe_process_rec(dt_dev_pixelpipe_t *pipe, dt_develop_t *dev, void **output,
@@ -1962,9 +1997,11 @@ static int dt_dev_pixelpipe_process_rec(dt_dev_pixelpipe_t *pipe, dt_develop_t *
     // 3a) import input array with given scale and roi
     dt_times_t start;
     dt_get_times(&start);
+
     if(_init_base_buffer(pipe, dev, output, cl_mem_output, out_format, &roi_in, roi_out, hash, bypass_cache, bufsize,
                       bpp))
       return 1;
+
     dt_show_times_f(&start, "[dev_pixelpipe]", "initing base buffer [%s]", _pipe_type_to_str(pipe->type));
     return 0;
   }
@@ -2005,31 +2042,10 @@ static int dt_dev_pixelpipe_process_rec(dt_dev_pixelpipe_t *pipe, dt_develop_t *
 
   dt_pixelpipe_flow_t pixelpipe_flow = (PIXELPIPE_FLOW_NONE | PIXELPIPE_FLOW_HISTOGRAM_NONE);
 
-  // special case: user requests to see channel data in the parametric mask of a module, or the blending
-  // mask. In that case we skip all modules manipulating pixel content and only process image distorting
-  // modules. Finally "gamma" is responsible for displaying channel/mask data accordingly.
-  if(strcmp(module->op, "gamma") != 0
-     && (pipe->mask_display != DT_DEV_PIXELPIPE_DISPLAY_NONE)
-     && !(module->operation_tags() & IOP_TAG_DISTORT)
-     && (in_bpp == out_bpp) && !memcmp(&roi_in, roi_out, sizeof(struct dt_iop_roi_t)))
-  {
-    // since we're not actually running the module, the output format is the same as the input format
-    **out_format = pipe->dsc = piece->dsc_out = piece->dsc_in;
-
-#ifdef HAVE_OPENCL
-    if(dt_opencl_is_inited() && pipe->opencl_enabled && pipe->devid >= 0 && (cl_mem_input != NULL))
-      *cl_mem_output = cl_mem_input;
-    else
-      *output = input;
-#else
-    *output = input;
-#endif
-    /* Previously: used full buffer copy on CPU:
-    _copy_buffer((const char *const)input, (char *const)*output, roi_out->height, roi_out->width, roi_in.width,
-                   0, 0, in_bpp * roi_in.width, in_bpp); */
-
+  // Bypass pixel filtering and return early if we only want the pipe to display mask previews
+  if(!_process_masks_preview(pipe, dev, piece, input, output, cl_mem_input, cl_mem_output, out_format, &roi_in, roi_out,
+                         in_bpp, out_bpp, module))
     return 0;
-  }
 
   /* get tiling requirement of module */
   dt_develop_tiling_t tiling = { 0 };
