@@ -31,6 +31,7 @@
 #include "control/conf.h"
 #include "control/control.h"
 #include "develop/develop.h"
+#include "dtgtk/drawingarea.h"
 #include "gui/color_picker_proxy.h"
 #include "gui/draw.h"
 #include "gui/gtk.h"
@@ -173,25 +174,6 @@ static void _redraw_scopes(dt_lib_histogram_t *d)
 {
   gtk_widget_queue_draw(d->scope_draw);
 }
-
-
-void _resize_scopes(dt_lib_histogram_t *d)
-{
-  // Set height = width no matter the width, aka make it square.
-  GtkAllocation allocation;
-  gtk_widget_get_allocation(d->scope_draw, &allocation);
-  gtk_widget_set_size_request(d->scope_draw, -1, allocation.width);
-}
-
-
-// this is only called in darkroom view when preview pipe finishes
-static void _lib_histogram_preview_updated_callback(gpointer instance, dt_lib_module_t *self)
-{
-  dt_lib_histogram_t *d = (dt_lib_histogram_t *)self->data;
-  d->backbuf = _get_backuf(darktable.develop, d->op);
-  if(_is_backbuf_ready(d)) _redraw_scopes(d);
-}
-
 
 static void _process_histogram(dt_backbuf_t *backbuf, cairo_t *cr, const int width, const int height)
 {
@@ -701,25 +683,32 @@ static gboolean _draw_callback(GtkWidget *widget, cairo_t *crf, gpointer user_da
 {
   // Note: the draw callback is called from our own callback (mapped to "preview pipe finished recomputing" signal)
   // but is also called by Gtk when the main window is resized, exposed, etc.
+  dt_lib_histogram_t *d = (dt_lib_histogram_t *)user_data;
+  if(d->cst == NULL) return 1;
+  cairo_set_source_surface(crf, d->cst, 0, 0);
+  cairo_paint(crf);
+  return 0;
+}
+
+
+void _get_allocation_size(dt_lib_histogram_t *d, int *width, int *height)
+{
+  GtkAllocation allocation;
+  gtk_widget_get_allocation(d->scope_draw, &allocation);
+  *width = allocation.width;
+  *height = allocation.height;
+}
+
+
+gboolean _redraw_surface(dt_lib_histogram_t *d)
+{
+  if(d->cst == NULL) return 1;
+
   dt_times_t start;
   dt_get_times(&start);
 
-  dt_lib_histogram_t *d = (dt_lib_histogram_t *)user_data;
-  if(!_is_backbuf_ready(d)) return 1;
-
-  // Get current allocation to compare cache states
-  GtkAllocation allocation;
-  gtk_widget_get_allocation(widget, &allocation);
-  const int width = allocation.width;
-  const int height = allocation.height;
-
-  if(!_needs_recompute(d, width, height))
-  {
-    // Fast path: serve cached buffer
-    cairo_set_source_surface(crf, d->cst, 0, 0);
-    cairo_paint(crf);
-    return 1;
-  }
+  int width, height;
+  _get_allocation_size(d, &width, &height);
 
   // Save cache integrity
   d->cache.hash = d->backbuf->hash;
@@ -728,11 +717,10 @@ static gboolean _draw_callback(GtkWidget *widget, cairo_t *crf, gpointer user_da
   d->cache.zoom = d->zoom;
   d->cache.view = dt_bauhaus_combobox_get(d->display);
 
-  d->cst = dt_cairo_image_surface_create(CAIRO_FORMAT_ARGB32, width, height);
   cairo_t *cr = cairo_create(d->cst);
 
   // Paint background
-  gtk_render_background(gtk_widget_get_style_context(widget), cr, 0, 0, width, height);
+  gtk_render_background(gtk_widget_get_style_context(d->scope_draw), cr, 0, 0, width, height);
   cairo_set_line_width(cr, 1.); // we want exactly 1 px no matter the resolution
 
   // Paint content
@@ -773,10 +761,36 @@ static gboolean _draw_callback(GtkWidget *widget, cairo_t *crf, gpointer user_da
   }
 
   cairo_destroy(cr);
-  cairo_set_source_surface(crf, d->cst, 0, 0);
-  cairo_paint(crf);
   dt_show_times_f(&start, "[histogram]", "redraw");
-  return 1;
+  return 0;
+}
+
+gboolean _trigger_recompute(dt_lib_histogram_t *d)
+{
+  int width, height;
+  _get_allocation_size(d, &width, &height);
+
+  if(_is_backbuf_ready(d) && _needs_recompute(d, width, height))
+  {
+    if(d->cst && cairo_surface_get_reference_count(d->cst) > 0) cairo_surface_destroy(d->cst);
+    // If width and height have changed, we need to recreate the surface.
+    // Recreate it anyway.
+    d->cst = dt_cairo_image_surface_create(CAIRO_FORMAT_ARGB32, width, height);
+    _redraw_surface(d);
+    // Don't send gtk_queue_redraw event from here, catch the return value and do it in the calling function
+    return 1;
+  }
+
+  return 0;
+}
+
+
+// this is only called in darkroom view when preview pipe finishes
+static void _lib_histogram_preview_updated_callback(gpointer instance, dt_lib_module_t *self)
+{
+  dt_lib_histogram_t *d = (dt_lib_histogram_t *)self->data;
+  d->backbuf = _get_backuf(darktable.develop, d->op);
+  if(_trigger_recompute(d)) _redraw_scopes(d);
 }
 
 
@@ -808,14 +822,14 @@ void _stage_callback(GtkWidget *widget, dt_lib_histogram_t *d)
   dt_bauhaus_combobox_entry_set_sensitive(d->display, DT_LIB_HISTOGRAM_SCOPE_VECTORSCOPE, strcmp(d->op, "demosaic"));
 
   d->backbuf = _get_backuf(darktable.develop, d->op);
-  if(_is_backbuf_ready(d)) _redraw_scopes(d);
+  if(_trigger_recompute(d)) _redraw_scopes(d);
 }
 
 
 void _display_callback(GtkWidget *widget, dt_lib_histogram_t *d)
 {
-  _redraw_scopes(d);
   dt_conf_set_int("plugin/darkroom/histogram/display", dt_bauhaus_combobox_get(d->display));
+  if(_trigger_recompute(d)) _redraw_scopes(d);
 }
 
 
@@ -823,7 +837,8 @@ static void _resize_callback(GtkWidget *widget, GdkRectangle *allocation, dt_lib
 {
   fprintf(stdout, "resize called \n");
   _reset_cache(d);
-  _resize_scopes(d);
+  _trigger_recompute(d);
+  // Don't start a redraw from here, Gtk does it automatically on resize event
 }
 
 static gboolean _area_scrolled_callback(GtkWidget *widget, GdkEventScroll *event, dt_lib_histogram_t *d)
@@ -838,7 +853,11 @@ static gboolean _area_scrolled_callback(GtkWidget *widget, GdkEventScroll *event
   {
     d->zoom = new_value;
     dt_conf_set_float("plugin/darkroom/histogram/zoom", new_value);
-    if(_is_backbuf_ready(d)) _redraw_scopes(d);
+    if(_is_backbuf_ready(d))
+    {
+      _redraw_surface(d);
+      _redraw_scopes(d);
+    }
   }
   return TRUE;
 }
@@ -876,13 +895,13 @@ void gui_init(dt_lib_module_t *self)
   d->cst = NULL;
 
   self->widget = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
-  d->scope_draw = gtk_drawing_area_new();
+  d->scope_draw = dtgtk_drawing_area_new_with_aspect_ratio(1.);
   gtk_widget_add_events(GTK_WIDGET(d->scope_draw), darktable.gui->scroll_mask);
-  gtk_box_pack_start(GTK_BOX(self->widget), d->scope_draw, TRUE, TRUE, 0);
   gtk_widget_set_size_request(d->scope_draw, -1, DT_PIXEL_APPLY_DPI(250));
   g_signal_connect(G_OBJECT(d->scope_draw), "draw", G_CALLBACK(_draw_callback), d);
   g_signal_connect(G_OBJECT(d->scope_draw), "scroll-event", G_CALLBACK(_area_scrolled_callback), d);
   g_signal_connect(G_OBJECT(d->scope_draw), "size-allocate", G_CALLBACK(_resize_callback), d);
+  gtk_box_pack_start(GTK_BOX(self->widget), d->scope_draw, TRUE, TRUE, 0);
 
   d->stage = dt_bauhaus_combobox_new_action(DT_ACTION(self));
   dt_bauhaus_widget_set_label(d->stage, NULL, _("Show data from"));
@@ -903,7 +922,6 @@ void gui_init(dt_lib_module_t *self)
   g_signal_connect(G_OBJECT(d->display), "value-changed", G_CALLBACK(_display_callback), d);
   gtk_box_pack_start(GTK_BOX(self->widget), d->display, FALSE, FALSE, 0);
 
-  _resize_scopes(d);
   _reset_cache(d);
   _set_params(d);
 }
