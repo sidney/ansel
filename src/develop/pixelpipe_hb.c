@@ -1871,6 +1871,17 @@ static int _init_base_buffer(dt_dev_pixelpipe_t *pipe, dt_develop_t *dev, void *
         return 1;
       }
     }
+    else if(bpp == 16)
+    {
+      // dt_iop_clip_and_zoom() expects 4 * float 32 only
+      roi_in->x /= roi_out->scale;
+      roi_in->y /= roi_out->scale;
+      roi_in->width = pipe->iwidth;
+      roi_in->height = pipe->iheight;
+      roi_in->scale = 1.0f;
+      dt_iop_clip_and_zoom(*output, pipe->input, roi_out, roi_in, roi_out->width, pipe->iwidth);
+      return 0;
+    }
     else
     {
       fprintf(stdout,
