@@ -835,7 +835,6 @@ void _display_callback(GtkWidget *widget, dt_lib_histogram_t *d)
 
 static void _resize_callback(GtkWidget *widget, GdkRectangle *allocation, dt_lib_histogram_t *d)
 {
-  fprintf(stdout, "resize called \n");
   _reset_cache(d);
   _trigger_recompute(d);
   // Don't start a redraw from here, Gtk does it automatically on resize event
