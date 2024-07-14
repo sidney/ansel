@@ -705,10 +705,7 @@ static gboolean _draw_callback(GtkWidget *widget, cairo_t *crf, gpointer user_da
   dt_get_times(&start);
 
   dt_lib_histogram_t *d = (dt_lib_histogram_t *)user_data;
-  if(!_is_backbuf_ready(d)) return 0;
-
-  // Check if we need to expand height
-  _resize_scopes(d);
+  if(!_is_backbuf_ready(d)) return 1;
 
   // Get current allocation to compare cache states
   GtkAllocation allocation;
@@ -731,7 +728,6 @@ static gboolean _draw_callback(GtkWidget *widget, cairo_t *crf, gpointer user_da
   d->cache.zoom = d->zoom;
   d->cache.view = dt_bauhaus_combobox_get(d->display);
 
-  if(d->cst && cairo_surface_get_reference_count(d->cst) > 0) cairo_surface_destroy(d->cst);
   d->cst = dt_cairo_image_surface_create(CAIRO_FORMAT_ARGB32, width, height);
   cairo_t *cr = cairo_create(d->cst);
 
@@ -825,7 +821,9 @@ void _display_callback(GtkWidget *widget, dt_lib_histogram_t *d)
 
 static void _resize_callback(GtkWidget *widget, GdkRectangle *allocation, dt_lib_histogram_t *d)
 {
+  fprintf(stdout, "resize called \n");
   _reset_cache(d);
+  _resize_scopes(d);
 }
 
 static gboolean _area_scrolled_callback(GtkWidget *widget, GdkEventScroll *event, dt_lib_histogram_t *d)
@@ -905,6 +903,7 @@ void gui_init(dt_lib_module_t *self)
   g_signal_connect(G_OBJECT(d->display), "value-changed", G_CALLBACK(_display_callback), d);
   gtk_box_pack_start(GTK_BOX(self->widget), d->display, FALSE, FALSE, 0);
 
+  _resize_scopes(d);
   _reset_cache(d);
   _set_params(d);
 }
