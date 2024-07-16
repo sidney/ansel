@@ -994,8 +994,14 @@ RECURSIVE              = YES
 # Note that relative paths are relative to the directory from which doxygen is
 # run.
 
-EXCLUDE                = ../src/external ./api ./doxygen-awesome-css ../build ../AppDir
-
+EXCLUDE                = ../src/external \
+                         ./api \
+                         ./doxygen-awesome-css \
+                         ../build \
+                         ../AppDir \
+                         ../src/tests/integration \
+                         ../README.md
+EXCLUDE
 # The EXCLUDE_SYMLINKS tag can be used to select whether or not files or
 # directories that are symbolic links (a Unix file system feature) are excluded
 # from the input.
@@ -1075,7 +1081,8 @@ IMAGE_PATH             =
 # need to set EXTENSION_MAPPING for the extension otherwise the files are not
 # properly processed by doxygen.
 
-INPUT_FILTER           =
+# Find //TODO and //FIXME and in code comments and treat them as the \todo command
+INPUT_FILTER           = "sed -Ee 's,(//|/\*).*(TODO|FIXME),\1! \\todo ,'"
 
 # The FILTER_PATTERNS tag can be used to specify filters on a per file pattern
 # basis. Doxygen will compare the file name with each pattern and apply the
@@ -2474,7 +2481,7 @@ DOT_NUM_THREADS        = 8
 # The default value is: fontname=Helvetica,fontsize=10.
 # This tag requires that the tag HAVE_DOT is set to YES.
 
-DOT_COMMON_ATTR        = "fontname=FreeSans,fontsize=10"
+DOT_COMMON_ATTR        = "fontname=FreeSans,fontsize=12"
 
 # DOT_EDGE_ATTR is concatenated with DOT_COMMON_ATTR. For elegant style you can
 # add 'arrowhead=open, arrowtail=open, arrowsize=0.5'. <a
@@ -2483,7 +2490,7 @@ DOT_COMMON_ATTR        = "fontname=FreeSans,fontsize=10"
 # The default value is: labelfontname=Helvetica,labelfontsize=10.
 # This tag requires that the tag HAVE_DOT is set to YES.
 
-DOT_EDGE_ATTR          = "labelfontname=FreeSans,labelfontsize=10"
+DOT_EDGE_ATTR          = "labelfontname=FreeSans,labelfontsize=12"
 
 # DOT_NODE_ATTR is concatenated with DOT_COMMON_ATTR. For view without boxes
 # around nodes set 'shape=plain' or 'shape=plaintext' <a

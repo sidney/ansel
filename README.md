@@ -1,9 +1,11 @@
 # Ansel
 
+[TOC]
+
+## What is it ?
+
 __Ansel__ is a better future for Darktable, designed from real-life use cases and solving actual problems,
 by the guy who did the scene-referred workflow and spent these past 4 years working full-time on Darktable.
-
-[Website](https://ansel.photos) (including docs, workflows, support, etc.)
 
 It is forked on Darktable 4.0, and is compatible with editing histories produced with Darktable 4.0 and earlier.
 It is not compatible with Darktable 4.2 and later and will not be, since 4.2 introduces irresponsible choices that
@@ -64,3 +66,4 @@ A couple of nice guys are trying their best to fix issues on Mac OS in a timely 
 - [Project news](https://ansel.photos/en/news/)
 - [Community forum](https://community.ansel.photos/)
 - [Matrix chatrooms](https://app.element.io/#/room/#ansel:matrix.org)
+- [Support](https://ansel.photos/en/support/)
