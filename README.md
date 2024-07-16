@@ -1,3 +1,5 @@
+/** \mainpage Ansel
+
 __Ansel__ is a better future for Darktable, designed from real-life use cases and solving actual problems,
 by the guy who did the scene-referred workflow and spent these past 4 years working full-time on Darktable.
 
