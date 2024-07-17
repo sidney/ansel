@@ -35,8 +35,6 @@ As time will go, we will add real dev documentation, explaining how the core tas
 
 ## Useful links
 
-## Useful links
-
 - [User documentation](https://ansel.photos/en/doc/), in particular:
     - [Build and test on Linux](https://ansel.photos/en/doc/install/linux)
     - [Build and test on Windows](https://ansel.photos/en/doc/install/linux)
