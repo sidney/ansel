@@ -1791,6 +1791,8 @@ void dt_dev_read_history_ext(dt_develop_t *dev, const int imgid, gboolean no_ima
       continue;
     }
 
+    _sanitize_modules(hist->module);
+
     // Run a battery of tests
     const gboolean is_valid_module_name = (strcmp(module_name, hist->module->op) == 0);
     const gboolean is_valid_blendop_version = (blendop_version == dt_develop_blend_version());
