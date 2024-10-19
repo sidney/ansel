@@ -815,6 +815,8 @@ int dt_imageio_export_with_flags(const int32_t imgid, const char *filename,
       dt_imageio_resizing_factor_get_and_parsing(&_num, &_denum);
       const double scale_factor = _num / _denum;
       scale = fmin(scale_factor, 1.);
+      processed_height = pipe.processed_height * scale;
+      processed_width = pipe.processed_width * scale;
       force_width = TRUE;
       force_height = TRUE;
     }
