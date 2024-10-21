@@ -1,6 +1,6 @@
 /*
     This file is part of darktable,
-    Copyright (C) 2010-2023 darktable developers.
+    Copyright (C) 2010-2024 darktable developers.
 
     darktable is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -21,6 +21,10 @@
 #endif
 
 #include "RawSpeed-API.h"
+#include "io/FileIOException.h"
+#include "metadata/CameraMetadataException.h"
+#include "parsers/RawParserException.h"
+#include "parsers/FiffParserException.h"
 
 #define TYPE_FLOAT32 RawImageType::F32
 #define TYPE_USHORT16 RawImageType::UINT16
@@ -53,7 +57,9 @@ int rawspeed_get_number_of_processor_cores()
 
 using namespace rawspeed;
 
-static dt_imageio_retval_t dt_imageio_open_rawspeed_sraw (dt_image_t *img, RawImage r, dt_mipmap_buffer_t *buf);
+static dt_imageio_retval_t dt_imageio_open_rawspeed_sraw (dt_image_t *img,
+                                                          const RawImage r,
+                                                          dt_mipmap_buffer_t *buf);
 static CameraMetaData *meta = NULL;
 
 static void dt_rawspeed_load_meta()
@@ -81,10 +87,8 @@ gboolean dt_rawspeed_lookup_makermodel(const char *maker, const char *model,
   gboolean got_it_done = FALSE;
   try {
     dt_rawspeed_load_meta();
-    const Camera *cam = meta->getCamera(maker, model, "");
-    // Also look for dng cameras
-    if(!cam)
-      cam = meta->getCamera(maker, model, "dng");
+    // Look for camera in any mode available
+    const Camera *cam = meta->getCamera(maker, model);
     if(cam)
     {
       g_strlcpy(mk, cam->canonical_make.c_str(), mk_len);
@@ -215,18 +219,19 @@ dt_imageio_retval_t dt_imageio_open_rawspeed(dt_image_t *img, const char *filena
       }
 
     img->raw_black_level = r->blackLevel;
-    img->raw_white_point = r->whitePoint;
+    img->raw_white_point = r->whitePoint.value_or((1U << 16)-1);
 
-    if(r->blackLevelSeparate[0] == -1
-       || r->blackLevelSeparate[1] == -1
-       || r->blackLevelSeparate[2] == -1
-       || r->blackLevelSeparate[3] == -1)
+    // NOTE: while it makes sense to always sample black areas when they exist,
+    // black area handling is broken in rawspeed, so don't do that for now.
+    // https://github.com/darktable-org/rawspeed/issues/389
+    if(!r->blackLevelSeparate)
     {
       r->calculateBlackAreas();
     }
 
+    const auto bl = *(r->blackLevelSeparate->getAsArray1DRef());
     for(uint8_t i = 0; i < 4; i++)
-      img->raw_black_level_separate[i] = r->blackLevelSeparate[i];
+      img->raw_black_level_separate[i] = bl(i);
 
     if(r->blackLevel == -1)
     {
@@ -237,7 +242,7 @@ dt_imageio_retval_t dt_imageio_open_rawspeed(dt_image_t *img, const char *filena
       }
       black /= 4.0f;
 
-      img->raw_black_level = CLAMP(black, 0, UINT16_MAX);
+      img->raw_black_level = CLAMP(roundf(black), 0, UINT16_MAX);
     }
 
     /*
@@ -273,12 +278,39 @@ dt_imageio_retval_t dt_imageio_open_rawspeed(dt_image_t *img, const char *filena
     {
       img->flags |= DT_IMAGE_HDR;
 
-      // we assume that image is normalized before.
-      // FIXME: not true for hdrmerge DNG's.
-      for(int k = 0; k < 4; k++) img->buf_dsc.processed_maximum[k] = 1.0f;
+      // We assume that float images should already be normalized.
+      // Also consider 1.0f in binary32 (legacy dt HDR files) as white point magic value;
+      // otherwise (e.g. HDRMerge files), let rawprepare normalize as usual.
+      if(r->whitePoint == 0x3F800000) img->raw_white_point = 1;
+      if(img->raw_white_point == 1)
+        for(int k = 0; k < 4; k++) img->buf_dsc.processed_maximum[k] = 1.0f;
     }
 
     img->buf_dsc.filters = 0u;
+
+    // dimensions of uncropped image
+    const iPoint2D dimUncropped = r->getUncroppedDim();
+    img->width = dimUncropped.x;
+    img->height = dimUncropped.y;
+
+    // dimensions of cropped image
+    const iPoint2D dimCropped = r->dim;
+
+    // crop - Top,Left corner
+    const iPoint2D cropTL = r->getCropOffset();
+    img->crop_x = cropTL.x;
+    img->crop_y = cropTL.y;
+
+    // crop - Bottom,Right corner
+    const iPoint2D cropBR = dimUncropped - dimCropped - cropTL;
+    img->crop_width = cropBR.x;
+    img->crop_height = cropBR.y;
+    img->p_width = img->width - img->crop_x - img->crop_width;
+    img->p_height = img->height - img->crop_y - img->crop_height;
+
+    img->fuji_rotation_pos = r->metadata.fujiRotationPos;
+    img->pixel_aspect_ratio = (float)r->metadata.pixelAspectRatio;
+
     if(!r->isCFA)
     {
       const dt_imageio_retval_t ret = dt_imageio_open_rawspeed_sraw(img, r, mbuf);
@@ -313,27 +345,6 @@ dt_imageio_retval_t dt_imageio_open_rawspeed(dt_image_t *img, const char *filena
       default:
         return DT_IMAGEIO_FILE_CORRUPTED;
     }
-
-    // dimensions of uncropped image
-    iPoint2D dimUncropped = r->getUncroppedDim();
-    img->width = dimUncropped.x;
-    img->height = dimUncropped.y;
-
-    // dimensions of cropped image
-    iPoint2D dimCropped = r->dim;
-
-    // crop - Top,Left corner
-    iPoint2D cropTL = r->getCropOffset();
-    img->crop_x = cropTL.x;
-    img->crop_y = cropTL.y;
-
-    // crop - Bottom,Right corner
-    iPoint2D cropBR = dimUncropped - dimCropped - cropTL;
-    img->crop_width = cropBR.x;
-    img->crop_height = cropBR.y;
-
-    img->fuji_rotation_pos = r->metadata.fujiRotationPos;
-    img->pixel_aspect_ratio = (float)r->metadata.pixelAspectRatio;
 
     // as the X-Trans filters comments later on states, these are for
     // cropped image, so we need to uncrop them.
@@ -399,12 +410,56 @@ dt_imageio_retval_t dt_imageio_open_rawspeed(dt_image_t *img, const char *filena
                                         r->metadata.model.c_str(),
                                         r->metadata.mode.c_str());
 
-    if(cam && cam->supportStatus == Camera::SupportStatus::NoSamples)
+    if(cam && cam->supportStatus == Camera::SupportStatus::SupportedNoSamples)
       img->camera_missing_sample = TRUE;
+  }
+  catch(const rawspeed::IOException &exc)
+  {
+    fprintf(stderr, "[rawspeed] (%s) I/O error: %s", img->filename, exc.what());
+    return DT_IMAGEIO_FILE_CORRUPTED;
+  }
+  catch(const rawspeed::FileIOException &exc)
+  {
+    fprintf(stderr, "[rawspeed] (%s) File I/O error: %s", img->filename, exc.what());
+    return DT_IMAGEIO_FILE_CORRUPTED;
+  }
+  catch(const rawspeed::RawDecoderException &exc)
+  {
+    const char *msg = exc.what();
+    // FIXME FIXME
+    // The following is a nasty hack which will break if exception messages change.
+    // The proper way to handle this is to add two new exception types to Rawspeed and
+    // have them throw the appropriate ones on encountering an unsupported camera model
+    // or unsupported feature (e.g. bit depth, compression, aspect ratio mode, ...)
+    if(msg && (strstr(msg, "Camera not supported") || strstr(msg, "not supported, and not allowed to guess")))
+    {
+      fprintf(stderr, "[rawspeed] Unsupported camera model for %s", img->filename);
+      return DT_IMAGEIO_FILE_CORRUPTED;
+    }
+    else if (msg && strstr(msg, "supported"))
+    {
+      fprintf(stderr, "[rawspeed] (%s) %s", img->filename, msg);
+      return DT_IMAGEIO_FILE_CORRUPTED;
+    }
+    else
+    {
+      fprintf(stderr, "[rawspeed] %s corrupt: %s", img->filename, exc.what());
+      return DT_IMAGEIO_FILE_CORRUPTED;
+    }
+  }
+  catch(const rawspeed::RawParserException &exc)
+  {
+    fprintf(stderr, "[rawspeed] (%s) CIFF/FIFF error: %s", img->filename, exc.what());
+    return DT_IMAGEIO_FILE_CORRUPTED;
+  }
+  catch(const rawspeed::CameraMetadataException &exc)
+  {
+    fprintf(stderr, "[rawspeed] (%s) metadata error: %s", img->filename, exc.what());
+    return DT_IMAGEIO_FILE_CORRUPTED;
   }
   catch(const std::exception &exc)
   {
-    fprintf(stderr, "[rawspeed] (%s) %s\n", img->filename, exc.what());
+    fprintf(stderr, "[rawspeed] (%s) %s", img->filename, exc.what());
 
     /* if an exception is raised lets not retry or handle the
      specific ones, consider the file as corrupted */
@@ -422,14 +477,14 @@ dt_imageio_retval_t dt_imageio_open_rawspeed(dt_image_t *img, const char *filena
   return DT_IMAGEIO_OK;
 }
 
-dt_imageio_retval_t dt_imageio_open_rawspeed_sraw(dt_image_t *img, RawImage r, dt_mipmap_buffer_t *mbuf)
+dt_imageio_retval_t dt_imageio_open_rawspeed_sraw(dt_image_t *img,
+                                                  const RawImage r,
+                                                  dt_mipmap_buffer_t *mbuf)
 {
   // sraw aren't real raw, but not ldr either (need white balance and stuff)
   img->flags &= ~DT_IMAGE_LDR;
   img->flags &= ~DT_IMAGE_RAW;
   img->flags |= DT_IMAGE_S_RAW;
-  img->width = r->dim.x;
-  img->height = r->dim.y;
 
   // actually we want to store full floats here:
   img->buf_dsc.channels = 4;
@@ -492,10 +547,8 @@ dt_imageio_retval_t dt_imageio_open_rawspeed_sraw(dt_image_t *img, RawImage r, d
 
         for(int i = 0; i < img->width; i++, out += 4)
         {
-          for(int k = 0; k < 3; k++)
-          {
-            out[k] = in(j, cpp * i + k);
-          }
+          out[0] = out[1] = out[2] = in(j, cpp * i);
+          out[3] = 0.0f;
         }
       }
     }
@@ -520,9 +573,8 @@ dt_imageio_retval_t dt_imageio_open_rawspeed_sraw(dt_image_t *img, RawImage r, d
         for(int i = 0; i < img->width; i++, out += 4)
         {
           for(int k = 0; k < 3; k++)
-          {
             out[k] = (float)in(j, cpp * i + k) / (float)UINT16_MAX;
-          }
+          out[3] = 0.0f;
         }
       }
     }
@@ -539,15 +591,14 @@ dt_imageio_retval_t dt_imageio_open_rawspeed_sraw(dt_image_t *img, RawImage r, d
         for(int i = 0; i < img->width; i++, out += 4)
         {
           for(int k = 0; k < 3; k++)
-          {
             out[k] = in(j, cpp * i + k);
-          }
+          out[3] = 0.0f;
         }
       }
     }
   }
 
-  img->buf_dsc.cst = IOP_CS_RAW;
+  img->buf_dsc.cst = IOP_CS_RGB;
   img->loader = LOADER_RAWSPEED;
 
   //  Check if the camera is missing samples
@@ -555,7 +606,7 @@ dt_imageio_retval_t dt_imageio_open_rawspeed_sraw(dt_image_t *img, RawImage r, d
                                       r->metadata.model.c_str(),
                                       r->metadata.mode.c_str());
 
-  if(cam && cam->supportStatus == Camera::SupportStatus::NoSamples)
+  if(cam && cam->supportStatus == Camera::SupportStatus::SupportedNoSamples)
     img->camera_missing_sample = TRUE;
 
   return DT_IMAGEIO_OK;
