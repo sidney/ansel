@@ -2181,6 +2181,39 @@ const int32_t _import_job(dt_control_import_t *data, gchar *img_path_to_db)
   return imgid;
 }
 
+
+/**
+ * @brief Attempt to find a sidecar XMP file along an image file and import (copy) it to destination.
+ * Warning: this does not support versions, so only the first version is imported.
+ *
+ * @param filename full path of original image file
+ * @param dest_file_path full path of destination image file
+ * @return int TRUE if XMP imported
+ */
+int _import_copy_xmp(const char *const filename, gchar *dest_file_path)
+{
+  char *xmp_source = g_strdup_printf("%s.xmp", dt_util_normalize_path(filename));
+  char *xmp_destination = g_strdup_printf("%s.xmp", dt_util_normalize_path(dest_file_path));
+
+  if(!xmp_source || !xmp_destination || !dt_util_test_image_file(xmp_source))
+  {
+    g_free(xmp_source);
+    g_free(xmp_destination);
+    return 0;
+  }
+
+  int success = _copy_file(xmp_source, xmp_destination);
+
+  if(success)
+    fprintf(stdout, "Sidecar XMP found and copied\n");
+  else
+    fprintf(stdout, "Sidecar XMP found but copy failed");
+
+  g_free(xmp_source);
+  g_free(xmp_destination);
+  return success;
+}
+
 /**
  * @brief copy a file to a destination path after checking if everything is allright.
  *
@@ -2228,6 +2261,8 @@ int _import_copy_file(const char *const filename, const int index, dt_control_im
       process = _copy_file(filename, dest_file_path);
     else
       fprintf(stdout, "Not allowed to write in the folder.\n");
+
+    if(process) _import_copy_xmp(filename, dest_file_path);
 
     if(process)
       g_strlcpy(img_path_to_db, dest_file_path, pathname_len);
