@@ -74,5 +74,5 @@ void append_run(GtkWidget **menus, GList **lists, const dt_menus_t index)
   add_sub_menu_entry(menus, lists, _("Defragment the library"), index, NULL, optimize_database_callback, NULL, NULL, NULL);
   add_sub_menu_entry(menus, lists, _("Backup the library"), index, NULL, backup_database_callback, NULL, NULL, NULL);
   add_sub_menu_entry(menus, lists, _("Resynchronize library and XMP"), index, NULL, crawl_xmp_changes, NULL, NULL, NULL);
-  add_sub_menu_entry(menus, lists, _("Save all developments to XMP"), index, NULL, write_XMP, NULL, NULL, NULL);
+  add_sub_menu_entry(menus, lists, _("Save selected developments to XMP"), index, NULL, write_XMP, NULL, NULL, sensitive_if_selected);
 }
