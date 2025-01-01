@@ -216,36 +216,13 @@ include_directories(SYSTEM ${CMAKE_CURRENT_SOURCE_DIR}/external/OpenCL)
 # initial compiler flags
 add_definitions(-DHAVE_CONFIG_H=1)
 
-CHECK_C_COMPILER_FLAG("-std=c99" COMPILER_SUPPORTS_C99)
-if(NOT COMPILER_SUPPORTS_C99)
-        message(FATAL_ERROR "The compiler ${CMAKE_C_COMPILER} has no C99 support. Please use a different C compiler.")
-endif()
-
-CHECK_C_COMPILER_FLAG("-std=c11" COMPILER_SUPPORTS_C11)
-if(NOT COMPILER_SUPPORTS_C11)
-  message(FATAL_ERROR "The compiler ${CMAKE_C_COMPILER} has no C11 support. Please use a different C compiler.")
-endif()
-
-# yes, need to keep both the CMAKE_CXX_FLAGS and CMAKE_CXX_STANDARD.
-# with just the CMAKE_CXX_STANDARD, try_compile() breaks:
-#   https://gitlab.kitware.com/cmake/cmake/issues/16456
-# with just the CMAKE_CXX_FLAGS, 'bundled' pugixml breaks tests
-#   https://github.com/darktable-org/rawspeed/issues/112#issuecomment-321517003
-
-message(STATUS "Checking for -std=c++17 support")
-CHECK_CXX_COMPILER_FLAG("-std=c++17" COMPILER_SUPPORTS_CXX17)
-if(NOT COMPILER_SUPPORTS_CXX17)
-  message(FATAL_ERROR "The compiler ${CMAKE_CXX_COMPILER} has no C++17 support. Please use a different C++ compiler.")
-else()
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++17")
-  message(STATUS "Checking for -std=c++17 support - works")
-endif()
+set(CMAKE_C_STANDARD 99)
+set(CMAKE_C_STANDARD_REQUIRED ON)
+set(CMAKE_C_EXTENSIONS OFF)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
-
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -std=c99")
 
 if(APPLE AND (CMAKE_CXX_COMPILER_ID STREQUAL "AppleClang" OR CMAKE_CXX_COMPILER_ID STREQUAL "Clang"))
         set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -stdlib=libc++")
