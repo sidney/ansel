@@ -201,6 +201,7 @@ jobs:
             git
             intltool
             po4a
+            mingw-w64-ucrt-x86_64-openexr-3.2.4-1
           pacboy: >-
             cc:p
             cmake:p
@@ -236,10 +237,8 @@ jobs:
             libxslt:p
             lua:p
             omp:p
-            openexr:p
             openjpeg2:p
             osm-gps-map:p
-            portmidi:p
             pugixml:p
             python:p
             python-jsonschema:p
