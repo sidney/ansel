@@ -1010,42 +1010,74 @@ static inline void _dt_dev_modules_reload_defaults(dt_develop_t *dev)
   }
 }
 
-void _sanitize_modules(dt_iop_module_t *module)
+gboolean _sanitize_modules(dt_iop_module_t *module, const dt_image_t *const img)
 {
   // Ensure mandatory modules are enabled and unapplicable modules are disabled
-  if(dt_image_is_monochrome(&module->dev->image_storage))
+  gboolean modified = FALSE;
+
+  if(dt_image_is_monochrome(img))
   {
+    // MONOCHROME RAW
     if(!strcmp(module->op, "demosaic") ||
        !strcmp(module->op, "temperature") ||
        !strcmp(module->op, "cacorrect") ||
        !strcmp(module->op, "highlights"))
-      module->enabled = FALSE;
-
+    {
+      if(module->enabled)
+      {
+        module->enabled = FALSE;
+        modified = TRUE;
+      }
+    }
   }
-  else if(dt_image_is_matrix_correction_supported(&module->dev->image_storage))
+  else if(dt_image_is_matrix_correction_supported(img))
   {
-    if(!strcmp(module->op, "demosaic"))
+    // COLOR RAW
+    if(!strcmp(module->op, "demosaic") && !module->enabled)
+    {
       module->enabled = TRUE;
+      modified = TRUE;
+    }
+    // Note: don't auto-add temperature.c as we need to import old defaults
+    // for edits prior to Darktable 3.0. See _dev_auto_apply_presets() below
   }
   else
   {
-    // JPG, PNG, etc.
+    // NON-RAW: JPG, PNG, etc.
     if(!strcmp(module->op, "demosaic") ||
        !strcmp(module->op, "cacorrect") ||
        !strcmp(module->op, "rawdenoise") ||
        !strcmp(module->op, "hotpixels") ||
        !strcmp(module->op, "highlights")) // FIXME: highlights should be allowed
-      module->enabled = FALSE;
+    {
+      if(module->enabled)
+      {
+        module->enabled = FALSE;
+        modified = TRUE;
+      }
+    }
   }
 
   if(!strcmp(module->op, "rawprepare"))
-    module->enabled = dt_image_is_rawprepare_supported(&module->dev->image_storage);
+  {
+    int32_t enabled = module->enabled;
+    module->enabled = dt_image_is_rawprepare_supported(img);
+    modified = (enabled != module->enabled);
+  }
 
   // Always on.
   if(!strcmp(module->op, "colorin") ||
      !strcmp(module->op, "colorout") ||
      !strcmp(module->op, "dither"))
-    module->enabled = TRUE;
+  {
+    if(!module->enabled)
+    {
+      module->enabled = TRUE;
+      modified = TRUE;
+    }
+  }
+
+  return modified;
 }
 
 void dt_dev_pop_history_items_ext(dt_develop_t *dev, int32_t cnt)
@@ -1067,7 +1099,7 @@ void dt_dev_pop_history_items_ext(dt_develop_t *dev, int32_t cnt)
 
     hist->module->iop_order = hist->iop_order;
     hist->module->enabled = hist->enabled;
-    _sanitize_modules(hist->module);
+    _sanitize_modules(hist->module, &dev->image_storage);
     hist->enabled = hist->module->enabled;
 
     g_strlcpy(hist->module->multi_name, hist->multi_name, sizeof(hist->module->multi_name));
@@ -1792,8 +1824,6 @@ void dt_dev_read_history_ext(dt_develop_t *dev, const int imgid, gboolean no_ima
       free(hist);
       continue;
     }
-
-    _sanitize_modules(hist->module);
 
     // Run a battery of tests
     const gboolean is_valid_module_name = (strcmp(module_name, hist->module->op) == 0);
