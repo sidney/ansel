@@ -1050,7 +1050,6 @@ void _sanitize_modules(dt_iop_module_t *module)
 
 void dt_dev_pop_history_items_ext(dt_develop_t *dev, int32_t cnt)
 {
-  dt_ioppr_check_iop_order(dev, 0, "dt_dev_pop_history_items_ext begin");
   const int end_prev = dev->history_end;
   dev->history_end = cnt;
 
@@ -1115,6 +1114,9 @@ void dt_dev_pop_history_items(dt_develop_t *dev, int32_t cnt)
   ++darktable.gui->reset;
 
   dt_pthread_mutex_lock(&dev->history_mutex);
+
+  dt_ioppr_check_iop_order(dev, 0, "dt_dev_pop_history_items");
+
   dt_dev_pop_history_items_ext(dev, cnt);
 
   // update all gui modules

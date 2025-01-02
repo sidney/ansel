@@ -734,6 +734,7 @@ int dt_imageio_export_with_flags(const int32_t imgid, const char *filename,
 
     GList *modules_used = NULL;
 
+    dt_ioppr_check_iop_order(&dev, imgid, "dt_imageio_export_with_flags");
     dt_dev_pop_history_items_ext(&dev, appending ? dev.history_end : 0);
     dt_ioppr_update_for_style_items(&dev, style_items, appending);
 

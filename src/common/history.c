@@ -459,6 +459,8 @@ int dt_history_merge_module_into_history(dt_develop_t *dev_dest, dt_develop_t *d
 
     dt_ioppr_resync_modules_order(dev_dest);
 
+    dt_ioppr_check_iop_order(dev_dest, 0, "dt_history_merge_module_into_history");
+
     dt_dev_pop_history_items_ext(dev_dest, dev_dest->history_end);
 
     if(forms_used_replace) free(forms_used_replace);
