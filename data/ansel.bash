@@ -102,7 +102,7 @@ _ansel_cli()
   COMPREPLY=()
 
   # the possible options
-  opts="--width --height --bpp --hq --upscale --style --style-overwrite --apply-custom-presets --verbose --version --core --help -h"
+  opts="--width --height --bpp --style --style-overwrite --apply-custom-presets --verbose --version --core --help -h"
 
   # if there was a --core earlier in the argument list then delegate to _ansel()
   for (( i=1; i < ${cword}; i=$(( ++i )) )); do
@@ -117,7 +117,7 @@ _ansel_cli()
       # suggest nothing, there should just be /something/
       return 0
       ;;
-    --hq|--upscale|--apply-custom-presets)
+    --apply-custom-presets)
       # suggest the possible boolean values
       COMPREPLY=($(compgen -W "0 1 true false" -- "${cur}"))
       return 0

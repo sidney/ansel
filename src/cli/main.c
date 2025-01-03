@@ -68,8 +68,6 @@ static void usage(const char *progname)
   fprintf(stderr, "   --width <max width> default: 0 = full resolution\n");
   fprintf(stderr, "   --height <max height> default: 0 = full resolution\n");
   fprintf(stderr, "   --bpp <bpp>, unsupported\n");
-  fprintf(stderr, "   --hq <0|1|false|true> default: true\n");
-  fprintf(stderr, "   --upscale <0|1|false|true>, default: false\n");
   fprintf(stderr, "   --export_masks <0|1|false|true>, default: false\n");
   fprintf(stderr, "   --style <style name>\n");
   fprintf(stderr, "   --style-overwrite\n");
@@ -198,7 +196,7 @@ int main(int argc, char *arg[])
   char *style = NULL;
   int file_counter = 0;
   int width = 0, height = 0, bpp = 0;
-  gboolean verbose = FALSE, high_quality = TRUE, upscale = FALSE,
+  gboolean verbose = FALSE,
            style_overwrite = FALSE, custom_presets = TRUE, export_masks = FALSE,
            output_to_dir = FALSE;
 
@@ -246,22 +244,6 @@ int main(int argc, char *arg[])
         bpp = MAX(atoi(arg[k]), 0);
         fprintf(stderr, _("TODO: sorry, due to API restrictions we currently cannot set the BPP to %d.\n"), bpp);
       }
-      else if(!strcmp(arg[k], "--hq") && argc > k + 1)
-      {
-        k++;
-        gchar *str = g_ascii_strup(arg[k], -1);
-        if(!g_strcmp0(str, "0") || !g_strcmp0(str, "FALSE"))
-          high_quality = FALSE;
-        else if(!g_strcmp0(str, "1") || !g_strcmp0(str, "TRUE"))
-          high_quality = TRUE;
-        else
-        {
-          fprintf(stderr, _("unknown option for --hq: %s.\n"), arg[k]);
-          usage(arg[0]);
-          exit(1);
-        }
-        g_free(str);
-      }
       else if(!strcmp(arg[k], "--export_masks") && argc > k + 1)
       {
         k++;
@@ -273,22 +255,6 @@ int main(int argc, char *arg[])
         else
         {
           fprintf(stderr, _("unknown option for --export_masks: %s.\n"), arg[k]);
-          usage(arg[0]);
-          exit(1);
-        }
-        g_free(str);
-      }
-      else if(!strcmp(arg[k], "--upscale") && argc > k + 1)
-      {
-        k++;
-        gchar *str = g_ascii_strup(arg[k], -1);
-        if(!g_strcmp0(str, "0") || !g_strcmp0(str, "FALSE"))
-          upscale = FALSE;
-        else if(!g_strcmp0(str, "1") || !g_strcmp0(str, "TRUE"))
-          upscale= TRUE;
-        else
-        {
-          fprintf(stderr, _("unknown option for --upscale: %s.\n"), arg[k]);
           usage(arg[0]);
           exit(1);
         }
@@ -734,7 +700,7 @@ int main(int argc, char *arg[])
 
   if(storage->initialize_store)
   {
-    storage->initialize_store(storage, sdata, &format, &fdata, &id_list, high_quality, upscale);
+    storage->initialize_store(storage, sdata, &format, &fdata, &id_list, TRUE);
 
     format->set_params(format, fdata, format->params_size(format));
     storage->set_params(storage, sdata, storage->params_size(storage));
@@ -750,7 +716,7 @@ int main(int argc, char *arg[])
     dt_export_metadata_t metadata;
     metadata.flags = dt_lib_export_metadata_default_flags();
     metadata.list = NULL;
-    if(storage->store(storage, sdata, id, format, fdata, num, total, high_quality, upscale, export_masks,
+    if(storage->store(storage, sdata, id, format, fdata, num, total, TRUE, export_masks,
                       icc_type, icc_filename, icc_intent, &metadata) != 0)
       res = 1;
   }

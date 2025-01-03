@@ -65,9 +65,6 @@ typedef struct dt_variables_data_t
   int export_width;
   int export_height;
 
-  // upscale allowed on export
-  gboolean upscale;
-
   char *homedir;
   char *pictures_folder;
   const char *file_ext;
@@ -218,7 +215,7 @@ static void _init_expansion(dt_variables_params_t *params, gboolean iterate)
       const int mh = params->data->max_height ? params->data->max_height : INT_MAX;
       const int mw = params->data->max_width ? params->data->max_width : INT_MAX;
       const float scale = fminf((float)mh / img->final_height, (float)mw / img->final_width);
-      if(scale < 1.0f || params->data->upscale)
+      if(scale < 1.0f)
       {
         // export scaling
         params->data->export_height = roundf(img->final_height * scale);
@@ -1133,11 +1130,6 @@ void dt_variables_set_max_width_height(dt_variables_params_t *params, int max_wi
 {
   params->data->max_width = max_width;
   params->data->max_height = max_height;
-}
-
-void dt_variables_set_upscale(dt_variables_params_t *params, gboolean upscale)
-{
-  params->data->upscale = upscale;
 }
 
 void dt_variables_reset_sequence(dt_variables_params_t *params)

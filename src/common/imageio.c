@@ -652,7 +652,7 @@ void dt_imageio_to_fractional(float in, uint32_t *num, uint32_t *den)
 }
 
 int dt_imageio_export(const int32_t imgid, const char *filename, dt_imageio_module_format_t *format,
-                      dt_imageio_module_data_t *format_params, const gboolean high_quality, const gboolean upscale,
+                      dt_imageio_module_data_t *format_params, const gboolean high_quality,
                       const gboolean copy_metadata, const gboolean export_masks,
                       dt_colorspaces_color_profile_type_t icc_type, const gchar *icc_filename,
                       dt_iop_color_intent_t icc_intent, dt_imageio_module_storage_t *storage,
@@ -667,7 +667,7 @@ int dt_imageio_export(const int32_t imgid, const char *filename, dt_imageio_modu
     const gboolean is_scaling =
       dt_conf_is_equal("plugins/lighttable/export/resizing", "scaling");
 
-    return dt_imageio_export_with_flags(imgid, filename, format, format_params, FALSE, FALSE, high_quality, upscale, is_scaling,
+    return dt_imageio_export_with_flags(imgid, filename, format, format_params, FALSE, FALSE, TRUE, is_scaling,
                                         FALSE, NULL, copy_metadata, export_masks, icc_type, icc_filename, icc_intent,
                                         storage, storage_params, num, total, metadata);
   }
@@ -677,7 +677,7 @@ int dt_imageio_export(const int32_t imgid, const char *filename, dt_imageio_modu
 int dt_imageio_export_with_flags(const int32_t imgid, const char *filename,
                                  dt_imageio_module_format_t *format, dt_imageio_module_data_t *format_params,
                                  const gboolean ignore_exif, const gboolean display_byteorder,
-                                 const gboolean high_quality, const gboolean upscale, gboolean is_scaling, const gboolean thumbnail_export,
+                                 const gboolean high_quality, gboolean is_scaling, const gboolean thumbnail_export,
                                  const char *filter, const gboolean copy_metadata, const gboolean export_masks,
                                  dt_colorspaces_color_profile_type_t icc_type, const gchar *icc_filename,
                                  dt_iop_color_intent_t icc_intent, dt_imageio_module_storage_t *storage,

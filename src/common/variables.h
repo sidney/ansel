@@ -52,8 +52,6 @@ void dt_variables_params_init(dt_variables_params_t **params);
 void dt_variables_params_destroy(dt_variables_params_t *params);
 /** set max image width and height defined for an export session in a dt_variables_params_t. */
 void dt_variables_set_max_width_height(dt_variables_params_t *params, int max_width, int max_height);
-/** set upscale allowed flag for an export session in a dt_variables_params_t. */
-void dt_variables_set_upscale(dt_variables_params_t *params, gboolean upscale);
 /** set flags for tags to be exported */
 void dt_variables_set_tags_flags(dt_variables_params_t *params, uint32_t flags);
 
@@ -67,7 +65,7 @@ void dt_variables_reset_sequence(dt_variables_params_t *params);
 
 /**
  * @brief Gets the path to the current OS pictures directory.
- * 
+ *
  * @param homedir the user's home directory
  * @param picdir the gchar* to set to the path of the pictures directory
  * @param picdir_size the size of `picdir`

@@ -335,14 +335,12 @@ static int _export_image(dt_job_t *job, dt_image_box *img)
   dt_control_job_set_progress(job, 0.05);
   dt_control_log(_("processing `%s' for `%s'"), params->job_title, params->prt.printer.name);
 
-  const gboolean high_quality = TRUE;
-  const gboolean upscale = TRUE;
   const gboolean export_masks = FALSE;
   const gboolean is_scaling = FALSE;
 
   dt_imageio_export_with_flags
     (img->imgid, "unused", &buf, (dt_imageio_module_data_t *)&dat, TRUE, FALSE,
-     high_quality, upscale, is_scaling, FALSE, NULL, FALSE, export_masks, params->buf_icc_type,
+     TRUE, is_scaling, FALSE, NULL, FALSE, export_masks, params->buf_icc_type,
      params->buf_icc_profile, params->buf_icc_intent,  NULL, NULL, 1, 1, NULL);
 
   img->exp_width = dat.head.width;

@@ -81,7 +81,7 @@ typedef struct dt_control_export_t
   int max_width, max_height, format_index, storage_index;
   dt_imageio_module_data_t *sdata; // needed since the gui thread resets things like overwrite once the export
   // is dispatched, but we have to keep that information
-  gboolean high_quality, upscale, export_masks;
+  gboolean export_masks;
   char style[128];
   gboolean style_append;
   dt_colorspaces_color_profile_type_t icc_type;
@@ -497,7 +497,7 @@ static int32_t dt_control_merge_hdr_job_run(dt_job_t *job)
     const gboolean is_scaling =
       dt_conf_is_equal("plugins/lighttable/export/resizing", "scaling");
 
-    dt_imageio_export_with_flags(imgid, "unused", &buf, (dt_imageio_module_data_t *)&dat, TRUE, FALSE, FALSE, TRUE, is_scaling,
+    dt_imageio_export_with_flags(imgid, "unused", &buf, (dt_imageio_module_data_t *)&dat, TRUE, FALSE, FALSE, is_scaling,
                                  FALSE, "pre:rawprepare", FALSE, FALSE, DT_COLORSPACE_NONE, NULL, DT_INTENT_LAST, NULL,
                                  NULL, num, total, NULL);
 
@@ -1331,7 +1331,7 @@ static int32_t dt_control_export_job_run(dt_job_t *job)
 
   if(mstorage->initialize_store)
   {
-    if(mstorage->initialize_store(mstorage, sdata, &mformat, &fdata, &t, settings->high_quality, settings->upscale))
+    if(mstorage->initialize_store(mstorage, sdata, &mformat, &fdata, &t, TRUE))
     {
       // bail out, something went wrong
       goto end;
@@ -1421,7 +1421,7 @@ static int32_t dt_control_export_job_run(dt_job_t *job)
       else
       {
         dt_image_cache_read_release(darktable.image_cache, image);
-        if(mstorage->store(mstorage, sdata, imgid, mformat, fdata, num, total, settings->high_quality, settings->upscale,
+        if(mstorage->store(mstorage, sdata, imgid, mformat, fdata, num, total, TRUE,
                            settings->export_masks, settings->icc_type, settings->icc_filename, settings->icc_intent,
                            &metadata) != 0)
           dt_control_job_cancel(job);
@@ -1833,7 +1833,7 @@ static void dt_control_export_cleanup(void *p)
 }
 
 void dt_control_export(GList *imgid_list, int max_width, int max_height, int format_index, int storage_index,
-                       gboolean high_quality, gboolean upscale, gboolean export_masks, char *style, gboolean style_append,
+                       gboolean high_quality, gboolean export_masks, char *style, gboolean style_append,
                        dt_colorspaces_color_profile_type_t icc_type, const gchar *icc_filename,
                        dt_iop_color_intent_t icc_intent, const gchar *metadata_export)
 {
@@ -1866,9 +1866,7 @@ void dt_control_export(GList *imgid_list, int max_width, int max_height, int for
     return;
   }
   data->sdata = sdata;
-  data->high_quality = high_quality;
   data->export_masks = export_masks;
-  data->upscale = upscale;
   g_strlcpy(data->style, style, sizeof(data->style));
   data->style_append = style_append;
   data->icc_type = icc_type;

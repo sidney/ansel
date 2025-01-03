@@ -152,18 +152,13 @@ static int write_image(lua_State *L)
   /* check that param 3 is a string (filename) */
   const char *filename = luaL_checkstring(L, 3);
 
-  /* treat param 4 as an optional boolean */
-  const gboolean upscale = lua_toboolean(L, 4);
-
-
   dt_lua_unlock();
   // TODO: expose these to the user!
-  gboolean high_quality = dt_conf_get_bool("plugins/lighttable/export/high_quality_processing");
   gboolean export_masks = dt_conf_get_bool("plugins/lighttable/export/export_masks");
   // TODO: expose icc overwrites to the user!
   dt_colorspaces_color_profile_type_t icc_type = sanitize_colorspaces(dt_conf_get_int("plugins/lighttable/export/icctype"));
   const char *icc_filename = dt_conf_get_string_const("plugins/lighttable/export/iccprofile");
-  gboolean result = dt_imageio_export(imgid, filename, format, fdata, high_quality, upscale, FALSE, export_masks,
+  gboolean result = dt_imageio_export(imgid, filename, format, fdata, TRUE, FALSE, FALSE, export_masks,
                                       icc_type, icc_filename, DT_INTENT_LAST, NULL, NULL, 1, 1, NULL);
   dt_lua_lock();
   lua_pushboolean(L, result);

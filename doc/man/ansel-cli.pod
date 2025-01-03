@@ -12,8 +12,6 @@ Options:
     --width <max width>
     --height <max height>
     --bpp <bpp>
-    --hq <0|1|false|true>
-    --upscale <0|1|false|true>
     --export_masks <0|1|false|true>
     --style <style name>
     --style-overwrite
@@ -74,16 +72,6 @@ If you need to define the bit depth you need to use the following workaround:
     --core --conf plugins/imageio/format/<FORMAT>/bpp=<VALUE>
 
 where B<FORMAT> is the name of the selected output format, for example B<png>.
-
-=item B<< --hq <0|1|true|false>  >>
-
-A flag that defines whether to use high quality resampling during export.
-Defaults to true.
-
-=item B<< --upscale <0|1|true|false>  >>
-
-A flag that defines whether to allow upscaling during export.
-Defaults to false.
 
 =item B<< --export_masks <0|1|true|false>  >>
 
