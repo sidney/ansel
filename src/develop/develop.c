@@ -1010,75 +1010,6 @@ static inline void _dt_dev_modules_reload_defaults(dt_develop_t *dev)
   }
 }
 
-gboolean _sanitize_modules(dt_iop_module_t *module, const dt_image_t *const img)
-{
-  // Ensure mandatory modules are enabled and unapplicable modules are disabled
-  gboolean modified = FALSE;
-
-  if(dt_image_is_monochrome(img))
-  {
-    // MONOCHROME RAW
-    if(!strcmp(module->op, "demosaic") ||
-       !strcmp(module->op, "temperature") ||
-       !strcmp(module->op, "cacorrect") ||
-       !strcmp(module->op, "highlights"))
-    {
-      if(module->enabled)
-      {
-        module->enabled = FALSE;
-        modified = TRUE;
-      }
-    }
-  }
-  else if(dt_image_is_matrix_correction_supported(img))
-  {
-    // COLOR RAW
-    if(!strcmp(module->op, "demosaic") && !module->enabled)
-    {
-      module->enabled = TRUE;
-      modified = TRUE;
-    }
-    // Note: don't auto-add temperature.c as we need to import old defaults
-    // for edits prior to Darktable 3.0. See _dev_auto_apply_presets() below
-  }
-  else
-  {
-    // NON-RAW: JPG, PNG, etc.
-    if(!strcmp(module->op, "demosaic") ||
-       !strcmp(module->op, "cacorrect") ||
-       !strcmp(module->op, "rawdenoise") ||
-       !strcmp(module->op, "hotpixels") ||
-       !strcmp(module->op, "highlights")) // FIXME: highlights should be allowed
-    {
-      if(module->enabled)
-      {
-        module->enabled = FALSE;
-        modified = TRUE;
-      }
-    }
-  }
-
-  if(!strcmp(module->op, "rawprepare"))
-  {
-    int32_t enabled = module->enabled;
-    module->enabled = dt_image_is_rawprepare_supported(img);
-    modified = (enabled != module->enabled);
-  }
-
-  // Always on.
-  if(!strcmp(module->op, "colorin") ||
-     !strcmp(module->op, "colorout") ||
-     !strcmp(module->op, "dither"))
-  {
-    if(!module->enabled)
-    {
-      module->enabled = TRUE;
-      modified = TRUE;
-    }
-  }
-
-  return modified;
-}
 
 void dt_dev_pop_history_items_ext(dt_develop_t *dev, int32_t cnt)
 {
@@ -1099,7 +1030,6 @@ void dt_dev_pop_history_items_ext(dt_develop_t *dev, int32_t cnt)
 
     hist->module->iop_order = hist->iop_order;
     hist->module->enabled = hist->enabled;
-    _sanitize_modules(hist->module, &dev->image_storage);
     hist->enabled = hist->module->enabled;
 
     g_strlcpy(hist->module->multi_name, hist->multi_name, sizeof(hist->module->multi_name));
