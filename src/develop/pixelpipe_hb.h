@@ -229,7 +229,8 @@ void dt_dev_pixelpipe_cleanup_nodes(dt_dev_pixelpipe_t *pipe);
 // sync with develop_t history stack from scratch (new node added, have to pop old ones)
 void dt_dev_pixelpipe_create_nodes(dt_dev_pixelpipe_t *pipe, struct dt_develop_t *dev);
 // sync with develop_t history stack by just copying the top item params (same op, new params on top)
-void dt_dev_pixelpipe_synch_all(dt_dev_pixelpipe_t *pipe, struct dt_develop_t *dev);
+void dt_dev_pixelpipe_synch_all_real(dt_dev_pixelpipe_t *pipe, struct dt_develop_t *dev, const char *caller_func);
+#define dt_dev_pixelpipe_synch_all(pipe, dev) dt_dev_pixelpipe_synch_all_real(pipe, dev, __FUNCTION__)
 // adjust output node according to history stack (history pop event)
 void dt_dev_pixelpipe_synch_top(dt_dev_pixelpipe_t *pipe, struct dt_develop_t *dev);
 
