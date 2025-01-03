@@ -35,7 +35,7 @@ struct dt_iop_module_t;
 typedef struct dt_dev_history_item_t
 {
   struct dt_iop_module_t *module; // pointer to image operation module
-  int32_t enabled;                // switched respective module on/off
+  gboolean enabled;               // switched respective module on/off
   dt_iop_params_t *params;        // parameters for this operation
   struct dt_develop_blend_params_t *blend_params;
   char op_name[20];
