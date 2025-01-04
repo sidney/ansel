@@ -44,7 +44,7 @@ void open_doc_callback(GtkWidget *widget)
 void open_booking_callback(GtkWidget *widget)
 {
   gtk_show_uri_on_window(GTK_WINDOW(dt_ui_main_window(darktable.gui->ui)),
-  "https://photo.aurelienpierre.com/private-lessons-on-retouching-with-darktable/?lang=en", GDK_CURRENT_TIME, NULL);
+  "https://ansel.photos/en/support/#individual-user-training", GDK_CURRENT_TIME, NULL);
 }
 
 void open_donate_callback(GtkWidget *widget)
