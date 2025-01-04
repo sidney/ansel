@@ -330,7 +330,7 @@ jobs:
           ${INSTALL_PREFIX}/bin/ansel --version || true
           ${INSTALL_PREFIX}/bin/ansel-cli \
                  --width 2048 --height 2048 \
-                 -apply-custom-presets false \
+                 --apply-custom-presets false \
                  "${SRC_DIR}/src/tests/integration/images/mire1.cr2" \
                  "${SRC_DIR}/src/tests/integration/0000-nop/nop.xmp" \
                  output.png \
