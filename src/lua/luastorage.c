@@ -77,7 +77,7 @@ static int default_dimension_wrapper(struct dt_imageio_module_storage_t *self, d
 
 static int store_wrapper(struct dt_imageio_module_storage_t *self, struct dt_imageio_module_data_t *self_data,
                          const int imgid, dt_imageio_module_format_t *format, dt_imageio_module_data_t *fdata,
-                         const int num, const int total, const gboolean high_quality, const gboolean upscale,
+                         const int num, const int total, const gboolean high_quality,
                          const gboolean export_masks, dt_colorspaces_color_profile_type_t icc_type,
                          const gchar *icc_filename, dt_iop_color_intent_t icc_intent, dt_export_metadata_t *metadata)
 {
@@ -148,7 +148,7 @@ static int store_wrapper(struct dt_imageio_module_storage_t *self, struct dt_ima
 // FIXME: return 0 on success and 1 on error!
 static int initialize_store_wrapper(struct dt_imageio_module_storage_t *self, dt_imageio_module_data_t *data,
                                     dt_imageio_module_format_t **format, dt_imageio_module_data_t **fdata,
-                                    GList **images, const gboolean high_quality, const gboolean upscale)
+                                    GList **images, const gboolean high_quality)
 {
   dt_lua_lock();
   lua_State *L = darktable.lua_state.state;
