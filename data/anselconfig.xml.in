@@ -1887,7 +1887,7 @@
   <dtconfig>
     <name>plugins/lighttable/export/dimensions_type</name>
     <type min="0">int</type>
-    <default>0</default>
+    <default>4</default>
     <shortdescription>unit of the printing size</shortdescription>
     <longdescription>unit in which to input the image size.</longdescription>
   </dtconfig>

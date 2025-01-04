@@ -71,7 +71,8 @@ typedef enum dt_dimensions_type_t
   DT_DIMENSIONS_PIXELS = 0, // set dimensions exactly in pixels
   DT_DIMENSIONS_CM     = 1, // set dimensions from physical size in centimeters * DPI
   DT_DIMENSIONS_INCH   = 2,  // set dimensions from physical size in inch
-  DT_DIMENSIONS_SCALE   = 3  // set dimensions by scale
+  DT_DIMENSIONS_SCALE   = 3,  // set dimensions by scale
+  DT_DIMENSIONS_ORIGINAL = 4 // user-friendly alias for scale = 1
 } dt_dimensions_type_t;
 
 char *dt_lib_export_metadata_configuration_dialog(char *list, const gboolean ondisk);
@@ -116,6 +117,7 @@ static inline uint32_t print2pixels(dt_lib_export_t *self, const float value)
   switch(d_type)
   {
     case(DT_DIMENSIONS_PIXELS):
+    case(DT_DIMENSIONS_ORIGINAL):
       return ceilf(value);
     case(DT_DIMENSIONS_CM):
       return cm2pixels(self, value);
@@ -135,6 +137,7 @@ static inline float pixels2print(dt_lib_export_t *self, const uint32_t pix)
   switch(d_type)
   {
     case(DT_DIMENSIONS_PIXELS):
+    case(DT_DIMENSIONS_ORIGINAL):
       return (float)pix;
     case(DT_DIMENSIONS_CM):
       return pixels2cm(self, pix);
@@ -453,7 +456,7 @@ static void _size_in_px_update(dt_lib_export_t *d)
 {
   const dt_dimensions_type_t d_type = (dt_dimensions_type_t)dt_bauhaus_combobox_get(d->dimensions_type);
 
-  if((d_type == DT_DIMENSIONS_SCALE) || (d_type == DT_DIMENSIONS_PIXELS))
+  if((d_type == DT_DIMENSIONS_SCALE) || (d_type == DT_DIMENSIONS_PIXELS) || (d_type == DT_DIMENSIONS_ORIGINAL))
   {
     gtk_widget_hide(d->size_in_px);
   }
@@ -786,6 +789,7 @@ static void _dimensions_type_changed(GtkWidget *widget, dt_lib_export_t *d)
   dt_conf_set_int(CONFIG_PREFIX "dimensions_type", d_type);
   dt_conf_set_string(CONFIG_PREFIX "resizing",
                      d_type == DT_DIMENSIONS_SCALE ? "scaling" : "max_size");
+
   if(d_type == DT_DIMENSIONS_CM || d_type == DT_DIMENSIONS_INCH)
   {
     // set dpi to user-set dpi
@@ -797,6 +801,16 @@ static void _dimensions_type_changed(GtkWidget *widget, dt_lib_export_t *d)
     // reset export dpi to default value for scale/pixel specific export
     dt_conf_set_int("metadata/resolution", dt_confgen_get_int("metadata/resolution", DT_DEFAULT));
   }
+
+  if(d_type == DT_DIMENSIONS_ORIGINAL)
+  {
+    // The "same as original" is really just an user-friendly alias
+    // for size = 0x0 pixels, which we read as "full size"
+    dt_conf_set_int(CONFIG_PREFIX "width", 0);
+    dt_conf_set_int(CONFIG_PREFIX "height", 0);
+    dt_conf_set_string(CONFIG_PREFIX "resizing_factor", "1");
+  }
+
   _size_update_display(d);
 }
 
@@ -1032,11 +1046,11 @@ void gui_init(dt_lib_module_t *self)
   self->data = (void *)d;
   self->widget = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
 
-  GtkWidget *label = dt_ui_section_label_new(_("storage options"));
+  GtkWidget *label = dt_ui_section_label_new(_("Storage options"));
   gtk_box_pack_start(GTK_BOX(self->widget), label, FALSE, TRUE, 0);
 
   d->storage = dt_bauhaus_combobox_new_action(DT_ACTION(self));
-  dt_bauhaus_widget_set_label(d->storage, NULL, N_("target storage"));
+  dt_bauhaus_widget_set_label(d->storage, NULL, N_("Target storage"));
   gtk_box_pack_start(GTK_BOX(self->widget), d->storage, FALSE, TRUE, 0);
 
   // add all storage widgets to the stack widget
@@ -1083,14 +1097,17 @@ void gui_init(dt_lib_module_t *self)
   label = dt_ui_section_label_new(_("global options"));
   gtk_box_pack_start(GTK_BOX(self->widget), label, FALSE, TRUE, 0);
 
-  DT_BAUHAUS_COMBOBOX_NEW_FULL(d->dimensions_type, self, NULL, N_("set size"),
-                               _("choose a method for setting the output size"),
+  DT_BAUHAUS_COMBOBOX_NEW_FULL(d->dimensions_type, self, NULL, N_("set size (bounding box)"),
+                               _("Choose a method for setting the output size.\n"
+                                 "The width and height specified define the bounding box\n"
+                                 "in which the image will be proportionnaly fitted.\n"),
                                dt_conf_get_int(CONFIG_PREFIX "dimensions_type"),
                                (GtkCallback)_dimensions_type_changed, d,
                                N_("in pixels (for file)"),
                                N_("in cm (for print)"),
                                N_("in inch (for print)"),
-                               N_("by scale (for file)"));
+                               N_("by scale (for file)"),
+                               N_("original resolution"));
 
   d->print_width = gtk_entry_new();
   gtk_widget_set_tooltip_text(d->print_width, _("maximum output width limit.\n"
@@ -1183,7 +1200,7 @@ void gui_init(dt_lib_module_t *self)
   dt_loc_get_datadir(datadir, sizeof(datadir));
 
   d->profile = dt_bauhaus_combobox_new_action(DT_ACTION(self));
-  dt_bauhaus_widget_set_label(d->profile, NULL, N_("profile"));
+  dt_bauhaus_widget_set_label(d->profile, NULL, N_("Color space"));
   gtk_box_pack_start(GTK_BOX(self->widget), d->profile, FALSE, TRUE, 0);
   dt_bauhaus_combobox_add(d->profile, _("same as original"));
   for(GList *l = darktable.color_profiles->profiles; l; l = g_list_next(l))
@@ -1197,7 +1214,13 @@ void gui_init(dt_lib_module_t *self)
 
   char *system_profile_dir = g_build_filename(datadir, "color", "out", NULL);
   char *user_profile_dir = g_build_filename(confdir, "color", "out", NULL);
-  char *tooltip = g_strdup_printf(_("output ICC profiles in %s or %s"), user_profile_dir, system_profile_dir);
+  char *tooltip = g_strdup_printf(_(
+    "RGB color space used to encode the output files.\n"
+    "\"same as original\" exports to the same space as the original\n"
+    "picture, which is linear sensor RGB for raw pictures.\n"
+    "sRGB is recommended in most cases.\n"
+    "You can use custom color spaces defined\n"
+    "by ICC profiles stored in:\n- %s\n- %s"), user_profile_dir, system_profile_dir);
   gtk_widget_set_tooltip_text(d->profile, tooltip);
   g_free(system_profile_dir);
   g_free(user_profile_dir);

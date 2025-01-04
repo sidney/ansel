@@ -191,6 +191,8 @@ void gui_init(dt_imageio_module_storage_t *self)
 
   d->onsave_action = dt_bauhaus_combobox_new(NULL);
   dt_bauhaus_widget_set_label(d->onsave_action, NULL, N_("on conflict"));
+  gtk_widget_set_tooltip_text(d->onsave_action, _("Expected behaviour if the current naming pattern\n"
+                                                  "produces a filename that already exists."));
   dt_bauhaus_combobox_add(d->onsave_action, _("create unique filename"));
   dt_bauhaus_combobox_add(d->onsave_action, _("overwrite"));
   dt_bauhaus_combobox_add(d->onsave_action, _("skip"));
