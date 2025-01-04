@@ -293,6 +293,10 @@ int dt_history_merge_module_into_history(dt_develop_t *dev_dest, dt_develop_t *d
               mod_src->op);
       module_added = 0;
     }
+    else
+    {
+      dt_print(DT_DEBUG_HISTORY, "[dt_history_merge_module_into_history] %s (%s) will be overriden in target history by parameters from source history\n", mod_src->name(), mod_src->multi_name);
+    }
   }
 
   if(module_added && mod_replace == NULL && !append)
@@ -311,6 +315,7 @@ int dt_history_merge_module_into_history(dt_develop_t *dev_dest, dt_develop_t *d
           // we will replace this module
           modules_used = g_list_append(modules_used, mod_dest);
           mod_replace = mod_dest;
+          dt_print(DT_DEBUG_HISTORY, "[dt_history_merge_module_into_history] %s (%s) will be overriden in target history by parameters from source history\n", mod_src->name(), mod_src->multi_name);
           break;
         }
       }
@@ -330,6 +335,10 @@ int dt_history_merge_module_into_history(dt_develop_t *dev_dest, dt_develop_t *d
       {
         fprintf(stderr, "[dt_history_merge_module_into_history] can't find base instance module %s\n", mod_src->op);
         module_added = 0;
+      }
+      else
+      {
+        dt_print(DT_DEBUG_HISTORY, "[dt_history_merge_module_into_history] %s (%s) will be enabled in target history with parameters from source history\n", mod_src->name(), mod_src->multi_name);
       }
     }
   }
@@ -351,6 +360,7 @@ int dt_history_merge_module_into_history(dt_develop_t *dev_dest, dt_develop_t *d
         module->instance = mod_src->instance;
         module->multi_priority = mod_src->multi_priority;
         module->iop_order = dt_ioppr_get_iop_order(dev_dest->iop_order_list, module->op, module->multi_priority);
+        dt_print(DT_DEBUG_HISTORY, "[dt_history_merge_module_into_history] %s (%s) will be inserted as a new instance in target history\n", mod_src->name(), mod_src->multi_name);
       }
     }
     else
@@ -411,6 +421,8 @@ int dt_history_merge_module_into_history(dt_develop_t *dev_dest, dt_develop_t *d
   // and we add it to history
   if(module_added)
   {
+    dt_print(DT_DEBUG_HISTORY, "[dt_history_merge_module_into_history] %s (%s) was at position %i in source pipeline, now is at position %i\n", mod_src->name(), mod_src->multi_name, mod_src->iop_order, module->iop_order);
+
     // copy masks
     guint nbf = 0;
     int *forms_used_replace = NULL;
@@ -506,19 +518,19 @@ static int _history_copy_and_paste_on_image_merge(int32_t imgid, int32_t dest_im
 
   if(ops)
   {
-    if (DT_IOP_ORDER_INFO) fprintf(stderr," selected ops");
+    dt_print(DT_DEBUG_PARAMS, "[_history_copy_and_paste_on_image_merge] pasting selected IOP\n");
+
     // copy only selected history entries
     for(const GList *l = g_list_last(ops); l; l = g_list_previous(l))
     {
       const unsigned int num = GPOINTER_TO_UINT(l->data);
-
       const dt_dev_history_item_t *hist = g_list_nth_data(dev_src->history, num);
 
       if(hist)
       {
-        if (!dt_iop_is_hidden(hist->module))
+        if(!dt_iop_is_hidden(hist->module))
         {
-          if (DT_IOP_ORDER_INFO)
+          if(DT_IOP_ORDER_INFO)
             fprintf(stderr,"\n  module %20s, multiprio %i",  hist->module->op, hist->module->multi_priority);
 
           mod_list = g_list_prepend(mod_list, hist->module);
@@ -528,7 +540,8 @@ static int _history_copy_and_paste_on_image_merge(int32_t imgid, int32_t dest_im
   }
   else
   {
-    if (DT_IOP_ORDER_INFO) fprintf(stderr," all modules");
+    dt_print(DT_DEBUG_PARAMS, "[_history_copy_and_paste_on_image_merge] pasting all IOP\n");
+
     // we will copy all modules
     for(GList *modules_src = dev_src->iop; modules_src; modules_src = g_list_next(modules_src))
     {
@@ -536,12 +549,11 @@ static int _history_copy_and_paste_on_image_merge(int32_t imgid, int32_t dest_im
 
       // copy from history only if
       if((_search_history_by_module(dev_src, mod_src) != NULL) // module is in history of source image
-         && !(mod_src->default_enabled && mod_src->enabled
-              && !memcmp(mod_src->params, mod_src->default_params, mod_src->params_size) // it's not a enabled by default module with unmodified settings
-              && !dt_iop_is_hidden(mod_src))
+         && !dt_iop_is_hidden(mod_src) // hidden modules are technical and special
          && (copy_full || !dt_history_module_skip_copy(mod_src->flags()))
         )
       {
+        // Note: we prepend to GList because it's more efficient
         mod_list = g_list_prepend(mod_list, mod_src);
       }
     }
@@ -786,6 +798,7 @@ gboolean dt_history_copy_and_paste_on_image(const int32_t imgid, const int32_t d
   dt_image_cache_set_change_timestamp(darktable.image_cache, dest_imgid);
 
   /* if current image in develop reload history */
+  // FIXME: this is GUI update. That doesn't belong to history management.
   if(dt_dev_is_current_image(darktable.develop, dest_imgid))
   {
     dt_dev_reload_history_items(darktable.develop);
@@ -1648,7 +1661,7 @@ gboolean dt_history_copy_parts(int imgid)
   if(dt_history_copy(imgid))
   {
     // we want to copy all history and let user select the parts needed
-    darktable.view_manager->copy_paste.full_copy = TRUE;
+    darktable.view_manager->copy_paste.full_copy = FALSE;
 
     // run dialog, it will insert into selops the selected moduel
 
