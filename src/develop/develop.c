@@ -467,7 +467,7 @@ restart:;
 
 static inline void _dt_dev_load_pipeline_defaults(dt_develop_t *dev)
 {
-  for(const GList *modules = g_list_last(dev->iop); modules; modules = g_list_previous(modules))
+  for(const GList *modules = g_list_first(dev->iop); modules; modules = g_list_next(modules))
   {
     dt_iop_module_t *module = (dt_iop_module_t *)(modules->data);
     dt_iop_reload_defaults(module);
@@ -944,7 +944,7 @@ void dt_dev_reload_history_items(dt_develop_t *dev)
   dt_pthread_mutex_lock(&dev->history_mutex);
 
   // we have to add new module instances first
-  for(GList *modules = dev->iop; modules; modules = g_list_next(modules))
+  for(GList *modules = g_list_first(dev->iop); modules; modules = g_list_next(modules))
   {
     dt_iop_module_t *module = (dt_iop_module_t *)(modules->data);
     if(module->multi_priority > 0)
@@ -1267,7 +1267,7 @@ static gboolean _dev_auto_apply_presets(dt_develop_t *dev)
       // loop over all modules and display a message for default-enabled modules that
       // are not found on the history.
 
-      for(GList *modules = dev->iop; modules; modules = g_list_next(modules))
+      for(GList *modules = g_list_first(dev->iop); modules; modules = g_list_next(modules))
       {
         dt_iop_module_t *module = (dt_iop_module_t *)modules->data;
 
