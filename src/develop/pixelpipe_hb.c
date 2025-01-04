@@ -452,7 +452,7 @@ void dt_dev_pixelpipe_synch(dt_dev_pixelpipe_t *pipe, dt_develop_t *dev, GList *
   else if(rawprep_img)
     pipe->want_detail_mask |= DT_DEV_DETAIL_MASK_RAWPREPARE;
 
-  for(GList *nodes = pipe->nodes; nodes; nodes = g_list_next(nodes))
+  for(GList *nodes = g_list_first(pipe->nodes); nodes; nodes = g_list_next(nodes))
   {
     piece = (dt_dev_pixelpipe_iop_t *)nodes->data;
 
@@ -478,7 +478,7 @@ void dt_dev_pixelpipe_synch_all_real(dt_dev_pixelpipe_t *pipe, dt_develop_t *dev
   dt_print(DT_DEBUG_DEV, "[pixelpipe] synch all modules with defaults_params for pipe %i called from %s\n", pipe->type, caller_func);
 
   // call reset_params on all pieces first. This is mandatory to init utility modules that don't have an history stack
-  for(GList *nodes = pipe->nodes; nodes; nodes = g_list_next(nodes))
+  for(GList *nodes = g_list_first(pipe->nodes); nodes; nodes = g_list_next(nodes))
   {
     dt_dev_pixelpipe_iop_t *piece = (dt_dev_pixelpipe_iop_t *)nodes->data;
     piece->hash = 0;
@@ -491,11 +491,9 @@ void dt_dev_pixelpipe_synch_all_real(dt_dev_pixelpipe_t *pipe, dt_develop_t *dev
   dt_print(DT_DEBUG_DEV, "[pixelpipe] synch all modules with history for pipe %i called from %s\n", pipe->type, caller_func);
 
   // go through all history items and adjust params
-  GList *history = dev->history;
-  for(int k = 0; k < dev->history_end && history; k++)
+  for(GList *history = g_list_first(dev->history); history; history = g_list_next(history))
   {
     dt_dev_pixelpipe_synch(pipe, dev, history);
-    history = g_list_next(history);
   }
   dt_pthread_mutex_unlock(&pipe->busy_mutex);
 }

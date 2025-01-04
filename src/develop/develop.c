@@ -1577,7 +1577,7 @@ void _dev_write_history(dt_develop_t *dev, const int imgid)
   _warn_about_history_overuse(dev);
 
   // write history entries
-  GList *history = dev->history;
+  GList *history = g_list_first(dev->history);
   for(int i = 0; history; i++)
   {
     dt_dev_history_item_t *hist = (dt_dev_history_item_t *)(history->data);
@@ -2295,7 +2295,7 @@ void _dev_module_update_multishow(dt_develop_t *dev, struct dt_iop_module_t *mod
 {
   // We count the number of other instances
   int nb_instances = 0;
-  for(GList *modules = dev->iop; modules; modules = g_list_next(modules))
+  for(GList *modules = g_list_first(dev->iop); modules; modules = g_list_next(modules))
   {
     dt_iop_module_t *mod = (dt_iop_module_t *)modules->data;
 
