@@ -224,6 +224,12 @@ DEFAULT(dt_introspection_field_t *, get_f, const char *name);
 // optional preference entry to add at the bottom of the preset menu
 OPTIONAL(void, set_preferences, void *menu, struct dt_iop_module_t *self);
 
+// Perform checks on image type/metadata to forcefully self-enable or self-disable a module
+// depending on input image. current_state will usually be self->enabled but can also be tied
+// to history enabled state.
+// Returns final enabled/disabled state after correction
+OPTIONAL(gboolean, force_enable, struct dt_iop_module_t *self, const gboolean current_state);
+
 #ifdef FULL_API_H
 
 #pragma GCC visibility pop
@@ -239,4 +245,3 @@ OPTIONAL(void, set_preferences, void *menu, struct dt_iop_module_t *self);
 // vim: shiftwidth=2 expandtab tabstop=2 cindent
 // kate: tab-indents: off; indent-width 2; replace-tabs on; indent-mode cstyle; remove-trailing-spaces modified;
 // clang-format on
-

@@ -1672,7 +1672,7 @@ void dt_dev_read_history_ext(dt_develop_t *dev, const int imgid, gboolean no_ima
     const int modversion = sqlite3_column_int(stmt, 2);
     const char *module_name = (const char *)sqlite3_column_text(stmt, 3);
     const void *module_params = sqlite3_column_blob(stmt, 4);
-    const int enabled = sqlite3_column_int(stmt, 5);
+    int enabled = sqlite3_column_int(stmt, 5);
     const void *blendop_params = sqlite3_column_blob(stmt, 6);
     const int blendop_version = sqlite3_column_int(stmt, 7);
     const int multi_priority = sqlite3_column_int(stmt, 8);
@@ -1755,6 +1755,10 @@ void dt_dev_read_history_ext(dt_develop_t *dev, const int imgid, gboolean no_ima
       continue;
     }
 
+    // Last chance & desperate attempt at enabling/disabling critical modules
+    // when history is garbled - This might prevent segfaults on invalid data
+    if(hist->module->force_enable) enabled = hist->module->force_enable(hist->module, enabled);
+
     // Run a battery of tests
     const gboolean is_valid_module_name = (strcmp(module_name, hist->module->op) == 0);
     const gboolean is_valid_blendop_version = (blendop_version == dt_develop_blend_version());
@@ -1770,7 +1774,7 @@ void dt_dev_read_history_ext(dt_develop_t *dev, const int imgid, gboolean no_ima
                               modversion, _print_validity(is_valid_module_version), _print_validity(is_valid_params_size));
 
     // Init buffers and values
-    hist->enabled = enabled;
+    hist->enabled = (enabled != 0); // "cast" int into a clean gboolean
     hist->num = num;
     hist->iop_order = iop_order;
     hist->multi_priority = multi_priority;
@@ -1849,7 +1853,7 @@ void dt_dev_read_history_ext(dt_develop_t *dev, const int imgid, gboolean no_ima
 
     // make sure that always-on modules are always on. duh.
     if(hist->module->default_enabled == 1 && hist->module->hide_enable_button == 1)
-      hist->enabled = 1;
+      hist->enabled = TRUE;
 
     // Compute the history params hash
     hist->hash = hist->module->hash = dt_iop_module_hash(hist->module);

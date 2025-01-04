@@ -202,7 +202,7 @@ void commit_params(dt_iop_module_t *self, dt_iop_params_t *p1, dt_dev_pixelpipe_
 
 #if 0
 /** optional, always needed if tiling is permitted by setting IOP_FLAGS_ALLOW_TILING
-    Also define this if the module uses more memory on the OpenCl device than the in& output buffers. 
+    Also define this if the module uses more memory on the OpenCl device than the in& output buffers.
 */
 void tiling_callback(struct dt_iop_module_t *self, struct dt_dev_pixelpipe_iop_t *piece,
                      const dt_iop_roi_t *roi_in, const dt_iop_roi_t *roi_out,
@@ -530,6 +530,31 @@ void reload_defaults(dt_iop_module_t *module)
   }
 }
 
+/**  Optional: if this module is required to handle some type of image or
+ * incompatible with some other, here is the opportunity to forcefully enable/disable it
+ * to protect users from themselves when applying styles or copy-pasting histories.
+ * Return corrected enabled state, which might be the unaffected current_state if valid.
+*/
+gboolean force_enable(struct dt_iop_module_t *self, const gboolean current_state)
+{
+  // This needs to be enabled for raw images, disabled for other images.
+  // There is no messing around.
+
+  const int is_raw = dt_image_is_raw(&self->dev->image_storage);
+  gboolean enable = current_state;
+
+  if(is_raw && (!self->enabled))
+  {
+    enable = TRUE;
+  }
+  else if(!is_raw && (self->enabled))
+  {
+    enable = FALSE;
+  }
+  return enable;
+}
+
+
 void gui_init(dt_iop_module_t *self)
 {
   // Allocates memory for the module's user interface in the darkroom and
@@ -644,4 +669,3 @@ GSList *mouse_actions(dt_iop_module_t *self)
 // vim: shiftwidth=2 expandtab tabstop=2 cindent
 // kate: tab-indents: off; indent-width 2; replace-tabs on; indent-mode cstyle; remove-trailing-spaces modified;
 // clang-format on
-
