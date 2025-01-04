@@ -741,6 +741,7 @@ static void _dev_add_history_item_ext(dt_develop_t *dev, dt_iop_module_t *module
       // do we need to rebuild ? Aka are disabled modules added to pipeline still ?
       dev->pipe->changed |= DT_DEV_PIPE_SYNCH;
       dev->preview_pipe->changed |= DT_DEV_PIPE_SYNCH;
+      dt_print(DT_DEBUG_PIPE, "[_dev_add_history_item_ext] invalidating pipeline for recomputing\n");
     }
   }
   else
@@ -751,10 +752,9 @@ static void _dev_add_history_item_ext(dt_develop_t *dev, dt_iop_module_t *module
     {
       dev->pipe->changed |= DT_DEV_PIPE_TOP_CHANGED;
       dev->preview_pipe->changed |= DT_DEV_PIPE_TOP_CHANGED;
+      dt_print(DT_DEBUG_PIPE, "[_dev_add_history_item_ext] invalidating pipeline for recomputing\n");
     }
   }
-
-  fprintf(stdout, "[_dev_add_history_item_ext] invalidating history\n");
 
   g_strlcpy(hist->multi_name, module->multi_name, sizeof(hist->multi_name));
   memcpy(hist->params, module->params, module->params_size);
@@ -1013,6 +1013,8 @@ static inline void _dt_dev_modules_reload_defaults(dt_develop_t *dev)
 
 void dt_dev_pop_history_items_ext(dt_develop_t *dev, int32_t cnt)
 {
+  dt_print(DT_DEBUG_HISTORY, "[dt_dev_pop_history_items_ext] reading history items...\n");
+
   const int end_prev = dev->history_end;
   dev->history_end = cnt;
 
@@ -1766,12 +1768,15 @@ void dt_dev_read_history_ext(dt_develop_t *dev, const int imgid, gboolean no_ima
     const gboolean is_valid_module_version = (modversion == hist->module->version());
     const gboolean is_valid_params_size = (param_length == hist->module->params_size);
 
-    dt_print(DT_DEBUG_PARAMS, "[history] successfully loaded module %s from history\n"
+    dt_print(DT_DEBUG_HISTORY, "[history] successfully loaded module %s from history\n"
                               "\t\t\tblendop v. %i:\tversion %s\tparams %s\n"
-                              "\t\t\tparams v. %i:\tversion %s\tparams %s\n",
+                              "\t\t\tparams v. %i:\tversion %s\tparams %s\n"
+                              "\t\t\t enabled: %i\n",
                               module_name,
                               blendop_version, _print_validity(is_valid_blendop_version), _print_validity(is_valid_blendop_size),
-                              modversion, _print_validity(is_valid_module_version), _print_validity(is_valid_params_size));
+                              modversion, _print_validity(is_valid_module_version), _print_validity(is_valid_params_size),
+                              enabled
+                              );
 
     // Init buffers and values
     hist->enabled = (enabled != 0); // "cast" int into a clean gboolean
@@ -1919,6 +1924,8 @@ void dt_dev_read_history_ext(dt_develop_t *dev, const int imgid, gboolean no_ima
   {
     dt_history_hash_write_from_history(imgid, flags);
   }
+
+  dt_print(DT_DEBUG_HISTORY, "[history] dt_dev_read_history_ext completed\n");
 }
 
 void dt_dev_read_history(dt_develop_t *dev)

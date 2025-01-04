@@ -2011,6 +2011,8 @@ int dt_ioppr_check_iop_order(dt_develop_t *dev, const int imgid, const char *msg
     }
   }
 
+  dt_print(DT_DEBUG_PARAMS, "[dt_ioppr_check_iop_order] IOP order passed (called from %s)\n", msg);
+
   return iop_order_ok;
 }
 
