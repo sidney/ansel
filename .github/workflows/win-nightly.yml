@@ -143,7 +143,7 @@ jobs:
           $(cygpath ${INSTALL_PREFIX})/bin/ansel.exe --version || true
           $(cygpath ${INSTALL_PREFIX})/bin/ansel-cli.exe \
                  --width 2048 --height 2048 \
-                 --hq true --apply-custom-presets false \
+                 --apply-custom-presets false \
                  $(cygpath ${SRC_DIR})/src/tests/integration/images/mire1.cr2 \
                  $(cygpath ${SRC_DIR})/src/tests/integration/0000-nop/nop.xmp \
                  output.png \

@@ -148,7 +148,7 @@ for dir in $TESTS; do
             export OMP_THREAD_LIMIT=4
 
             $CLI --width 2048 --height 2048 \
-                 --hq true --apply-custom-presets false \
+                 -apply-custom-presets false \
                  "$TEST_IMAGES/$IMAGE" "$TEST.xmp" output.png \
                  --core --disable-opencl $CORE_OPTIONS 1> /dev/null  2> /dev/null
 
@@ -156,7 +156,7 @@ for dir in $TESTS; do
 
             if [ $DO_OPENCL == yes ]; then
                 $CLI --width 2048 --height 2048 \
-                     --hq true --apply-custom-presets false \
+                     --apply-custom-presets false \
                      "$TEST_IMAGES/$IMAGE" "$TEST.xmp" output-cl.png \
                      --core $CORE_OPTIONS 1> /dev/null 2> /dev/null
 
