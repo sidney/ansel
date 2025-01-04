@@ -158,7 +158,7 @@ static int write_image(lua_State *L)
   // TODO: expose icc overwrites to the user!
   dt_colorspaces_color_profile_type_t icc_type = sanitize_colorspaces(dt_conf_get_int("plugins/lighttable/export/icctype"));
   const char *icc_filename = dt_conf_get_string_const("plugins/lighttable/export/iccprofile");
-  gboolean result = dt_imageio_export(imgid, filename, format, fdata, TRUE, FALSE, FALSE, export_masks,
+  gboolean result = dt_imageio_export(imgid, filename, format, fdata, TRUE, FALSE, export_masks,
                                       icc_type, icc_filename, DT_INTENT_LAST, NULL, NULL, 1, 1, NULL);
   dt_lua_lock();
   lua_pushboolean(L, result);
