@@ -96,7 +96,7 @@ static int store_wrapper(struct dt_imageio_module_storage_t *self, struct dt_ima
 
   gchar *complete_name = g_build_filename(tmpdir, filename, (char *)NULL);
 
-  if(dt_imageio_export(imgid, complete_name, format, fdata, high_quality, upscale, TRUE, export_masks, icc_type,
+  if(dt_imageio_export(imgid, complete_name, format, fdata, TRUE, TRUE, export_masks, icc_type,
                        icc_filename, icc_intent, self, self_data, num, total, metadata) != 0)
   {
     fprintf(stderr, "[%s] could not export to file: `%s'!\n", self->name(self), complete_name);
@@ -527,4 +527,3 @@ int dt_lua_init_luastorages(lua_State *L)
 // vim: shiftwidth=2 expandtab tabstop=2 cindent
 // kate: tab-indents: off; indent-width 2; replace-tabs on; indent-mode cstyle; remove-trailing-spaces modified;
 // clang-format on
-
