@@ -1,6 +1,6 @@
 * developers:
-Pascal Obry
 Aurélien PIERRE
+Pascal Obry
 Aldric Renaudin
 parafin
 Roman Lebedev
@@ -11,15 +11,19 @@ Jeronimo Pellegrini
 Victor Forsiuk
 Ryo Shinozaki
 Martin Straeten
+Guillaume Marty
+Alynx Zhou
+Aurélien PIERRE
 Serkan ÖNDER
 Petr Stasiak
 Stephan Hoek
 EdgarLux
+Maurizio Paglia
+Luca Zulberti
 Matt Maguire
 Nicolas Auffray
 bajdero
 mmardegan
-Aurélien PIERRE
 Jan Friedrich
 Matjaž Jeran
 MatteoVita
@@ -30,6 +34,7 @@ cotacot
 Hanno Schwalm
 Philippe Weyland
 Diederik ter Rahe
+Alynx Zhou
 Victor Forsiuk
 Nicolas Auffray
 Miloš Komarčević
@@ -37,39 +42,106 @@ Jeronimo Pellegrini
 Chris Elston
 Sakari Kapanen
 Dan Torop
+Guillaume Stutin
 Ryo Shinozaki
 HansBull
+Guillaume Marty
 Martin Straeten
+Jiyone
+lologor
 Ralf Brown
 Serkan ÖNDER
+Maurizio Paglia
 Petr Stasiak
 Stephan Hoek
 solarer
+Luca Zulberti
 Philipp Lutz
 luz paz
+Alban Gruin
 Apfelkraut
 EdgarLux
+Ricky Moon
 quovadit
 
 * Sub-module rawspeed contributors (at least 1 commit):
 Roman Lebedev
+Miloš Komarčević
+Jordan Neumeyer
+Thomas Baumann
+Georg Lukas
+Philipp Lutz
+Daniel Vogelbacher
+Victor Forsiuk
+Howard Liberty
+Yattaro
+maruncz
+-cr
+Alex Tutubalin
+Artemis Tosini
+David Korczynski
+Georg Niedrist
+Jan Šmucr
+Jorge Nerín
+LibRaw LLC
+Marco Ristuccia
+Marko Toplak
+Massimo Paladin
+Michael Allman
+Milos Komarcevic
+Omari Stephens
+Pascal Obry
+PeterWem
+Simon Raffeiner
+Sprite
+luz paz
+squid-f
+ubergeek801
+Šarūnas Burdulis
 
 * Sub-module OpenCL contributors (at least 1 commit):
+Ben Ashbaugh
+Kévin Petit
+John Plate
+Brice Videau
+Jon Leech
+Milkey Mouse
+y-novikov
 
 * Sub-module libxcf contributors (at least 1 commit):
 
 * Sub-module whereami contributors (at least 1 commit):
-
-* Sub-module integration contributors (at least 1 commit):
-Pascal Obry
+Gregory Pakosz
 
 * Sub-module LibRaw contributors (at least 1 commit):
 Alex Tutubalin
 LibRaw LLC
 Mark Reid
+Aleks L
 Miloš Komarčević
+Alex
+Dirk Lemstra
 Fabien Castan
 Petr Minář
+Pino Toscano
+luz paz
 sashashura
+
+* Sub-module doxygen-awesome-css contributors (at least 1 commit):
+jothepro
+Johannes Krafft
+Markus Napp
+Andrea Pappacoda
+Andy Maloney
+Ayush Chamoli
+Bernd Riederer
+David Álvarez Rosa
+Eritque arcus
+Liviu Ionescu
+Michael R. Crusoe
+OkawaYusuke
+Volker Enderlein
+William Roy
+patricklaf
 
 And all those of you that made previous releases possible
