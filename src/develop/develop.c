@@ -2620,13 +2620,13 @@ void dt_masks_set_lock_mode(dt_develop_t *dev, gboolean mode)
 int32_t dt_dev_get_history_end(dt_develop_t *dev)
 {
   const int num_items = g_list_length(dev->history);
-  return CLAMP(dev->history_end, 1, num_items);
+  return CLAMP(dev->history_end, 0, num_items);
 }
 
 void dt_dev_set_history_end(dt_develop_t *dev, const uint32_t index)
 {
   const int num_items = g_list_length(dev->history);
-  dev->history_end = CLAMP(index, 1, num_items);
+  dev->history_end = CLAMP(index, 0, num_items);
 }
 
 // clang-format off

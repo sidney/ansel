@@ -996,9 +996,8 @@ static void _lib_history_change_callback(gpointer instance, gpointer user_data)
 
   /* add default which always should be */
   int num = -1;
-  // this is the only place where we access private dev->history_end without getter 0 means uninited pipe
   GtkWidget *widget =
-    _lib_history_create_button(self, num, _("original"), FALSE, FALSE, TRUE, darktable.develop->history_end == 0, FALSE);
+    _lib_history_create_button(self, num, _("original"), FALSE, FALSE, TRUE, dt_dev_get_history_end(darktable.develop) == 0, FALSE);
   gtk_box_pack_start(GTK_BOX(d->history_box), widget, FALSE, FALSE, 0);
   num++;
 
