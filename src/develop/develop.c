@@ -666,13 +666,13 @@ static void _dev_add_history_item_ext(dt_develop_t *dev, dt_iop_module_t *module
   module->hash = dt_iop_module_hash(module);
 
   // WARNING: dev->history_item refers to GUI index of history lib module ,
-  // where 0 is the original image.
-  // It is offset by 1 compared to the history GList, aka last GUI index = length of GList.
+  // where 0 is the original image, aka outside of the dev->history list.
+  // It is offset by 1 compared to the div->history GList, aka last GUI index = length of GList.
   // So here, dev->history_item is the index of the new history entry to append
   // printf("history is at index %i\n", dev->history_end - 1);
-  for(GList *history = g_list_nth(dev->history, dev->history_end);
+  for(GList *history = g_list_nth(dev->history, dt_dev_get_history_end(dev));
       history;
-      history = g_list_nth(dev->history, dev->history_end))
+      history = g_list_nth(dev->history, dt_dev_get_history_end(dev)))
   {
     dt_dev_history_item_t *hist = (dt_dev_history_item_t *)(history->data);
     // printf("history item %s at %i\n", hist->module->op, g_list_index(dev->history, hist));
@@ -783,7 +783,7 @@ static void _dev_add_history_item_ext(dt_develop_t *dev, dt_iop_module_t *module
   // WARNING: dev->history_item refers to GUI index where 0 is the original image.
   // It is offset by 1 compared to the history GList,
   // meaning dev->history_item is the index of the entry button in the history lib module GUI.
-  dev->history_end = g_list_length(dev->history);
+  dt_dev_set_history_end(dev, g_list_length(dev->history));
 }
 
 const dt_dev_history_item_t *dt_dev_get_history_item(dt_develop_t *dev, const char *op)
@@ -927,7 +927,7 @@ void dt_dev_reload_history_items(dt_develop_t *dev)
 
   // remove unused history items:
   // FIXME: factorize with add_history_item cleaning
-  GList *history = g_list_nth(dev->history, dev->history_end);
+  GList *history = g_list_nth(dev->history, dt_dev_get_history_end(dev));
   while(history)
   {
     GList *next = g_list_next(history);
@@ -974,7 +974,7 @@ void dt_dev_reload_history_items(dt_develop_t *dev)
 
   dt_pthread_mutex_unlock(&dev->history_mutex);
 
-  dt_dev_pop_history_items(dev, dev->history_end);
+  dt_dev_pop_history_items(dev, dt_dev_get_history_end(dev));
 
   dt_ioppr_resync_iop_list(dev);
 
@@ -1015,8 +1015,8 @@ void dt_dev_pop_history_items_ext(dt_develop_t *dev, int32_t cnt)
 {
   dt_print(DT_DEBUG_HISTORY, "[dt_dev_pop_history_items_ext] reading history items...\n");
 
-  const int end_prev = dev->history_end;
-  dev->history_end = cnt;
+  const uint32_t end_prev = dt_dev_get_history_end(dev);
+  dt_dev_set_history_end(dev, cnt);
 
   // reset gui params for all modules
   _dt_dev_modules_reload_defaults(dev);
@@ -1182,7 +1182,7 @@ void dt_dev_write_history_ext(dt_develop_t *dev, const int imgid)
   DT_DEBUG_SQLITE3_PREPARE_V2(dt_database_get(darktable.db),
                               "UPDATE main.images SET history_end = ?1 WHERE id = ?2", -1,
                               &stmt, NULL);
-  DT_DEBUG_SQLITE3_BIND_INT(stmt, 1, dev->history_end);
+  DT_DEBUG_SQLITE3_BIND_INT(stmt, 1, dt_dev_get_history_end(dev));
   DT_DEBUG_SQLITE3_BIND_INT(stmt, 2, imgid);
   sqlite3_step(stmt);
   sqlite3_finalize(stmt);
@@ -1663,7 +1663,7 @@ void dt_dev_read_history_ext(dt_develop_t *dev, const int imgid, gboolean no_ima
   // clang-format on
   DT_DEBUG_SQLITE3_BIND_INT(stmt, 1, imgid);
 
-  dev->history_end = 0;
+  dt_dev_set_history_end(dev, 0); // actually, will be sanitized to 1
 
   // Strip rows from DB lookup. One row == One module in history
   while(sqlite3_step(stmt) == SQLITE_ROW)
@@ -1789,7 +1789,7 @@ void dt_dev_read_history_ext(dt_develop_t *dev, const int imgid, gboolean no_ima
     hist->blend_params = malloc(sizeof(dt_develop_blend_params_t));
 
     // update module iop_order only on active history entries
-    if(history_end_current > dev->history_end) hist->module->iop_order = hist->iop_order;
+    if(history_end_current > dt_dev_get_history_end(dev)) hist->module->iop_order = hist->iop_order;
 
     // Copy blending params if valid, else try to convert legacy params
     if(blendop_params && is_valid_blendop_version && is_valid_blendop_size)
@@ -1864,7 +1864,7 @@ void dt_dev_read_history_ext(dt_develop_t *dev, const int imgid, gboolean no_ima
     hist->hash = hist->module->hash = dt_iop_module_hash(hist->module);
 
     dev->history = g_list_append(dev->history, hist);
-    dev->history_end++;
+    dt_dev_set_history_end(dev, dt_dev_get_history_end(dev) + 1);
   }
   sqlite3_finalize(stmt);
 
@@ -1877,7 +1877,7 @@ void dt_dev_read_history_ext(dt_develop_t *dev, const int imgid, gboolean no_ima
   DT_DEBUG_SQLITE3_BIND_INT(stmt, 1, imgid);
   if(sqlite3_step(stmt) == SQLITE_ROW) // seriously, this should never fail
     if(sqlite3_column_type(stmt, 0) != SQLITE_NULL)
-      dev->history_end = sqlite3_column_int(stmt, 0);
+      dt_dev_set_history_end(dev, sqlite3_column_int(stmt, 0));
   sqlite3_finalize(stmt);
 
   dt_ioppr_check_iop_order(dev, imgid, "dt_dev_read_history_no_image end");
@@ -2273,7 +2273,7 @@ void dt_dev_module_remove(dt_develop_t *dev, dt_iop_module_t *module)
         //        module, hist->module);
         dt_dev_free_history_item(hist);
         dev->history = g_list_delete_link(dev->history, elem);
-        dev->history_end--;
+        dt_dev_set_history_end(dev, dt_dev_get_history_end(dev) - 1);
         del = 1;
       }
       elem = next;
@@ -2577,7 +2577,7 @@ void dt_dev_undo_start_record(dt_develop_t *dev)
     DT_DEBUG_CONTROL_SIGNAL_RAISE
       (darktable.signals, DT_SIGNAL_DEVELOP_HISTORY_WILL_CHANGE,
        dt_history_duplicate(dev->history),
-       dev->history_end,
+       dt_dev_get_history_end(dev),
        dt_ioppr_iop_order_copy_deep(dev->iop_order_list));
   }
 }
@@ -2621,7 +2621,7 @@ int32_t dt_dev_get_history_end(dt_develop_t *dev)
   return CLAMP(dev->history_end, 1, num_items);
 }
 
-void dt_dev_set_history_end(dt_develop_t *dev, const int index)
+void dt_dev_set_history_end(dt_develop_t *dev, const uint32_t index)
 {
   const int num_items = g_list_length(dev->history);
   dev->history_end = CLAMP(index, 1, num_items);

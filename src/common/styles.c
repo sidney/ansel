@@ -843,12 +843,12 @@ void dt_styles_apply_to_image(const char *name, const gboolean duplicate, const 
 
     dt_ioppr_check_iop_order(dev_dest, newimgid, "dt_styles_apply_to_image ");
 
-    dt_dev_pop_history_items_ext(dev_dest, dev_dest->history_end);
+    dt_dev_pop_history_items_ext(dev_dest, dt_dev_get_history_end(dev_dest));
 
     dt_ioppr_check_iop_order(dev_dest, newimgid, "dt_styles_apply_to_image 1");
 
     if (DT_IOP_ORDER_INFO)
-      fprintf(stderr,"\n^^^^^ Apply style on image %i, history size %i",imgid,dev_dest->history_end);
+      fprintf(stderr,"\n^^^^^ Apply style on image %i, history size %i",imgid, dt_dev_get_history_end(dev_dest));
 
     // go through all entries in style
     // clang-format off

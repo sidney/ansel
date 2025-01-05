@@ -473,7 +473,7 @@ int dt_history_merge_module_into_history(dt_develop_t *dev_dest, dt_develop_t *d
 
     dt_ioppr_check_iop_order(dev_dest, 0, "dt_history_merge_module_into_history");
 
-    dt_dev_pop_history_items_ext(dev_dest, dev_dest->history_end);
+    dt_dev_pop_history_items_ext(dev_dest, dt_dev_get_history_end(dev_dest));
 
     if(forms_used_replace) free(forms_used_replace);
   }
@@ -508,8 +508,8 @@ static int _history_copy_and_paste_on_image_merge(int32_t imgid, int32_t dest_im
   dt_ioppr_check_iop_order(dev_src, imgid, "_history_copy_and_paste_on_image_merge ");
   dt_ioppr_check_iop_order(dev_dest, dest_imgid, "_history_copy_and_paste_on_image_merge ");
 
-  dt_dev_pop_history_items_ext(dev_src, dev_src->history_end);
-  dt_dev_pop_history_items_ext(dev_dest, dev_dest->history_end);
+  dt_dev_pop_history_items_ext(dev_src, dt_dev_get_history_end(dev_src));
+  dt_dev_pop_history_items_ext(dev_dest, dt_dev_get_history_end(dev_dest));
 
   dt_ioppr_check_iop_order(dev_src, imgid, "_history_copy_and_paste_on_image_merge 1");
   dt_ioppr_check_iop_order(dev_dest, dest_imgid, "_history_copy_and_paste_on_image_merge 1");

@@ -2261,9 +2261,9 @@ static int _auto_save_edit(gpointer data)
 
   // Save dev history to DB and XMP (if enabled) only if history changed since previous save
   // and it's not too heavy. Too heavy would freeze the GUI in operation, not cool.
-  if(dev->history_end != history_top && dt_dev_mask_history_overload(dev, 200) < 200)
+  if(dt_dev_get_history_end(dev) != history_top && dt_dev_mask_history_overload(dev, 200) < 200)
   {
-    history_top = dev->history_end;
+    history_top = dt_dev_get_history_end(dev);
     dt_dev_write_history_ext(dev, dev->image_storage.id);
     dt_image_write_sidecar_file(dev->image_storage.id);
   }
@@ -2353,7 +2353,7 @@ void enter(dt_view_t *self)
 
   // synch gui and flag pipe as dirty
   // this is done here and not in dt_read_history, as it would else be triggered before module->gui_init.
-  dt_dev_pop_history_items(dev, dev->history_end);
+  dt_dev_pop_history_items(dev, dt_dev_get_history_end(dev));
 
   /* ensure that filmstrip shows current image */
   dt_thumbtable_set_offset_image(dt_ui_thumbtable(darktable.gui->ui), dev->image_storage.id, TRUE);
