@@ -1871,6 +1871,8 @@ void dt_dev_read_history_ext(dt_develop_t *dev, const int imgid, gboolean no_ima
   dt_ioppr_resync_modules_order(dev);
 
   // find the new history end
+  // Note: dt_dev_set_history_end sanitizes the value with the actual history size.
+  // It needs to run after dev->history is fully populated
   DT_DEBUG_SQLITE3_PREPARE_V2(dt_database_get(darktable.db),
                               "SELECT history_end FROM main.images WHERE id = ?1",
                               -1, &stmt, NULL);

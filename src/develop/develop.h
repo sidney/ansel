@@ -372,10 +372,21 @@ void dt_dev_invalidate_history_module(GList *list, struct dt_iop_module_t *modul
 // We allow pipelines to run partial histories, up to a certain index
 // stored privately in dev->history_end. Use these getter/setters
 // that will check validity, instead of directly reading/writing the private data.
-// Note that dev->history_end is shifted by +1 index, meaning index 0 is the raw image
-// and therefore outside of the actual dev->history list, then dev->history_end = 1 is
+
+// Get the index of the last active history element from a GUI perspective.
+// It means that dev->history_end is shifted by a +1 offset, so index 0 is the raw image,
+// therefore outside of the actual dev->history list, then dev->history_end = 1 is
 // actually the first element of history, and dev->history_end = length(dev->history) is the last.
+// Note: the value is sanitized with the actual history size.
+// It needs to run after dev->history is fully populated
 int32_t dt_dev_get_history_end(dt_develop_t *dev);
+
+// Set the index of the last active history element from a GUI perspective.
+// It means that dev->history_end is shifted by a +1 offset, so index 0 is the raw image,
+// therefore outside of the actual dev->history list, then dev->history_end = 1 is
+// actually the first element of history, and dev->history_end = length(dev->history) is the last.
+// Note: the value is sanitized with the actual history size.
+// It needs to run after dev->history is fully populated
 void dt_dev_set_history_end(dt_develop_t *dev, const uint32_t index);
 
 // force a rebuild of the pipe, needed when a module order is changed for example
