@@ -2615,6 +2615,18 @@ void dt_masks_set_lock_mode(dt_develop_t *dev, gboolean mode)
   }
 }
 
+int32_t dt_dev_get_history_end(dt_develop_t *dev)
+{
+  const int num_items = g_list_length(dev->history);
+  return CLAMP(dev->history_end, 1, num_items);
+}
+
+void dt_dev_set_history_end(dt_develop_t *dev, const int index)
+{
+  const int num_items = g_list_length(dev->history);
+  dev->history_end = CLAMP(index, 1, num_items);
+}
+
 // clang-format off
 // modelines: These editor modelines have been set for all relevant files by tools/update_modelines.py
 // vim: shiftwidth=2 expandtab tabstop=2 cindent

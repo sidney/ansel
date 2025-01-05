@@ -491,9 +491,17 @@ void dt_dev_pixelpipe_synch_all_real(dt_dev_pixelpipe_t *pipe, dt_develop_t *dev
   dt_print(DT_DEBUG_DEV, "[pixelpipe] synch all modules with history for pipe %i called from %s\n", pipe->type, caller_func);
 
   // go through all history items and adjust params
-  for(GList *history = g_list_first(dev->history); history; history = g_list_next(history))
+  // note that we don't necessarily process the whole history
+  const uint32_t history_end = dt_dev_get_history_end(dev);
+  // because history_end is shifted by 1, it is actually the step after the last one we want
+  uint32_t k = 0;
+
+  for(GList *history = g_list_first(dev->history);
+      history && k < history_end;
+      history = g_list_next(history))
   {
     dt_dev_pixelpipe_synch(pipe, dev, history);
+    ++k;
   }
   dt_pthread_mutex_unlock(&pipe->busy_mutex);
 }
