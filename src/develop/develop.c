@@ -656,10 +656,35 @@ int dt_dev_write_history_item(const int imgid, dt_dev_history_item_t *h, int32_t
 }
 
 
-
-static void _dev_add_history_item_ext(dt_develop_t *dev, dt_iop_module_t *module, gboolean enable,
-                                      gboolean force_new_item, gboolean no_image, gboolean include_masks)
+static dt_iop_module_t * _find_mask_manager(dt_develop_t *dev)
 {
+  for(GList *module = g_list_first(dev->iop); module; module = g_list_next(module))
+  {
+    dt_iop_module_t *mod = (dt_iop_module_t *)(module->data);
+    if(strcmp(mod->op, "mask_manager") == 0)
+      return mod;
+  }
+  return NULL;
+}
+
+
+void dt_dev_add_history_item_ext(dt_develop_t *dev, struct dt_iop_module_t *module, gboolean enable,
+                                 gboolean force_new_item, gboolean no_image, gboolean include_masks)
+{
+  if(!module)
+  {
+    // module = NULL means a mask was changed from the mask manager
+    // and that's where this function is called.
+    // Find it now, even though it is not enabled and won't be.
+    module = _find_mask_manager(dev);
+    force_new_item = FALSE;
+  }
+
+  if(!module) return;
+
+  // Stupid mask manager is a IOP module not processing any pixels...
+  if(strcmp(module->op, "mask_manager") == 0) enable = FALSE;
+
   // look for leaks on top of history in two steps
   // first remove obsolete items above history_end
   // but keep the always-on modules
@@ -800,21 +825,21 @@ const dt_dev_history_item_t *dt_dev_get_history_item(dt_develop_t *dev, const ch
   return NULL;
 }
 
-void dt_dev_add_history_item_ext(dt_develop_t *dev, dt_iop_module_t *module, gboolean enable, const int no_image)
-{
-  _dev_add_history_item_ext(dev, module, enable, FALSE, no_image, FALSE);
-}
 
-void _dev_add_history_item(dt_develop_t *dev, dt_iop_module_t *module, gboolean enable, gboolean new_item)
+// The next 2 functions are always called from GUI controls setting parameters
+// This is why they directly start a pipeline recompute.
+// Otherwise, please keep GUI and pipeline fully separated.
+
+void dt_dev_add_history_item_real(dt_develop_t *dev, dt_iop_module_t *module, gboolean enable)
 {
-  // FIXME: not quite sure why we could not add an history item without a GUI
-  if(!darktable.gui) return;
+  dt_atomic_set_int(&dev->pipe->shutdown, TRUE);
+  dt_atomic_set_int(&dev->preview_pipe->shutdown, TRUE);
 
   dt_dev_undo_start_record(dev);
 
   dt_pthread_mutex_lock(&dev->history_mutex);
 
-  _dev_add_history_item_ext(dev, module, enable, new_item, FALSE, FALSE);
+  dt_dev_add_history_item_ext(dev, module, enable, FALSE, FALSE, FALSE);
 
   /* attach changed tag reflecting actual change */
   const int imgid = dev->image_storage.id;
@@ -831,18 +856,6 @@ void _dev_add_history_item(dt_develop_t *dev, dt_iop_module_t *module, gboolean 
   dt_dev_undo_end_record(dev);
 
   if(tag_change) DT_DEBUG_CONTROL_SIGNAL_RAISE(darktable.signals, DT_SIGNAL_TAG_CHANGED);
-}
-
-// The next 2 functions are always called from GUI controls setting parameters
-// This is why they directly start a pipeline recompute.
-// Otherwise, please keep GUI and pipeline fully separated.
-
-void dt_dev_add_history_item_real(dt_develop_t *dev, dt_iop_module_t *module, gboolean enable)
-{
-  dt_atomic_set_int(&dev->pipe->shutdown, TRUE);
-  dt_atomic_set_int(&dev->preview_pipe->shutdown, TRUE);
-
-  _dev_add_history_item(dev, module, enable, FALSE);
 
   dt_pthread_mutex_lock(&dev->history_mutex);
   dev->image_status = DT_DEV_PIXELPIPE_DIRTY;
@@ -855,33 +868,6 @@ void dt_dev_add_history_item_real(dt_develop_t *dev, dt_iop_module_t *module, gb
   if(darktable.gui) dt_iop_gui_set_enable_button(module);
 }
 
-// FIXME : merge that with the generic add_history_item_ext()
-void dt_dev_add_masks_history_item_ext(dt_develop_t *dev, dt_iop_module_t *_module, gboolean _enable, gboolean no_image)
-{
-  dt_iop_module_t *module = _module;
-  gboolean enable = _enable;
-
-  // no module means that is called from the mask manager, so find the iop
-  if(module == NULL)
-  {
-    for(GList *modules = dev->iop; modules; modules = g_list_next(modules))
-    {
-      dt_iop_module_t *mod = (dt_iop_module_t *)(modules->data);
-      if(strcmp(mod->op, "mask_manager") == 0)
-      {
-        module = mod;
-        break;
-      }
-    }
-    enable = FALSE;
-  }
-  if(module)
-  {
-    _dev_add_history_item_ext(dev, module, enable, FALSE, no_image, TRUE);
-  }
-  else
-    fprintf(stderr, "[dt_dev_add_masks_history_item_ext] can't find mask manager module\n");
-}
 
 void dt_dev_add_masks_history_item(dt_develop_t *dev, dt_iop_module_t *module, gboolean enable)
 {
@@ -891,10 +877,7 @@ void dt_dev_add_masks_history_item(dt_develop_t *dev, dt_iop_module_t *module, g
 
   dt_pthread_mutex_lock(&dev->history_mutex);
 
-  if(dev->gui_attached)
-  {
-    dt_dev_add_masks_history_item_ext(dev, module, enable, FALSE);
-  }
+  dt_dev_add_history_item_ext(dev, module, enable, FALSE, FALSE, TRUE);
 
   dt_pthread_mutex_unlock(&dev->history_mutex);
 
