@@ -1679,12 +1679,14 @@ gboolean dt_history_paste_on_list(const GList *list, gboolean undo)
   if(!list) // do we have any images to receive the pasted history?
     return FALSE;
 
+  const gboolean merge = dt_conf_get_bool("plugins/lighttable/copy_history/pastemode");
+
   if(undo) dt_undo_start_group(darktable.undo, DT_UNDO_LT_HISTORY);
   for(GList *l = (GList *)list; l; l = g_list_next(l))
   {
     const int dest = GPOINTER_TO_INT(l->data);
     dt_history_copy_and_paste_on_image(darktable.view_manager->copy_paste.copied_imageid,
-                                       dest, TRUE,
+                                       dest, merge,
                                        darktable.view_manager->copy_paste.selops,
                                        darktable.view_manager->copy_paste.copy_iop_order,
                                        darktable.view_manager->copy_paste.full_copy);
@@ -1726,12 +1728,14 @@ gboolean dt_history_paste_parts_on_list(const GList *list, gboolean undo)
     return FALSE;
   }
 
+  const gboolean merge = dt_conf_get_bool("plugins/lighttable/copy_history/pastemode");
+
   if(undo) dt_undo_start_group(darktable.undo, DT_UNDO_LT_HISTORY);
   for (const GList *l = l_copy; l; l = g_list_next(l))
   {
     const int dest = GPOINTER_TO_INT(l->data);
     dt_history_copy_and_paste_on_image(darktable.view_manager->copy_paste.copied_imageid,
-                                       dest, TRUE,
+                                       dest, merge,
                                        darktable.view_manager->copy_paste.selops,
                                        darktable.view_manager->copy_paste.copy_iop_order,
                                        darktable.view_manager->copy_paste.full_copy);
