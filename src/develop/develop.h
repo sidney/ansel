@@ -358,7 +358,6 @@ void dt_dev_add_history_item_ext(dt_develop_t *dev, struct dt_iop_module_t *modu
 void dt_dev_add_history_item_real(dt_develop_t *dev, struct dt_iop_module_t *module, gboolean enable);
 #define dt_dev_add_history_item(dev, module, enable) DT_DEBUG_TRACE_WRAPPER(DT_DEBUG_DEV, dt_dev_add_history_item_real, (dev), (module), (enable))
 
-void dt_dev_add_masks_history_item(dt_develop_t *dev, struct dt_iop_module_t *_module, gboolean enable);
 void dt_dev_reload_history_items(dt_develop_t *dev);
 void dt_dev_pop_history_items_ext(dt_develop_t *dev, int32_t cnt);
 void dt_dev_pop_history_items(dt_develop_t *dev, int32_t cnt);

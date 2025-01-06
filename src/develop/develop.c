@@ -856,26 +856,9 @@ void dt_dev_add_history_item_real(dt_develop_t *dev, dt_iop_module_t *module, gb
   dt_dev_invalidate_all(dev);
   dt_control_queue_redraw_center();
   dt_dev_refresh_ui_images(dev);
-  if(darktable.gui) dt_iop_gui_set_enable_button(module);
-}
-
-
-void dt_dev_add_masks_history_item(dt_develop_t *dev, dt_iop_module_t *module, gboolean enable)
-{
-  if(!darktable.gui || darktable.gui->reset) return;
-
-  dt_dev_undo_start_record(dev);
-
-  dt_pthread_mutex_lock(&dev->history_mutex);
-
-  dt_dev_add_history_item_ext(dev, module, enable, FALSE, FALSE, TRUE);
-
-  dt_pthread_mutex_unlock(&dev->history_mutex);
-
-  if(dev->gui_attached)
+  if(darktable.gui)
   {
-    /* signal that history has changed */
-    dt_dev_undo_end_record(dev);
+    dt_iop_gui_set_enable_button(module);
 
     /* recreate mask list */
     dt_dev_masks_list_change(dev);
