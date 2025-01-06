@@ -690,12 +690,13 @@ void dt_dev_add_history_item_ext(dt_develop_t *dev, struct dt_iop_module_t *modu
   // look for leaks on top of history in two steps
   // first remove obsolete items above history_end
   // but keep the always-on modules
+
   for(GList *history = g_list_nth(dev->history, dt_dev_get_history_end(dev));
       history;
       history = g_list_next(history))
   {
     dt_dev_history_item_t *hist = (dt_dev_history_item_t *)(history->data);
-    dt_print(DT_DEBUG_HISTORY, "[dt_dev_add_history_item_ext] history item %s at %i\n", hist->module->op, g_list_index(dev->history, hist));
+    dt_print(DT_DEBUG_HISTORY, "[dt_dev_add_history_item_ext] history item %s at %i is past history limit (%i)\n", hist->module->op, g_list_index(dev->history, hist), dt_dev_get_history_end(dev) - 1);
 
     // Check if an earlier instance of the module exists.
     // FIXME: Why do we delete only non-existing instances ?
@@ -717,6 +718,10 @@ void dt_dev_add_history_item_ext(dt_develop_t *dev, struct dt_iop_module_t *modu
       dt_dev_free_history_item(hist);
       dev->history = g_list_delete_link(dev->history, history);
     }
+    else
+    {
+      dt_print(DT_DEBUG_HISTORY, "[dt_dev_add_history_item_ext] obsoleted history item will be kept: %s at %i\n", hist->module->op, g_list_index(dev->history, hist));
+    }
   }
 
   // Check if the current module to append to history is actually the same as the last one in history,
@@ -732,64 +737,48 @@ void dt_dev_add_history_item_ext(dt_develop_t *dev, struct dt_iop_module_t *modu
   }
 
   dt_dev_history_item_t *hist;
+  uint32_t position = 0; // used only for debug strings
   if(force_new_item || !new_is_old)
   {
     // Create a new history entry
     hist = (dt_dev_history_item_t *)calloc(1, sizeof(dt_dev_history_item_t));
-
-    // Init name
-    g_strlcpy(hist->op_name, module->op, sizeof(hist->op_name));
-
-    // Init buffers
     hist->params = malloc(module->params_size);
     hist->blend_params = malloc(sizeof(dt_develop_blend_params_t));
-
-    // Init base params
-    hist->module = module;
-    hist->iop_order = module->iop_order;
-    hist->multi_priority = module->multi_priority;
-
+    hist->num = -1;
     dev->history = g_list_append(dev->history, hist);
+    position = g_list_index(dev->history, hist);
     dt_print(DT_DEBUG_HISTORY, "[dt_dev_add_history_item_ext] new history entry added for %s at position %i\n",
-             module->name(), g_list_index(dev->history, hist));
-
-    if(!no_image)
-    {
-      // FIXME: if module was just enabled and is in default pipeline order,
-      // do we need to rebuild ? Aka are disabled modules added to pipeline still ?
-      dev->pipe->changed |= DT_DEV_PIPE_SYNCH;
-      dev->preview_pipe->changed |= DT_DEV_PIPE_SYNCH;
-      dt_print(DT_DEBUG_PIPE, "[dt_dev_add_history_item_ext] invalidating pipeline for recomputing\n");
-    }
+             module->name(), position);
   }
   else
   {
     // Reuse previous history entry
     hist = (dt_dev_history_item_t *)last->data;
-
-    if(!no_image)
-    {
-      dev->pipe->changed |= DT_DEV_PIPE_TOP_CHANGED;
-      dev->preview_pipe->changed |= DT_DEV_PIPE_TOP_CHANGED;
-      dt_print(DT_DEBUG_PIPE, "[dt_dev_add_history_item_ext] invalidating pipeline for recomputing\n");
-    }
+    position = g_list_index(dev->history, hist);
+    dt_print(DT_DEBUG_HISTORY, "[dt_dev_add_history_item_ext] history entry reused for %s at position %i\n",
+             module->name(), position);
   }
 
+  // Always resync history with all module internals
+  hist->module = module;
+  hist->iop_order = module->iop_order;
+  hist->multi_priority = module->multi_priority;
+  g_strlcpy(hist->op_name, module->op, sizeof(hist->op_name));
   g_strlcpy(hist->multi_name, module->multi_name, sizeof(hist->multi_name));
   memcpy(hist->params, module->params, module->params_size);
-
-  // We copy blending params even if the module doesn't support blending.
-  // It's stupid but other parts of the soft rely on that.
   memcpy(hist->blend_params, module->blend_params, sizeof(dt_develop_blend_params_t));
 
   // Publish the masks on the raster stack for other modules to find
   dt_iop_commit_blend_params(module, module->blend_params);
 
+  if(hist->forms) g_list_free_full(hist->forms, (void (*)(void *))dt_masks_free_form);
+
   if(include_masks)
   {
-    if(hist->forms) g_list_free_full(hist->forms, (void (*)(void *))dt_masks_free_form);
+    dt_print(DT_DEBUG_HISTORY, "[dt_dev_add_history_item_ext] committing masks for module %s at history position %i\n", module->name(), position);
+    // FIXME: this copies ALL drawn masks used by all modules to any module history using masks.
+    // Kudos to the idiots who thought it would be reasonable. Expect database bloating and perf penalty.
     hist->forms = dt_masks_dup_forms_deep(dev->forms, NULL);
-    dt_print(DT_DEBUG_HISTORY, "[dt_dev_add_history_item_ext] committing masks for module %s at history position %i\n", module->name(), g_list_index(dev->history, hist));
   }
   else
   {
@@ -800,7 +789,19 @@ void dt_dev_add_history_item_ext(dt_develop_t *dev, struct dt_iop_module_t *modu
   hist->enabled = module->enabled;
   hist->hash = module->hash;
 
+  // It is assumed that the last-added history entry is always on top
+  // so its cursor index is always equal to the number of elements,
+  // keeping in mind that history_end = 0 is the raw image, aka not a dev->history GList entry.
   dt_dev_set_history_end(dev, g_list_length(dev->history));
+
+  if(!no_image)
+  {
+    // FIXME: if module was just enabled and is in default pipeline order,
+    // do we need to rebuild ? Aka are disabled modules added to pipeline still ?
+    dev->pipe->changed |= DT_DEV_PIPE_SYNCH;
+    dev->preview_pipe->changed |= DT_DEV_PIPE_SYNCH;
+    dt_print(DT_DEBUG_PIPE, "[dt_dev_add_history_item_ext] invalidating pipeline for recomputing\n");
+  }
 }
 
 const dt_dev_history_item_t *dt_dev_get_history_item(dt_develop_t *dev, const char *op)
