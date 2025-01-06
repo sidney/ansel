@@ -728,14 +728,8 @@ void dt_dev_add_history_item_ext(dt_develop_t *dev, struct dt_iop_module_t *modu
     dt_dev_history_item_t *last_item = (dt_dev_history_item_t *)last->data;
     dt_iop_module_t *last_module = last_item->module;
     // fprintf(stdout, "history has hash %lu, new module %s has %lu\n", last_item->hash, module->op, module->hash);
-    if(dt_iop_check_modules_equal(module, last_module))
-    {
-      new_is_old = (module->hash == last_item->hash);
-    }
+    new_is_old = dt_iop_check_modules_equal(module, last_module);
   }
-  // new_is_old will be true only if the module got its ON/OFF state switched
-  // since the immediate previous history entry, but everything else is equal,
-  // including masks and blending.
 
   dt_dev_history_item_t *hist;
   if(force_new_item || !new_is_old)
