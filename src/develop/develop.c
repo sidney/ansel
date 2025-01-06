@@ -734,6 +734,7 @@ void dt_dev_add_history_item_ext(dt_develop_t *dev, struct dt_iop_module_t *modu
   dt_dev_history_item_t *hist;
   if(force_new_item || !new_is_old)
   {
+    // Create a new history entry
     hist = (dt_dev_history_item_t *)calloc(1, sizeof(dt_dev_history_item_t));
 
     // Init name
@@ -749,6 +750,8 @@ void dt_dev_add_history_item_ext(dt_develop_t *dev, struct dt_iop_module_t *modu
     hist->multi_priority = module->multi_priority;
 
     dev->history = g_list_append(dev->history, hist);
+    dt_print(DT_DEBUG_HISTORY, "[dt_dev_add_history_item_ext] new history entry added for %s at position %i\n",
+             module->name(), g_list_index(dev->history, hist));
 
     if(!no_image)
     {
@@ -756,18 +759,19 @@ void dt_dev_add_history_item_ext(dt_develop_t *dev, struct dt_iop_module_t *modu
       // do we need to rebuild ? Aka are disabled modules added to pipeline still ?
       dev->pipe->changed |= DT_DEV_PIPE_SYNCH;
       dev->preview_pipe->changed |= DT_DEV_PIPE_SYNCH;
-      dt_print(DT_DEBUG_PIPE, "[_dev_add_history_item_ext] invalidating pipeline for recomputing\n");
+      dt_print(DT_DEBUG_PIPE, "[dt_dev_add_history_item_ext] invalidating pipeline for recomputing\n");
     }
   }
   else
   {
+    // Reuse previous history entry
     hist = (dt_dev_history_item_t *)last->data;
 
     if(!no_image)
     {
       dev->pipe->changed |= DT_DEV_PIPE_TOP_CHANGED;
       dev->preview_pipe->changed |= DT_DEV_PIPE_TOP_CHANGED;
-      dt_print(DT_DEBUG_PIPE, "[_dev_add_history_item_ext] invalidating pipeline for recomputing\n");
+      dt_print(DT_DEBUG_PIPE, "[dt_dev_add_history_item_ext] invalidating pipeline for recomputing\n");
     }
   }
 
@@ -785,6 +789,7 @@ void dt_dev_add_history_item_ext(dt_develop_t *dev, struct dt_iop_module_t *modu
   {
     if(hist->forms) g_list_free_full(hist->forms, (void (*)(void *))dt_masks_free_form);
     hist->forms = dt_masks_dup_forms_deep(dev->forms, NULL);
+    dt_print(DT_DEBUG_HISTORY, "[dt_dev_add_history_item_ext] committing masks for module %s at history position %i\n", module->name(), g_list_index(dev->history, hist));
   }
   else
   {
@@ -795,9 +800,6 @@ void dt_dev_add_history_item_ext(dt_develop_t *dev, struct dt_iop_module_t *modu
   hist->enabled = module->enabled;
   hist->hash = module->hash;
 
-  // WARNING: dev->history_item refers to GUI index where 0 is the original image.
-  // It is offset by 1 compared to the history GList,
-  // meaning dev->history_item is the index of the entry button in the history lib module GUI.
   dt_dev_set_history_end(dev, g_list_length(dev->history));
 }
 
@@ -828,8 +830,8 @@ void dt_dev_add_history_item_real(dt_develop_t *dev, dt_iop_module_t *module, gb
   dt_dev_undo_start_record(dev);
 
   dt_pthread_mutex_lock(&dev->history_mutex);
-
   dt_dev_add_history_item_ext(dev, module, enable, FALSE, FALSE, FALSE);
+  dt_pthread_mutex_unlock(&dev->history_mutex);
 
   /* attach changed tag reflecting actual change */
   const int imgid = dev->image_storage.id;
@@ -839,8 +841,6 @@ void dt_dev_add_history_item_real(dt_develop_t *dev, dt_iop_module_t *module, gb
 
   /* register export timestamp in cache */
   dt_image_cache_set_change_timestamp(darktable.image_cache, imgid);
-
-  dt_pthread_mutex_unlock(&dev->history_mutex);
 
   /* signal that history has changed */
   dt_dev_undo_end_record(dev);
