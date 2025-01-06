@@ -685,25 +685,21 @@ void dt_dev_add_history_item_ext(dt_develop_t *dev, struct dt_iop_module_t *modu
   // Stupid mask manager is a IOP module not processing any pixels...
   if(strcmp(module->op, "mask_manager") == 0) enable = FALSE;
 
+  module->hash = dt_iop_module_hash(module);
+
   // look for leaks on top of history in two steps
   // first remove obsolete items above history_end
   // but keep the always-on modules
-  module->hash = dt_iop_module_hash(module);
-
-  // WARNING: dev->history_item refers to GUI index of history lib module ,
-  // where 0 is the original image, aka outside of the dev->history list.
-  // It is offset by 1 compared to the div->history GList, aka last GUI index = length of GList.
-  // So here, dev->history_item is the index of the new history entry to append
-  // printf("history is at index %i\n", dev->history_end - 1);
   for(GList *history = g_list_nth(dev->history, dt_dev_get_history_end(dev));
       history;
-      history = g_list_nth(dev->history, dt_dev_get_history_end(dev)))
+      history = g_list_next(history))
   {
     dt_dev_history_item_t *hist = (dt_dev_history_item_t *)(history->data);
-    // printf("history item %s at %i\n", hist->module->op, g_list_index(dev->history, hist));
+    dt_print(DT_DEBUG_HISTORY, "[dt_dev_add_history_item_ext] history item %s at %i\n", hist->module->op, g_list_index(dev->history, hist));
 
     // Check if an earlier instance of the module exists.
     // FIXME: Why do we delete only non-existing instances ?
+    // Is it another workaround to deal with default-enabled modules ?
     gboolean earlier_entry = FALSE;
     for(GList *prior_history = g_list_previous(history);
         prior_history && earlier_entry == FALSE;
@@ -717,7 +713,7 @@ void dt_dev_add_history_item_ext(dt_develop_t *dev, struct dt_iop_module_t *modu
     if((!hist->module->hide_enable_button && !hist->module->default_enabled)
         || earlier_entry)
     {
-      // printf("removing obsoleted history item: %s at %i\n", hist->module->op, g_list_index(dev->history, hist));
+      dt_print(DT_DEBUG_HISTORY, "[dt_dev_add_history_item_ext] removing obsoleted history item: %s at %i\n", hist->module->op, g_list_index(dev->history, hist));
       dt_dev_free_history_item(hist);
       dev->history = g_list_delete_link(dev->history, history);
     }
