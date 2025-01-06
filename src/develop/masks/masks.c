@@ -64,6 +64,7 @@ static void *_dup_masks_form_cb(const void *formdata, gpointer user_data)
   dt_masks_form_t *form = (dt_masks_form_t *)formdata;
   dt_masks_form_t *uform = (dt_masks_form_t *)user_data;
   const dt_masks_form_t *f = uform == NULL || form->formid != uform->formid ? form : uform;
+  dt_print(DT_DEBUG_MASKS, "[duplicate mask] %s %i\n", form->name, form->type);
   return (void *)dt_masks_dup_masks_form(f);
 }
 
