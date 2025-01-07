@@ -958,6 +958,9 @@ void dt_masks_write_masks_history_item(const int imgid, const int num, dt_masks_
 {
   sqlite3_stmt *stmt;
 
+  dt_print(DT_DEBUG_HISTORY, "[dt_masks_write_masks_history_item] writing mask %s of type %i for image %i\n",
+           form->name, form->type, imgid);
+
   // write the form into the database
   // clang-format off
   DT_DEBUG_SQLITE3_PREPARE_V2(dt_database_get(darktable.db),

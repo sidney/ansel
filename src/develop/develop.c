@@ -605,6 +605,8 @@ void dt_dev_configure(dt_develop_t *dev, int wd, int ht)
 // helper used to synch a single history item with db
 int dt_dev_write_history_item(const int imgid, dt_dev_history_item_t *h, int32_t num)
 {
+  dt_print(DT_DEBUG_HISTORY, "[dt_dev_write_history_item] writing history for module %s (%s) for image %i...\n", h->op_name, h->multi_name, imgid);
+
   sqlite3_stmt *stmt;
   DT_DEBUG_SQLITE3_PREPARE_V2(dt_database_get(darktable.db),
                               "SELECT num FROM main.history WHERE imgid = ?1 AND num = ?2", -1, &stmt, NULL);
@@ -645,7 +647,10 @@ int dt_dev_write_history_item(const int imgid, dt_dev_history_item_t *h, int32_t
   sqlite3_finalize(stmt);
 
   // write masks (if any)
-  for(GList *forms = h->forms; forms; forms = g_list_next(forms))
+  if(h->forms)
+    dt_print(DT_DEBUG_HISTORY, "[dt_dev_write_history_item] drawn mask found for module %s (%s) for image %i\n", h->op_name, h->multi_name, imgid);
+
+  for(GList *forms = g_list_first(h->forms); forms; forms = g_list_next(forms))
   {
     dt_masks_form_t *form = (dt_masks_form_t *)forms->data;
     if (form)
@@ -1128,6 +1133,8 @@ void dt_dev_write_history_ext(dt_develop_t *dev, const int imgid)
 
   _cleanup_history(imgid);
   _warn_about_history_overuse(dev);
+
+  dt_print(DT_DEBUG_HISTORY, "[dt_dev_write_history_ext] writing history for image %i...\n", imgid);
 
   // write history entries
 
