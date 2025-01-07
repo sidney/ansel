@@ -960,6 +960,8 @@ void dt_history_compress_on_image(const int32_t imgid)
 {
   sqlite3_stmt *stmt;
 
+  dt_print(DT_DEBUG_HISTORY, "[dt_history_compress_on_image] compressing history for image %i\n", imgid);
+
   // get history_end for image
   int my_history_end = 0;
   DT_DEBUG_SQLITE3_PREPARE_V2(dt_database_get(darktable.db),
@@ -970,7 +972,7 @@ void dt_history_compress_on_image(const int32_t imgid)
     my_history_end = sqlite3_column_int(stmt, 0);
   sqlite3_finalize(stmt);
 
-  if (my_history_end == 0)
+  if(my_history_end == 0)
   {
     dt_history_delete_on_image(imgid);
     return;
