@@ -1057,6 +1057,8 @@ void dt_iop_gui_set_enable_button_icon(GtkWidget *w, dt_iop_module_t *module)
 
 void dt_iop_gui_set_enable_button(dt_iop_module_t *module)
 {
+  if(module == NULL) return;
+
   if(module->off)
   {
     gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(module->off), module->enabled);
