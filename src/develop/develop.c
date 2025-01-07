@@ -754,6 +754,8 @@ void dt_dev_add_history_item_ext(dt_develop_t *dev, struct dt_iop_module_t *modu
   {
     // Reuse previous history entry
     hist = (dt_dev_history_item_t *)last->data;
+    // Drawn masks are forced-resync later, free them now
+    if(hist->forms) g_list_free_full(hist->forms, (void (*)(void *))dt_masks_free_form);
     position = g_list_index(dev->history, hist);
     dt_print(DT_DEBUG_HISTORY, "[dt_dev_add_history_item_ext] history entry reused for %s at position %i\n",
              module->name(), position);
@@ -768,15 +770,18 @@ void dt_dev_add_history_item_ext(dt_develop_t *dev, struct dt_iop_module_t *modu
   memcpy(hist->params, module->params, module->params_size);
   memcpy(hist->blend_params, module->blend_params, sizeof(dt_develop_blend_params_t));
 
-  // Publish the masks on the raster stack for other modules to find
-  dt_iop_commit_blend_params(module, module->blend_params);
-
-  if(hist->forms) g_list_free_full(hist->forms, (void (*)(void *))dt_masks_free_form);
+  // Include masks if module supports blending and blending is on or if it's the mask manager
+  // TODO: make that less ugly
+  include_masks = ((module->flags() & IOP_FLAGS_SUPPORTS_BLENDING) == IOP_FLAGS_SUPPORTS_BLENDING
+                   && module->blend_params->mask_mode > DEVELOP_MASK_ENABLED)
+                  || strcmp(module->op, "mask_manager") == 0
+                  || strcmp(module->op, "retouch") == 0
+                  || strcmp(module->op, "spots") == 0;
 
   if(include_masks)
   {
     dt_print(DT_DEBUG_HISTORY, "[dt_dev_add_history_item_ext] committing masks for module %s at history position %i\n", module->name(), position);
-    // FIXME: this copies ALL drawn masks used by all modules to any module history using masks.
+    // FIXME: this copies ALL drawn masks AND masks groups used by all modules to any module history using masks.
     // Kudos to the idiots who thought it would be reasonable. Expect database bloating and perf penalty.
     hist->forms = dt_masks_dup_forms_deep(dev->forms, NULL);
   }
@@ -785,9 +790,17 @@ void dt_dev_add_history_item_ext(dt_develop_t *dev, struct dt_iop_module_t *modu
     hist->forms = NULL;
   }
 
+  if(include_masks && hist->forms)
+    dt_print(DT_DEBUG_HISTORY, "[dt_dev_add_history_item_ext] masks committed for module %s at history position %i\n", module->name(), position);
+  else if(include_masks)
+    dt_print(DT_DEBUG_HISTORY, "[dt_dev_add_history_item_ext] masks NOT committed for module %s at history position %i\n", module->name(), position);
+
   if(enable) module->enabled = TRUE;
   hist->enabled = module->enabled;
   hist->hash = module->hash;
+
+  // Publish the masks on the raster stack for other modules to find
+  dt_iop_commit_blend_params(module, module->blend_params);
 
   // It is assumed that the last-added history entry is always on top
   // so its cursor index is always equal to the number of elements,
