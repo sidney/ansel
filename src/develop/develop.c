@@ -776,12 +776,9 @@ void dt_dev_add_history_item_ext(dt_develop_t *dev, struct dt_iop_module_t *modu
   memcpy(hist->blend_params, module->blend_params, sizeof(dt_develop_blend_params_t));
 
   // Include masks if module supports blending and blending is on or if it's the mask manager
-  // TODO: make that less ugly
   include_masks = ((module->flags() & IOP_FLAGS_SUPPORTS_BLENDING) == IOP_FLAGS_SUPPORTS_BLENDING
                    && module->blend_params->mask_mode > DEVELOP_MASK_ENABLED)
-                  || strcmp(module->op, "mask_manager") == 0
-                  || strcmp(module->op, "retouch") == 0
-                  || strcmp(module->op, "spots") == 0;
+                  || (module->flags() & IOP_FLAGS_INTERNAL_MASKS) == IOP_FLAGS_INTERNAL_MASKS;
 
   if(include_masks)
   {

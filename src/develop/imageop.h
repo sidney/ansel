@@ -104,6 +104,7 @@ typedef enum dt_iop_flags_t
   IOP_FLAGS_ALLOW_FAST_PIPE = 1 << 12,   // Module can work with a fast pipe
   IOP_FLAGS_UNSAFE_COPY = 1 << 13,       // Unsafe to copy as part of history
   IOP_FLAGS_GUIDES_SPECIAL_DRAW = 1 << 14, // handle the grid drawing directly
+  IOP_FLAGS_INTERNAL_MASKS = 1 << 15     // Module uses masks internally, outside of blendops. This advertises the need to commit them to history unconditionnaly.
 } dt_iop_flags_t;
 
 typedef struct dt_iop_gui_data_t
