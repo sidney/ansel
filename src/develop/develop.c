@@ -656,29 +656,51 @@ int dt_dev_write_history_item(const int imgid, dt_dev_history_item_t *h, int32_t
 }
 
 
-
-static void _dev_add_history_item_ext(dt_develop_t *dev, dt_iop_module_t *module, gboolean enable,
-                                      gboolean force_new_item, gboolean no_image, gboolean include_masks)
+static dt_iop_module_t * _find_mask_manager(dt_develop_t *dev)
 {
+  for(GList *module = g_list_first(dev->iop); module; module = g_list_next(module))
+  {
+    dt_iop_module_t *mod = (dt_iop_module_t *)(module->data);
+    if(strcmp(mod->op, "mask_manager") == 0)
+      return mod;
+  }
+  return NULL;
+}
+
+
+void dt_dev_add_history_item_ext(dt_develop_t *dev, struct dt_iop_module_t *module, gboolean enable,
+                                 gboolean force_new_item, gboolean no_image, gboolean include_masks)
+{
+  if(!module)
+  {
+    // module = NULL means a mask was changed from the mask manager
+    // and that's where this function is called.
+    // Find it now, even though it is not enabled and won't be.
+    module = _find_mask_manager(dev);
+    force_new_item = FALSE;
+  }
+
+  if(!module) return;
+
+  // Stupid mask manager is a IOP module not processing any pixels...
+  if(strcmp(module->op, "mask_manager") == 0) enable = FALSE;
+
+  module->hash = dt_iop_module_hash(module);
+
   // look for leaks on top of history in two steps
   // first remove obsolete items above history_end
   // but keep the always-on modules
-  module->hash = dt_iop_module_hash(module);
 
-  // WARNING: dev->history_item refers to GUI index of history lib module ,
-  // where 0 is the original image.
-  // It is offset by 1 compared to the history GList, aka last GUI index = length of GList.
-  // So here, dev->history_item is the index of the new history entry to append
-  // printf("history is at index %i\n", dev->history_end - 1);
-  for(GList *history = g_list_nth(dev->history, dev->history_end);
+  for(GList *history = g_list_nth(dev->history, dt_dev_get_history_end(dev));
       history;
-      history = g_list_nth(dev->history, dev->history_end))
+      history = g_list_next(history))
   {
     dt_dev_history_item_t *hist = (dt_dev_history_item_t *)(history->data);
-    // printf("history item %s at %i\n", hist->module->op, g_list_index(dev->history, hist));
+    dt_print(DT_DEBUG_HISTORY, "[dt_dev_add_history_item_ext] history item %s at %i is past history limit (%i)\n", hist->module->op, g_list_index(dev->history, hist), dt_dev_get_history_end(dev) - 1);
 
     // Check if an earlier instance of the module exists.
     // FIXME: Why do we delete only non-existing instances ?
+    // Is it another workaround to deal with default-enabled modules ?
     gboolean earlier_entry = FALSE;
     for(GList *prior_history = g_list_previous(history);
         prior_history && earlier_entry == FALSE;
@@ -692,9 +714,13 @@ static void _dev_add_history_item_ext(dt_develop_t *dev, dt_iop_module_t *module
     if((!hist->module->hide_enable_button && !hist->module->default_enabled)
         || earlier_entry)
     {
-      // printf("removing obsoleted history item: %s at %i\n", hist->module->op, g_list_index(dev->history, hist));
+      dt_print(DT_DEBUG_HISTORY, "[dt_dev_add_history_item_ext] removing obsoleted history item: %s at %i\n", hist->module->op, g_list_index(dev->history, hist));
       dt_dev_free_history_item(hist);
       dev->history = g_list_delete_link(dev->history, history);
+    }
+    else
+    {
+      dt_print(DT_DEBUG_HISTORY, "[dt_dev_add_history_item_ext] obsoleted history item will be kept: %s at %i\n", hist->module->op, g_list_index(dev->history, hist));
     }
   }
 
@@ -707,68 +733,51 @@ static void _dev_add_history_item_ext(dt_develop_t *dev, dt_iop_module_t *module
     dt_dev_history_item_t *last_item = (dt_dev_history_item_t *)last->data;
     dt_iop_module_t *last_module = last_item->module;
     // fprintf(stdout, "history has hash %lu, new module %s has %lu\n", last_item->hash, module->op, module->hash);
-    if(dt_iop_check_modules_equal(module, last_module))
-    {
-      new_is_old = (module->hash == last_item->hash);
-    }
+    new_is_old = dt_iop_check_modules_equal(module, last_module);
   }
-  // new_is_old will be true only if the module got its ON/OFF state switched
-  // since the immediate previous history entry, but everything else is equal,
-  // including masks and blending.
 
   dt_dev_history_item_t *hist;
+  uint32_t position = 0; // used only for debug strings
   if(force_new_item || !new_is_old)
   {
+    // Create a new history entry
     hist = (dt_dev_history_item_t *)calloc(1, sizeof(dt_dev_history_item_t));
-
-    // Init name
-    g_strlcpy(hist->op_name, module->op, sizeof(hist->op_name));
-
-    // Init buffers
     hist->params = malloc(module->params_size);
     hist->blend_params = malloc(sizeof(dt_develop_blend_params_t));
-
-    // Init base params
-    hist->module = module;
-    hist->iop_order = module->iop_order;
-    hist->multi_priority = module->multi_priority;
-
+    hist->num = -1;
     dev->history = g_list_append(dev->history, hist);
-
-    if(!no_image)
-    {
-      // FIXME: if module was just enabled and is in default pipeline order,
-      // do we need to rebuild ? Aka are disabled modules added to pipeline still ?
-      dev->pipe->changed |= DT_DEV_PIPE_SYNCH;
-      dev->preview_pipe->changed |= DT_DEV_PIPE_SYNCH;
-      dt_print(DT_DEBUG_PIPE, "[_dev_add_history_item_ext] invalidating pipeline for recomputing\n");
-    }
+    position = g_list_index(dev->history, hist);
+    dt_print(DT_DEBUG_HISTORY, "[dt_dev_add_history_item_ext] new history entry added for %s at position %i\n",
+             module->name(), position);
   }
   else
   {
+    // Reuse previous history entry
     hist = (dt_dev_history_item_t *)last->data;
-
-    if(!no_image)
-    {
-      dev->pipe->changed |= DT_DEV_PIPE_TOP_CHANGED;
-      dev->preview_pipe->changed |= DT_DEV_PIPE_TOP_CHANGED;
-      dt_print(DT_DEBUG_PIPE, "[_dev_add_history_item_ext] invalidating pipeline for recomputing\n");
-    }
+    position = g_list_index(dev->history, hist);
+    dt_print(DT_DEBUG_HISTORY, "[dt_dev_add_history_item_ext] history entry reused for %s at position %i\n",
+             module->name(), position);
   }
 
+  // Always resync history with all module internals
+  hist->module = module;
+  hist->iop_order = module->iop_order;
+  hist->multi_priority = module->multi_priority;
+  g_strlcpy(hist->op_name, module->op, sizeof(hist->op_name));
   g_strlcpy(hist->multi_name, module->multi_name, sizeof(hist->multi_name));
   memcpy(hist->params, module->params, module->params_size);
-
-  // We copy blending params even if the module doesn't support blending.
-  // It's stupid but other parts of the soft rely on that.
   memcpy(hist->blend_params, module->blend_params, sizeof(dt_develop_blend_params_t));
 
   // Publish the masks on the raster stack for other modules to find
   dt_iop_commit_blend_params(module, module->blend_params);
 
+  if(hist->forms) g_list_free_full(hist->forms, (void (*)(void *))dt_masks_free_form);
+
   if(include_masks)
   {
-    if(hist->forms) g_list_free_full(hist->forms, (void (*)(void *))dt_masks_free_form);
+    dt_print(DT_DEBUG_HISTORY, "[dt_dev_add_history_item_ext] committing masks for module %s at history position %i\n", module->name(), position);
+    // FIXME: this copies ALL drawn masks used by all modules to any module history using masks.
+    // Kudos to the idiots who thought it would be reasonable. Expect database bloating and perf penalty.
     hist->forms = dt_masks_dup_forms_deep(dev->forms, NULL);
   }
   else
@@ -780,10 +789,19 @@ static void _dev_add_history_item_ext(dt_develop_t *dev, dt_iop_module_t *module
   hist->enabled = module->enabled;
   hist->hash = module->hash;
 
-  // WARNING: dev->history_item refers to GUI index where 0 is the original image.
-  // It is offset by 1 compared to the history GList,
-  // meaning dev->history_item is the index of the entry button in the history lib module GUI.
-  dev->history_end = g_list_length(dev->history);
+  // It is assumed that the last-added history entry is always on top
+  // so its cursor index is always equal to the number of elements,
+  // keeping in mind that history_end = 0 is the raw image, aka not a dev->history GList entry.
+  dt_dev_set_history_end(dev, g_list_length(dev->history));
+
+  if(!no_image)
+  {
+    // FIXME: if module was just enabled and is in default pipeline order,
+    // do we need to rebuild ? Aka are disabled modules added to pipeline still ?
+    dev->pipe->changed |= DT_DEV_PIPE_SYNCH;
+    dev->preview_pipe->changed |= DT_DEV_PIPE_SYNCH;
+    dt_print(DT_DEBUG_PIPE, "[dt_dev_add_history_item_ext] invalidating pipeline for recomputing\n");
+  }
 }
 
 const dt_dev_history_item_t *dt_dev_get_history_item(dt_develop_t *dev, const char *op)
@@ -800,38 +818,6 @@ const dt_dev_history_item_t *dt_dev_get_history_item(dt_develop_t *dev, const ch
   return NULL;
 }
 
-void dt_dev_add_history_item_ext(dt_develop_t *dev, dt_iop_module_t *module, gboolean enable, const int no_image)
-{
-  _dev_add_history_item_ext(dev, module, enable, FALSE, no_image, FALSE);
-}
-
-void _dev_add_history_item(dt_develop_t *dev, dt_iop_module_t *module, gboolean enable, gboolean new_item)
-{
-  // FIXME: not quite sure why we could not add an history item without a GUI
-  if(!darktable.gui) return;
-
-  dt_dev_undo_start_record(dev);
-
-  dt_pthread_mutex_lock(&dev->history_mutex);
-
-  _dev_add_history_item_ext(dev, module, enable, new_item, FALSE, FALSE);
-
-  /* attach changed tag reflecting actual change */
-  const int imgid = dev->image_storage.id;
-  guint tagid = 0;
-  dt_tag_new("darktable|changed", &tagid);
-  const gboolean tag_change = dt_tag_attach(tagid, imgid, FALSE, FALSE);
-
-  /* register export timestamp in cache */
-  dt_image_cache_set_change_timestamp(darktable.image_cache, imgid);
-
-  dt_pthread_mutex_unlock(&dev->history_mutex);
-
-  /* signal that history has changed */
-  dt_dev_undo_end_record(dev);
-
-  if(tag_change) DT_DEBUG_CONTROL_SIGNAL_RAISE(darktable.signals, DT_SIGNAL_TAG_CHANGED);
-}
 
 // The next 2 functions are always called from GUI controls setting parameters
 // This is why they directly start a pipeline recompute.
@@ -842,7 +828,25 @@ void dt_dev_add_history_item_real(dt_develop_t *dev, dt_iop_module_t *module, gb
   dt_atomic_set_int(&dev->pipe->shutdown, TRUE);
   dt_atomic_set_int(&dev->preview_pipe->shutdown, TRUE);
 
-  _dev_add_history_item(dev, module, enable, FALSE);
+  dt_dev_undo_start_record(dev);
+
+  dt_pthread_mutex_lock(&dev->history_mutex);
+  dt_dev_add_history_item_ext(dev, module, enable, FALSE, FALSE, FALSE);
+  dt_pthread_mutex_unlock(&dev->history_mutex);
+
+  /* attach changed tag reflecting actual change */
+  const int imgid = dev->image_storage.id;
+  guint tagid = 0;
+  dt_tag_new("darktable|changed", &tagid);
+  const gboolean tag_change = dt_tag_attach(tagid, imgid, FALSE, FALSE);
+
+  /* register export timestamp in cache */
+  dt_image_cache_set_change_timestamp(darktable.image_cache, imgid);
+
+  /* signal that history has changed */
+  dt_dev_undo_end_record(dev);
+
+  if(tag_change) DT_DEBUG_CONTROL_SIGNAL_RAISE(darktable.signals, DT_SIGNAL_TAG_CHANGED);
 
   dt_pthread_mutex_lock(&dev->history_mutex);
   dev->image_status = DT_DEV_PIXELPIPE_DIRTY;
@@ -852,56 +856,9 @@ void dt_dev_add_history_item_real(dt_develop_t *dev, dt_iop_module_t *module, gb
   dt_dev_invalidate_all(dev);
   dt_control_queue_redraw_center();
   dt_dev_refresh_ui_images(dev);
-  if(darktable.gui) dt_iop_gui_set_enable_button(module);
-}
-
-// FIXME : merge that with the generic add_history_item_ext()
-void dt_dev_add_masks_history_item_ext(dt_develop_t *dev, dt_iop_module_t *_module, gboolean _enable, gboolean no_image)
-{
-  dt_iop_module_t *module = _module;
-  gboolean enable = _enable;
-
-  // no module means that is called from the mask manager, so find the iop
-  if(module == NULL)
+  if(darktable.gui)
   {
-    for(GList *modules = dev->iop; modules; modules = g_list_next(modules))
-    {
-      dt_iop_module_t *mod = (dt_iop_module_t *)(modules->data);
-      if(strcmp(mod->op, "mask_manager") == 0)
-      {
-        module = mod;
-        break;
-      }
-    }
-    enable = FALSE;
-  }
-  if(module)
-  {
-    _dev_add_history_item_ext(dev, module, enable, FALSE, no_image, TRUE);
-  }
-  else
-    fprintf(stderr, "[dt_dev_add_masks_history_item_ext] can't find mask manager module\n");
-}
-
-void dt_dev_add_masks_history_item(dt_develop_t *dev, dt_iop_module_t *module, gboolean enable)
-{
-  if(!darktable.gui || darktable.gui->reset) return;
-
-  dt_dev_undo_start_record(dev);
-
-  dt_pthread_mutex_lock(&dev->history_mutex);
-
-  if(dev->gui_attached)
-  {
-    dt_dev_add_masks_history_item_ext(dev, module, enable, FALSE);
-  }
-
-  dt_pthread_mutex_unlock(&dev->history_mutex);
-
-  if(dev->gui_attached)
-  {
-    /* signal that history has changed */
-    dt_dev_undo_end_record(dev);
+    dt_iop_gui_set_enable_button(module);
 
     /* recreate mask list */
     dt_dev_masks_list_change(dev);
@@ -927,7 +884,7 @@ void dt_dev_reload_history_items(dt_develop_t *dev)
 
   // remove unused history items:
   // FIXME: factorize with add_history_item cleaning
-  GList *history = g_list_nth(dev->history, dev->history_end);
+  GList *history = g_list_nth(dev->history, dt_dev_get_history_end(dev));
   while(history)
   {
     GList *next = g_list_next(history);
@@ -974,7 +931,7 @@ void dt_dev_reload_history_items(dt_develop_t *dev)
 
   dt_pthread_mutex_unlock(&dev->history_mutex);
 
-  dt_dev_pop_history_items(dev, dev->history_end);
+  dt_dev_pop_history_items(dev, dt_dev_get_history_end(dev));
 
   dt_ioppr_resync_iop_list(dev);
 
@@ -1015,8 +972,8 @@ void dt_dev_pop_history_items_ext(dt_develop_t *dev, int32_t cnt)
 {
   dt_print(DT_DEBUG_HISTORY, "[dt_dev_pop_history_items_ext] reading history items...\n");
 
-  const int end_prev = dev->history_end;
-  dev->history_end = cnt;
+  const uint32_t end_prev = dt_dev_get_history_end(dev);
+  dt_dev_set_history_end(dev, cnt);
 
   // reset gui params for all modules
   _dt_dev_modules_reload_defaults(dev);
@@ -1182,7 +1139,7 @@ void dt_dev_write_history_ext(dt_develop_t *dev, const int imgid)
   DT_DEBUG_SQLITE3_PREPARE_V2(dt_database_get(darktable.db),
                               "UPDATE main.images SET history_end = ?1 WHERE id = ?2", -1,
                               &stmt, NULL);
-  DT_DEBUG_SQLITE3_BIND_INT(stmt, 1, dev->history_end);
+  DT_DEBUG_SQLITE3_BIND_INT(stmt, 1, dt_dev_get_history_end(dev));
   DT_DEBUG_SQLITE3_BIND_INT(stmt, 2, imgid);
   sqlite3_step(stmt);
   sqlite3_finalize(stmt);
@@ -1663,7 +1620,7 @@ void dt_dev_read_history_ext(dt_develop_t *dev, const int imgid, gboolean no_ima
   // clang-format on
   DT_DEBUG_SQLITE3_BIND_INT(stmt, 1, imgid);
 
-  dev->history_end = 0;
+  dt_dev_set_history_end(dev, 0); // actually, will be sanitized to 1
 
   // Strip rows from DB lookup. One row == One module in history
   while(sqlite3_step(stmt) == SQLITE_ROW)
@@ -1789,7 +1746,7 @@ void dt_dev_read_history_ext(dt_develop_t *dev, const int imgid, gboolean no_ima
     hist->blend_params = malloc(sizeof(dt_develop_blend_params_t));
 
     // update module iop_order only on active history entries
-    if(history_end_current > dev->history_end) hist->module->iop_order = hist->iop_order;
+    if(history_end_current > dt_dev_get_history_end(dev)) hist->module->iop_order = hist->iop_order;
 
     // Copy blending params if valid, else try to convert legacy params
     if(blendop_params && is_valid_blendop_version && is_valid_blendop_size)
@@ -1864,20 +1821,22 @@ void dt_dev_read_history_ext(dt_develop_t *dev, const int imgid, gboolean no_ima
     hist->hash = hist->module->hash = dt_iop_module_hash(hist->module);
 
     dev->history = g_list_append(dev->history, hist);
-    dev->history_end++;
+    dt_dev_set_history_end(dev, dt_dev_get_history_end(dev) + 1);
   }
   sqlite3_finalize(stmt);
 
   dt_ioppr_resync_modules_order(dev);
 
   // find the new history end
+  // Note: dt_dev_set_history_end sanitizes the value with the actual history size.
+  // It needs to run after dev->history is fully populated
   DT_DEBUG_SQLITE3_PREPARE_V2(dt_database_get(darktable.db),
                               "SELECT history_end FROM main.images WHERE id = ?1",
                               -1, &stmt, NULL);
   DT_DEBUG_SQLITE3_BIND_INT(stmt, 1, imgid);
   if(sqlite3_step(stmt) == SQLITE_ROW) // seriously, this should never fail
     if(sqlite3_column_type(stmt, 0) != SQLITE_NULL)
-      dev->history_end = sqlite3_column_int(stmt, 0);
+      dt_dev_set_history_end(dev, sqlite3_column_int(stmt, 0));
   sqlite3_finalize(stmt);
 
   dt_ioppr_check_iop_order(dev, imgid, "dt_dev_read_history_no_image end");
@@ -2273,7 +2232,7 @@ void dt_dev_module_remove(dt_develop_t *dev, dt_iop_module_t *module)
         //        module, hist->module);
         dt_dev_free_history_item(hist);
         dev->history = g_list_delete_link(dev->history, elem);
-        dev->history_end--;
+        dt_dev_set_history_end(dev, dt_dev_get_history_end(dev) - 1);
         del = 1;
       }
       elem = next;
@@ -2577,7 +2536,7 @@ void dt_dev_undo_start_record(dt_develop_t *dev)
     DT_DEBUG_CONTROL_SIGNAL_RAISE
       (darktable.signals, DT_SIGNAL_DEVELOP_HISTORY_WILL_CHANGE,
        dt_history_duplicate(dev->history),
-       dev->history_end,
+       dt_dev_get_history_end(dev),
        dt_ioppr_iop_order_copy_deep(dev->iop_order_list));
   }
 }
@@ -2613,6 +2572,18 @@ void dt_masks_set_lock_mode(dt_develop_t *dev, gboolean mode)
     dev->mask_lock = mode;
     dt_pthread_mutex_unlock(&darktable.gui->mutex);
   }
+}
+
+int32_t dt_dev_get_history_end(dt_develop_t *dev)
+{
+  const int num_items = g_list_length(dev->history);
+  return CLAMP(dev->history_end, 0, num_items);
+}
+
+void dt_dev_set_history_end(dt_develop_t *dev, const uint32_t index)
+{
+  const int num_items = g_list_length(dev->history);
+  dev->history_end = CLAMP(index, 0, num_items);
 }
 
 // clang-format off

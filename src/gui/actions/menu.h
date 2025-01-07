@@ -25,6 +25,14 @@ typedef enum dt_menus_t
   DT_MENU_LAST
 } dt_menus_t;
 
+typedef enum dt_menu_entry_style_t
+{
+  DT_MENU_ENTRY_DEFAULT = 0,
+  DT_MENU_ENTRY_CHECKBUTTON = 1,
+  DT_MENU_ENTRY_RADIOBUTTON = 2,
+  DT_MENU_ENTRY_LAST
+} dt_menu_entry_style_t;
+
 
 typedef struct dt_menu_entry_t
 {
@@ -35,6 +43,7 @@ typedef struct dt_menu_entry_t
   gboolean (*checked_callback)(GtkWidget *widget);        // Callback checking some conditions to determine if the boolean pref set by the item is currently TRUE or FALSE
   gboolean (*active_callback)(GtkWidget *widget);         // Callback checking some conditions to determine if the menu item is the current view
   dt_menus_t menu;           // Index of first-level menu
+  dt_menu_entry_style_t style;
 } dt_menu_entry_t;
 
 
@@ -63,9 +72,15 @@ static dt_menu_entry_t * set_menu_entry(GList **items_list, const gchar *label, 
 
   // Main widget
   if(checked_callback)
+  {
     entry->widget = gtk_check_menu_item_new_with_label("");
+    entry->style = DT_MENU_ENTRY_CHECKBUTTON;
+  }
   else
+  {
     entry->widget = gtk_menu_item_new_with_label("");
+    entry->style = DT_MENU_ENTRY_DEFAULT;
+  }
 
   // Set the text label allowing markup
   GtkWidget *child = gtk_bin_get_child(GTK_BIN(entry->widget));
@@ -92,7 +107,7 @@ static dt_menu_entry_t * set_menu_entry(GList **items_list, const gchar *label, 
 void update_entry(dt_menu_entry_t *entry)
 {
   // Use the callbacks functions to update the visual properties of the menu entry
-  if(entry->checked_callback)
+  if(entry->style > DT_MENU_ENTRY_DEFAULT)
   {
     // Set the visible state of the checkbox without actually triggering the callback running on activation
     // Gtk has no concept of "set costmetic active state" for checkboxes.

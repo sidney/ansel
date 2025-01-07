@@ -353,12 +353,11 @@ void dt_dev_unload_image(dt_develop_t *dev);
 int dt_dev_is_current_image(dt_develop_t *dev, uint32_t imgid);
 
 const dt_dev_history_item_t *dt_dev_get_history_item(dt_develop_t *dev, const char *op);
-void dt_dev_add_history_item_ext(dt_develop_t *dev, struct dt_iop_module_t *module, gboolean enable, gboolean no_image);
+void dt_dev_add_history_item_ext(dt_develop_t *dev, struct dt_iop_module_t *module, gboolean enable, gboolean force_new_item,
+                                 gboolean no_image, gboolean include_masks);
 void dt_dev_add_history_item_real(dt_develop_t *dev, struct dt_iop_module_t *module, gboolean enable);
 #define dt_dev_add_history_item(dev, module, enable) DT_DEBUG_TRACE_WRAPPER(DT_DEBUG_DEV, dt_dev_add_history_item_real, (dev), (module), (enable))
 
-void dt_dev_add_masks_history_item_ext(dt_develop_t *dev, struct dt_iop_module_t *_module, gboolean _enable, gboolean no_image);
-void dt_dev_add_masks_history_item(dt_develop_t *dev, struct dt_iop_module_t *_module, gboolean enable);
 void dt_dev_reload_history_items(dt_develop_t *dev);
 void dt_dev_pop_history_items_ext(dt_develop_t *dev, int32_t cnt);
 void dt_dev_pop_history_items(dt_develop_t *dev, int32_t cnt);
@@ -368,6 +367,26 @@ void dt_dev_read_history_ext(dt_develop_t *dev, const int imgid, gboolean no_ima
 void dt_dev_read_history(dt_develop_t *dev);
 void dt_dev_free_history_item(gpointer data);
 void dt_dev_invalidate_history_module(GList *list, struct dt_iop_module_t *module);
+
+// We allow pipelines to run partial histories, up to a certain index
+// stored privately in dev->history_end. Use these getter/setters
+// that will check validity, instead of directly reading/writing the private data.
+
+// Get the index of the last active history element from a GUI perspective.
+// It means that dev->history_end is shifted by a +1 offset, so index 0 is the raw image,
+// therefore outside of the actual dev->history list, then dev->history_end = 1 is
+// actually the first element of history, and dev->history_end = length(dev->history) is the last.
+// Note: the value is sanitized with the actual history size.
+// It needs to run after dev->history is fully populated
+int32_t dt_dev_get_history_end(dt_develop_t *dev);
+
+// Set the index of the last active history element from a GUI perspective.
+// It means that dev->history_end is shifted by a +1 offset, so index 0 is the raw image,
+// therefore outside of the actual dev->history list, then dev->history_end = 1 is
+// actually the first element of history, and dev->history_end = length(dev->history) is the last.
+// Note: the value is sanitized with the actual history size.
+// It needs to run after dev->history is fully populated
+void dt_dev_set_history_end(dt_develop_t *dev, const uint32_t index);
 
 // force a rebuild of the pipe, needed when a module order is changed for example
 void dt_dev_pixelpipe_rebuild(struct dt_develop_t *dev);

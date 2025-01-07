@@ -582,7 +582,7 @@ static void _pop_undo(gpointer user_data, dt_undo_type_t type, dt_undo_data_t da
     // set history and modules to dev
     GList *history_temp2 = dev->history;
     dev->history = history_temp;
-    dev->history_end = hist_end;
+    dt_dev_set_history_end(dev, hist_end);
     g_list_free_full(history_temp2, dt_dev_free_history_item);
     GList *iop_temp2 = dev->iop;
     dev->iop = iop_temp;
@@ -997,7 +997,7 @@ static void _lib_history_change_callback(gpointer instance, gpointer user_data)
   /* add default which always should be */
   int num = -1;
   GtkWidget *widget =
-    _lib_history_create_button(self, num, _("original"), FALSE, FALSE, TRUE, darktable.develop->history_end == 0, FALSE);
+    _lib_history_create_button(self, num, _("original"), FALSE, FALSE, TRUE, dt_dev_get_history_end(darktable.develop) == 0, FALSE);
   gtk_box_pack_start(GTK_BOX(d->history_box), widget, FALSE, FALSE, 0);
   num++;
 
@@ -1012,7 +1012,7 @@ static void _lib_history_change_callback(gpointer instance, gpointer user_data)
     hist->before_iop_order_list = dt_ioppr_iop_order_copy_deep(d->previous_iop_order_list);
 
     hist->after_snapshot = dt_history_duplicate(darktable.develop->history);
-    hist->after_end = darktable.develop->history_end;
+    hist->after_end = dt_dev_get_history_end(darktable.develop);
     hist->after_iop_order_list = dt_ioppr_iop_order_copy_deep(darktable.develop->iop_order_list);
 
     if(darktable.develop->gui_module)
@@ -1045,7 +1045,7 @@ static void _lib_history_change_callback(gpointer instance, gpointer user_data)
     else
       label = g_strdup_printf("%s %s", hitem->module->name(), hitem->multi_name);
 
-    const gboolean selected = (num == darktable.develop->history_end - 1);
+    const gboolean selected = (num == dt_dev_get_history_end(darktable.develop) - 1);
     widget =
       _lib_history_create_button(self, num, label, (hitem->enabled || (strcmp(hitem->op_name, "mask_manager") == 0)),
                                  hitem->module->default_enabled, hitem->module->hide_enable_button, selected,
@@ -1083,7 +1083,7 @@ static void _lib_history_truncate(gboolean compress)
   if(compress)
     dt_history_compress_on_image(imgid);
   else
-    dt_history_truncate_on_image(imgid, darktable.develop->history_end);
+    dt_history_truncate_on_image(imgid, dt_dev_get_history_end(darktable.develop));
 
   sqlite3_stmt *stmt;
 
@@ -1103,7 +1103,7 @@ static void _lib_history_truncate(gboolean compress)
   DT_DEBUG_SQLITE3_BIND_INT(stmt, 1, imgid);
 
   if (sqlite3_step(stmt) == SQLITE_ROW)
-    darktable.develop->history_end = sqlite3_column_int(stmt, 0);
+    dt_dev_set_history_end(darktable.develop, sqlite3_column_int(stmt, 0));
   sqlite3_finalize(stmt);
 
   // select the new history end corresponding to the one before the history compression
@@ -1111,7 +1111,7 @@ static void _lib_history_truncate(gboolean compress)
                               "UPDATE main.images SET history_end=?2 WHERE id=?1",
                               -1, &stmt, NULL);
   DT_DEBUG_SQLITE3_BIND_INT(stmt, 1, imgid);
-  DT_DEBUG_SQLITE3_BIND_INT(stmt, 2, darktable.develop->history_end);
+  DT_DEBUG_SQLITE3_BIND_INT(stmt, 2, dt_dev_get_history_end(darktable.develop));
   sqlite3_step(stmt);
   sqlite3_finalize(stmt);
 

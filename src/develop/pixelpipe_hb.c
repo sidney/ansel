@@ -423,7 +423,7 @@ void dt_pixelpipe_get_global_hash(dt_dev_pixelpipe_t *pipe, dt_develop_t *dev)
       local_hash = dt_hash(local_hash, (const char *)&piece->planned_roi_out, sizeof(dt_iop_roi_t));
       hash = dt_hash(hash, (const char *)&local_hash, sizeof(uint64_t));
 
-      dt_print(DT_DEBUG_PARAMS, "[params] global hash for %s in pipe %i with hash %lu\n", piece->module->op, pipe->type, (long unsigned int)hash);
+      dt_print(DT_DEBUG_PIPE, "[pipe] global hash for %s in pipe %i with hash %lu\n", piece->module->op, pipe->type, (long unsigned int)hash);
     }
 
     piece->global_hash = hash;
@@ -491,9 +491,17 @@ void dt_dev_pixelpipe_synch_all_real(dt_dev_pixelpipe_t *pipe, dt_develop_t *dev
   dt_print(DT_DEBUG_DEV, "[pixelpipe] synch all modules with history for pipe %i called from %s\n", pipe->type, caller_func);
 
   // go through all history items and adjust params
-  for(GList *history = g_list_first(dev->history); history; history = g_list_next(history))
+  // note that we don't necessarily process the whole history
+  const uint32_t history_end = dt_dev_get_history_end(dev);
+  // because history_end is shifted by 1, it is actually the step after the last one we want
+  uint32_t k = 0;
+
+  for(GList *history = g_list_first(dev->history);
+      history && k < history_end;
+      history = g_list_next(history))
   {
     dt_dev_pixelpipe_synch(pipe, dev, history);
+    ++k;
   }
   dt_pthread_mutex_unlock(&pipe->busy_mutex);
 }
@@ -501,7 +509,7 @@ void dt_dev_pixelpipe_synch_all_real(dt_dev_pixelpipe_t *pipe, dt_develop_t *dev
 void dt_dev_pixelpipe_synch_top(dt_dev_pixelpipe_t *pipe, dt_develop_t *dev)
 {
   dt_pthread_mutex_lock(&pipe->busy_mutex);
-  GList *history = g_list_nth(dev->history, dev->history_end - 1);
+  GList *history = g_list_nth(dev->history, dt_dev_get_history_end(dev) - 1);
   if(history)
   {
     dt_dev_history_item_t *hist = (dt_dev_history_item_t *)history->data;
@@ -1971,7 +1979,7 @@ static int dt_dev_pixelpipe_process_rec(dt_dev_pixelpipe_t *pipe, dt_develop_t *
   if(!bypass_cache && dt_dev_pixelpipe_cache_available(&(pipe->cache), hash))
   {
     if(module)
-      dt_print(DT_DEBUG_DEV, "[pixelpipe] dt_dev_pixelpipe_process_rec, cache available for pipe %i and module %s with hash %llu\n",
+      dt_print(DT_DEBUG_PIPE, "[pixelpipe] dt_dev_pixelpipe_process_rec, cache available for pipe %i and module %s with hash %llu\n",
              pipe->type, module->op, (long long unsigned int)hash);
 
     (void)dt_dev_pixelpipe_cache_get(&(pipe->cache), hash, bufsize, output, out_format);

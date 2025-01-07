@@ -465,7 +465,7 @@ static void _gui_delete_callback(GtkButton *button, dt_iop_module_t *module)
 
   if(dev->gui_attached)
     DT_DEBUG_CONTROL_SIGNAL_RAISE(darktable.signals, DT_SIGNAL_DEVELOP_HISTORY_WILL_CHANGE,
-                            dt_history_duplicate(darktable.develop->history), darktable.develop->history_end,
+                            dt_history_duplicate(darktable.develop->history), dt_dev_get_history_end(darktable.develop),
                             dt_ioppr_iop_order_copy_deep(darktable.develop->iop_order_list));
 
   // we must pay attention if priority is 0
@@ -1707,7 +1707,7 @@ void dt_iop_commit_params(dt_iop_module_t *module, dt_iop_params_t *params,
   // We need to take mask display into account too because it's set in various ways from GUI.
   piece->global_hash = piece->hash = dt_hash(module->hash, (const char *)&module->request_mask_display, sizeof(int));
 
-  dt_print(DT_DEBUG_PARAMS, "[params] commit for %s in pipe %i with hash %lu\n", module->op, pipe->type, (long unsigned int)piece->hash);
+  dt_print(DT_DEBUG_PIPE, "[pipe] commit for %s (%s) in pipe %i with hash %lu\n", module->op, module->multi_name, pipe->type, (long unsigned int)piece->hash);
 }
 
 void dt_iop_gui_cleanup_module(dt_iop_module_t *module)

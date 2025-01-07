@@ -111,6 +111,28 @@ static void delete_development_callback()
   g_list_free(imgs);
 }
 
+
+static gboolean paste_mode_append_checked_callback()
+{
+  return dt_conf_get_bool("plugins/lighttable/copy_history/pastemode") == 1;
+}
+
+static gboolean paste_mode_overwrite_checked_callback()
+{
+  return dt_conf_get_bool("plugins/lighttable/copy_history/pastemode") == 0;
+}
+
+static void paste_mode_append_callback()
+{
+  dt_conf_set_bool("plugins/lighttable/copy_history/pastemode", 1);
+}
+
+static void paste_mode_overwrite_callback()
+{
+  dt_conf_set_bool("plugins/lighttable/copy_history/pastemode", 0);
+}
+
+
 static gboolean copy_sensitive_callback()
 {
   return dt_collection_get_selected_count(darktable.collection) == 1
@@ -279,6 +301,14 @@ void append_edit(GtkWidget **menus, GList **lists, const dt_menus_t index)
   dt_action_register(ac, NULL, redo_callback, GDK_KEY_y, GDK_CONTROL_MASK);
 
   add_menu_separator(menus[index]);
+
+  add_top_submenu_entry(menus, lists, _("History paste mode"), index);
+  GtkWidget *parent = get_last_widget(lists);
+
+  add_sub_sub_menu_entry(parent, lists, _("Overwrite (replace)"), index, NULL,
+                         paste_mode_overwrite_callback, paste_mode_overwrite_checked_callback, NULL, NULL);
+  add_sub_sub_menu_entry(parent, lists, _("Append (merge)"), index, NULL,
+                         paste_mode_append_callback, paste_mode_append_checked_callback, NULL, NULL);
 
   add_sub_menu_entry(menus, lists, _("Copy development (all)"), index, NULL, copy_callback, NULL, NULL, copy_sensitive_callback);
   ac = dt_action_define(pnl, NULL, N_("Copy development (all)"), get_last_widget(lists), NULL);
