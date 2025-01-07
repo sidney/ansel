@@ -801,29 +801,29 @@ static gchar *_lib_history_change_text(dt_introspection_field_t *field, const ch
   return NULL;
 }
 
-static gboolean _changes_tooltip_callback(GtkWidget *widget, gint x, gint y, gboolean keyboard_mode,
-                                          GtkTooltip *tooltip, dt_dev_history_item_t *hitem)
+static const dt_dev_history_item_t * _find_previous_history_step(const dt_dev_history_item_t *hitem)
 {
-  dt_iop_params_t *old_params = hitem->module->default_params;
-  dt_develop_blend_params_t *old_blend = hitem->module->default_blendop_params;
-  dt_dev_history_item_t *hprev = hitem;
-
   // Find the immediate previous history instance matching the current module
   for(const GList *find_old = g_list_find(darktable.develop->history, hitem);
       find_old;
       find_old = g_list_previous(find_old))
   {
-    dt_dev_history_item_t *hiprev = (dt_dev_history_item_t *)(find_old->data);
-    if(hiprev == hitem) continue; // first loop run, we start from current hitem
-
-    if(hiprev->module == hitem->module)
-    {
-      old_params = hiprev->params;
-      old_blend = hiprev->blend_params;
-      hprev = hiprev;
-      break;
-    }
+    dt_dev_history_item_t *hprev = (dt_dev_history_item_t *)(find_old->data);
+    if(hprev == hitem) continue; // first loop run, we start from current hitem
+    if(hprev->module == hitem->module) return hprev;
   }
+
+  // This is the first history element for this module
+  return hitem;
+}
+
+static gboolean _changes_tooltip_callback(GtkWidget *widget, gint x, gint y, gboolean keyboard_mode,
+                                          GtkTooltip *tooltip, dt_dev_history_item_t *hitem)
+{
+  const dt_dev_history_item_t *hprev = _find_previous_history_step(hitem);
+  dt_iop_params_t *old_params = (hprev == hitem) ? hitem->module->default_params : hprev->module->params;
+  dt_develop_blend_params_t *old_blend = (hprev == hitem) ? hitem->module->default_blendop_params : hprev->module->blend_params;
+
 
   gchar **change_parts = g_malloc0_n(sizeof(dt_develop_blend_params_t) / (sizeof(float)) + 10, sizeof(char*));
   int num_parts = 0;
@@ -853,11 +853,24 @@ static gboolean _changes_tooltip_callback(GtkWidget *widget, gint x, gint y, gbo
                                 (hitem->field) ? _("on") : _("off"));                        \
   }
 
-  // No previous history item: new module
-  if(hitem == hprev)
-    change_parts[num_parts++] = g_strdup_printf(_("new module created"));
+  const gboolean enabled_by_default = (hitem->module->force_enable && hitem->module->force_enable(hitem->module, hitem->enabled))
+                                      || hitem->module->default_enabled;
+  if(hprev == hitem)
+  {
+    // This is the first history entry for this module.
+    // That means the module was necessarily enabled in this step.
+    if(enabled_by_default)
+      change_parts[num_parts++] = g_strdup_printf(_("mandatory module created automatically"));
+    else
+      change_parts[num_parts++] = g_strdup_printf(_("module created per user request"));
+  }
+  else
+  {
+    // This is not the first history entry for this module.
+    // It can have been disabled.
+    add_history_change_boolean(enabled, _("enabled"));
+  }
 
-  add_history_change_boolean(enabled, _("enabled"));
   add_history_change(iop_order, "%i", _("pipeline order"));
   add_history_change_string(multi_name, _("instance name"));
 
@@ -1077,11 +1090,19 @@ static void _lib_history_change_callback(gpointer instance, gpointer user_data)
   for(const GList *history = darktable.develop->history; history; history = g_list_next(history))
   {
     const dt_dev_history_item_t *hitem = (dt_dev_history_item_t *)(history->data);
+
+    // Append * to the history label of enabled-by-default or forced-enabled modules
+    // That is the first history entry of modules enabled by default
+    const gboolean enabled_by_default
+        = ((hitem->module->force_enable && hitem->module->force_enable(hitem->module, hitem->enabled))
+          || hitem->module->default_enabled);
+    gchar *star = (hitem == _find_previous_history_step(hitem) && enabled_by_default) ? " *" : "";
+
     gchar *label;
     if(!hitem->multi_name[0] || strcmp(hitem->multi_name, "0") == 0)
-      label = g_strdup(hitem->module->name());
+      label = g_strdup_printf("%s%s", hitem->module->name(), star);
     else
-      label = g_strdup_printf("%s %s", hitem->module->name(), hitem->multi_name);
+      label = g_strdup_printf("%s %s%s", hitem->module->name(), hitem->multi_name, star);
 
     const gboolean selected = (num == dt_dev_get_history_end(darktable.develop) - 1);
     widget =
