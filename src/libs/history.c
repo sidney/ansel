@@ -82,7 +82,7 @@ static void _lib_history_module_remove_callback(gpointer instance, dt_iop_module
 
 const char *name(dt_lib_module_t *self)
 {
-  return _("history");
+  return _("History of changes");
 }
 
 const char **views(dt_lib_module_t *self)
@@ -802,30 +802,68 @@ static gchar *_lib_history_change_text(dt_introspection_field_t *field, const ch
 }
 
 static gboolean _changes_tooltip_callback(GtkWidget *widget, gint x, gint y, gboolean keyboard_mode,
-                                          GtkTooltip *tooltip, const dt_dev_history_item_t *hitem)
+                                          GtkTooltip *tooltip, dt_dev_history_item_t *hitem)
 {
   dt_iop_params_t *old_params = hitem->module->default_params;
   dt_develop_blend_params_t *old_blend = hitem->module->default_blendop_params;
+  dt_dev_history_item_t *hprev = hitem;
 
-  for(const GList *find_old = darktable.develop->history;
-      find_old && find_old->data != hitem;
-      find_old = g_list_next(find_old))
+  // Find the immediate previous history instance matching the current module
+  for(const GList *find_old = g_list_find(darktable.develop->history, hitem);
+      find_old;
+      find_old = g_list_previous(find_old))
   {
-    const dt_dev_history_item_t *hiprev = (dt_dev_history_item_t *)(find_old->data);
+    dt_dev_history_item_t *hiprev = (dt_dev_history_item_t *)(find_old->data);
+    if(hiprev == hitem) continue; // first loop run, we start from current hitem
 
     if(hiprev->module == hitem->module)
     {
       old_params = hiprev->params;
       old_blend = hiprev->blend_params;
+      hprev = hiprev;
+      break;
     }
   }
 
   gchar **change_parts = g_malloc0_n(sizeof(dt_develop_blend_params_t) / (sizeof(float)) + 10, sizeof(char*));
+  int num_parts = 0;
+
+  #define add_history_change(field, format, label)                                           \
+  if((hitem->field) != (hprev->field))                                                       \
+  {                                                                                          \
+    gchar *full_format = g_strconcat("%s\t", format, "\t\u2192\t", format, NULL);            \
+    change_parts[num_parts++] = g_strdup_printf(full_format, label,                          \
+                                (hprev->field), (hitem->field));                             \
+    g_free(full_format);                                                                     \
+  }
+
+  #define add_history_change_string(field, label)                                            \
+  if(strcmp(hitem->field, hprev->field))                                                     \
+  {                                                                                          \
+    change_parts[num_parts++] = g_strdup_printf("%s\t\"%s\"\t\u2192\t\"%s\"",                \
+                                label, (hprev->field), (hitem->field));                      \
+  }
+
+  #define add_history_change_boolean(field, label)                                           \
+  if((hitem->field) != (hprev->field))                                                       \
+  {                                                                                          \
+    change_parts[num_parts++] = g_strdup_printf("%s\t%s\t\u2192\t%s",                        \
+                                label,                                                       \
+                                (hprev->field) ? _("on") : _("off"),                         \
+                                (hitem->field) ? _("on") : _("off"));                        \
+  }
+
+  // No previous history item: new module
+  if(hitem == hprev)
+    change_parts[num_parts++] = g_strdup_printf(_("new module created"));
+
+  add_history_change_boolean(enabled, _("enabled"));
+  add_history_change(iop_order, "%i", _("pipeline order"));
+  add_history_change_string(multi_name, _("instance name"));
 
   if(hitem->module->have_introspection)
-    change_parts[0] = _lib_history_change_text(hitem->module->get_introspection()->field, NULL,
+    change_parts[num_parts++] = _lib_history_change_text(hitem->module->get_introspection()->field, NULL,
                                                 hitem->params, old_params);
-  int num_parts = change_parts[0] ? 1 : 0;
 
   if(hitem->module->flags() & IOP_FLAGS_SUPPORTS_BLENDING)
   {
