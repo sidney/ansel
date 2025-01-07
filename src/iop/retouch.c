@@ -227,6 +227,8 @@ int default_colorspace(dt_iop_module_t *self, dt_dev_pixelpipe_t *pipe, dt_dev_p
   return IOP_CS_RGB;
 }
 
+static int rt_shape_is_being_added(dt_iop_module_t *self, const int shape_type);
+
 int legacy_params(dt_iop_module_t *self, const void *const old_params, const int old_version, void *new_params,
                   const int new_version)
 {
@@ -750,6 +752,54 @@ static void rt_resynch_params(struct dt_iop_module_t *self)
   {
     p->rt_forms[i] = forms_d[i];
   }
+}
+
+void post_history_commit(dt_iop_module_t *self)
+{
+  // When drawing events are finished, they commit the shapes to dev->forms
+  // then commit to history, where dev->forms is are copied to hist->forms.
+  // This is where we need to catch the new masks
+  // to sync them with our params here.
+
+  // TODO: share this code with gui_update()
+  rt_resynch_params(self);
+
+  if(darktable.develop->form_gui->creation_continuous
+     && darktable.develop->form_gui->creation_continuous_module == self && !rt_allow_create_form(self))
+  {
+    dt_masks_change_form_gui(NULL);
+    darktable.develop->form_gui->creation_continuous = FALSE;
+    darktable.develop->form_gui->creation_continuous_module = NULL;
+  }
+
+  dt_iop_retouch_gui_data_t *g = (dt_iop_retouch_gui_data_t *)self->gui_data;
+  if(g == NULL) return;
+  gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(g->bt_circle), rt_shape_is_being_added(self, DT_MASKS_CIRCLE));
+  gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(g->bt_path), rt_shape_is_being_added(self, DT_MASKS_PATH));
+  gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(g->bt_ellipse), rt_shape_is_being_added(self, DT_MASKS_ELLIPSE));
+  gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(g->bt_brush), rt_shape_is_being_added(self, DT_MASKS_BRUSH));
+
+  const dt_masks_form_t *grp = dt_masks_get_from_id(self->dev, self->blend_params->mask_id);
+  guint nb = 0;
+  if(grp && (grp->type & DT_MASKS_GROUP)) nb = g_list_length(grp->points);
+  gchar *str = g_strdup_printf("%d", nb);
+  gtk_label_set_text(g->label_form, str);
+  g_free(str);
+
+  // update edit shapes status
+  dt_iop_gui_blend_data_t *bd = (dt_iop_gui_blend_data_t *)self->blend_data;
+
+  //only toggle shape show button if shapes exist
+  if(grp && (grp->type & DT_MASKS_GROUP) && grp->points)
+  {
+    gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(g->bt_edit_masks),
+                                 (bd->masks_shown != DT_MASKS_EDIT_OFF) && (darktable.develop->gui_module == self));
+  }
+  else
+  {
+    gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(g->bt_edit_masks), FALSE);
+  }
+
 }
 
 static gboolean rt_masks_form_is_in_roi(dt_iop_module_t *self, dt_dev_pixelpipe_iop_t *piece,

@@ -863,6 +863,26 @@ void dt_dev_add_history_item_real(dt_develop_t *dev, dt_iop_module_t *module, gb
 
   if(tag_change) DT_DEBUG_CONTROL_SIGNAL_RAISE(darktable.signals, DT_SIGNAL_TAG_CHANGED);
 
+  if(darktable.gui)
+  {
+    /* recreate mask list */
+    dt_dev_masks_list_change(dev);
+
+    if(module)
+    {
+      // We need a full GUI update to resync retouch IOP
+      // TL;DR : it copies the list of masks from dev to its own params on gui update
+      //dt_iop_gui_update(module);
+      dt_iop_gui_set_enable_button(module);
+      // If it wasn't for retouch, we could simply update the on/off button state of IOPs
+      // Note that GUI update needs to happen before sending pipeline recompute signals
+    }
+  }
+
+  // Run the delayed post-commit actions if implemented
+  if(module && module->post_history_commit) module->post_history_commit(module);
+
+  // Recompute pipeline last
   dt_pthread_mutex_lock(&dev->history_mutex);
   dev->image_status = DT_DEV_PIXELPIPE_DIRTY;
   dev->preview_status = DT_DEV_PIXELPIPE_DIRTY;
@@ -871,14 +891,6 @@ void dt_dev_add_history_item_real(dt_develop_t *dev, dt_iop_module_t *module, gb
   dt_dev_invalidate_all(dev);
   dt_control_queue_redraw_center();
   dt_dev_refresh_ui_images(dev);
-
-  if(darktable.gui)
-  {
-    if(module) dt_iop_gui_set_enable_button(module);
-
-    /* recreate mask list */
-    dt_dev_masks_list_change(dev);
-  }
 }
 
 void dt_dev_free_history_item(gpointer data)

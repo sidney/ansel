@@ -230,6 +230,16 @@ OPTIONAL(void, set_preferences, void *menu, struct dt_iop_module_t *self);
 // Returns final enabled/disabled state after correction
 OPTIONAL(gboolean, force_enable, struct dt_iop_module_t *self, const gboolean current_state);
 
+/**
+ * @brief Callback to run after a module's history is commited.
+ * This is mostly useful to synchronize mask drawing events with internal
+ * module resynchronization of masks, since the drawing events directly
+ * trigger the history appending.
+ *
+ * @param self
+ */
+OPTIONAL(void, post_history_commit, struct dt_iop_module_t *self);
+
 #ifdef FULL_API_H
 
 #pragma GCC visibility pop
