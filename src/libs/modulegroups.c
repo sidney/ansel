@@ -344,6 +344,21 @@ static gboolean _lib_modulesgroups_search_active(const gchar *text_entered, dt_i
   return is_handled;
 }
 
+
+static gboolean _is_module_in_history(const dt_iop_module_t *module)
+{
+  for(GList *history = g_list_last(darktable.develop->history);
+      history;
+      history = g_list_previous(history))
+    {
+      const dt_dev_history_item_t *hitem = (dt_dev_history_item_t *)(history->data);
+      if(hitem->module == module) return TRUE;
+    }
+
+  return FALSE;
+}
+
+
 static void _lib_modulegroups_update_iop_visibility(dt_lib_module_t *self)
 {
   dt_lib_modulegroups_t *d = (dt_lib_modulegroups_t *)self->data;
@@ -381,7 +396,7 @@ static void _lib_modulegroups_update_iop_visibility(dt_lib_module_t *self)
       {
         case DT_MODULEGROUP_ACTIVE_PIPE:
         {
-          if(module->enabled)
+          if(_is_module_in_history(module))
           {
             if(w) gtk_widget_show(w);
           }
