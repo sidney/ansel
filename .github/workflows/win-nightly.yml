@@ -79,7 +79,7 @@ jobs:
             libxslt:p
             lua:p
             omp:p
-            openexr:p
+            # openexr:p - Fails on Windows on byte type redefined
             openjpeg2:p
             osm-gps-map:p
             portmidi:p
