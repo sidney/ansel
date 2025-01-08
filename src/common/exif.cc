@@ -50,8 +50,6 @@
 
 #include <pugixml.hpp>
 
-using namespace std;
-
 extern "C" {
 #include "common/colorlabels.h"
 #include "common/darktable.h"
@@ -75,6 +73,8 @@ extern "C" {
 #include "develop/blend.h"
 #include "develop/masks.h"
 }
+
+using namespace std;
 
 #define DT_XMP_EXIF_VERSION 5
 
