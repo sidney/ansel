@@ -80,6 +80,7 @@ jobs:
             lua:p
             omp:p
             openjpeg2:p
+            openexr:p
             osm-gps-map:p
             portmidi:p
             pugixml:p
@@ -90,7 +91,6 @@ jobs:
             sqlite3:p
             zlib:p
           update: true
-          # openexr:p - Fails on Windows on byte type redefined
       - name: Checkout ansel source
         uses: actions/checkout@v4
         with:
