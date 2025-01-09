@@ -464,8 +464,7 @@ int dt_history_merge_module_into_history(dt_develop_t *dev_dest, dt_develop_t *d
       }
     }
 
-    const gboolean include_masks = (nbf > 0 && forms_used_replace[0] > 0);
-    dt_dev_add_history_item_ext(dev_dest, module, FALSE, FALSE, TRUE, include_masks);
+    dt_dev_add_history_item_ext(dev_dest, module, FALSE, FALSE, TRUE, TRUE);
 
     dt_ioppr_resync_modules_order(dev_dest);
 
