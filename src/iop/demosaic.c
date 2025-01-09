@@ -489,7 +489,7 @@ void process(struct dt_iop_module_t *self, dt_dev_pixelpipe_iop_t *piece, const 
   if(self->dev->gui_attached && (piece->pipe->type & DT_DEV_PIXELPIPE_FULL) == DT_DEV_PIXELPIPE_FULL)
   {
     dt_iop_demosaic_gui_data_t *g = (dt_iop_demosaic_gui_data_t *)self->gui_data;
-    showmask = (g->visual_mask);
+    if(g) showmask = (g->visual_mask);
     // take care of passthru modes
     if(piece->pipe->mask_display == DT_DEV_PIXELPIPE_DISPLAY_PASSTHRU)
       demosaicing_method = (piece->pipe->dsc.filters != 9u) ? DT_IOP_DEMOSAIC_RCD : DT_IOP_DEMOSAIC_MARKESTEIJN;
@@ -930,7 +930,7 @@ int process_cl(struct dt_iop_module_t *self, dt_dev_pixelpipe_iop_t *piece, cl_m
   if(self->dev->gui_attached && (piece->pipe->type & DT_DEV_PIXELPIPE_FULL) == DT_DEV_PIXELPIPE_FULL)
   {
     dt_iop_demosaic_gui_data_t *g = (dt_iop_demosaic_gui_data_t *)self->gui_data;
-    showmask = (g->visual_mask);
+    if(g) showmask = (g->visual_mask);
     // take care of passthru modes
     if(piece->pipe->mask_display == DT_DEV_PIXELPIPE_DISPLAY_PASSTHRU)
       demosaicing_method = (piece->pipe->dsc.filters != 9u) ? DT_IOP_DEMOSAIC_RCD : DT_IOP_DEMOSAIC_MARKESTEIJN;
