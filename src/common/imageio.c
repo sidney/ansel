@@ -712,6 +712,8 @@ int dt_imageio_export_with_flags(const int32_t imgid, const char *filename,
   else
     res = dt_dev_pixelpipe_init_export(&pipe, buf.width, buf.height, format->levels(format_params), export_masks);
 
+  dt_pthread_mutex_lock(&pipe.busy_mutex);
+
   if(!res)
   {
     dt_control_log(
@@ -1051,6 +1053,7 @@ int dt_imageio_export_with_flags(const int32_t imgid, const char *filename,
     goto error;
 
   dt_mipmap_cache_release(darktable.mipmap_cache, &buf);
+  dt_pthread_mutex_unlock(&pipe.busy_mutex);
   dt_dev_pixelpipe_cleanup(&pipe);
   dt_dev_cleanup(&dev);
 
@@ -1093,6 +1096,7 @@ int dt_imageio_export_with_flags(const int32_t imgid, const char *filename,
   return 0; // success
 
 error:
+  dt_pthread_mutex_unlock(&pipe.busy_mutex);
   dt_dev_pixelpipe_cleanup(&pipe);
 error_early:
   dt_dev_cleanup(&dev);

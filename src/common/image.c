@@ -707,11 +707,13 @@ void dt_image_update_final_size(const int32_t imgid)
 {
   if(imgid <= 0) return;
   int ww = 0, hh = 0;
+  dt_pthread_mutex_lock(&darktable.develop->pipe->busy_mutex);
   if(darktable.develop && darktable.develop->pipe && darktable.develop->pipe->output_imgid == imgid)
   {
     dt_dev_pixelpipe_get_roi_out(darktable.develop->pipe, darktable.develop, darktable.develop->pipe->iwidth,
                                     darktable.develop->pipe->iheight, &ww, &hh);
   }
+  dt_pthread_mutex_unlock(&darktable.develop->pipe->busy_mutex);
   dt_image_t *imgtmp = dt_image_cache_get(darktable.image_cache, imgid, 'w');
   imgtmp->final_width = ww;
   imgtmp->final_height = hh;
@@ -740,10 +742,12 @@ gboolean dt_image_get_final_size(const int32_t imgid, int *width, int *height)
 
   dt_dev_pixelpipe_t pipe;
   int wd = dev.image_storage.width, ht = dev.image_storage.height;
+
   int res = dt_dev_pixelpipe_init_dummy(&pipe, wd, ht);
   if(res)
   {
     // set mem pointer to 0, won't be used.
+    dt_pthread_mutex_lock(&pipe.busy_mutex);
     dt_dev_pixelpipe_set_input(&pipe, &dev, NULL, wd, ht, 1.0f);
     dt_dev_pixelpipe_create_nodes(&pipe, &dev);
     dt_dev_pixelpipe_synch_all(&pipe, &dev);
@@ -752,7 +756,8 @@ gboolean dt_image_get_final_size(const int32_t imgid, int *width, int *height)
     wd = pipe.processed_width;
     ht = pipe.processed_height;
     res = TRUE;
-    dt_dev_pixelpipe_cleanup(&pipe);
+    dt_pthread_mutex_unlock(&pipe.busy_mutex);
+    // dt_dev_cleanup also cleans up the pipe
   }
   dt_dev_cleanup(&dev);
 
