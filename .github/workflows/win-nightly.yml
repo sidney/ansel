@@ -191,7 +191,7 @@ jobs:
       - name: Notify Matrix
         if: ${{ success() }}
         run: |
-          FILENAME=$(tr '~', '.' <<< "$(find . -type f -iname "ansel-*.exe")")
+          FILENAME=$(tr '~' '.' <<< "$(find . -type f -iname "ansel-*.exe")")
           MESSAGE="New Exe [${FILENAME}](${{ env.REPO }}/releases/download/${{ env.TAG }}/${FILENAME}) built"
           python .ci/matrix.py \
           -m "$MESSAGE" \
