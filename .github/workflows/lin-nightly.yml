@@ -256,7 +256,7 @@ jobs:
       - name: Notify Matrix
         if: ${{ success() }}
         run: |
-          FILENAME=$(find . -type f -iname "Ansel-*.AppImage")
+          FILENAME=$(tr '~' '.' <<< "$(find . -type f -iname "Ansel-*.AppImage")")
           MESSAGE="New AppImage [${FILENAME}](${{ env.REPO }}/releases/download/${{ env.TAG }}/${FILENAME}) built"
           python .ci/matrix.py \
           -m "$MESSAGE" \
