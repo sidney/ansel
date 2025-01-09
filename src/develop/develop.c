@@ -67,7 +67,6 @@ void dt_dev_init(dt_develop_t *dev, int32_t gui_attached)
   dev->image_status = dev->preview_status = DT_DEV_PIXELPIPE_DIRTY;
   dev->image_invalid_cnt = 0;
   dev->pipe = dev->preview_pipe = NULL;
-  dt_pthread_mutex_init(&dev->pipe_mutex, NULL);
   dev->histogram_pre_tonecurve = NULL;
   dev->histogram_pre_levels = NULL;
   dev->forms = NULL;
@@ -146,7 +145,6 @@ void dt_dev_cleanup(dt_develop_t *dev)
 {
   if(!dev) return;
   // image_cache does not have to be unref'd, this is done outside develop module.
-  dt_pthread_mutex_destroy(&dev->pipe_mutex);
 
   if(dev->raw_histogram.buffer) dt_free_align(dev->raw_histogram.buffer);
   if(dev->output_histogram.buffer) dt_free_align(dev->output_histogram.buffer);
@@ -302,7 +300,7 @@ void dt_dev_invalidate_all_real(dt_develop_t *dev)
 
 void dt_dev_process_preview_job(dt_develop_t *dev)
 {
-  dt_pthread_mutex_lock(&dev->pipe_mutex);
+  dt_pthread_mutex_lock(&dev->preview_pipe->busy_mutex);
   dt_control_log_busy_enter();
   dt_control_toast_busy_enter();
   dev->preview_status = DT_DEV_PIXELPIPE_RUNNING;
@@ -316,7 +314,7 @@ void dt_dev_process_preview_job(dt_develop_t *dev)
     dt_control_log_busy_leave();
     dt_control_toast_busy_leave();
     dt_mipmap_cache_release(darktable.mipmap_cache, &buf);
-    dt_pthread_mutex_unlock(&dev->pipe_mutex);
+    dt_pthread_mutex_unlock(&dev->preview_pipe->busy_mutex);
     return;
   }
 
@@ -347,7 +345,7 @@ void dt_dev_process_preview_job(dt_develop_t *dev)
       dt_control_toast_busy_leave();
       dev->preview_status = DT_DEV_PIXELPIPE_INVALID;
       dt_mipmap_cache_release(darktable.mipmap_cache, &buf);
-      dt_pthread_mutex_unlock(&dev->pipe_mutex);
+      dt_pthread_mutex_unlock(&dev->preview_pipe->busy_mutex);
       return;
     }
   }
@@ -361,7 +359,7 @@ void dt_dev_process_preview_job(dt_develop_t *dev)
   dt_control_log_busy_leave();
   dt_control_toast_busy_leave();
   dt_mipmap_cache_release(darktable.mipmap_cache, &buf);
-  dt_pthread_mutex_unlock(&dev->pipe_mutex);
+  dt_pthread_mutex_unlock(&dev->preview_pipe->busy_mutex);
 
   DT_DEBUG_CONTROL_SIGNAL_RAISE(darktable.signals, DT_SIGNAL_DEVELOP_PREVIEW_PIPE_FINISHED);
 }
@@ -369,7 +367,7 @@ void dt_dev_process_preview_job(dt_develop_t *dev)
 
 void dt_dev_process_image_job(dt_develop_t *dev)
 {
-  dt_pthread_mutex_lock(&dev->pipe_mutex);
+  dt_pthread_mutex_lock(&dev->pipe->busy_mutex);
   dt_control_log_busy_enter();
   dt_control_toast_busy_enter();
   // let gui know to draw preview instead of us, if it's there:
@@ -383,7 +381,7 @@ void dt_dev_process_image_job(dt_develop_t *dev)
     dt_control_log_busy_leave();
     dt_control_toast_busy_leave();
     dt_mipmap_cache_release(darktable.mipmap_cache, &buf);
-    dt_pthread_mutex_unlock(&dev->pipe_mutex);
+    dt_pthread_mutex_unlock(&dev->pipe->busy_mutex);
     return;
   }
 
@@ -439,7 +437,7 @@ restart:;
       dt_control_toast_busy_leave();
       dev->image_status = DT_DEV_PIXELPIPE_INVALID;
       dt_mipmap_cache_release(darktable.mipmap_cache, &buf);
-      dt_pthread_mutex_unlock(&dev->pipe_mutex);
+      dt_pthread_mutex_unlock(&dev->pipe->busy_mutex);
       return;
     }
   }
@@ -458,7 +456,7 @@ restart:;
   dt_control_log_busy_leave();
   dt_control_toast_busy_leave();
   dt_mipmap_cache_release(darktable.mipmap_cache, &buf);
-  dt_pthread_mutex_unlock(&dev->pipe_mutex);
+  dt_pthread_mutex_unlock(&dev->pipe->busy_mutex);
 
   if(dev->gui_attached)
     DT_DEBUG_CONTROL_SIGNAL_RAISE(darktable.signals, DT_SIGNAL_DEVELOP_UI_PIPE_FINISHED);
@@ -500,13 +498,8 @@ static inline int _dt_dev_load_raw(dt_develop_t *dev, const uint32_t imgid)
   return (no_valid_image || no_valid_thumb);
 }
 
-void dt_dev_unload_image(dt_develop_t *dev)
-{
-}
-
 void dt_dev_reload_image(dt_develop_t *dev, const uint32_t imgid)
 {
-  dt_dev_unload_image(dev);
   dt_dev_load_image(dev, imgid);
 }
 
@@ -697,7 +690,7 @@ void dt_dev_add_history_item_ext(dt_develop_t *dev, struct dt_iop_module_t *modu
   // but keep the always-on modules
 
   for(GList *history = g_list_nth(dev->history, dt_dev_get_history_end(dev));
-      history;
+      history && history->data;
       history = g_list_next(history))
   {
     dt_dev_history_item_t *hist = (dt_dev_history_item_t *)(history->data);
@@ -1601,7 +1594,7 @@ void dt_dev_read_history_ext(dt_develop_t *dev, const int imgid, gboolean no_ima
     // cleanup
     DT_DEBUG_SQLITE3_EXEC(dt_database_get(darktable.db), "DELETE FROM memory.history", NULL, NULL, NULL);
 
-    dt_print(DT_DEBUG_PARAMS, "[history] temporary history deleted\n");
+    dt_print(DT_DEBUG_HISTORY, "[history] temporary history deleted\n");
 
     // make sure all modules default params are loaded to init history
     _dt_dev_load_pipeline_defaults(dev);
@@ -1614,12 +1607,12 @@ void dt_dev_read_history_ext(dt_develop_t *dev, const int imgid, gboolean no_ima
     first_run = _dev_auto_apply_presets(dev);
     auto_apply_modules = _dev_get_module_nb_records() - default_modules;
 
-    dt_print(DT_DEBUG_PARAMS, "[history] temporary history initialised with default params and presets\n");
+    dt_print(DT_DEBUG_HISTORY, "[history] temporary history initialised with default params and presets\n");
 
     // now merge memory.history into main.history
     _dev_merge_history(dev, imgid);
 
-    dt_print(DT_DEBUG_PARAMS, "[history] temporary history merged with image history\n");
+    dt_print(DT_DEBUG_HISTORY, "[history] temporary history merged with image history\n");
   }
 
   sqlite3_stmt *stmt;
@@ -1876,7 +1869,7 @@ void dt_dev_read_history_ext(dt_develop_t *dev, const int imgid, gboolean no_ima
   if(dev->gui_attached && !no_image)
   {
     /* signal history changed */
-    dt_dev_undo_end_record(dev);
+    //dt_dev_undo_end_record(dev);
   }
   dt_dev_masks_list_change(dev);
 

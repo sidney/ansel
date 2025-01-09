@@ -174,7 +174,6 @@ typedef struct dt_develop_t
 
   // image processing pipeline with caching
   struct dt_dev_pixelpipe_t *pipe, *preview_pipe;
-  dt_pthread_mutex_t pipe_mutex; // these are locked while the pipes are still in use
 
   // image under consideration, which
   // is copied each time an image is changed. this means we have some information
@@ -348,7 +347,6 @@ void dt_dev_refresh_ui_images_real(dt_develop_t *dev);
 
 int dt_dev_load_image(dt_develop_t *dev, const uint32_t imgid);
 void dt_dev_reload_image(dt_develop_t *dev, const uint32_t imgid);
-void dt_dev_unload_image(dt_develop_t *dev);
 /** checks if provided imgid is the image currently in develop */
 int dt_dev_is_current_image(dt_develop_t *dev, uint32_t imgid);
 

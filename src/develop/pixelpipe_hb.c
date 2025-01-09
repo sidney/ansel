@@ -282,10 +282,6 @@ void dt_dev_pixelpipe_cleanup(dt_dev_pixelpipe_t *pipe)
 
 void dt_dev_pixelpipe_cleanup_nodes(dt_dev_pixelpipe_t *pipe)
 {
-  // FIXME: either this or all process() -> gdk mutices have to be changed!
-  //        (this is a circular dependency on busy_mutex and the gdk mutex)
-  // [[does the above still apply?]]
-  dt_pthread_mutex_lock(&pipe->busy_mutex); // block until the pipe has shut down
   // destroy all nodes
   for(GList *nodes = pipe->nodes; nodes; nodes = g_list_next(nodes))
   {
@@ -311,12 +307,10 @@ void dt_dev_pixelpipe_cleanup_nodes(dt_dev_pixelpipe_t *pipe)
   // and iop order
   g_list_free_full(pipe->iop_order_list, free);
   pipe->iop_order_list = NULL;
-  dt_pthread_mutex_unlock(&pipe->busy_mutex);	// safe for others to mess with the pipe now
 }
 
 void dt_dev_pixelpipe_create_nodes(dt_dev_pixelpipe_t *pipe, dt_develop_t *dev)
 {
-  dt_pthread_mutex_lock(&pipe->busy_mutex); // block until pipe is idle
   // check that the pipe was actually properly cleaned up after the last run
   g_assert(pipe->nodes == NULL);
   g_assert(pipe->iop == NULL);
@@ -359,7 +353,6 @@ void dt_dev_pixelpipe_create_nodes(dt_dev_pixelpipe_t *pipe, dt_develop_t *dev)
     dt_iop_init_pipe(piece->module, pipe, piece);
     pipe->nodes = g_list_append(pipe->nodes, piece);
   }
-  dt_pthread_mutex_unlock(&pipe->busy_mutex); // safe for others to use/mess with the pipe now
 }
 
 static uint64_t _default_pipe_hash(dt_dev_pixelpipe_t *pipe)
@@ -473,8 +466,6 @@ void dt_dev_pixelpipe_synch(dt_dev_pixelpipe_t *pipe, dt_develop_t *dev, GList *
 
 void dt_dev_pixelpipe_synch_all_real(dt_dev_pixelpipe_t *pipe, dt_develop_t *dev, const char *caller_func)
 {
-  dt_pthread_mutex_lock(&pipe->busy_mutex);
-
   dt_print(DT_DEBUG_DEV, "[pixelpipe] synch all modules with defaults_params for pipe %i called from %s\n", pipe->type, caller_func);
 
   // call reset_params on all pieces first. This is mandatory to init utility modules that don't have an history stack
@@ -503,12 +494,10 @@ void dt_dev_pixelpipe_synch_all_real(dt_dev_pixelpipe_t *pipe, dt_develop_t *dev
     dt_dev_pixelpipe_synch(pipe, dev, history);
     ++k;
   }
-  dt_pthread_mutex_unlock(&pipe->busy_mutex);
 }
 
 void dt_dev_pixelpipe_synch_top(dt_dev_pixelpipe_t *pipe, dt_develop_t *dev)
 {
-  dt_pthread_mutex_lock(&pipe->busy_mutex);
   GList *history = g_list_nth(dev->history, dt_dev_get_history_end(dev) - 1);
   if(history)
   {
@@ -520,7 +509,6 @@ void dt_dev_pixelpipe_synch_top(dt_dev_pixelpipe_t *pipe, dt_develop_t *dev)
   {
     dt_print(DT_DEBUG_DEV, "[pixelpipe] synch top history module missing error for pipe %i\n", pipe->type);
   }
-  dt_pthread_mutex_unlock(&pipe->busy_mutex);
 }
 
 void dt_dev_pixelpipe_change(dt_dev_pixelpipe_t *pipe, struct dt_develop_t *dev)
@@ -2177,7 +2165,6 @@ static int dt_dev_pixelpipe_process_rec_and_backcopy(dt_dev_pixelpipe_t *pipe, d
                                                      const dt_iop_roi_t *roi_out, GList *modules, GList *pieces,
                                                      int pos)
 {
-  dt_pthread_mutex_lock(&pipe->busy_mutex);
   darktable.dtresources.group = 4 * darktable.dtresources.level;
 #ifdef HAVE_OPENCL
   dt_opencl_check_tuning(pipe->devid);
@@ -2210,7 +2197,6 @@ static int dt_dev_pixelpipe_process_rec_and_backcopy(dt_dev_pixelpipe_t *pipe, d
     }
   }
 #endif
-  dt_pthread_mutex_unlock(&pipe->busy_mutex);
   return ret;
 }
 
@@ -2276,11 +2262,9 @@ restart:;
     // Well, there were errors -> we might need to free an invalid opencl memory object
     dt_opencl_release_mem_object(cl_mem_out);
     dt_opencl_unlock_device(pipe->devid); // release opencl resource
-    dt_pthread_mutex_lock(&pipe->busy_mutex);
     pipe->opencl_enabled = 0; // disable opencl for this pipe
     pipe->opencl_error = 0;   // reset error status
     pipe->devid = -1;
-    dt_pthread_mutex_unlock(&pipe->busy_mutex);
 
     darktable.opencl->error_count++; // increase error count
     if(darktable.opencl->error_count >= DT_OPENCL_MAX_ERRORS)
@@ -2363,7 +2347,6 @@ void dt_dev_pixelpipe_flush_caches(dt_dev_pixelpipe_t *pipe)
 void dt_dev_pixelpipe_get_roi_out(dt_dev_pixelpipe_t *pipe, struct dt_develop_t *dev, int width_in,
                                      int height_in, int *width, int *height)
 {
-  dt_pthread_mutex_lock(&pipe->busy_mutex);
   dt_iop_roi_t roi_in = (dt_iop_roi_t){ 0, 0, width_in, height_in, 1.0 };
   dt_iop_roi_t roi_out;
   GList *modules = g_list_first(pipe->iop);
@@ -2396,7 +2379,6 @@ void dt_dev_pixelpipe_get_roi_out(dt_dev_pixelpipe_t *pipe, struct dt_develop_t 
   }
   *width = roi_out.width;
   *height = roi_out.height;
-  dt_pthread_mutex_unlock(&pipe->busy_mutex);
 }
 
 void dt_dev_pixelpipe_get_roi_in(dt_dev_pixelpipe_t *pipe, struct dt_develop_t *dev, const struct dt_iop_roi_t roi_out)
@@ -2409,7 +2391,6 @@ void dt_dev_pixelpipe_get_roi_in(dt_dev_pixelpipe_t *pipe, struct dt_develop_t *
   // upstream in the pipeline for proper pipeline cache invalidation, so we need to browse the pipeline
   // backwards.
 
-  dt_pthread_mutex_lock(&pipe->busy_mutex);
   dt_iop_roi_t roi_out_temp = roi_out;
   dt_iop_roi_t roi_in;
   GList *modules = g_list_last(pipe->iop);
@@ -2444,7 +2425,6 @@ void dt_dev_pixelpipe_get_roi_in(dt_dev_pixelpipe_t *pipe, struct dt_develop_t *
     modules = g_list_previous(modules);
     pieces = g_list_previous(pieces);
   }
-  dt_pthread_mutex_unlock(&pipe->busy_mutex);
 }
 
 float *dt_dev_get_raster_mask(const dt_dev_pixelpipe_t *pipe, const dt_iop_module_t *raster_mask_source,

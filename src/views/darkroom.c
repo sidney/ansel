@@ -2289,7 +2289,7 @@ void enter(dt_view_t *self)
   dt_develop_t *dev = (dt_develop_t *)self->data;
 
   // Make sure we don't start computing pipes until we have a proper history
-  dt_pthread_mutex_lock(&dev->pipe_mutex);
+  dt_pthread_mutex_lock(&dev->history_mutex);
 
   if(!dev->form_gui)
   {
@@ -2338,6 +2338,8 @@ void enter(dt_view_t *self)
     }
   }
 
+  dt_pthread_mutex_unlock(&dev->history_mutex);
+
 #ifdef USE_LUA
 
   dt_lua_async_call_alien(dt_lua_event_trigger_wrapper,
@@ -2353,6 +2355,7 @@ void enter(dt_view_t *self)
 
   // synch gui and flag pipe as dirty
   // this is done here and not in dt_read_history, as it would else be triggered before module->gui_init.
+  // locks history mutex internally
   dt_dev_pop_history_items(dev, dt_dev_get_history_end(dev));
 
   /* ensure that filmstrip shows current image */
@@ -2407,8 +2410,6 @@ void enter(dt_view_t *self)
 
   dt_image_check_camera_missing_sample(&dev->image_storage);
 
-  dt_pthread_mutex_unlock(&dev->pipe_mutex);
-
   // Init the starting point of undo/redo
   dt_dev_undo_start_record(dev);
   dt_dev_undo_end_record(dev);
@@ -2431,8 +2432,6 @@ void leave(dt_view_t *self)
     dt_iop_color_picker_reset(darktable.lib->proxy.colorpicker.picker_proxy->module, FALSE);
 
   _unregister_modules_drag_n_drop(self);
-
-  dt_dev_unload_image(dev);
 
   /* disconnect from filmstrip image activate */
   DT_DEBUG_CONTROL_SIGNAL_DISCONNECT(darktable.signals, G_CALLBACK(_view_darkroom_filmstrip_activate_callback),
@@ -2501,11 +2500,14 @@ void leave(dt_view_t *self)
   }
 
   // clear gui.
-
-  dt_pthread_mutex_lock(&dev->pipe_mutex);
-
+  dt_pthread_mutex_lock(&dev->pipe->busy_mutex);
   dt_dev_pixelpipe_cleanup_nodes(dev->pipe);
+  dt_pthread_mutex_unlock(&dev->pipe->busy_mutex);
+
+  dt_pthread_mutex_lock(&dev->preview_pipe->busy_mutex);
   dt_dev_pixelpipe_cleanup_nodes(dev->preview_pipe);
+  dt_pthread_mutex_unlock(&dev->preview_pipe->busy_mutex);
+
 
   dt_pthread_mutex_lock(&dev->history_mutex);
   while(dev->history)
@@ -2534,8 +2536,6 @@ void leave(dt_view_t *self)
   }
 
   dt_pthread_mutex_unlock(&dev->history_mutex);
-
-  dt_pthread_mutex_unlock(&dev->pipe_mutex);
 
   // cleanup visible masks
   if(dev->form_gui)
