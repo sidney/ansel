@@ -689,6 +689,8 @@ void dt_styles_create_from_list(const GList *list)
 
 void dt_styles_apply_style_item(dt_develop_t *dev, dt_style_item_t *style_item, GList **modules_used, const gboolean append)
 {
+  dt_pthread_mutex_lock(&dev->history_mutex);
+
   // get any instance of the same operation so we can copy it
   dt_iop_module_t *mod_src = dt_iop_get_module_by_op_priority(dev->iop, style_item->operation, -1);
 
@@ -785,6 +787,7 @@ void dt_styles_apply_style_item(dt_develop_t *dev, dt_style_item_t *style_item, 
       free(module);
     }
   }
+  dt_pthread_mutex_unlock(&dev->history_mutex);
 }
 
 void dt_styles_apply_to_image(const char *name, const gboolean duplicate, const gboolean overwrite, const int32_t imgid)
@@ -848,7 +851,7 @@ void dt_styles_apply_to_image(const char *name, const gboolean duplicate, const 
     dt_ioppr_check_iop_order(dev_dest, newimgid, "dt_styles_apply_to_image 1");
 
     if (DT_IOP_ORDER_INFO)
-      fprintf(stderr,"\n^^^^^ Apply style on image %i, history size %i",imgid, dt_dev_get_history_end(dev_dest));
+      fprintf(stderr,"\n^^^^^ Apply style on image %i, history size %i\n",imgid, dt_dev_get_history_end(dev_dest));
 
     // go through all entries in style
     // clang-format off
