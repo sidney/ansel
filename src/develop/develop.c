@@ -598,7 +598,7 @@ void dt_dev_configure(dt_develop_t *dev, int wd, int ht)
 // helper used to synch a single history item with db
 int dt_dev_write_history_item(const int imgid, dt_dev_history_item_t *h, int32_t num)
 {
-  dt_print(DT_DEBUG_HISTORY, "[dt_dev_write_history_item] writing history for module %s (%s) for image %i...\n", h->op_name, h->multi_name, imgid);
+  dt_print(DT_DEBUG_HISTORY, "[dt_dev_write_history_item] writing history for module %s (%s) at pipe position %i for image %i...\n", h->op_name, h->multi_name, h->iop_order, imgid);
 
   sqlite3_stmt *stmt;
   DT_DEBUG_SQLITE3_PREPARE_V2(dt_database_get(darktable.db),
@@ -1130,27 +1130,16 @@ void dt_dev_write_history_ext(dt_develop_t *dev, const int imgid)
   _cleanup_history(imgid);
   _warn_about_history_overuse(dev);
 
-  dt_print(DT_DEBUG_HISTORY, "[dt_dev_write_history_ext] writing history for image %i...\n", imgid);
+  dt_print(DT_DEBUG_HISTORY | DT_IOP_ORDER_INFO, "[dt_dev_write_history_ext] writing history for image %i, iop version: %i...\n", imgid, dev->iop_order_version);
 
   // write history entries
-
-  GList *history = dev->history;
-  if (DT_IOP_ORDER_INFO)
-    fprintf(stderr,"\n^^^^ Writing history image: %i, iop version: %i",imgid,dev->iop_order_version);
-  for(int i = 0; history; i++)
+  int i = 0;
+  for(GList *history = g_list_first(dev->history); history; history = g_list_next(history))
   {
     dt_dev_history_item_t *hist = (dt_dev_history_item_t *)(history->data);
-    (void)dt_dev_write_history_item(imgid, hist, i);
-    if (DT_IOP_ORDER_INFO)
-    {
-      fprintf(stderr,"\n%20s, num %i, order %d, v(%i), multiprio %i",
-              hist->module->op,i,hist->iop_order,hist->module->version(),hist->multi_priority);
-      if (hist->enabled) fprintf(stderr,", enabled");
-    }
-    history = g_list_next(history);
+    dt_dev_write_history_item(imgid, hist, i);
+    i++;
   }
-  if (DT_IOP_ORDER_INFO)
-    fprintf(stderr,"\nvvvv\n");
 
   // update history end
   DT_DEBUG_SQLITE3_PREPARE_V2(dt_database_get(darktable.db),
@@ -1162,7 +1151,6 @@ void dt_dev_write_history_ext(dt_develop_t *dev, const int imgid)
   sqlite3_finalize(stmt);
 
   // write the current iop-order-list for this image
-
   dt_ioppr_write_iop_order_list(dev->iop_order_list, imgid);
   dt_history_hash_write_from_history(imgid, DT_HISTORY_HASH_CURRENT);
 }
