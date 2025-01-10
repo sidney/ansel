@@ -810,15 +810,6 @@ gboolean dt_dev_add_history_item_ext(dt_develop_t *dev, struct dt_iop_module_t *
   // So dev->history_end = index of last history entry + 1 = length of history
   dt_dev_set_history_end(dev, g_list_length(dev->history));
 
-  if(!no_image)
-  {
-    // FIXME: if module was just enabled and is in default pipeline order,
-    // do we need to rebuild ? Aka are disabled modules added to pipeline still ?
-    dev->pipe->changed |= DT_DEV_PIPE_SYNCH;
-    dev->preview_pipe->changed |= DT_DEV_PIPE_SYNCH;
-    dt_print(DT_DEBUG_PIPE, "[dt_dev_add_history_item_ext] invalidating pipeline for recomputing\n");
-  }
-
   return add_new_pipe_node;
 }
 
@@ -871,14 +862,20 @@ void dt_dev_add_history_item_real(dt_develop_t *dev, dt_iop_module_t *module, gb
     /* recreate mask list */
     dt_dev_masks_list_change(dev);
 
+    if(dev->gui_attached)
+    {
+      // FIXME: if module was just enabled and is in default pipeline order,
+      // do we need to rebuild ? Aka are disabled modules added to pipeline still ?
+      dev->pipe->changed |= DT_DEV_PIPE_SYNCH;
+      dev->preview_pipe->changed |= DT_DEV_PIPE_SYNCH;
+      dt_print(DT_DEBUG_PIPE, "[dt_dev_add_history_item] invalidating pipeline for recomputing\n");
+    }
+
     if(module)
     {
       // We need a full GUI update to resync retouch IOP
       // TL;DR : it copies the list of masks from dev to its own params on gui update
-      //dt_iop_gui_update(module);
       dt_iop_gui_set_enable_button(module);
-      // If it wasn't for retouch, we could simply update the on/off button state of IOPs
-      // Note that GUI update needs to happen before sending pipeline recompute signals
     }
   }
 
