@@ -2471,16 +2471,15 @@ int dt_dev_sync_pixelpipe_hash(dt_develop_t *dev, struct dt_dev_pixelpipe_t *pip
 uint64_t dt_dev_hash(dt_develop_t *dev, struct dt_dev_pixelpipe_t *pipe)
 {
   uint64_t hash = 0;
-  dt_pthread_mutex_lock(&dev->pipe->busy_mutex);
-  dt_pthread_mutex_lock(&dev->history_mutex);
+  // FIXME: this should have its own hash
+  // since it's available before pipeline computation
+  // but after dev->history reading and pipe nodes init
   GList *pieces = g_list_last(pipe->nodes);
   if(pieces)
   {
     dt_dev_pixelpipe_iop_t *piece = (dt_dev_pixelpipe_iop_t *)(pieces->data);
     hash = piece->global_hash;
   }
-  dt_pthread_mutex_unlock(&dev->history_mutex);
-  dt_pthread_mutex_unlock(&dev->pipe->busy_mutex);
   return hash;
 }
 
