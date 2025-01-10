@@ -1559,6 +1559,155 @@ char * _print_validity(gboolean state)
     return "WRONG";
 }
 
+
+static void _init_default_history(dt_develop_t *dev, const int imgid, gboolean *first_run, gboolean *auto_apply_modules)
+{
+  // cleanup DB
+  DT_DEBUG_SQLITE3_EXEC(dt_database_get(darktable.db), "DELETE FROM memory.history", NULL, NULL, NULL);
+  dt_print(DT_DEBUG_HISTORY, "[history] temporary history deleted\n");
+
+  // make sure all modules default params are loaded to init history
+  _dt_dev_load_pipeline_defaults(dev);
+
+  // prepend all default modules to memory.history
+  _dev_add_default_modules(dev, imgid);
+  const int default_modules = _dev_get_module_nb_records();
+
+  // maybe add auto-presets to memory.history
+  *first_run = _dev_auto_apply_presets(dev);
+  *auto_apply_modules = _dev_get_module_nb_records() - default_modules;
+  dt_print(DT_DEBUG_HISTORY, "[history] temporary history initialised with default params and presets\n");
+
+  // now merge memory.history into main.history
+  _dev_merge_history(dev, imgid);
+  dt_print(DT_DEBUG_HISTORY, "[history] temporary history merged with image history\n");
+}
+
+
+static void _find_so_for_history_entry(dt_develop_t *dev, dt_dev_history_item_t *hist)
+{
+  dt_iop_module_t *match = NULL;
+
+  for(GList *modules = g_list_first(dev->iop); modules; modules = g_list_next(modules))
+  {
+    dt_iop_module_t *module = (dt_iop_module_t *)modules->data;
+    if(!strcmp(module->op, hist->op_name))
+    {
+      if(module->multi_priority == hist->multi_priority)
+      {
+        // Found exact match at required priority: we are done
+        hist->module = module;
+        break;
+      }
+      else if(hist->multi_priority > 0)
+      {
+        // Found the right kind of module but the wrong instance.
+        // Current history entry is targeting an instance that may exist later in the pipe, so keep looping/looking.
+        match = module;
+      }
+    }
+  }
+
+  if(!hist->module && match)
+  {
+    // We found a module having the required name but not the required instance number:
+    // add a new instance of this module by using its ->so property
+    dt_iop_module_t *new_module = (dt_iop_module_t *)calloc(1, sizeof(dt_iop_module_t));
+    if(!dt_iop_load_module(new_module, match->so, dev))
+    {
+      dev->iop = g_list_append(dev->iop, new_module);
+      // Just init, it will get rewritten later by resync IOP order methods:
+      new_module->instance = match->instance;
+      hist->module = new_module;
+    }
+  }
+  // else we found an already-existing instance and it's in hist->module already
+}
+
+
+static void _sync_blendop_params(dt_dev_history_item_t *hist, const void *blendop_params, const int bl_length,
+                          const int blendop_version, int *legacy_params)
+{
+  const gboolean is_valid_blendop_version = (blendop_version == dt_develop_blend_version());
+  const gboolean is_valid_blendop_size = (bl_length == sizeof(dt_develop_blend_params_t));
+
+  hist->blend_params = malloc(sizeof(dt_develop_blend_params_t));
+
+  if(blendop_params && is_valid_blendop_version && is_valid_blendop_size)
+  {
+    memcpy(hist->blend_params, blendop_params, sizeof(dt_develop_blend_params_t));
+  }
+  else if(blendop_params
+          && dt_develop_blend_legacy_params(hist->module, blendop_params, blendop_version, hist->blend_params,
+                                            dt_develop_blend_version(), bl_length)
+                 == 0)
+  {
+    *legacy_params = TRUE;
+  }
+  else
+  {
+    memcpy(hist->blend_params, hist->module->default_blendop_params, sizeof(dt_develop_blend_params_t));
+  }
+
+  // Copy and publish the masks on the raster stack for other modules to find
+  dt_iop_commit_blend_params(hist->module, hist->blend_params);
+}
+
+static int _sync_params(dt_dev_history_item_t *hist, const void *module_params, const int param_length,
+                          const int modversion, int *legacy_params)
+{
+  const gboolean is_valid_module_version = (modversion == hist->module->version());
+  const gboolean is_valid_params_size = (param_length == hist->module->params_size);
+
+  hist->params = malloc(hist->module->params_size);
+  if(is_valid_module_version && is_valid_params_size)
+  {
+    memcpy(hist->params, module_params, hist->module->params_size);
+  }
+  else
+  {
+    if(!hist->module->legacy_params
+        || hist->module->legacy_params(hist->module, module_params, labs(modversion),
+                                      hist->params, labs(hist->module->version())))
+    {
+      fprintf(stderr, "[dev_read_history] module `%s' version mismatch: history is %d, dt %d.\n",
+              hist->module->op, modversion, hist->module->version());
+
+      dt_control_log(_("module `%s' version mismatch: %d != %d"), hist->module->op,
+                      hist->module->version(), modversion);
+      dt_dev_free_history_item(hist);
+      return 1;
+    }
+    else
+    {
+      if(!strcmp(hist->module->op, "spots") && modversion == 1)
+      {
+        // quick and dirty hack to handle spot removal legacy_params
+        memcpy(hist->blend_params, hist->module->blend_params, sizeof(dt_develop_blend_params_t));
+      }
+      *legacy_params = TRUE;
+    }
+
+    /*
+      * Fix for flip iop: previously it was not always needed, but it might be
+      * in history stack as "orientation (off)", but now we always want it
+      * by default, so if it is disabled, enable it, and replace params with
+      * default_params. if user want to, he can disable it.
+      */
+    if(!strcmp(hist->module->op, "flip") && hist->enabled == 0 && labs(modversion) == 1)
+    {
+      memcpy(hist->params, hist->module->default_params, hist->module->params_size);
+      hist->enabled = 1;
+    }
+  }
+
+  // Copy params from history entry to module internals
+  memcpy(hist->module->params, hist->params, hist->module->params_size);
+
+  return 0;
+}
+
+
 void dt_dev_read_history_ext(dt_develop_t *dev, const int imgid, gboolean no_image)
 {
   if(imgid <= 0) return;
@@ -1573,31 +1722,7 @@ void dt_dev_read_history_ext(dt_develop_t *dev, const int imgid, gboolean no_ima
 
   dt_ioppr_set_default_iop_order(dev, imgid);
 
-  if(!no_image)
-  {
-    // cleanup
-    DT_DEBUG_SQLITE3_EXEC(dt_database_get(darktable.db), "DELETE FROM memory.history", NULL, NULL, NULL);
-
-    dt_print(DT_DEBUG_HISTORY, "[history] temporary history deleted\n");
-
-    // make sure all modules default params are loaded to init history
-    _dt_dev_load_pipeline_defaults(dev);
-
-    // prepend all default modules to memory.history
-    _dev_add_default_modules(dev, imgid);
-    const int default_modules = _dev_get_module_nb_records();
-
-    // maybe add auto-presets to memory.history
-    first_run = _dev_auto_apply_presets(dev);
-    auto_apply_modules = _dev_get_module_nb_records() - default_modules;
-
-    dt_print(DT_DEBUG_HISTORY, "[history] temporary history initialised with default params and presets\n");
-
-    // now merge memory.history into main.history
-    _dev_merge_history(dev, imgid);
-
-    dt_print(DT_DEBUG_HISTORY, "[history] temporary history merged with image history\n");
-  }
+  if(!no_image) _init_default_history(dev, imgid, &first_run, &auto_apply_modules);
 
   sqlite3_stmt *stmt;
 
@@ -1645,49 +1770,18 @@ void dt_dev_read_history_ext(dt_develop_t *dev, const int imgid, gboolean no_ima
 
     const int iop_order = dt_ioppr_get_iop_order(dev->iop_order_list, module_name, multi_priority);
 
+    // Init a bare minimal history entry
     dt_dev_history_item_t *hist = (dt_dev_history_item_t *)calloc(1, sizeof(dt_dev_history_item_t));
     hist->module = NULL;
+    hist->enabled = (enabled != 0); // "cast" int into a clean gboolean
+    hist->num = num;
+    hist->iop_order = iop_order;
+    hist->multi_priority = multi_priority;
+    g_strlcpy(hist->op_name, module_name, sizeof(hist->op_name));
+    g_strlcpy(hist->multi_name, multi_name, sizeof(hist->multi_name));
 
     // Find a .so file that matches our history entry, aka a module to run the params stored in DB
-    dt_iop_module_t *find_op = NULL;
-    for(GList *modules = dev->iop; modules; modules = g_list_next(modules))
-    {
-      dt_iop_module_t *module = (dt_iop_module_t *)modules->data;
-      if(!strcmp(module->op, module_name))
-      {
-        if(module->multi_priority == multi_priority)
-        {
-          hist->module = module;
-          if(multi_name)
-            g_strlcpy(module->multi_name, multi_name, sizeof(module->multi_name));
-          else
-            memset(module->multi_name, 0, sizeof(module->multi_name));
-          break;
-        }
-        else if(multi_priority > 0)
-        {
-          // we just say that we find the name, so we just have to add new instance of this module
-          find_op = module;
-        }
-      }
-    }
-    if(!hist->module && find_op)
-    {
-      // we have to add a new instance of this module and set index to modindex
-      dt_iop_module_t *new_module = (dt_iop_module_t *)calloc(1, sizeof(dt_iop_module_t));
-      if(!dt_iop_load_module(new_module, find_op->so, dev))
-      {
-        dt_iop_update_multi_priority(new_module, multi_priority);
-        new_module->iop_order = iop_order;
-
-        g_strlcpy(new_module->multi_name, multi_name, sizeof(new_module->multi_name));
-
-        dev->iop = g_list_append(dev->iop, new_module);
-
-        new_module->instance = find_op->instance;
-        hist->module = new_module;
-      }
-    }
+    _find_so_for_history_entry(dev, hist);
 
     if(!hist->module)
     {
@@ -1698,6 +1792,10 @@ void dt_dev_read_history_ext(dt_develop_t *dev, const int imgid, gboolean no_ima
       free(hist);
       continue;
     }
+
+    // Update IOP order stuff, that applies to all modules regardless of their internals
+    hist->module->iop_order = hist->iop_order;
+    dt_iop_update_multi_priority(hist->module, hist->multi_priority);
 
     // module has no user params and won't bother us in GUI - exit early, we are done
     if(hist->module->flags() & IOP_FLAGS_NO_HISTORY_STACK)
@@ -1710,97 +1808,20 @@ void dt_dev_read_history_ext(dt_develop_t *dev, const int imgid, gboolean no_ima
     // when history is garbled - This might prevent segfaults on invalid data
     if(hist->module->force_enable) enabled = hist->module->force_enable(hist->module, enabled);
 
-    // Run a battery of tests
-    const gboolean is_valid_module_name = (strcmp(module_name, hist->module->op) == 0);
-    const gboolean is_valid_blendop_version = (blendop_version == dt_develop_blend_version());
-    const gboolean is_valid_blendop_size = (bl_length == sizeof(dt_develop_blend_params_t));
-    const gboolean is_valid_module_version = (modversion == hist->module->version());
-    const gboolean is_valid_params_size = (param_length == hist->module->params_size);
+    dt_print(DT_DEBUG_HISTORY, "[history] successfully loaded module %s history (enabled: %i)\n", hist->module->op, enabled);
 
-    if(is_valid_module_name && is_valid_module_version && is_valid_params_size)
-      dt_print(DT_DEBUG_HISTORY, "[history] successfully loaded module %s history (enabled: %i)\n", hist->module->op, enabled);
-
-    // Init buffers and values
-    hist->enabled = (enabled != 0); // "cast" int into a clean gboolean
-    hist->num = num;
-    hist->iop_order = iop_order;
-    hist->multi_priority = multi_priority;
-    g_strlcpy(hist->op_name, hist->module->op, sizeof(hist->op_name));
-    g_strlcpy(hist->multi_name, multi_name, sizeof(hist->multi_name));
-    hist->params = malloc(hist->module->params_size);
-    hist->blend_params = malloc(sizeof(dt_develop_blend_params_t));
-
-    // Update IOP order
-    hist->module->iop_order = hist->iop_order;
+    // Copy instance name
+    g_strlcpy(hist->module->multi_name, hist->multi_name, sizeof(hist->module->multi_name));
 
     // Copy blending params if valid, else try to convert legacy params
-    if(blendop_params && is_valid_blendop_version && is_valid_blendop_size)
-    {
-      memcpy(hist->blend_params, blendop_params, sizeof(dt_develop_blend_params_t));
-    }
-    else if(blendop_params
-            && dt_develop_blend_legacy_params(hist->module, blendop_params, blendop_version,
-                                              hist->blend_params, dt_develop_blend_version(), bl_length) == 0)
-    {
-      legacy_params = TRUE;
-    }
-    else
-    {
-      memcpy(hist->blend_params, hist->module->default_blendop_params, sizeof(dt_develop_blend_params_t));
-    }
-
-    // Copy and publish the masks on the raster stack for other modules to find
-    dt_iop_commit_blend_params(hist->module, hist->blend_params);
+    _sync_blendop_params(hist, blendop_params, bl_length, blendop_version, &legacy_params);
 
     // Copy module params if valid, else try to convert legacy params
-    if(is_valid_module_version && is_valid_params_size && is_valid_module_name)
-    {
-      memcpy(hist->params, module_params, hist->module->params_size);
-    }
-    else
-    {
-      if(!hist->module->legacy_params
-         || hist->module->legacy_params(hist->module, module_params, labs(modversion),
-                                        hist->params, labs(hist->module->version())))
-      {
-        fprintf(stderr, "[dev_read_history] module `%s' version mismatch: history is %d, dt %d.\n",
-                hist->module->op, modversion, hist->module->version());
-
-        const char *fname = dev->image_storage.filename + strlen(dev->image_storage.filename);
-        while(fname > dev->image_storage.filename && *fname != '/') fname--;
-
-        if(fname > dev->image_storage.filename) fname++;
-        dt_control_log(_("%s: module `%s' version mismatch: %d != %d"), fname, hist->module->op,
-                       hist->module->version(), modversion);
-        dt_dev_free_history_item(hist);
-        continue;
-      }
-      else
-      {
-        if(!strcmp(hist->module->op, "spots") && modversion == 1)
-        {
-          // quick and dirty hack to handle spot removal legacy_params
-          memcpy(hist->blend_params, hist->module->blend_params, sizeof(dt_develop_blend_params_t));
-        }
-        legacy_params = TRUE;
-      }
-
-      /*
-       * Fix for flip iop: previously it was not always needed, but it might be
-       * in history stack as "orientation (off)", but now we always want it
-       * by default, so if it is disabled, enable it, and replace params with
-       * default_params. if user want to, he can disable it.
-       */
-      if(!strcmp(hist->module->op, "flip") && hist->enabled == 0 && labs(modversion) == 1)
-      {
-        memcpy(hist->params, hist->module->default_params, hist->module->params_size);
-        hist->enabled = 1;
-      }
-    }
+    if(_sync_params(hist, module_params, param_length, modversion, &legacy_params)) continue;
 
     // make sure that always-on modules are always on. duh.
     if(hist->module->default_enabled == 1 && hist->module->hide_enable_button == 1)
-      hist->enabled = TRUE;
+      hist->enabled = hist->module->enabled = TRUE;
 
     // Compute the history params hash
     hist->hash = hist->module->hash = dt_iop_module_hash(hist->module);
