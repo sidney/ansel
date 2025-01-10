@@ -1806,9 +1806,6 @@ void dt_dev_read_history_ext(dt_develop_t *dev, const int imgid, gboolean no_ima
   if(imgid <= 0) return;
   if(!dev->iop) return;
 
-  if(dev->gui_attached && !no_image)
-    dt_dev_undo_start_record(dev);
-
   int auto_apply_modules = 0;
   gboolean first_run = FALSE;
   gboolean legacy_params = FALSE;
@@ -1852,15 +1849,12 @@ void dt_dev_read_history_ext(dt_develop_t *dev, const int imgid, gboolean no_ima
       dt_dev_set_history_end(dev, sqlite3_column_int(stmt, 0));
   sqlite3_finalize(stmt);
 
+  // Sanitize and flatten module order
   dt_ioppr_resync_modules_order(dev);
-
   dt_ioppr_check_iop_order(dev, imgid, "dt_dev_read_history_no_image end");
 
+  // Update masks history
   dt_masks_read_masks_history(dev, imgid);
-
-  if(dev->gui_attached && !no_image)
-    dt_dev_undo_end_record(dev);
-
   dt_dev_masks_list_change(dev);
 
   // make sure module_dev is in sync with history
