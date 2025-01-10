@@ -738,7 +738,13 @@ gboolean dt_dev_add_history_item_ext(dt_develop_t *dev, struct dt_iop_module_t *
   }
   else
   {
-    add_new_pipe_node = (dt_dev_get_history_item(dev, module->op) == NULL);
+    const dt_dev_history_item_t *previous_item = dt_dev_get_history_item(dev, module);
+    // check if NULL first or prevous_item->module will segfault
+    // We need to add a new pipeline node if:
+    add_new_pipe_node = (previous_item == NULL)                         // it's the first history entry for this module
+                        || (previous_item->enabled != module->enabled); // the previous history entry is disabled
+    // if previous history entry is disabled and we don't have any other entry,
+    // it is possible the pipeline will not have this node.
   }
 
   dt_dev_history_item_t *hist;
@@ -813,16 +819,13 @@ gboolean dt_dev_add_history_item_ext(dt_develop_t *dev, struct dt_iop_module_t *
   return add_new_pipe_node;
 }
 
-const dt_dev_history_item_t *dt_dev_get_history_item(dt_develop_t *dev, const char *op)
+const dt_dev_history_item_t *dt_dev_get_history_item(dt_develop_t *dev, struct dt_iop_module_t *module)
 {
   for(GList *l = g_list_last(dev->history); l; l = g_list_previous(l))
   {
     dt_dev_history_item_t *item = (dt_dev_history_item_t *)l->data;
-    if(!g_strcmp0(item->op_name, op))
-    {
+    if(item->module == module)
       return item;
-      break;
-    }
   }
   return NULL;
 }
@@ -845,8 +848,6 @@ void dt_dev_add_history_item_real(dt_develop_t *dev, dt_iop_module_t *module, gb
 
   /* signal that history has changed */
   dt_dev_undo_end_record(dev);
-
-
 
   if(darktable.gui)
   {
@@ -968,7 +969,7 @@ static inline void _dt_dev_modules_reload_defaults(dt_develop_t *dev)
   // modules to history, then setting said history to the previous defaults.
   // Worse, some modules (temperature.c) grabbed their params at runtime (WB as shot in camera),
   // meaning the defaults were not even static values.
-  for(GList *modules = dev->iop; modules; modules = g_list_next(modules))
+  for(GList *modules = g_list_first(dev->iop); modules; modules = g_list_next(modules))
   {
     dt_iop_module_t *module = (dt_iop_module_t *)(modules->data);
     memcpy(module->params, module->default_params, module->params_size);
