@@ -1857,40 +1857,6 @@ void dt_dev_read_history_ext(dt_develop_t *dev, const int imgid, gboolean no_ima
   dt_masks_read_masks_history(dev, imgid);
   dt_dev_masks_list_change(dev);
 
-  // make sure module_dev is in sync with history
-  _dev_write_history(dev, imgid);
-  dt_ioppr_write_iop_order_list(dev->iop_order_list, imgid);
-  dt_history_hash_t flags = DT_HISTORY_HASH_CURRENT;
-  if(first_run)
-  {
-    const dt_history_hash_t hash_status = dt_history_hash_get_status(imgid);
-    // if altered doesn't mask it
-    if(!(hash_status & DT_HISTORY_HASH_CURRENT))
-    {
-      flags = flags | (auto_apply_modules ? DT_HISTORY_HASH_AUTO : DT_HISTORY_HASH_BASIC);
-    }
-    dt_history_hash_write_from_history(imgid, flags);
-    // As we have a proper history right now and this is first_run we possibly write the xmp now
-    dt_image_t *image = dt_image_cache_get(darktable.image_cache, imgid, 'w');
-    // depending on the xmp_writing mode we either us safe or relaxed
-    const gboolean always = (dt_image_get_xmp_mode() == DT_WRITE_XMP_ALWAYS);
-    dt_image_cache_write_release(darktable.image_cache, image, always ? DT_IMAGE_CACHE_SAFE : DT_IMAGE_CACHE_RELAXED);
-  }
-  else if(legacy_params)
-  {
-    const dt_history_hash_t hash_status = dt_history_hash_get_status(imgid);
-    if(hash_status & (DT_HISTORY_HASH_BASIC | DT_HISTORY_HASH_AUTO))
-    {
-      // if image not altered keep the current status
-      flags = flags | hash_status;
-    }
-    dt_history_hash_write_from_history(imgid, flags);
-  }
-  else
-  {
-    dt_history_hash_write_from_history(imgid, flags);
-  }
-
   dt_print(DT_DEBUG_HISTORY, "[history] dt_dev_read_history_ext completed\n");
 }
 
