@@ -1581,7 +1581,9 @@ void dt_dev_read_history_ext(dt_develop_t *dev, const int imgid, gboolean no_ima
 {
   if(imgid <= 0) return;
   if(!dev->iop) return;
-  dt_dev_undo_start_record(dev);
+
+  if(dev->gui_attached && !no_image)
+    dt_dev_undo_start_record(dev);
 
   int auto_apply_modules = 0;
   gboolean first_run = FALSE;
@@ -1617,19 +1619,6 @@ void dt_dev_read_history_ext(dt_develop_t *dev, const int imgid, gboolean no_ima
 
   sqlite3_stmt *stmt;
 
-  // Get the end of the history - What's that ???
-
-  int history_end_current = 0;
-
-  DT_DEBUG_SQLITE3_PREPARE_V2(dt_database_get(darktable.db),
-                              "SELECT history_end FROM main.images WHERE id = ?1",
-                              -1, &stmt, NULL);
-  DT_DEBUG_SQLITE3_BIND_INT(stmt, 1, imgid);
-  if(sqlite3_step(stmt) == SQLITE_ROW) // seriously, this should never fail
-    if(sqlite3_column_type(stmt, 0) != SQLITE_NULL)
-      history_end_current = sqlite3_column_int(stmt, 0);
-  sqlite3_finalize(stmt);
-
   // Load current image history from DB
   // clang-format off
   DT_DEBUG_SQLITE3_PREPARE_V2(dt_database_get(darktable.db),
@@ -1642,8 +1631,6 @@ void dt_dev_read_history_ext(dt_develop_t *dev, const int imgid, gboolean no_ima
                               -1, &stmt, NULL);
   // clang-format on
   DT_DEBUG_SQLITE3_BIND_INT(stmt, 1, imgid);
-
-  dt_dev_set_history_end(dev, 0); // actually, will be sanitized to 1
 
   // Strip rows from DB lookup. One row == One module in history
   while(sqlite3_step(stmt) == SQLITE_ROW)
@@ -1748,15 +1735,8 @@ void dt_dev_read_history_ext(dt_develop_t *dev, const int imgid, gboolean no_ima
     const gboolean is_valid_module_version = (modversion == hist->module->version());
     const gboolean is_valid_params_size = (param_length == hist->module->params_size);
 
-    dt_print(DT_DEBUG_HISTORY, "[history] successfully loaded module %s from history\n"
-                              "\t\t\tblendop v. %i:\tversion %s\tparams %s\n"
-                              "\t\t\tparams v. %i:\tversion %s\tparams %s\n"
-                              "\t\t\t enabled: %i\n",
-                              module_name,
-                              blendop_version, _print_validity(is_valid_blendop_version), _print_validity(is_valid_blendop_size),
-                              modversion, _print_validity(is_valid_module_version), _print_validity(is_valid_params_size),
-                              enabled
-                              );
+    if(is_valid_module_name && is_valid_module_version && is_valid_params_size)
+      dt_print(DT_DEBUG_HISTORY, "[history] successfully loaded module %s history (enabled: %i)\n", hist->module->op, enabled);
 
     // Init buffers and values
     hist->enabled = (enabled != 0); // "cast" int into a clean gboolean
@@ -1768,8 +1748,8 @@ void dt_dev_read_history_ext(dt_develop_t *dev, const int imgid, gboolean no_ima
     hist->params = malloc(hist->module->params_size);
     hist->blend_params = malloc(sizeof(dt_develop_blend_params_t));
 
-    // update module iop_order only on active history entries
-    if(history_end_current > dt_dev_get_history_end(dev)) hist->module->iop_order = hist->iop_order;
+    // Update IOP order
+    hist->module->iop_order = hist->iop_order;
 
     // Copy blending params if valid, else try to convert legacy params
     if(blendop_params && is_valid_blendop_version && is_valid_blendop_size)
@@ -1848,8 +1828,6 @@ void dt_dev_read_history_ext(dt_develop_t *dev, const int imgid, gboolean no_ima
   }
   sqlite3_finalize(stmt);
 
-  dt_ioppr_resync_modules_order(dev);
-
   // find the new history end
   // Note: dt_dev_set_history_end sanitizes the value with the actual history size.
   // It needs to run after dev->history is fully populated
@@ -1862,15 +1840,15 @@ void dt_dev_read_history_ext(dt_develop_t *dev, const int imgid, gboolean no_ima
       dt_dev_set_history_end(dev, sqlite3_column_int(stmt, 0));
   sqlite3_finalize(stmt);
 
+  dt_ioppr_resync_modules_order(dev);
+
   dt_ioppr_check_iop_order(dev, imgid, "dt_dev_read_history_no_image end");
 
   dt_masks_read_masks_history(dev, imgid);
 
   if(dev->gui_attached && !no_image)
-  {
-    /* signal history changed */
-    //dt_dev_undo_end_record(dev);
-  }
+    dt_dev_undo_end_record(dev);
+
   dt_dev_masks_list_change(dev);
 
   // make sure module_dev is in sync with history
