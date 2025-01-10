@@ -673,6 +673,312 @@ int dt_imageio_export(const int32_t imgid, const char *filename, dt_imageio_modu
   }
 }
 
+gboolean _apply_style_before_export(dt_develop_t *dev, dt_imageio_module_data_t *format_params, const uint32_t imgid, const gboolean appending)
+{
+  GList *style_items = dt_styles_get_item_list(format_params->style, TRUE, -1);
+  if(!style_items)
+  {
+    dt_control_log(_("cannot find the style '%s' to apply during export."), format_params->style);
+    return TRUE;
+  }
+
+  GList *modules_used = NULL;
+
+  dt_ioppr_check_iop_order(dev, imgid, "dt_imageio_export_with_flags");
+  dt_dev_pop_history_items_ext(dev, appending ? dt_dev_get_history_end(dev) : 0);
+  dt_ioppr_update_for_style_items(dev, style_items, appending);
+
+  for(GList *st_items = style_items; st_items; st_items = g_list_next(st_items))
+  {
+    dt_style_item_t *st_item = (dt_style_item_t *)st_items->data;
+    dt_styles_apply_style_item(dev, st_item, &modules_used, appending);
+  }
+
+  g_list_free(modules_used);
+  g_list_free_full(style_items, dt_style_item_free);
+
+  return FALSE;
+}
+
+void _print_export_debug(dt_dev_pixelpipe_t *pipe, dt_imageio_module_data_t *format_params, const gboolean appending, const gboolean use_style)
+{
+  if(darktable.unmuted & DT_DEBUG_IMAGEIO)
+  {
+    fprintf(stderr,"[dt_imageio_export_with_flags] ");
+    if(use_style)
+    {
+      if(appending) fprintf(stderr,"appending style `%s'\n", format_params->style);
+      else          fprintf(stderr,"overwrite style `%s'\n", format_params->style);
+    }
+    else fprintf(stderr,"\n");
+    int cnt = 0;
+    for(GList *nodes = pipe->nodes; nodes; nodes = g_list_next(nodes))
+    {
+      dt_dev_pixelpipe_iop_t *piece = (dt_dev_pixelpipe_iop_t *)nodes->data;
+      if(piece->enabled)
+      {
+        cnt++;
+        fprintf(stderr," %s", piece->module->op);
+      }
+    }
+    fprintf(stderr," (%i)\n", cnt);
+  }
+}
+
+
+void _filter_pipeline(const char *filter, dt_dev_pixelpipe_t *pipe)
+{
+  // Warning: can only filter prior to or past to a certain module, but not both !!!
+  if(filter)
+  {
+    if(!strncmp(filter, "pre:", 4)) dt_dev_pixelpipe_disable_after(pipe, filter + 4);
+    if(!strncmp(filter, "post:", 5)) dt_dev_pixelpipe_disable_before(pipe, filter + 5);
+  }
+}
+
+
+gboolean _get_export_size(dt_develop_t *dev, dt_dev_pixelpipe_t *pipe, dt_imageio_module_data_t *format_params, const gboolean is_scaling, const float image_ratio,
+                          double *scale, float *origin, int width, int height, int *processed_width, int *processed_height)
+{
+// Set to TRUE if width size is explicitly set by user
+  gboolean force_width;
+  // Set to TRUE if height size is explicitly set by user
+  gboolean force_height;
+
+  if(dt_dev_distort_backtransform_plus(dev, pipe, 0.f, DT_DEV_TRANSFORM_DIR_ALL, origin, 1))
+  {
+    if(is_scaling)
+    {
+      double _num, _denum;
+      dt_imageio_resizing_factor_get_and_parsing(&_num, &_denum);
+      const double scale_factor = _num / _denum;
+      *scale = fmin(scale_factor, 1.);
+      *processed_height = pipe->processed_height * (*scale);
+      *processed_width = pipe->processed_width * (*scale);
+      force_width = TRUE;
+      force_height = TRUE;
+    }
+    else
+    {
+      double scalex = 1.;
+      double scaley = 1.;
+
+      if(width == 0)
+      {
+        force_width = FALSE;
+        width = pipe->processed_width;
+      }
+      else
+      {
+        force_width = TRUE;
+        scalex = fmin((double)width / (double)pipe->processed_width, 1.);
+      }
+
+      if(height == 0)
+      {
+        force_height = FALSE;
+        height = pipe->processed_height;
+      }
+      else
+      {
+        force_height = TRUE;
+        scaley = fmin((double)height / (double)pipe->processed_height, 1.);
+      }
+
+      *scale = fmin(scalex, scaley);
+    }
+  }
+  else
+  {
+    // error reading pipeline pieces for distort transforms
+    fprintf(stderr, "[export_with_flags] could not get output size from pipeline\n");
+    return 1;
+  }
+
+  if(force_height && force_width)
+  {
+    // width and height both specified by user in pixels
+    if(pipe->processed_width > pipe->processed_height)
+    {
+      *processed_width = MIN(round(*scale * pipe->processed_width), width);
+      *processed_height = round(*processed_width / image_ratio);
+    }
+    else if(pipe->processed_width < pipe->processed_height)
+    {
+      *processed_height = MIN(round(*scale * pipe->processed_height), height);
+      *processed_width = round(*processed_height * image_ratio);
+    }
+    else
+    {
+      *processed_width = MIN(round(*scale * pipe->processed_width), width);
+      *processed_height = MIN(round(*scale * pipe->processed_height), height);
+    }
+  }
+  else if(force_width)
+  {
+    // width only specified by user in pixels, fluid height
+    *processed_width = MIN(round(*scale * pipe->processed_width), width);
+    *processed_height = round(*processed_width / image_ratio);
+  }
+  else if(force_height)
+  {
+    // height only specified by user in pixels, fluid width
+    *processed_height = MIN(round(*scale * pipe->processed_height), height);
+    *processed_width = round(*processed_height * image_ratio);
+  }
+  else
+  {
+    // nothing specified by user aka full resolution given cropping, lens and perspective distortions
+    *processed_width = pipe->processed_width;
+    *processed_height = pipe->processed_height;
+  }
+
+  dt_print(DT_DEBUG_IMAGEIO,"[dt_imageio_export] (direct) pipe %ix%i, range %ix%i --> size %ix%i / %ix%i - ratio %.5f\n",
+            pipe->processed_width, pipe->processed_height, format_params->max_width, format_params->max_height,
+            *processed_width, *processed_height, width, height, image_ratio);
+
+  return 0;
+}
+
+void _export_disable_finalscale(dt_dev_pixelpipe_t *pipe)
+{
+  dt_dev_pixelpipe_iop_t *finalscale = NULL;
+
+  for(GList *nodes = g_list_last(pipe->nodes); nodes; nodes = g_list_previous(nodes))
+  {
+    dt_dev_pixelpipe_iop_t *node = (dt_dev_pixelpipe_iop_t *)(nodes->data);
+    if(!strcmp(node->module->op, "finalscale"))
+    {
+      finalscale = node;
+      break;
+    }
+  }
+
+  if(finalscale) finalscale->enabled = 0;
+}
+
+
+void _swap_byteorder_uint8_to_uint8(uint8_t *outbuf, const size_t processed_width, const size_t processed_height)
+{
+  uint8_t *const buf8 = outbuf;
+
+#ifdef _OPENMP
+#pragma omp parallel for default(none) \
+  dt_omp_firstprivate(processed_width, processed_height, buf8) \
+  schedule(static)
+#endif
+  // just flip byte order
+  for(size_t k = 0; k < (size_t)processed_width * processed_height; k++)
+  {
+    uint8_t tmp = buf8[4 * k + 0];
+    buf8[4 * k + 0] = buf8[4 * k + 2];
+    buf8[4 * k + 2] = tmp;
+  }
+}
+
+void _clamp_float_to_uint8(uint8_t *outbuf, const size_t processed_width, const size_t processed_height)
+{
+  const float *const inbuf = (float *)outbuf;
+  fprintf(stdout, "clamp_float_to_uint\n");
+
+  // That nasty. Read pixels as floats by packs of 32 bits, write them as uint8 by pack of 8 bits.
+  // So, while this is done inplace, it's not threadsafe and can't be parallelized.
+  // Also, memory accesses get worse as we progress into the array since the distance between
+  // reads and writes increases and cachelines become scattered.
+  for(size_t k = 0; k < (size_t)processed_width * processed_height; k++)
+  {
+    // convert in place, this is unfortunately very serial..
+    const uint8_t r = roundf(CLAMP(inbuf[4 * k + 0] * 0xff, 0, 0xff));
+    const uint8_t g = roundf(CLAMP(inbuf[4 * k + 1] * 0xff, 0, 0xff));
+    const uint8_t b = roundf(CLAMP(inbuf[4 * k + 2] * 0xff, 0, 0xff));
+    outbuf[4 * k + 0] = r;
+    outbuf[4 * k + 1] = g;
+    outbuf[4 * k + 2] = b;
+  }
+}
+
+void _swap_byteorder_float_to_uint8(uint8_t *outbuf, const size_t processed_width, const size_t processed_height)
+{
+  const float *const inbuf = (float *)outbuf;
+  fprintf(stdout, "swap_float_to_uint\n");
+
+  // That nasty. Read pixels as floats by packs of 32 bits, write them as uint8 by pack of 8 bits.
+  // So, while this is done inplace, it's not threadsafe and can't be parallelized.
+  // Also, memory accesses get worse as we progress into the array since the distance between
+  // reads and writes increases and cachelines become scattered.
+  for(size_t k = 0; k < (size_t)processed_width * processed_height; k++)
+  {
+    // convert in place, this is unfortunately very serial..
+    const uint8_t r = roundf(CLAMP(inbuf[4 * k + 2] * 0xff, 0, 0xff));
+    const uint8_t g = roundf(CLAMP(inbuf[4 * k + 1] * 0xff, 0, 0xff));
+    const uint8_t b = roundf(CLAMP(inbuf[4 * k + 0] * 0xff, 0, 0xff));
+    outbuf[4 * k + 0] = r;
+    outbuf[4 * k + 1] = g;
+    outbuf[4 * k + 2] = b;
+  }
+}
+
+
+void _export_final_buffer_to_uint8(uint8_t *outbuf, const gboolean display_byteorder, const gboolean high_quality,
+                                   const size_t processed_width, const size_t processed_height)
+{
+
+  if(display_byteorder)
+  {
+    if(high_quality)
+      _swap_byteorder_float_to_uint8(outbuf, processed_width, processed_height);
+    // else processing output was 8-bit already, and no need to swap order, so no-op
+  }
+  else // need to flip
+  {
+    if(high_quality) // ldr output: char
+      _clamp_float_to_uint8(outbuf, processed_width, processed_height);
+    else // need to swap:
+      _swap_byteorder_uint8_to_uint8(outbuf, processed_width, processed_height);
+  }
+}
+
+void _export_final_buffer_to_uint16(uint8_t *outbuf, const size_t processed_width, const size_t processed_height)
+{
+  // uint16_t per color channel
+  float *buff = (float *)outbuf;
+  uint16_t *buf16 = (uint16_t *)outbuf;
+  for(int y = 0; y < processed_height; y++)
+    for(int x = 0; x < processed_width; x++)
+    {
+      const size_t k = (size_t)processed_width * y + x;
+      for(int i = 0; i < 3; i++) buf16[4 * k + i] = roundf(CLAMP(buff[4 * k + i] * 0xffff, 0, 0xffff));
+    }
+}
+
+void _export_apply_lua_actions(const int32_t imgid, const char *filename, dt_imageio_module_format_t *format,
+                               dt_imageio_module_data_t *format_params, dt_imageio_module_storage_t *storage,
+                               dt_imageio_module_data_t *storage_params)
+{
+#ifdef USE_LUA
+    //Synchronous calling of lua intermediate-export-image events
+    dt_lua_lock();
+
+    lua_State *L = darktable.lua_state.state;
+
+    luaA_push(L, dt_lua_image_t, &imgid);
+
+    lua_pushstring(L, filename);
+
+    luaA_push_type(L, format->parameter_lua_type, format_params);
+
+    if(storage)
+      luaA_push_type(L, storage->parameter_lua_type, storage_params);
+    else
+      lua_pushnil(L);
+
+    dt_lua_event_trigger(L, "intermediate-export-image", 4);
+
+    dt_lua_unlock();
+#endif
+}
+
+
 // internal function: to avoid exif blob reading + 8-bit byteorder flag + high-quality override
 int dt_imageio_export_with_flags(const int32_t imgid, const char *filename,
                                  dt_imageio_module_format_t *format, dt_imageio_module_data_t *format_params,
@@ -725,215 +1031,59 @@ int dt_imageio_export_with_flags(const int32_t imgid, const char *filename,
   const gboolean use_style = !thumbnail_export && format_params->style[0] != '\0';
   const gboolean appending = format_params->style_append != FALSE;
   //  If a style is to be applied during export, add the iop params into the history
-  if(use_style)
-  {
-    GList *style_items = dt_styles_get_item_list(format_params->style, TRUE, -1);
-    if(!style_items)
-    {
-      dt_control_log(_("cannot find the style '%s' to apply during export."), format_params->style);
-      goto error;
-    }
-
-    GList *modules_used = NULL;
-
-    dt_ioppr_check_iop_order(&dev, imgid, "dt_imageio_export_with_flags");
-    dt_dev_pop_history_items_ext(&dev, appending ? dev.history_end : 0);
-    dt_ioppr_update_for_style_items(&dev, style_items, appending);
-
-    for(GList *st_items = style_items; st_items; st_items = g_list_next(st_items))
-    {
-      dt_style_item_t *st_item = (dt_style_item_t *)st_items->data;
-      dt_styles_apply_style_item(&dev, st_item, &modules_used, appending);
-    }
-
-    g_list_free(modules_used);
-    g_list_free_full(style_items, dt_style_item_free);
-  }
+  if(use_style && _apply_style_before_export(&dev, format_params, imgid, appending))
+    goto error;
 
   dt_ioppr_resync_modules_order(&dev);
 
   // Update the ICC type if DT_COLORSPACE_NONE is passed
   dt_colorspaces_get_output_profile(imgid, &icc_type, icc_filename);
-
   dt_dev_pixelpipe_set_icc(&pipe, icc_type, icc_filename, icc_intent);
   dt_dev_pixelpipe_set_input(&pipe, &dev, (float *)buf.buf, buf.width, buf.height, buf.iscale);
   dt_dev_pixelpipe_create_nodes(&pipe, &dev);
   dt_dev_pixelpipe_synch_all(&pipe, &dev);
-  if(darktable.unmuted & DT_DEBUG_IMAGEIO)
-  {
-    fprintf(stderr,"[dt_imageio_export_with_flags] ");
-    if(use_style)
-    {
-      if(appending) fprintf(stderr,"appending style `%s'\n", format_params->style);
-      else          fprintf(stderr,"overwrite style `%s'\n", format_params->style);
-    }
-    else fprintf(stderr,"\n");
-    int cnt = 0;
-    for(GList *nodes = pipe.nodes; nodes; nodes = g_list_next(nodes))
-    {
-      dt_dev_pixelpipe_iop_t *piece = (dt_dev_pixelpipe_iop_t *)nodes->data;
-      if(piece->enabled)
-      {
-        cnt++;
-        fprintf(stderr," %s", piece->module->op);
-      }
-    }
-    fprintf(stderr," (%i)\n", cnt);
-  }
 
-  if(filter)
-  {
-    if(!strncmp(filter, "pre:", 4)) dt_dev_pixelpipe_disable_after(&pipe, filter + 4);
-    if(!strncmp(filter, "post:", 5)) dt_dev_pixelpipe_disable_before(&pipe, filter + 5);
-  }
+  // Write debug info to stdout
+  _print_export_debug(&pipe, format_params, appending, use_style);
+
+  // Remove modules past or prior a certain one.
+  // Useful for partial exports, for technical purposes (HDR merge)
+  _filter_pipeline(filter, &pipe);
 
   // Get theoritical final size of image, taking distortions and croppings into account, considering full-size original input
+  // Needs to be done after optional filtering, in case we filter out distortion modules
   dt_dev_pixelpipe_get_roi_out(&pipe, &dev, pipe.iwidth, pipe.iheight, &pipe.processed_width,
-                                  &pipe.processed_height);
+                               &pipe.processed_height);
   const double image_ratio = (double)pipe.processed_width / (double)pipe.processed_height;
 
   dt_show_times(&start, "[export] creating pixelpipe");
 
-  // find output color profile for this image:
-  int sRGB = (icc_type == DT_COLORSPACE_SRGB);
-
   int width = MAX(format_params->max_width, 0);
   int height = MAX(format_params->max_height, 0);
   double scale = 1.;
-
   int processed_width = 0;
   int processed_height = 0;
   float origin[] = { 0.0f, 0.0f };
-
-  // Set to TRUE if width size is explicitly set by user
-  gboolean force_width;
-  // Set to TRUE if height size is explicitly set by user
-  gboolean force_height;
-
-  if(dt_dev_distort_backtransform_plus(&dev, &pipe, 0.f, DT_DEV_TRANSFORM_DIR_ALL, origin, 1))
-  {
-    if(is_scaling)
-    {
-      double _num, _denum;
-      dt_imageio_resizing_factor_get_and_parsing(&_num, &_denum);
-      const double scale_factor = _num / _denum;
-      scale = fmin(scale_factor, 1.);
-      processed_height = pipe.processed_height * scale;
-      processed_width = pipe.processed_width * scale;
-      force_width = TRUE;
-      force_height = TRUE;
-    }
-    else
-    {
-      double scalex = 1.;
-      double scaley = 1.;
-
-      if(width == 0)
-      {
-        force_width = FALSE;
-        width = pipe.processed_width;
-      }
-      else
-      {
-        force_width = TRUE;
-        scalex = fmin((double)width / (double)pipe.processed_width, 1.);
-      }
-
-      if(height == 0)
-      {
-        force_height = FALSE;
-        height = pipe.processed_height;
-      }
-      else
-      {
-        force_height = TRUE;
-        scaley = fmin((double)height / (double)pipe.processed_height, 1.);
-      }
-
-      scale = fmin(scalex, scaley);
-    }
-  }
-  else
-  {
-    // error reading pipeline pieces for distort transforms
+  if(_get_export_size(&dev, &pipe, format_params, is_scaling, image_ratio, &scale, origin, width, height, &processed_width, &processed_height))
     goto error;
-  }
-
-  if(force_height && force_width)
-  {
-    // width and height both specified by user in pixels
-    if(pipe.processed_width > pipe.processed_height)
-    {
-      processed_width = MIN(round(scale * pipe.processed_width), width);
-      processed_height = round(processed_width / image_ratio);
-    }
-    else if(pipe.processed_width < pipe.processed_height)
-    {
-      processed_height = MIN(round(scale * pipe.processed_height), height);
-      processed_width = round(processed_height * image_ratio);
-    }
-    else
-    {
-      processed_width = MIN(round(scale * pipe.processed_width), width);
-      processed_height = MIN(round(scale * pipe.processed_height), height);
-    }
-  }
-  else if(force_width)
-  {
-    // width only specified by user in pixels, fluid height
-    processed_width = MIN(round(scale * pipe.processed_width), width);
-    processed_height = round(processed_width / image_ratio);
-  }
-  else if(force_height)
-  {
-    // height only specified by user in pixels, fluid width
-    processed_height = MIN(round(scale * pipe.processed_height), height);
-    processed_width = round(processed_height * image_ratio);
-  }
-  else
-  {
-    // nothing specified by user aka full resolution given cropping, lens and perspective distortions
-    processed_width = pipe.processed_width;
-    processed_height = pipe.processed_height;
-  }
-
-  dt_print(DT_DEBUG_IMAGEIO,"[dt_imageio_export] (direct) imgid %d, hq %i, pipe %ix%i, range %ix%i --> size %ix%i / %ix%i - ratio %.5f\n",
-            imgid, high_quality, pipe.processed_width, pipe.processed_height, format_params->max_width, format_params->max_height,
-            processed_width, processed_height, width, height, image_ratio);
-
 
   const int bpp = format->bpp(format_params);
 
   dt_get_times(&start);
+  /*
+    if high-quality processing was requested, downsampling will be done
+    at the very end of the pipe (just before border and watermark)
+    else, downsampling will be right after demosaic,
+    so we need to turn temporarily disable in-pipe late downsampling iop.
+  */
   if(high_quality)
   {
-    /*
-     * if high quality processing was requested, downsampling will be done
-     * at the very end of the pipe (just before border and watermark)
-     */
     dt_dev_pixelpipe_process_no_gamma(&pipe, &dev, 0, 0, processed_width, processed_height, scale);
   }
   else
   {
-    // else, downsampling will be right after demosaic
-
-    // so we need to turn temporarily disable in-pipe late downsampling iop.
-
-    // find the finalscale module
-    dt_dev_pixelpipe_iop_t *finalscale = NULL;
-    {
-      for(const GList *nodes = g_list_last(pipe.nodes); nodes; nodes = g_list_previous(nodes))
-      {
-        dt_dev_pixelpipe_iop_t *node = (dt_dev_pixelpipe_iop_t *)(nodes->data);
-        if(!strcmp(node->module->op, "finalscale"))
-        {
-          finalscale = node;
-          break;
-        }
-      }
-    }
-
-    if(finalscale) finalscale->enabled = 0;
+    // find the finalscale module and disable it.
+    _export_disable_finalscale(&pipe);
 
     // do the processing (8-bit with special treatment, to make sure we can use openmp further down):
     if(bpp == 8)
@@ -941,7 +1091,8 @@ int dt_imageio_export_with_flags(const int32_t imgid, const char *filename,
     else
       dt_dev_pixelpipe_process_no_gamma(&pipe, &dev, 0, 0, processed_width, processed_height, scale);
 
-    if(finalscale) finalscale->enabled = 1;
+    // Warning: finalscale is still disabled in pipeline. It's no issue for now since we don't re-use it
+    // before destroying it. Mind that if you extend the code.
   }
   dt_show_times(&start, thumbnail_export ? "[dev_process_thumbnail] pixel pipeline processing"
                                          : "[dev_process_export] pixel pipeline processing");
@@ -953,104 +1104,39 @@ int dt_imageio_export_with_flags(const int32_t imgid, const char *filename,
     goto error;
   }
 
-  // downconversion to low-precision formats:
+  // Inplace downconversion to low-precision formats:
   if(bpp == 8)
-  {
-    if(display_byteorder)
-    {
-      if(high_quality)
-      {
-        const float *const inbuf = (float *)outbuf;
-        for(size_t k = 0; k < (size_t)processed_width * processed_height; k++)
-        {
-          // convert in place, this is unfortunately very serial..
-          const uint8_t r = roundf(CLAMP(inbuf[4 * k + 2] * 0xff, 0, 0xff));
-          const uint8_t g = roundf(CLAMP(inbuf[4 * k + 1] * 0xff, 0, 0xff));
-          const uint8_t b = roundf(CLAMP(inbuf[4 * k + 0] * 0xff, 0, 0xff));
-          outbuf[4 * k + 0] = r;
-          outbuf[4 * k + 1] = g;
-          outbuf[4 * k + 2] = b;
-        }
-      }
-      // else processing output was 8-bit already, and no need to swap order
-    }
-    else // need to flip
-    {
-      // ldr output: char
-      if(high_quality)
-      {
-        const float *const inbuf = (float *)outbuf;
-        for(size_t k = 0; k < (size_t)processed_width * processed_height; k++)
-        {
-          // convert in place, this is unfortunately very serial..
-          const uint8_t r = roundf(CLAMP(inbuf[4 * k + 0] * 0xff, 0, 0xff));
-          const uint8_t g = roundf(CLAMP(inbuf[4 * k + 1] * 0xff, 0, 0xff));
-          const uint8_t b = roundf(CLAMP(inbuf[4 * k + 2] * 0xff, 0, 0xff));
-          outbuf[4 * k + 0] = r;
-          outbuf[4 * k + 1] = g;
-          outbuf[4 * k + 2] = b;
-        }
-      }
-      else
-      { // !display_byteorder, need to swap:
-        uint8_t *const buf8 = pipe.backbuf;
-#ifdef _OPENMP
-#pragma omp parallel for default(none) \
-  dt_omp_firstprivate(processed_width, processed_height, buf8) \
-  schedule(static)
-#endif
-        // just flip byte order
-        for(size_t k = 0; k < (size_t)processed_width * processed_height; k++)
-        {
-          uint8_t tmp = buf8[4 * k + 0];
-          buf8[4 * k + 0] = buf8[4 * k + 2];
-          buf8[4 * k + 2] = tmp;
-        }
-      }
-    }
-  }
+    _export_final_buffer_to_uint8(outbuf, display_byteorder, high_quality, processed_width, processed_height);
   else if(bpp == 16)
-  {
-    // uint16_t per color channel
-    float *buff = (float *)outbuf;
-    uint16_t *buf16 = (uint16_t *)outbuf;
-    for(int y = 0; y < processed_height; y++)
-      for(int x = 0; x < processed_width; x++)
-      {
-        const size_t k = (size_t)processed_width * y + x;
-        for(int i = 0; i < 3; i++) buf16[4 * k + i] = roundf(CLAMP(buff[4 * k + i] * 0xffff, 0, 0xffff));
-      }
-  }
+    _export_final_buffer_to_uint16(outbuf, processed_width, processed_height);
   // else output float, no further harm done to the pixels :)
 
   format_params->width = processed_width;
   format_params->height = processed_height;
 
+  // Exif data should be 65536 bytes max, but if original size is close to that,
+  // adding new tags could make it go over that... so let it be and see what
+  // happens when we write the image
+  int length = 0;
+  uint8_t *exif_profile = NULL;
+
   if(!ignore_exif)
   {
-    int length;
-    uint8_t *exif_profile = NULL; // Exif data should be 65536 bytes max, but if original size is close to that,
-                                  // adding new tags could make it go over that... so let it be and see what
-                                  // happens when we write the image
-    char pathname[PATH_MAX] = { 0 };
     gboolean from_cache = TRUE;
+    char pathname[PATH_MAX] = { 0 };
     dt_image_full_path(imgid,  pathname,  sizeof(pathname),  &from_cache, __FUNCTION__);
+    // find output color profile for this image:
+    int sRGB = (icc_type == DT_COLORSPACE_SRGB);
     // last param is dng mode, it's false here
     length = dt_exif_read_blob(&exif_profile, pathname, imgid, sRGB, processed_width, processed_height, 0);
-
-    res = format->write_image(format_params, filename, outbuf, icc_type, icc_filename, exif_profile, length, imgid,
-                              num, total, &pipe, export_masks);
-
-    free(exif_profile);
-  }
-  else
-  {
-    res = format->write_image(format_params, filename, outbuf, icc_type, icc_filename, NULL, 0, imgid, num, total,
-                              &pipe, export_masks);
   }
 
-  if(res)
-    goto error;
+  // Finally: write image buffer to target container
+  res = format->write_image(format_params, filename, outbuf, icc_type, icc_filename, exif_profile, length, imgid,
+                            num, total, &pipe, export_masks);
+
+  if(exif_profile) free(exif_profile);
+  if(res) goto error;
 
   dt_mipmap_cache_release(darktable.mipmap_cache, &buf);
   dt_pthread_mutex_unlock(&pipe.busy_mutex);
@@ -1067,28 +1153,7 @@ int dt_imageio_export_with_flags(const int32_t imgid, const char *filename,
   if(!thumbnail_export && strcmp(format->mime(format_params), "memory")
     && !(format->flags(format_params) & FORMAT_FLAGS_NO_TMPFILE))
   {
-#ifdef USE_LUA
-    //Synchronous calling of lua intermediate-export-image events
-    dt_lua_lock();
-
-    lua_State *L = darktable.lua_state.state;
-
-    luaA_push(L, dt_lua_image_t, &imgid);
-
-    lua_pushstring(L, filename);
-
-    luaA_push_type(L, format->parameter_lua_type, format_params);
-
-    if(storage)
-      luaA_push_type(L, storage->parameter_lua_type, storage_params);
-    else
-      lua_pushnil(L);
-
-    dt_lua_event_trigger(L, "intermediate-export-image", 4);
-
-    dt_lua_unlock();
-#endif
-
+    _export_apply_lua_actions(imgid, filename, format, format_params, storage, storage_params);
     DT_DEBUG_CONTROL_SIGNAL_RAISE(darktable.signals, DT_SIGNAL_IMAGE_EXPORT_TMPFILE, imgid, filename, format,
                             format_params, storage, storage_params);
   }
