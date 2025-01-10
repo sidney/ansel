@@ -2499,6 +2499,8 @@ void leave(dt_view_t *self)
 #endif
   }
 
+  dt_dev_append_changed_tag(dev->image_storage.id);
+
   // clear gui.
   dt_pthread_mutex_lock(&dev->pipe->busy_mutex);
   dt_dev_pixelpipe_cleanup_nodes(dev->pipe);

@@ -788,11 +788,7 @@ gboolean dt_history_copy_and_paste_on_image(const int32_t imgid, const int32_t d
   dt_undo_end_group(darktable.undo);
 
   /* attach changed tag reflecting actual change */
-  guint tagid = 0;
-  dt_tag_new("darktable|changed", &tagid);
-  dt_tag_attach(tagid, dest_imgid, FALSE, FALSE);
-  /* set change_timestamp */
-  dt_image_cache_set_change_timestamp(darktable.image_cache, dest_imgid);
+  dt_dev_append_changed_tag(dest_imgid);
 
   /* if current image in develop reload history */
   // FIXME: this is GUI update. That doesn't belong to history management.

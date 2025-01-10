@@ -843,19 +843,10 @@ void dt_dev_add_history_item_real(dt_develop_t *dev, dt_iop_module_t *module, gb
   dt_dev_add_history_item_ext(dev, module, enable, FALSE, FALSE, FALSE);
   dt_pthread_mutex_unlock(&dev->history_mutex);
 
-  /* attach changed tag reflecting actual change */
-  const int imgid = dev->image_storage.id;
-  guint tagid = 0;
-  dt_tag_new("darktable|changed", &tagid);
-  const gboolean tag_change = dt_tag_attach(tagid, imgid, FALSE, FALSE);
-
-  /* register export timestamp in cache */
-  dt_image_cache_set_change_timestamp(darktable.image_cache, imgid);
-
   /* signal that history has changed */
   dt_dev_undo_end_record(dev);
 
-  if(tag_change) DT_DEBUG_CONTROL_SIGNAL_RAISE(darktable.signals, DT_SIGNAL_TAG_CHANGED);
+
 
   if(darktable.gui)
   {
@@ -2589,6 +2580,19 @@ void dt_dev_set_history_end(dt_develop_t *dev, const uint32_t index)
 {
   const int num_items = g_list_length(dev->history);
   dev->history_end = CLAMP(index, 0, num_items);
+}
+
+void dt_dev_append_changed_tag(const int32_t imgid)
+{
+  /* attach changed tag reflecting actual change */
+  guint tagid = 0;
+  dt_tag_new("darktable|changed", &tagid);
+  const gboolean tag_change = dt_tag_attach(tagid, imgid, FALSE, FALSE);
+
+  /* register last change timestamp in cache */
+  dt_image_cache_set_change_timestamp(darktable.image_cache, imgid);
+
+  if(tag_change) DT_DEBUG_CONTROL_SIGNAL_RAISE(darktable.signals, DT_SIGNAL_TAG_CHANGED);
 }
 
 // clang-format off

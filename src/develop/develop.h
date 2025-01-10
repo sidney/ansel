@@ -530,6 +530,9 @@ void dt_masks_set_lock_mode(dt_develop_t *dev, gboolean mode);
 // Stop counting when the threshold is reached, for performance.
 guint dt_dev_mask_history_overload(dt_develop_t *dev, guint threshold);
 
+// Write the `darktable|changed` tag on the current picture upon history modification
+void dt_dev_append_changed_tag(const int32_t imgid);
+
 // clang-format off
 // modelines: These editor modelines have been set for all relevant files by tools/update_modelines.py
 // vim: shiftwidth=2 expandtab tabstop=2 cindent

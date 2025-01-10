@@ -922,15 +922,7 @@ void dt_styles_apply_to_image(const char *name, const gboolean duplicate, const 
     g_list_free(modules_used);
 
     /* add tag */
-    guint tagid = 0;
-    gchar ntag[512] = { 0 };
-    g_snprintf(ntag, sizeof(ntag), "darktable|style|%s", name);
-    if(dt_tag_new(ntag, &tagid)) dt_tag_attach(tagid, newimgid, FALSE, FALSE);
-    if(dt_tag_new("darktable|changed", &tagid))
-    {
-      dt_tag_attach(tagid, newimgid, FALSE, FALSE);
-      dt_image_cache_set_change_timestamp(darktable.image_cache, imgid);
-    }
+    dt_dev_append_changed_tag(newimgid);
 
     /* if current image in develop reload history */
     if(dt_dev_is_current_image(darktable.develop, newimgid))

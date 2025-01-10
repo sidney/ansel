@@ -1372,7 +1372,6 @@ static int32_t dt_control_export_job_run(dt_job_t *job)
   // Invariant: the tagid for 'darktable|changed' will not change while this function runs. Is this a
   // sensible assumption?
   guint tagid = 0, etagid = 0;
-  dt_tag_new("darktable|changed", &tagid);
   dt_tag_new("darktable|exported", &etagid);
 
   dt_export_metadata_t metadata;
