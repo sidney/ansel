@@ -915,11 +915,7 @@ void dt_dev_reload_history_items(dt_develop_t *dev)
     history = next;
   }
 
-  dt_pthread_mutex_unlock(&dev->history_mutex);
-
-  dt_dev_read_history(dev);
-
-  dt_pthread_mutex_lock(&dev->history_mutex);
+  dt_dev_read_history_ext(dev, dev->image_storage.id, FALSE);
 
   // we have to add new module instances first
   for(GList *modules = g_list_first(dev->iop); modules; modules = g_list_next(modules))
@@ -1890,10 +1886,9 @@ void dt_dev_read_history_ext(dt_develop_t *dev, const int imgid, gboolean no_ima
 
 void dt_dev_read_history(dt_develop_t *dev)
 {
-  // FIXME : This should be made thread-safe, but results in deadlock
-  //dt_pthread_mutex_lock(&dev->history_mutex);
+  dt_pthread_mutex_lock(&dev->history_mutex);
   dt_dev_read_history_ext(dev, dev->image_storage.id, FALSE);
-  //dt_pthread_mutex_unlock(&dev->history_mutex);
+  dt_pthread_mutex_unlock(&dev->history_mutex);
 }
 
 void dt_dev_reprocess_center(dt_develop_t *dev)
@@ -2229,8 +2224,7 @@ void dt_dev_module_remove(dt_develop_t *dev, dt_iop_module_t *module)
 
       if(module == hist->module)
       {
-        // printf("removing obsoleted history item: %s %s %p %p\n", hist->module->op, hist->module->multi_name,
-        //        module, hist->module);
+        dt_print(DT_DEBUG_HISTORY, "[dt_module_remode] removing obsoleted history item: %s %s %p %p\n", hist->module->op, hist->module->multi_name, module, hist->module);
         dt_dev_free_history_item(hist);
         dev->history = g_list_delete_link(dev->history, elem);
         dt_dev_set_history_end(dev, dt_dev_get_history_end(dev) - 1);
@@ -2240,7 +2234,6 @@ void dt_dev_module_remove(dt_develop_t *dev, dt_iop_module_t *module)
     }
   }
 
-  dt_pthread_mutex_unlock(&dev->history_mutex);
 
   // and we remove it from the list
   for(GList *modules = dev->iop; modules; modules = g_list_next(modules))
@@ -2252,6 +2245,8 @@ void dt_dev_module_remove(dt_develop_t *dev, dt_iop_module_t *module)
       break;
     }
   }
+
+  dt_pthread_mutex_unlock(&dev->history_mutex);
 
   if(dev->gui_attached && del)
   {
@@ -2499,6 +2494,7 @@ int dt_dev_sync_pixelpipe_hash(dt_develop_t *dev, struct dt_dev_pixelpipe_t *pip
 uint64_t dt_dev_hash(dt_develop_t *dev, struct dt_dev_pixelpipe_t *pipe)
 {
   uint64_t hash = 0;
+  dt_pthread_mutex_lock(&dev->pipe->busy_mutex);
   dt_pthread_mutex_lock(&dev->history_mutex);
   GList *pieces = g_list_last(pipe->nodes);
   if(pieces)
@@ -2507,6 +2503,7 @@ uint64_t dt_dev_hash(dt_develop_t *dev, struct dt_dev_pixelpipe_t *pipe)
     hash = piece->global_hash;
   }
   dt_pthread_mutex_unlock(&dev->history_mutex);
+  dt_pthread_mutex_unlock(&dev->pipe->busy_mutex);
   return hash;
 }
 
