@@ -1707,6 +1707,99 @@ static int _sync_params(dt_dev_history_item_t *hist, const void *module_params, 
   return 0;
 }
 
+static int _process_history_db_entry(dt_develop_t *dev, sqlite3_stmt *stmt, const int imgid, int *legacy_params)
+{
+  // Unpack the DB blobs
+  const int id = sqlite3_column_int(stmt, 0);
+  const int num = sqlite3_column_int(stmt, 1);
+  const int modversion = sqlite3_column_int(stmt, 2);
+  const char *module_name = (const char *)sqlite3_column_text(stmt, 3);
+  const void *module_params = sqlite3_column_blob(stmt, 4);
+  int enabled = sqlite3_column_int(stmt, 5);
+  const void *blendop_params = sqlite3_column_blob(stmt, 6);
+  const int blendop_version = sqlite3_column_int(stmt, 7);
+  const int multi_priority = sqlite3_column_int(stmt, 8);
+  const char *multi_name = (const char *)sqlite3_column_text(stmt, 9);
+
+  const int param_length = sqlite3_column_bytes(stmt, 4);
+  const int bl_length = sqlite3_column_bytes(stmt, 6);
+
+  // Sanity checks
+  const gboolean is_valid_id = (id == imgid);
+  const gboolean has_module_name = (module_name != NULL);
+
+  if(!(has_module_name && is_valid_id))
+  {
+    fprintf(stderr, "[dev_read_history] database history for image `%s' seems to be corrupted!\n",
+            dev->image_storage.filename);
+    return 1;
+  }
+
+  const int iop_order = dt_ioppr_get_iop_order(dev->iop_order_list, module_name, multi_priority);
+
+  // Init a bare minimal history entry
+  dt_dev_history_item_t *hist = (dt_dev_history_item_t *)calloc(1, sizeof(dt_dev_history_item_t));
+  hist->module = NULL;
+  hist->enabled = (enabled != 0); // "cast" int into a clean gboolean
+  hist->num = num;
+  hist->iop_order = iop_order;
+  hist->multi_priority = multi_priority;
+  g_strlcpy(hist->op_name, module_name, sizeof(hist->op_name));
+  g_strlcpy(hist->multi_name, multi_name, sizeof(hist->multi_name));
+
+  // Find a .so file that matches our history entry, aka a module to run the params stored in DB
+  _find_so_for_history_entry(dev, hist);
+
+  if(!hist->module)
+  {
+    fprintf(
+        stderr,
+        "[dev_read_history] the module `%s' requested by image `%s' is not installed on this computer!\n",
+        module_name, dev->image_storage.filename);
+    free(hist);
+    return 1;
+  }
+
+  // Update IOP order stuff, that applies to all modules regardless of their internals
+  hist->module->iop_order = hist->iop_order;
+  dt_iop_update_multi_priority(hist->module, hist->multi_priority);
+
+  // module has no user params and won't bother us in GUI - exit early, we are done
+  if(hist->module->flags() & IOP_FLAGS_NO_HISTORY_STACK)
+  {
+    free(hist);
+    return 1;
+  }
+
+  // Last chance & desperate attempt at enabling/disabling critical modules
+  // when history is garbled - This might prevent segfaults on invalid data
+  if(hist->module->force_enable) enabled = hist->module->force_enable(hist->module, enabled);
+
+  dt_print(DT_DEBUG_HISTORY, "[history] successfully loaded module %s history (enabled: %i)\n", hist->module->op, enabled);
+
+  // Copy instance name
+  g_strlcpy(hist->module->multi_name, hist->multi_name, sizeof(hist->module->multi_name));
+
+  // Copy blending params if valid, else try to convert legacy params
+  _sync_blendop_params(hist, blendop_params, bl_length, blendop_version, legacy_params);
+
+  // Copy module params if valid, else try to convert legacy params
+  if(_sync_params(hist, module_params, param_length, modversion, legacy_params))
+    return 1;
+
+  // make sure that always-on modules are always on. duh.
+  if(hist->module->default_enabled == 1 && hist->module->hide_enable_button == 1)
+    hist->enabled = hist->module->enabled = TRUE;
+
+  // Compute the history params hash
+  hist->hash = hist->module->hash = dt_iop_module_hash(hist->module);
+
+  dev->history = g_list_append(dev->history, hist);
+  dt_dev_set_history_end(dev, dt_dev_get_history_end(dev) + 1);
+
+  return 0;
+}
+
 
 void dt_dev_read_history_ext(dt_develop_t *dev, const int imgid, gboolean no_image)
 {
@@ -1742,92 +1835,8 @@ void dt_dev_read_history_ext(dt_develop_t *dev, const int imgid, gboolean no_ima
   // Strip rows from DB lookup. One row == One module in history
   while(sqlite3_step(stmt) == SQLITE_ROW)
   {
-    // Unpack the DB blobs
-    const int id = sqlite3_column_int(stmt, 0);
-    const int num = sqlite3_column_int(stmt, 1);
-    const int modversion = sqlite3_column_int(stmt, 2);
-    const char *module_name = (const char *)sqlite3_column_text(stmt, 3);
-    const void *module_params = sqlite3_column_blob(stmt, 4);
-    int enabled = sqlite3_column_int(stmt, 5);
-    const void *blendop_params = sqlite3_column_blob(stmt, 6);
-    const int blendop_version = sqlite3_column_int(stmt, 7);
-    const int multi_priority = sqlite3_column_int(stmt, 8);
-    const char *multi_name = (const char *)sqlite3_column_text(stmt, 9);
-
-    const int param_length = sqlite3_column_bytes(stmt, 4);
-    const int bl_length = sqlite3_column_bytes(stmt, 6);
-
-    // Sanity checks
-    const gboolean is_valid_id = (id == imgid);
-    const gboolean has_module_name = (module_name != NULL);
-
-    if(!(has_module_name && is_valid_id))
-    {
-      fprintf(stderr, "[dev_read_history] database history for image `%s' seems to be corrupted!\n",
-              dev->image_storage.filename);
+    if(_process_history_db_entry(dev, stmt, imgid, &legacy_params))
       continue;
-    }
-
-    const int iop_order = dt_ioppr_get_iop_order(dev->iop_order_list, module_name, multi_priority);
-
-    // Init a bare minimal history entry
-    dt_dev_history_item_t *hist = (dt_dev_history_item_t *)calloc(1, sizeof(dt_dev_history_item_t));
-    hist->module = NULL;
-    hist->enabled = (enabled != 0); // "cast" int into a clean gboolean
-    hist->num = num;
-    hist->iop_order = iop_order;
-    hist->multi_priority = multi_priority;
-    g_strlcpy(hist->op_name, module_name, sizeof(hist->op_name));
-    g_strlcpy(hist->multi_name, multi_name, sizeof(hist->multi_name));
-
-    // Find a .so file that matches our history entry, aka a module to run the params stored in DB
-    _find_so_for_history_entry(dev, hist);
-
-    if(!hist->module)
-    {
-      fprintf(
-          stderr,
-          "[dev_read_history] the module `%s' requested by image `%s' is not installed on this computer!\n",
-          module_name, dev->image_storage.filename);
-      free(hist);
-      continue;
-    }
-
-    // Update IOP order stuff, that applies to all modules regardless of their internals
-    hist->module->iop_order = hist->iop_order;
-    dt_iop_update_multi_priority(hist->module, hist->multi_priority);
-
-    // module has no user params and won't bother us in GUI - exit early, we are done
-    if(hist->module->flags() & IOP_FLAGS_NO_HISTORY_STACK)
-    {
-      free(hist);
-      continue;
-    }
-
-    // Last chance & desperate attempt at enabling/disabling critical modules
-    // when history is garbled - This might prevent segfaults on invalid data
-    if(hist->module->force_enable) enabled = hist->module->force_enable(hist->module, enabled);
-
-    dt_print(DT_DEBUG_HISTORY, "[history] successfully loaded module %s history (enabled: %i)\n", hist->module->op, enabled);
-
-    // Copy instance name
-    g_strlcpy(hist->module->multi_name, hist->multi_name, sizeof(hist->module->multi_name));
-
-    // Copy blending params if valid, else try to convert legacy params
-    _sync_blendop_params(hist, blendop_params, bl_length, blendop_version, &legacy_params);
-
-    // Copy module params if valid, else try to convert legacy params
-    if(_sync_params(hist, module_params, param_length, modversion, &legacy_params)) continue;
-
-    // make sure that always-on modules are always on. duh.
-    if(hist->module->default_enabled == 1 && hist->module->hide_enable_button == 1)
-      hist->enabled = hist->module->enabled = TRUE;
-
-    // Compute the history params hash
-    hist->hash = hist->module->hash = dt_iop_module_hash(hist->module);
-
-    dev->history = g_list_append(dev->history, hist);
-    dt_dev_set_history_end(dev, dt_dev_get_history_end(dev) + 1);
   }
   sqlite3_finalize(stmt);
 
