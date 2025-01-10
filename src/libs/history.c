@@ -821,8 +821,8 @@ static gboolean _changes_tooltip_callback(GtkWidget *widget, gint x, gint y, gbo
                                           GtkTooltip *tooltip, dt_dev_history_item_t *hitem)
 {
   const dt_dev_history_item_t *hprev = _find_previous_history_step(hitem);
-  dt_iop_params_t *old_params = (hprev == hitem) ? hitem->module->default_params : hprev->module->params;
-  dt_develop_blend_params_t *old_blend = (hprev == hitem) ? hitem->module->default_blendop_params : hprev->module->blend_params;
+  dt_iop_params_t *old_params = (hprev == hitem || hprev == NULL) ? hitem->module->default_params : hprev->module->params;
+  dt_develop_blend_params_t *old_blend = (hprev == hitem || hprev == NULL) ? hitem->module->default_blendop_params : hprev->module->blend_params;
 
 
   gchar **change_parts = g_malloc0_n(sizeof(dt_develop_blend_params_t) / (sizeof(float)) + 10, sizeof(char*));
