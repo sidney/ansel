@@ -352,8 +352,9 @@ int dt_dev_is_current_image(dt_develop_t *dev, uint32_t imgid);
 
 /* WARNING: non-thread-safe. Should be called in function locking the dev->history_mutex lock */
 const dt_dev_history_item_t *dt_dev_get_history_item(dt_develop_t *dev, const char *op);
-void dt_dev_add_history_item_ext(dt_develop_t *dev, struct dt_iop_module_t *module, gboolean enable, gboolean force_new_item,
-                                 gboolean no_image, gboolean include_masks);
+/* Return TRUE if the pipeline topology may need to be updated, aka new module node inserted */
+gboolean dt_dev_add_history_item_ext(dt_develop_t *dev, struct dt_iop_module_t *module, gboolean enable, gboolean force_new_item,
+                                     gboolean no_image, gboolean include_masks);
 void dt_dev_add_history_item_real(dt_develop_t *dev, struct dt_iop_module_t *module, gboolean enable);
 #define dt_dev_add_history_item(dev, module, enable) DT_DEBUG_TRACE_WRAPPER(DT_DEBUG_DEV, dt_dev_add_history_item_real, (dev), (module), (enable))
 

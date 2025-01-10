@@ -666,9 +666,14 @@ static dt_iop_module_t * _find_mask_manager(dt_develop_t *dev)
 }
 
 
-void dt_dev_add_history_item_ext(dt_develop_t *dev, struct dt_iop_module_t *module, gboolean enable,
-                                 gboolean force_new_item, gboolean no_image, gboolean include_masks)
+gboolean dt_dev_add_history_item_ext(dt_develop_t *dev, struct dt_iop_module_t *module, gboolean enable,
+                                     gboolean force_new_item, gboolean no_image, gboolean include_masks)
 {
+  // If this history item is the first for this module,
+  // we need to notify the pipeline that its topology may change (aka insert a new node).
+  // Since changing topology is expensive, we want to do it only when needed.
+  gboolean add_new_pipe_node = FALSE;
+
   if(!module)
   {
     // module = NULL means a mask was changed from the mask manager
@@ -678,7 +683,7 @@ void dt_dev_add_history_item_ext(dt_develop_t *dev, struct dt_iop_module_t *modu
     force_new_item = FALSE;
   }
 
-  if(!module) return;
+  if(!module) return add_new_pipe_node;
 
   // Stupid mask manager is a IOP module not processing any pixels...
   if(strcmp(module->op, "mask_manager") == 0) enable = FALSE;
@@ -688,7 +693,6 @@ void dt_dev_add_history_item_ext(dt_develop_t *dev, struct dt_iop_module_t *modu
   // look for leaks on top of history in two steps
   // first remove obsolete items above history_end
   // but keep the always-on modules
-
   for(GList *history = g_list_nth(dev->history, dt_dev_get_history_end(dev));
       history && history->data;
       history = g_list_next(history))
@@ -697,8 +701,6 @@ void dt_dev_add_history_item_ext(dt_develop_t *dev, struct dt_iop_module_t *modu
     dt_print(DT_DEBUG_HISTORY, "[dt_dev_add_history_item_ext] history item %s at %i is past history limit (%i)\n", hist->module->op, g_list_index(dev->history, hist), dt_dev_get_history_end(dev) - 1);
 
     // Check if an earlier instance of the module exists.
-    // FIXME: Why do we delete only non-existing instances ?
-    // Is it another workaround to deal with default-enabled modules ?
     gboolean earlier_entry = FALSE;
     for(GList *prior_history = g_list_previous(history);
         prior_history && earlier_entry == FALSE;
@@ -732,6 +734,11 @@ void dt_dev_add_history_item_ext(dt_develop_t *dev, struct dt_iop_module_t *modu
     dt_iop_module_t *last_module = last_item->module;
     // fprintf(stdout, "history has hash %lu, new module %s has %lu\n", last_item->hash, module->op, module->hash);
     new_is_old = dt_iop_check_modules_equal(module, last_module);
+    // add_new_pipe_node = FALSE
+  }
+  else
+  {
+    add_new_pipe_node = (dt_dev_get_history_item(dev, module->op) == NULL);
   }
 
   dt_dev_history_item_t *hist;
@@ -800,6 +807,7 @@ void dt_dev_add_history_item_ext(dt_develop_t *dev, struct dt_iop_module_t *modu
   // It is assumed that the last-added history entry is always on top
   // so its cursor index is always equal to the number of elements,
   // keeping in mind that history_end = 0 is the raw image, aka not a dev->history GList entry.
+  // So dev->history_end = index of last history entry + 1 = length of history
   dt_dev_set_history_end(dev, g_list_length(dev->history));
 
   if(!no_image)
@@ -810,6 +818,8 @@ void dt_dev_add_history_item_ext(dt_develop_t *dev, struct dt_iop_module_t *modu
     dev->preview_pipe->changed |= DT_DEV_PIPE_SYNCH;
     dt_print(DT_DEBUG_PIPE, "[dt_dev_add_history_item_ext] invalidating pipeline for recomputing\n");
   }
+
+  return add_new_pipe_node;
 }
 
 const dt_dev_history_item_t *dt_dev_get_history_item(dt_develop_t *dev, const char *op)
