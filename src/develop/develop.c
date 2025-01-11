@@ -239,11 +239,28 @@ void dt_dev_refresh_ui_images_real(dt_develop_t *dev)
 
 void dt_dev_pixelpipe_rebuild(dt_develop_t *dev)
 {
+  if(!dev->gui_attached) return;
+
+  dt_atomic_set_int(&dev->pipe->shutdown, TRUE);
+  dt_atomic_set_int(&dev->preview_pipe->shutdown, TRUE);
+
   dt_pthread_mutex_lock(&dev->history_mutex);
   dev->pipe->changed |= DT_DEV_PIPE_REMOVE;
   dev->preview_pipe->changed |= DT_DEV_PIPE_REMOVE;
   dt_pthread_mutex_unlock(&dev->history_mutex);
-  dt_dev_invalidate_all(dev);
+}
+
+void dt_dev_pixelpipe_resync(dt_develop_t *dev)
+{
+  if(!dev->gui_attached) return;
+
+  dt_atomic_set_int(&dev->pipe->shutdown, TRUE);
+  dt_atomic_set_int(&dev->preview_pipe->shutdown, TRUE);
+
+  dt_pthread_mutex_lock(&dev->history_mutex);
+  dev->pipe->changed |= DT_DEV_PIPE_SYNCH;
+  dev->preview_pipe->changed |= DT_DEV_PIPE_SYNCH;
+  dt_pthread_mutex_unlock(&dev->history_mutex);
 }
 
 void dt_dev_invalidate_real(dt_develop_t *dev)
@@ -256,7 +273,7 @@ void dt_dev_invalidate_real(dt_develop_t *dev)
 
   dt_pthread_mutex_lock(&dev->history_mutex);
   dev->image_status = DT_DEV_PIXELPIPE_DIRTY;
-  dev->pipe->changed |= DT_DEV_PIPE_SYNCH;
+  dev->pipe->changed |= DT_DEV_PIPE_TOP_CHANGED;
   dt_pthread_mutex_unlock(&dev->history_mutex);
 }
 
@@ -283,7 +300,7 @@ void dt_dev_invalidate_preview_real(dt_develop_t *dev)
   dt_atomic_set_int(&dev->preview_pipe->shutdown, TRUE);
 
   dt_pthread_mutex_lock(&dev->history_mutex);
-  dev->preview_pipe->changed |= DT_DEV_PIPE_SYNCH;
+  dev->preview_pipe->changed |= DT_DEV_PIPE_TOP_CHANGED;
   dev->preview_status = DT_DEV_PIXELPIPE_DIRTY;
   dt_pthread_mutex_unlock(&dev->history_mutex);
 }
@@ -553,17 +570,15 @@ int dt_dev_load_image(dt_develop_t *dev, const uint32_t imgid)
   {
     dev->pipe->processed_width = 0;
     dev->pipe->processed_height = 0;
-    dev->pipe->changed |= DT_DEV_PIPE_REMOVE | DT_DEV_PIPE_SYNCH;
-    dt_atomic_set_int(&dev->pipe->shutdown, TRUE);
   }
   if(dev->preview_pipe)
   {
     dev->preview_pipe->processed_width = 0;
     dev->preview_pipe->processed_height = 0;
-    dev->preview_pipe->changed |= DT_DEV_PIPE_REMOVE | DT_DEV_PIPE_SYNCH;
-    dt_atomic_set_int(&dev->preview_pipe->shutdown, TRUE);
   }
   dt_pthread_mutex_unlock(&dev->history_mutex);
+
+  dt_dev_pixelpipe_rebuild(dev);
 
   return 0;
 }
@@ -852,16 +867,6 @@ void dt_dev_add_history_item_real(dt_develop_t *dev, dt_iop_module_t *module, gb
   {
     /* recreate mask list */
     dt_dev_masks_list_change(dev);
-
-    if(dev->gui_attached)
-    {
-      // FIXME: if module was just enabled and is in default pipeline order,
-      // do we need to rebuild ? Aka are disabled modules added to pipeline still ?
-      dev->pipe->changed |= DT_DEV_PIPE_SYNCH;
-      dev->preview_pipe->changed |= DT_DEV_PIPE_SYNCH;
-      dt_print(DT_DEBUG_PIPE, "[dt_dev_add_history_item] invalidating pipeline for recomputing\n");
-    }
-
     if(module) dt_iop_gui_set_enable_button(module);
   }
 
@@ -874,7 +879,20 @@ void dt_dev_add_history_item_real(dt_develop_t *dev, dt_iop_module_t *module, gb
   dev->preview_status = DT_DEV_PIXELPIPE_DIRTY;
   dt_pthread_mutex_unlock(&dev->history_mutex);
 
-  dt_dev_invalidate_all(dev);
+  if(module)
+  {
+    // If we have a module, we only need to resync the top-most history item with pipeline
+    dt_dev_invalidate_all(dev);
+  }
+  else
+  {
+    // If we don't have a module, that means we have the mask manager.
+    // a weird thing happens with that one, when drawing masks, that typically
+    // leads to 2 history items creation (one for mask manager, the next for the module
+    // capturing the drawing). So, resync the whole history for safety
+    dt_dev_pixelpipe_resync(dev);
+  }
+
   dt_control_queue_redraw_center();
   dt_dev_refresh_ui_images(dev);
 }
@@ -927,9 +945,7 @@ void dt_dev_reload_history_items(dt_develop_t *dev)
         dt_iop_reload_defaults(module);
         dt_iop_gui_update_blending(module);
 
-        // the pipe need to be reconstruct
-        dev->pipe->changed |= DT_DEV_PIPE_REMOVE;
-        dev->preview_pipe->changed |= DT_DEV_PIPE_REMOVE;
+        dt_dev_pixelpipe_rebuild(dev);
       }
     }
     else if(!dt_iop_is_hidden(module) && module->expander)
@@ -1025,10 +1041,9 @@ void dt_dev_pop_history_items(dt_develop_t *dev, int32_t cnt)
   ++darktable.gui->reset;
 
   dt_pthread_mutex_lock(&dev->history_mutex);
-
   dt_ioppr_check_iop_order(dev, 0, "dt_dev_pop_history_items");
-
   dt_dev_pop_history_items_ext(dev, cnt);
+  dt_pthread_mutex_unlock(&dev->history_mutex);
 
   // update all gui modules
   GList *modules = dev->iop;
@@ -1039,17 +1054,11 @@ void dt_dev_pop_history_items(dt_develop_t *dev, int32_t cnt)
     modules = g_list_next(modules);
   }
 
-  dev->pipe->changed |= DT_DEV_PIPE_REMOVE;
-  dev->preview_pipe->changed |= DT_DEV_PIPE_REMOVE;
-
-  dt_atomic_set_int(&dev->pipe->shutdown, TRUE);
-  dt_atomic_set_int(&dev->preview_pipe->shutdown, TRUE);
-
   --darktable.gui->reset;
 
-  dt_pthread_mutex_unlock(&dev->history_mutex);
 
   dt_dev_masks_list_change(dev);
+  dt_dev_pixelpipe_rebuild(dev);
   dt_dev_refresh_ui_images(dev);
 }
 

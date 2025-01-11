@@ -388,17 +388,35 @@ int32_t dt_dev_get_history_end(dt_develop_t *dev);
 // It needs to run after dev->history is fully populated
 void dt_dev_set_history_end(dt_develop_t *dev, const uint32_t index);
 
-// force a rebuild of the pipe, needed when a module order is changed for example
+// Force a full rebuild of the pipe, needed when module order is changed.
+// Resync the full history, which may be expensive.
+// Pixelpipe cache will need to be flushed too when this is called,
+// for raster masks to work properly.
 void dt_dev_pixelpipe_rebuild(struct dt_develop_t *dev);
 
 void dt_dev_invalidate_real(dt_develop_t *dev);
+// Invalidate the main image preview in darkroom, resync only the last history item.
+// This is the most common usecase when interacting with modules and masks.
 #define dt_dev_invalidate(dev) DT_DEBUG_TRACE_WRAPPER(DT_DEBUG_DEV, dt_dev_invalidate_real, (dev))
+
 void dt_dev_invalidate_preview_real(dt_develop_t *dev);
+// Invalidate the thumbnail preview in darkroom, resync only the last history item.
 #define dt_dev_invalidate_preview(dev) DT_DEBUG_TRACE_WRAPPER(DT_DEBUG_DEV, dt_dev_invalidate_preview_real, (dev))
+
 void dt_dev_invalidate_all_real(dt_develop_t *dev);
+// Invalidate the main image and the thumbnail in darkroom, resync only the last history item.
 #define dt_dev_invalidate_all(dev) DT_DEBUG_TRACE_WRAPPER(DT_DEBUG_DEV, dt_dev_invalidate_all_real, (dev))
+
 void dt_dev_invalidate_zoom_real(dt_develop_t *dev);
+// Invalidate the main image preview in darkroom.
+// This doesn't resync history at all, only update the coordinates of the region of interest (ROI).
 #define dt_dev_invalidate_zoom(dev) DT_DEBUG_TRACE_WRAPPER(DT_DEBUG_DEV, dt_dev_invalidate_zoom_real, (dev))
+
+// Invalidate the main image and the thumbnail in darkroom.
+// Resync the whole history, which may be expensive.
+void dt_dev_pixelpipe_resync(dt_develop_t *dev);
+
+
 void dt_dev_set_histogram(dt_develop_t *dev);
 void dt_dev_set_histogram_pre(dt_develop_t *dev);
 void dt_dev_get_history_item_label(dt_dev_history_item_t *hist, char *label, const int cnt);
