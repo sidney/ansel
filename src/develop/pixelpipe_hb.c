@@ -2442,18 +2442,21 @@ float *dt_dev_get_raster_mask(const dt_dev_pixelpipe_t *pipe, const dt_iop_modul
   *free_mask = FALSE;
   float *raster_mask = NULL;
 
-  GList *source_iter;
+  dt_dev_pixelpipe_iop_t *source_piece = NULL;
+  GList *source_iter = NULL;
   for(source_iter = g_list_first(pipe->nodes); source_iter; source_iter = g_list_next(source_iter))
   {
-    const dt_dev_pixelpipe_iop_t *candidate = (dt_dev_pixelpipe_iop_t *)source_iter->data;
+    dt_dev_pixelpipe_iop_t *candidate = (dt_dev_pixelpipe_iop_t *)source_iter->data;
     if(candidate->module == raster_mask_source)
+    {
+      source_piece = candidate;
       break;
+    }
   }
 
-  if(source_iter)
+  if(source_piece)
   {
-    const dt_dev_pixelpipe_iop_t *source_piece = (dt_dev_pixelpipe_iop_t *)source_iter->data;
-    if(source_piece && !source_piece->enabled)
+    if(!source_piece->enabled)
     {
       // there might be stale masks from disabled modules left over. don't use those!
       dt_control_log(_("The `%s` module is trying to reuse a mask from disabled module `%s`.\n"
@@ -2465,13 +2468,14 @@ float *dt_dev_get_raster_mask(const dt_dev_pixelpipe_t *pipe, const dt_iop_modul
               target_module->op, target_module->multi_name, source_piece->module->op,
               source_piece->module->multi_name);
     }
-    else if(source_piece)
+    else
     {
       raster_mask = g_hash_table_lookup(source_piece->raster_masks, GINT_TO_POINTER(raster_mask_id));
       if(raster_mask)
       {
         for(GList *iter = g_list_next(source_iter); iter; iter = g_list_next(iter))
         {
+          // Pass the raster mask through all distortion steps between the provider and the consumer
           dt_dev_pixelpipe_iop_t *module = (dt_dev_pixelpipe_iop_t *)iter->data;
 
           if(module->enabled
@@ -2494,10 +2498,6 @@ float *dt_dev_get_raster_mask(const dt_dev_pixelpipe_t *pipe, const dt_iop_modul
               if(*free_mask) dt_free_align(raster_mask);
               *free_mask = TRUE;
               raster_mask = transformed_mask;
-
-              dt_print(DT_DEBUG_MASKS, "[raster masks] found mask from %s (%s) for module %s (%s) in pipe %i\n",
-                       source_piece->module->op, source_piece->module->multi_name, module->module->op,
-                       module->module->multi_name, pipe->type);
             }
             else if(!module->module->distort_mask &&
                     (module->processed_roi_in.width != module->processed_roi_out.width ||
@@ -2512,15 +2512,19 @@ float *dt_dev_get_raster_mask(const dt_dev_pixelpipe_t *pipe, const dt_iop_modul
           }
 
           if(module->module == target_module)
+          {
+            dt_print(DT_DEBUG_MASKS, "[raster masks] found mask id %i from %s (%s) for module %s (%s) in pipe %i\n",
+                       raster_mask_id, source_piece->module->op, source_piece->module->multi_name, module->module->op,
+                       module->module->multi_name, pipe->type);
             break;
+          }
         }
       }
       else
       {
         fprintf(stderr,
-                "[raster masks] the source mask from %s (%s) with id %d for module %s (%s) could not be found in "
-                "pipe %i\n",
-                source_piece->module->op, source_piece->module->multi_name, raster_mask_id, target_module->op,
+                "[raster masks] mask id %i from %s (%s) for module %s (%s) could not be found in pipe %i\n",
+                raster_mask_id, source_piece->module->op, source_piece->module->multi_name, target_module->op,
                 target_module->multi_name, pipe->type);
       }
     }
