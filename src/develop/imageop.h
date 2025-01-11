@@ -292,6 +292,14 @@ typedef struct dt_iop_module_t
 
   // parameters hash
   uint64_t hash;
+
+  // blendop hash
+  // Ideally, this would be added to struct dt_develop_blend_params_t *blendop
+  // but since blendops are dumped to DB as a memory blob, we can't change their length
+  // without updating version (aka breaking backwards compatibility), and this minor
+  // stuff is not worth it.
+  uint64_t blendop_hash;
+
 } dt_iop_module_t;
 
 typedef struct dt_action_target_t
@@ -487,10 +495,12 @@ void dt_iop_gui_changed(dt_action_t *action, GtkWidget *widget, gpointer data);
 
 
 /** Uniform way of getting the full state hash of user-defined parameters, including masks and blending.
- * Writes the value in module->hash
-* WARNING: doesn't take into account parameters dynamically set at runtime.
+ * Writes the value in module->hash. Needs module->blendop_hash to be inited first,
+ * meaning call dt_iop_compute_blendop_hash() before calling that.
+ * WARNING: doesn't take into account parameters dynamically set at runtime.
 */
 void dt_iop_compute_module_hash(dt_iop_module_t *module);
+void dt_iop_compute_blendop_hash(dt_iop_module_t *module);
 
 // Use module fingerprints to determine if two instances are actually the same
 gboolean dt_iop_check_modules_equal(dt_iop_module_t *mod_1, dt_iop_module_t *mod_2);

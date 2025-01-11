@@ -688,6 +688,8 @@ gboolean dt_dev_add_history_item_ext(dt_develop_t *dev, struct dt_iop_module_t *
   // Stupid mask manager is a IOP module not processing any pixels...
   if(strcmp(module->op, "mask_manager") == 0) enable = FALSE;
 
+  // TODO: this is probably a redundant call
+  dt_iop_compute_blendop_hash(module);
   dt_iop_compute_module_hash(module);
 
   // look for leaks on top of history in two steps
@@ -999,6 +1001,8 @@ void dt_dev_pop_history_items_ext(dt_develop_t *dev, int32_t cnt)
     hist->module->multi_priority = hist->multi_priority;
     g_strlcpy(hist->module->multi_name, hist->multi_name, sizeof(hist->module->multi_name));
 
+    // This needs to run after dt_iop_compute_blendop_hash()
+    // which is called in dt_iop_commit_blend_params
     dt_iop_compute_module_hash(hist->module);
     hist->hash = hist->module->hash;
 
@@ -1759,10 +1763,6 @@ static int _process_history_db_entry(dt_develop_t *dev, sqlite3_stmt *stmt, cons
   if(hist->module->default_enabled == 1 && hist->module->hide_enable_button == 1)
     hist->enabled = hist->module->enabled = TRUE;
 
-  // Compute the history params hash
-  dt_iop_compute_module_hash(hist->module);
-  hist->hash = hist->module->hash;
-
   dev->history = g_list_append(dev->history, hist);
   dt_dev_set_history_end(dev, dt_dev_get_history_end(dev) + 1);
 
@@ -1831,6 +1831,14 @@ void dt_dev_read_history_ext(dt_develop_t *dev, const int imgid, gboolean no_ima
   {
     dt_dev_history_item_t *hist = (dt_dev_history_item_t *)history->data;
     dt_iop_commit_blend_params(hist->module, hist->blend_params);
+
+    // Compute the history params hash.
+    // This needs to run after dt_iop_compute_blendop_hash(),
+    // which is called in dt_iop_commit_blend_params,
+    // which needs to run after dt_masks_read_masks_history()
+    // TL;DR: don't move this higher, it needs blendop AND mask shapes
+    dt_iop_compute_module_hash(hist->module);
+    hist->hash = hist->module->hash;
   }
 
   dt_dev_masks_list_change(dev);
