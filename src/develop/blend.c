@@ -661,12 +661,12 @@ void dt_develop_blend_process(struct dt_iop_module_t *self, struct dt_dev_pixelp
   if(piece->pipe->store_all_raster_masks || dt_iop_is_raster_mask_used(self, 0))
   {
     g_hash_table_replace(piece->raster_masks, GINT_TO_POINTER(0), _mask);
-    dt_print(DT_DEBUG_MASKS, "[raster masks] replacing raster mask for module %s (%s) for pipe %i\n", piece->module->op,
+    dt_print(DT_DEBUG_MASKS, "[raster masks] replacing raster mask id 0 for module %s (%s) for pipe %i\n", piece->module->op,
              piece->module->multi_name, piece->pipe->type);
   }
   else
   {
-    dt_print(DT_DEBUG_MASKS, "[raster masks] destroying raster mask for module %s (%s) for pipe %i\n", piece->module->op,
+    dt_print(DT_DEBUG_MASKS, "[raster masks] destroying raster mask id 0 for module %s (%s) for pipe %i\n", piece->module->op,
              piece->module->multi_name, piece->pipe->type);
     g_hash_table_remove(piece->raster_masks, GINT_TO_POINTER(0));
     dt_free_align(_mask);
@@ -1234,7 +1234,7 @@ int dt_develop_blend_process_cl(struct dt_iop_module_t *self, struct dt_dev_pixe
   // TODO: should we skip raster masks?
   if(piece->pipe->store_all_raster_masks || dt_iop_is_raster_mask_used(self, 0))
   {
-    dt_print(DT_DEBUG_MASKS, "[raster masks] replacing raster mask for module %s (%s) for pipe %i\n", piece->module->op,
+    dt_print(DT_DEBUG_MASKS, "[raster masks] replacing raster mask id 0 for module %s (%s) for pipe %i\n", piece->module->op,
              piece->module->multi_name, piece->pipe->type);
     //  get back final mask from the device to store it for later use
     if(!(mask_mode & DEVELOP_MASK_RASTER))
@@ -1246,7 +1246,7 @@ int dt_develop_blend_process_cl(struct dt_iop_module_t *self, struct dt_dev_pixe
     }
   else
   {
-    dt_print(DT_DEBUG_MASKS, "[raster masks] destroying raster mask for module %s (%s) for pipe %i\n", piece->module->op,
+    dt_print(DT_DEBUG_MASKS, "[raster masks] destroying raster mask id 0 for module %s (%s) for pipe %i\n", piece->module->op,
              piece->module->multi_name, piece->pipe->type);
     g_hash_table_remove(piece->raster_masks, GINT_TO_POINTER(0));
     dt_free_align(_mask);
