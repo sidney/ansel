@@ -2001,6 +2001,8 @@ static int dt_dev_pixelpipe_process_rec(dt_dev_pixelpipe_t *pipe, dt_develop_t *
   }
 
   // 3b) recurse and obtain output array in &input
+  dt_print(DT_DEBUG_PIPE, "[pixelpipe] cache not available for pipe %i and module %s (%s) with hash %llu\n",
+             pipe->type, module->op, module->multi_name, (long long unsigned int)hash);
 
   // get region of interest which is needed in input
   // This is already computed ahead of running at init time in _get_roi_in()
@@ -2493,9 +2495,9 @@ float *dt_dev_get_raster_mask(const dt_dev_pixelpipe_t *pipe, const dt_iop_modul
               *free_mask = TRUE;
               raster_mask = transformed_mask;
 
-              dt_print(DT_DEBUG_MASKS, "[raster masks] found mask from %s (%s) for module %s (%s)\n",
+              dt_print(DT_DEBUG_MASKS, "[raster masks] found mask from %s (%s) for module %s (%s) in pipe %i\n",
                        source_piece->module->op, source_piece->module->multi_name, module->module->op,
-                       module->module->multi_name);
+                       module->module->multi_name, pipe->type);
             }
             else if(!module->module->distort_mask &&
                     (module->processed_roi_in.width != module->processed_roi_out.width ||
@@ -2515,8 +2517,11 @@ float *dt_dev_get_raster_mask(const dt_dev_pixelpipe_t *pipe, const dt_iop_modul
       }
       else
       {
-        fprintf(stderr, "[raster masks] the source mask from %s (%s) with id %d for module %s (%s) could not be found\n",
-                source_piece->module->op, source_piece->module->multi_name, raster_mask_id, target_module->op, target_module->multi_name);
+        fprintf(stderr,
+                "[raster masks] the source mask from %s (%s) with id %d for module %s (%s) could not be found in "
+                "pipe %i\n",
+                source_piece->module->op, source_piece->module->multi_name, raster_mask_id, target_module->op,
+                target_module->multi_name, pipe->type);
       }
     }
   }
