@@ -807,9 +807,6 @@ gboolean dt_dev_add_history_item_ext(dt_develop_t *dev, struct dt_iop_module_t *
   hist->enabled = module->enabled;
   hist->hash = module->hash;
 
-  // Publish the masks on the raster stack for other modules to find
-  dt_iop_commit_blend_params(module, module->blend_params);
-
   // It is assumed that the last-added history entry is always on top
   // so its cursor index is always equal to the number of elements,
   // keeping in mind that history_end = 0 is the raw image, aka not a dev->history GList entry.
@@ -863,12 +860,7 @@ void dt_dev_add_history_item_real(dt_develop_t *dev, dt_iop_module_t *module, gb
       dt_print(DT_DEBUG_PIPE, "[dt_dev_add_history_item] invalidating pipeline for recomputing\n");
     }
 
-    if(module)
-    {
-      // We need a full GUI update to resync retouch IOP
-      // TL;DR : it copies the list of masks from dev to its own params on gui update
-      dt_iop_gui_set_enable_button(module);
-    }
+    if(module) dt_iop_gui_set_enable_button(module);
   }
 
   // Run the delayed post-commit actions if implemented
