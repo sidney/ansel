@@ -1511,6 +1511,8 @@ void dt_iop_commit_blend_params(dt_iop_module_t *module, const dt_develop_blend_
         if(m->multi_priority == blendop_params->raster_mask_instance)
         {
           g_hash_table_insert(m->raster_mask.source.users, module, GINT_TO_POINTER(blendop_params->raster_mask_id));
+          dt_print(DT_DEBUG_MASKS, "[raster masks] inserting mask from %s (%s) into %s (%s)\n", m->op, m->multi_name, module->op,
+                  module->multi_name);
           module->raster_mask.sink.source = m;
           module->raster_mask.sink.id = blendop_params->raster_mask_id;
           return;
@@ -1727,7 +1729,7 @@ void dt_iop_commit_params(dt_iop_module_t *module, dt_iop_params_t *params,
   // We need to take mask display into account too because it's set in various ways from GUI.
   piece->global_hash = piece->hash = dt_hash(module->hash, (const char *)&module->request_mask_display, sizeof(int));
 
-  dt_print(DT_DEBUG_PIPE, "[pipe] commit for %s (%s) in pipe %i with hash %lu\n", module->op, module->multi_name, pipe->type, (long unsigned int)piece->hash);
+  dt_print(DT_DEBUG_PIPE, "[pixelpipe] params commit for %s (%s) in pipe %i with hash %lu\n", module->op, module->multi_name, pipe->type, (long unsigned int)piece->hash);
 }
 
 void dt_iop_gui_cleanup_module(dt_iop_module_t *module)

@@ -416,7 +416,7 @@ void dt_pixelpipe_get_global_hash(dt_dev_pixelpipe_t *pipe, dt_develop_t *dev)
       local_hash = dt_hash(local_hash, (const char *)&piece->planned_roi_out, sizeof(dt_iop_roi_t));
       hash = dt_hash(hash, (const char *)&local_hash, sizeof(uint64_t));
 
-      dt_print(DT_DEBUG_PIPE, "[pipe] global hash for %s in pipe %i with hash %lu\n", piece->module->op, pipe->type, (long unsigned int)hash);
+      dt_print(DT_DEBUG_PIPE, "[pixelpipe] global hash for %s (%s) in pipe %i with hash %lu\n", piece->module->op, piece->module->multi_name, pipe->type, (long unsigned int)hash);
     }
 
     piece->global_hash = hash;
@@ -1967,8 +1967,8 @@ static int dt_dev_pixelpipe_process_rec(dt_dev_pixelpipe_t *pipe, dt_develop_t *
   if(!bypass_cache && dt_dev_pixelpipe_cache_available(&(pipe->cache), hash))
   {
     if(module)
-      dt_print(DT_DEBUG_PIPE, "[pixelpipe] dt_dev_pixelpipe_process_rec, cache available for pipe %i and module %s with hash %llu\n",
-             pipe->type, module->op, (long long unsigned int)hash);
+      dt_print(DT_DEBUG_PIPE, "[pixelpipe] cache available for pipe %i and module %s (%s) with hash %llu\n",
+             pipe->type, module->op, module->multi_name, (long long unsigned int)hash);
 
     (void)dt_dev_pixelpipe_cache_get(&(pipe->cache), hash, bufsize, output, out_format);
 
