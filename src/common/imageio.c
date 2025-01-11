@@ -879,7 +879,6 @@ void _swap_byteorder_uint8_to_uint8(uint8_t *outbuf, const size_t processed_widt
 void _clamp_float_to_uint8(uint8_t *outbuf, const size_t processed_width, const size_t processed_height)
 {
   const float *const inbuf = (float *)outbuf;
-  fprintf(stdout, "clamp_float_to_uint\n");
 
   // That nasty. Read pixels as floats by packs of 32 bits, write them as uint8 by pack of 8 bits.
   // So, while this is done inplace, it's not threadsafe and can't be parallelized.
@@ -900,7 +899,6 @@ void _clamp_float_to_uint8(uint8_t *outbuf, const size_t processed_width, const 
 void _swap_byteorder_float_to_uint8(uint8_t *outbuf, const size_t processed_width, const size_t processed_height)
 {
   const float *const inbuf = (float *)outbuf;
-  fprintf(stdout, "swap_float_to_uint\n");
 
   // That nasty. Read pixels as floats by packs of 32 bits, write them as uint8 by pack of 8 bits.
   // So, while this is done inplace, it's not threadsafe and can't be parallelized.
