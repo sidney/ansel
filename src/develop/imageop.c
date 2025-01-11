@@ -1670,6 +1670,7 @@ uint64_t dt_iop_module_hash(dt_iop_module_t *module)
 
   // Blend params are always inited even when module doesn't support blending
   hash = dt_hash(hash, (char *)module->blend_params, sizeof(dt_develop_blend_params_t));
+  hash = dt_hash(hash, (char *)&module->raster_mask, sizeof(module->raster_mask));
 
   return hash;
 }
