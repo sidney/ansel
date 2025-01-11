@@ -85,7 +85,7 @@ void dt_iop_load_default_params(dt_iop_module_t *module)
   dt_develop_blend_init_blend_parameters(module->default_blendop_params, cst);
   dt_iop_commit_blend_params(module, module->default_blendop_params);
   dt_iop_gui_blending_reload_defaults(module);
-  dt_iop_module_hash(module);
+  dt_iop_compute_module_hash(module);
 }
 
 static void _iop_modify_roi_in(struct dt_iop_module_t *self, struct dt_dev_pixelpipe_iop_t *piece,
@@ -1643,7 +1643,7 @@ gboolean dt_iop_check_modules_equal(dt_iop_module_t *mod_1, dt_iop_module_t *mod
           && mod_1->iop_order == mod_2->iop_order;
 }
 
-uint64_t dt_iop_module_hash(dt_iop_module_t *module)
+void dt_iop_compute_module_hash(dt_iop_module_t *module)
 {
   // Uniform way of getting the full state hash of user-defined parameters,
   // including masks and blending.
@@ -1658,21 +1658,38 @@ uint64_t dt_iop_module_hash(dt_iop_module_t *module)
   {
     if(module->dev)
     {
+      // Drawn masks
       dt_masks_form_t *grp = dt_masks_get_from_id(module->dev, module->blend_params->mask_id);
       hash = dt_masks_group_get_hash(hash, grp);
+
+      // Raster masks
+      hash = dt_hash(hash, (char *)&module->raster_mask, sizeof(module->raster_mask));
+
+      // If raster masks are used, we need to copy the blendops of the raster source too
+      // And we need to update the hash with our blendops to the raster source too.
+      // Note: source is mandatorily before in pipe order.
+      dt_iop_module_t *raster_source = module->raster_mask.sink.source;
+      if(raster_source)
+      {
+        dt_masks_form_t *raster_grp = dt_masks_get_from_id(raster_source->dev, raster_source->blend_params->mask_id);
+        hash = dt_masks_group_get_hash(hash, raster_grp);
+        hash = dt_hash(hash, (char *)raster_source->blend_params, sizeof(dt_develop_blend_params_t));
+
+        // Update source module
+        raster_source->hash = dt_hash(raster_source->hash, (char *)&module->raster_mask, sizeof(module->raster_mask));
+      }
     }
     else
     {
       // This should not happen.
-      fprintf(stdout, "[dt_iop_module_hash] WARNING: function is called on %s without inited develop.\n", module->op);
+      fprintf(stdout, "[dt_iop_compute_module_hash] WARNING: function is called on %s without inited develop.\n", module->op);
     }
   }
 
   // Blend params are always inited even when module doesn't support blending
   hash = dt_hash(hash, (char *)module->blend_params, sizeof(dt_develop_blend_params_t));
-  hash = dt_hash(hash, (char *)&module->raster_mask, sizeof(module->raster_mask));
 
-  return hash;
+  module->hash = hash;
 }
 
 void dt_iop_commit_params(dt_iop_module_t *module, dt_iop_params_t *params,

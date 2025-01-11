@@ -688,7 +688,7 @@ gboolean dt_dev_add_history_item_ext(dt_develop_t *dev, struct dt_iop_module_t *
   // Stupid mask manager is a IOP module not processing any pixels...
   if(strcmp(module->op, "mask_manager") == 0) enable = FALSE;
 
-  module->hash = dt_iop_module_hash(module);
+  dt_iop_compute_module_hash(module);
 
   // look for leaks on top of history in two steps
   // first remove obsolete items above history_end
@@ -998,7 +998,10 @@ void dt_dev_pop_history_items_ext(dt_develop_t *dev, int32_t cnt)
     hist->module->enabled = hist->enabled;
     hist->module->multi_priority = hist->multi_priority;
     g_strlcpy(hist->module->multi_name, hist->multi_name, sizeof(hist->module->multi_name));
-    hist->module->hash = hist->hash = dt_iop_module_hash(hist->module);
+
+    dt_iop_compute_module_hash(hist->module);
+    hist->hash = hist->module->hash;
+
     if(hist->forms) forms = hist->forms;
 
     history = g_list_next(history);
@@ -1757,7 +1760,8 @@ static int _process_history_db_entry(dt_develop_t *dev, sqlite3_stmt *stmt, cons
     hist->enabled = hist->module->enabled = TRUE;
 
   // Compute the history params hash
-  hist->hash = hist->module->hash = dt_iop_module_hash(hist->module);
+  dt_iop_compute_module_hash(hist->module);
+  hist->hash = hist->module->hash;
 
   dev->history = g_list_append(dev->history, hist);
   dt_dev_set_history_end(dev, dt_dev_get_history_end(dev) + 1);
