@@ -1503,7 +1503,7 @@ void dt_iop_commit_blend_params(dt_iop_module_t *module, const dt_develop_blend_
 
   if(module->dev)
   {
-    for(GList *iter = module->dev->iop; iter; iter = g_list_next(iter))
+    for(GList *iter = g_list_first(module->dev->iop); iter; iter = g_list_next(iter))
     {
       dt_iop_module_t *m = (dt_iop_module_t *)iter->data;
       if(!strcmp(m->op, blendop_params->raster_mask_source))
