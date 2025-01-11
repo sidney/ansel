@@ -2432,13 +2432,16 @@ float *dt_dev_get_raster_mask(const dt_dev_pixelpipe_t *pipe, const dt_iop_modul
                               gboolean *free_mask)
 {
   if(!raster_mask_source)
+  {
+    fprintf(stderr, "[raster masks] The source module of the mask for %s (%s) was not found\n", target_module->op, target_module->multi_name);
     return NULL;
+  }
 
   *free_mask = FALSE;
   float *raster_mask = NULL;
 
   GList *source_iter;
-  for(source_iter = pipe->nodes; source_iter; source_iter = g_list_next(source_iter))
+  for(source_iter = g_list_first(pipe->nodes); source_iter; source_iter = g_list_next(source_iter))
   {
     const dt_dev_pixelpipe_iop_t *candidate = (dt_dev_pixelpipe_iop_t *)source_iter->data;
     if(candidate->module == raster_mask_source)
@@ -2477,6 +2480,10 @@ float *dt_dev_get_raster_mask(const dt_dev_pixelpipe_t *pipe, const dt_iop_modul
               if(*free_mask) dt_free_align(raster_mask);
               *free_mask = TRUE;
               raster_mask = transformed_mask;
+
+              dt_print(DT_DEBUG_MASKS, "[raster masks] found mask from %s (%s) for module %s (%s)\n",
+                       source_piece->module->op, source_piece->module->multi_name, module->module->op,
+                       module->module->multi_name);
             }
             else if(!module->module->distort_mask &&
                     (module->processed_roi_in.width != module->processed_roi_out.width ||
@@ -2494,7 +2501,16 @@ float *dt_dev_get_raster_mask(const dt_dev_pixelpipe_t *pipe, const dt_iop_modul
             break;
         }
       }
+      else
+      {
+        fprintf(stderr, "[raster masks] the source mask from %s (%s) with id %d for module %s (%s) could not be found\n",
+                source_piece->module->op, source_piece->module->multi_name, raster_mask_id, target_module->op, target_module->multi_name);
+      }
     }
+  }
+  else
+  {
+    fprintf(stderr, "[raster masks] no source module for module %s (%s) could be found\n", target_module->op, target_module->multi_name);
   }
 
   return raster_mask;
