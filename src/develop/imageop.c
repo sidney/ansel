@@ -370,6 +370,7 @@ int dt_iop_load_module_by_so(dt_iop_module_t *module, dt_iop_module_so_t *so, dt
   module->raster_mask.source.masks = g_hash_table_new_full(g_direct_hash, g_direct_equal, NULL, g_free);
   module->raster_mask.sink.source = NULL;
   module->raster_mask.sink.id = 0;
+  module->raster_mask.sink.hash = 0;
 
   // only reference cached results of dlopen:
   module->module = so->module;
@@ -391,6 +392,7 @@ int dt_iop_load_module_by_so(dt_iop_module_t *module, dt_iop_module_so_t *so, dt
   // now init the instance:
   module->init(module);
   module->hash = 0;
+  module->blendop_hash = 0;
 
   /* initialize blendop params and default values */
   module->blend_params = calloc(1, sizeof(dt_develop_blend_params_t));
@@ -1512,10 +1514,11 @@ void dt_iop_commit_blend_params(dt_iop_module_t *module, const dt_develop_blend_
         if(m->multi_priority == blendop_params->raster_mask_instance)
         {
           g_hash_table_insert(m->raster_mask.source.users, module, GINT_TO_POINTER(blendop_params->raster_mask_id));
-          dt_print(DT_DEBUG_MASKS, "[raster masks] inserting mask from %s (%s) into %s (%s)\n", m->op, m->multi_name, module->op,
+          dt_print(DT_DEBUG_MASKS, "[raster masks] Committing raster mask from %s (%s) into %s (%s)\n", m->op, m->multi_name, module->op,
                   module->multi_name);
           module->raster_mask.sink.source = m;
           module->raster_mask.sink.id = blendop_params->raster_mask_id;
+          module->raster_mask.sink.hash = m->blendop_hash;
           return;
         }
       }
@@ -1524,6 +1527,7 @@ void dt_iop_commit_blend_params(dt_iop_module_t *module, const dt_develop_blend_
 
   module->raster_mask.sink.source = NULL;
   module->raster_mask.sink.id = 0;
+  module->raster_mask.sink.hash = 0;
 }
 
 gboolean _iop_validate_params(dt_introspection_field_t *field, gpointer params, gboolean report)

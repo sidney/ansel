@@ -236,6 +236,8 @@ typedef struct dt_iop_module_t
     struct {
       /** the module that provides the raster mask (if any). keep in sync with blend_params! */
       struct dt_iop_module_t *source;
+      /** the blendop_hash representing the current state of masking parameters */
+      uint64_t hash;
       int id;
     } sink;
   } raster_mask;
