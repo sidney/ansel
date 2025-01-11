@@ -1616,9 +1616,6 @@ static void _sync_blendop_params(dt_dev_history_item_t *hist, const void *blendo
   {
     memcpy(hist->blend_params, hist->module->default_blendop_params, sizeof(dt_develop_blend_params_t));
   }
-
-  // Copy and publish the masks on the raster stack for other modules to find
-  dt_iop_commit_blend_params(hist->module, hist->blend_params);
 }
 
 static int _sync_params(dt_dev_history_item_t *hist, const void *module_params, const int param_length,
@@ -1822,7 +1819,16 @@ void dt_dev_read_history_ext(dt_develop_t *dev, const int imgid, gboolean no_ima
   dt_ioppr_check_iop_order(dev, imgid, "dt_dev_read_history_no_image end");
 
   // Update masks history
+  // Note: until there, we had only blendops. No masks
   dt_masks_read_masks_history(dev, imgid);
+
+  // Copy and publish the masks on the raster stack for other modules to find
+  for(GList *history = g_list_first(dev->history); history; history = g_list_next(history))
+  {
+    dt_dev_history_item_t *hist = (dt_dev_history_item_t *)history->data;
+    dt_iop_commit_blend_params(hist->module, hist->blend_params);
+  }
+
   dt_dev_masks_list_change(dev);
 
   dt_print(DT_DEBUG_HISTORY, "[history] dt_dev_read_history_ext completed\n");
