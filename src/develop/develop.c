@@ -986,17 +986,16 @@ static inline void _dt_dev_modules_reload_defaults(dt_develop_t *dev)
 
 void dt_dev_pop_history_items_ext(dt_develop_t *dev, int32_t cnt)
 {
-  dt_print(DT_DEBUG_HISTORY, "[dt_dev_pop_history_items_ext] reading history items...\n");
+  dt_print(DT_DEBUG_HISTORY, "[dt_dev_pop_history_items_ext] loading history entries into modules...\n");
 
-  const uint32_t end_prev = dt_dev_get_history_end(dev);
   dt_dev_set_history_end(dev, cnt);
 
   // reset gui params for all modules
   _dt_dev_modules_reload_defaults(dev);
 
-  // go through history and set gui params
+  // go through history and set modules params
   GList *forms = NULL;
-  GList *history = dev->history;
+  GList *history = g_list_first(dev->history);
   for(int i = 0; i < cnt && history; i++)
   {
     dt_dev_history_item_t *hist = (dt_dev_history_item_t *)(history->data);
@@ -1005,16 +1004,10 @@ void dt_dev_pop_history_items_ext(dt_develop_t *dev, int32_t cnt)
 
     hist->module->iop_order = hist->iop_order;
     hist->module->enabled = hist->enabled;
-    hist->enabled = hist->module->enabled;
-
+    hist->module->multi_priority = hist->multi_priority;
     g_strlcpy(hist->module->multi_name, hist->multi_name, sizeof(hist->module->multi_name));
-    if(hist->forms) forms = hist->forms;
-
-    // this function is called on freshly-loaded histories, we don't necessarily have a hash yet
-    // FIXME: save the hash in DB and get it from there at this point.
     hist->module->hash = hist->hash = dt_iop_module_hash(hist->module);
-
-    //fprintf(stdout, "history has hash %lu, new module %s has %lu\n", hist->hash, hist->module->op, hist->module->hash);
+    if(hist->forms) forms = hist->forms;
 
     history = g_list_next(history);
   }
@@ -1025,25 +1018,7 @@ void dt_dev_pop_history_items_ext(dt_develop_t *dev, int32_t cnt)
 
   dt_ioppr_check_iop_order(dev, 0, "dt_dev_pop_history_items_ext end");
 
-  // check if masks have changed
-  int masks_changed = 0;
-  if(cnt < end_prev)
-    history = g_list_nth(dev->history, cnt);
-  else if(cnt > end_prev)
-    history = g_list_nth(dev->history, end_prev);
-  else
-    history = NULL;
-  for(int i = MIN(cnt, end_prev); i < MAX(cnt, end_prev) && history && !masks_changed; i++)
-  {
-    dt_dev_history_item_t *hist = (dt_dev_history_item_t *)(history->data);
-
-    if(hist->forms != NULL)
-      masks_changed = 1;
-
-    history = g_list_next(history);
-  }
-  if(masks_changed)
-    dt_masks_replace_current_forms(dev, forms);
+  dt_masks_replace_current_forms(dev, forms);
 }
 
 void dt_dev_pop_history_items(dt_develop_t *dev, int32_t cnt)
