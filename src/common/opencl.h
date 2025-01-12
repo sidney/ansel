@@ -70,20 +70,6 @@ typedef enum dt_opencl_memory_t
   OPENCL_MEMORY_SUB
 } dt_opencl_memory_t;
 
-typedef enum dt_opencl_scheduling_profile_t
-{
-  OPENCL_PROFILE_DEFAULT,
-  OPENCL_PROFILE_MULTIPLE_GPUS,
-  OPENCL_PROFILE_VERYFAST_GPU
-} dt_opencl_scheduling_profile_t;
-
-typedef enum dt_opencl_sync_cache_t
-{
-  OPENCL_SYNC_TRUE,
-  OPENCL_SYNC_ACTIVE_MODULE,
-  OPENCL_SYNC_FALSE
-} dt_opencl_sync_cache_t;
-
 /**
  * Accounting information used for OpenCL events.
  */
@@ -150,7 +136,7 @@ typedef struct dt_opencl_device_t
   size_t tuned_available;
   size_t used_available;
   // flags what tuning modes should be used
-  int tuneactive; 
+  int tuneactive;
   // flags detected errors
   int runtime_error;
   // if set to TRUE darktable will not use OpenCL kernels which contain atomic operations (example bilateral).
@@ -222,13 +208,11 @@ typedef struct dt_opencl_t
   dt_pthread_mutex_t lock;
   int inited;
   int print_statistics;
-  dt_opencl_sync_cache_t sync_cache;
   int enabled;
   int stopped;
   int num_devs;
   int error_count;
   int opencl_synchronization_timeout;
-  dt_opencl_scheduling_profile_t scheduling_profile;
   uint32_t crc;
   int mandatory[5];
   int *dev_priority_image;
