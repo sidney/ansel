@@ -56,6 +56,7 @@ void dt_dev_init(dt_develop_t *dev, int32_t gui_attached)
   dev->average_delay = DT_DEV_AVERAGE_DELAY_START;
   dev->preview_average_delay = DT_DEV_PREVIEW_AVERAGE_DELAY_START;
   dt_pthread_mutex_init(&dev->history_mutex, NULL);
+  dt_pthread_mutex_init(&dev->pipe_mutex, NULL);
   dev->history_end = 0;
   dev->history = NULL; // empty list
 
@@ -187,6 +188,8 @@ void dt_dev_cleanup(dt_develop_t *dev)
     dev->allprofile_info = g_list_delete_link(dev->allprofile_info, dev->allprofile_info);
   }
   dt_pthread_mutex_destroy(&dev->history_mutex);
+  dt_pthread_mutex_destroy(&dev->pipe_mutex);
+
   free(dev->histogram_pre_tonecurve);
   free(dev->histogram_pre_levels);
 
@@ -350,9 +353,12 @@ void dt_dev_process_preview_job(dt_develop_t *dev)
   // this locks dev->history_mutex.
   dt_dev_pixelpipe_change(dev->preview_pipe, dev);
 
-  if(dt_dev_pixelpipe_process(
-         dev->preview_pipe, dev, 0, 0, dev->preview_pipe->processed_width,
-         dev->preview_pipe->processed_height, 1.f))
+  dt_pthread_mutex_lock(&dev->pipe_mutex);
+  int ret = dt_dev_pixelpipe_process(dev->preview_pipe, dev, 0, 0, dev->preview_pipe->processed_width,
+                                     dev->preview_pipe->processed_height, 1.f);
+  dt_pthread_mutex_unlock(&dev->pipe_mutex);
+
+  if(ret)
   {
      if(dt_atomic_get_int(&dev->preview_pipe->shutdown))
       goto restart; // restart only if pipeline was shutdown, aka no error
@@ -444,7 +450,11 @@ restart:;
 
   dt_get_times(&start);
 
-  if(dt_dev_pixelpipe_process(dev->pipe, dev, x, y, wd, ht, scale))
+  dt_pthread_mutex_lock(&dev->pipe_mutex);
+  int ret = dt_dev_pixelpipe_process(dev->pipe, dev, x, y, wd, ht, scale);
+  dt_pthread_mutex_unlock(&dev->pipe_mutex);
+
+  if(ret)
   {
     if(dt_atomic_get_int(&dev->pipe->shutdown))
       goto restart; // restart only if pipeline was shutdown, aka no error
