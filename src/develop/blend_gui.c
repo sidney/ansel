@@ -2853,7 +2853,8 @@ void dt_iop_gui_update_blending(dt_iop_module_t *module)
   }
 
   const dt_image_t img = module->dev->image_storage;
-  gtk_widget_set_visible(bd->details_slider, dt_image_is_rawprepare_supported(&img));
+  // Details mask is deprecated. Show it only if it was used in an old edit
+  gtk_widget_set_visible(bd->details_slider, dt_image_is_rawprepare_supported(&img) && (module->blend_params->details != 0.0f));
 
   if((mask_mode & DEVELOP_MASK_ENABLED)
      && ((bd->masks_inited && (mask_mode & DEVELOP_MASK_MASK))
