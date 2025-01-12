@@ -2526,6 +2526,10 @@ float *dt_dev_get_raster_mask(const dt_dev_pixelpipe_t *pipe, const dt_iop_modul
                 "[raster masks] mask id %i from %s (%s) for module %s (%s) could not be found in pipe %i\n",
                 raster_mask_id, source_piece->module->op, source_piece->module->multi_name, target_module->op,
                 target_module->multi_name, pipe->type);
+        dt_control_log(_("The mask reused by module `%s` from module `%s`\n"
+                         "cannot be found in the pipeline. Please force a full recomputing\n"
+                         "using the global menu `Run -> Clear all pipeline caches`."),
+                         target_module->name(), source_piece->module->name());
       }
     }
   }
