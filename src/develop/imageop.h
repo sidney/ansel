@@ -456,9 +456,6 @@ void dt_iop_queue_history_update(dt_iop_module_t *module, gboolean extend_prior)
 /** cancel any previously-queued history update */
 void dt_iop_cancel_history_update(dt_iop_module_t *module);
 
-/** (un)hide iop module header right side buttons */
-gboolean dt_iop_show_hide_header_buttons(dt_iop_module_t *module, GdkEventCrossing *event, gboolean show_buttons, gboolean always_hide);
-
 /** add/remove mask indicator to iop module header */
 void add_remove_mask_indicator(dt_iop_module_t *module, gboolean add);
 
