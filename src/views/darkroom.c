@@ -2172,14 +2172,15 @@ static void _on_drag_data_received(GtkWidget *widget, GdkDragContext *dc, gint x
     // we update the headers
     dt_dev_modules_update_multishow(module_src->dev);
 
+    // add_history_item recomputes a pipeline
+    // so we need to flag it for rebuild before
+    dt_dev_pixelpipe_rebuild(module_src->dev);
     dt_dev_add_history_item(module_src->dev, module_src, TRUE);
 
     dt_ioppr_check_iop_order(module_src->dev, 0, "_on_drag_data_received end");
 
     // rebuild the accelerators
     dt_iop_connect_accels_multi(module_src->so);
-
-    dt_dev_pixelpipe_rebuild(module_src->dev);
 
     DT_DEBUG_CONTROL_SIGNAL_RAISE(darktable.signals, DT_SIGNAL_DEVELOP_MODULE_MOVED);
   }
