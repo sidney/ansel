@@ -1685,28 +1685,17 @@ void dt_iop_compute_module_hash(dt_iop_module_t *module)
   hash = dt_hash(hash, (char *)&module->iop_order, sizeof(int));
   hash = dt_hash(hash, (char *)&module->blendop_hash, sizeof(uint64_t));
 
-  if(module->flags() & IOP_FLAGS_SUPPORTS_BLENDING)
+  if((module->flags() & IOP_FLAGS_SUPPORTS_BLENDING) && module->dev)
   {
-    if(module->dev)
+    // If raster masks are used, we need to copy the blendops of the raster source too
+    // And we need to update the hash with our blendops to the raster source too.
+    // Note: source is mandatorily before in pipe order.
+    dt_iop_module_t *raster_source = module->raster_mask.sink.source;
+    if(raster_source)
     {
-      // If raster masks are used, we need to copy the blendops of the raster source too
-      // And we need to update the hash with our blendops to the raster source too.
-      // Note: source is mandatorily before in pipe order.
-      dt_iop_module_t *raster_source = module->raster_mask.sink.source;
-      if(raster_source)
-      {
-        dt_masks_form_t *raster_grp = dt_masks_get_from_id(raster_source->dev, raster_source->blend_params->mask_id);
-        hash = dt_masks_group_get_hash(hash, raster_grp);
-        hash = dt_hash(hash, (char *)raster_source->blend_params, sizeof(dt_develop_blend_params_t));
-
-        // Update source module
-        //raster_source->hash = dt_hash(raster_source->hash, (char *)&module->raster_mask, sizeof(module->raster_mask));
-      }
-    }
-    else
-    {
-      // This should not happen.
-      fprintf(stdout, "[dt_iop_compute_module_hash] WARNING: function is called on %s without inited develop.\n", module->op);
+      dt_masks_form_t *raster_grp = dt_masks_get_from_id(raster_source->dev, raster_source->blend_params->mask_id);
+      hash = dt_masks_group_get_hash(hash, raster_grp);
+      hash = dt_hash(hash, (char *)raster_source->blend_params, sizeof(dt_develop_blend_params_t));
     }
   }
 
