@@ -78,7 +78,7 @@ typedef struct dt_dev_pixelpipe_iop_t
   int process_tiling_ready;   // set this to 0 in commit_params to temporarily disable tiling
 
   // the following are used internally for caching:
-  dt_iop_buffer_dsc_t dsc_in, dsc_out;
+  dt_iop_buffer_dsc_t dsc_in, dsc_out, dsc_mask;
 
   // bypass the cache for this module
   gboolean bypass_cache;
@@ -252,7 +252,7 @@ void dt_dev_pixelpipe_add_node(dt_dev_pixelpipe_t *pipe, struct dt_develop_t *de
 void dt_dev_pixelpipe_remove_node(dt_dev_pixelpipe_t *pipe, struct dt_develop_t *dev, int n);
 
 // helper function to pass a raster mask through a (so far) processed pipe
-float *dt_dev_get_raster_mask(const dt_dev_pixelpipe_t *pipe, const struct dt_iop_module_t *raster_mask_source,
+float *dt_dev_get_raster_mask(dt_dev_pixelpipe_t *pipe, const struct dt_iop_module_t *raster_mask_source,
                               const int raster_mask_id, const struct dt_iop_module_t *target_module,
                               gboolean *free_mask);
 // some helper functions related to the details mask interface

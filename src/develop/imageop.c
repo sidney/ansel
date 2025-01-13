@@ -1678,7 +1678,7 @@ void dt_iop_compute_module_hash(dt_iop_module_t *module)
       // Aka tamper with its hash.
       // That's because the reference to the raster mask is stored in that module when it gets recomputed.
       // It's not kept in a global pipe cache or anything.
-      raster_source->hash = dt_hash(raster_source->hash, (char *)&module->blendop_hash, sizeof(uint64_t));
+      //raster_source->hash = dt_hash(raster_source->hash, (char *)&module->blendop_hash, sizeof(uint64_t));
     }
   }
 

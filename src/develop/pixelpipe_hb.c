@@ -135,7 +135,7 @@ inline static void _uint8_to_float(const uint8_t *const input, float *const outp
 int dt_dev_pixelpipe_init_export(dt_dev_pixelpipe_t *pipe, int32_t width, int32_t height, int levels,
                                  gboolean store_masks)
 {
-  const int res = dt_dev_pixelpipe_init_cached(pipe, sizeof(float) * 4 * width * height, 2);
+  const int res = dt_dev_pixelpipe_init_cached(pipe, sizeof(float) * 4 * width * height, 4);
   pipe->type = DT_DEV_PIXELPIPE_EXPORT;
   pipe->levels = levels;
   pipe->store_all_raster_masks = store_masks;
@@ -144,7 +144,7 @@ int dt_dev_pixelpipe_init_export(dt_dev_pixelpipe_t *pipe, int32_t width, int32_
 
 int dt_dev_pixelpipe_init_thumbnail(dt_dev_pixelpipe_t *pipe, int32_t width, int32_t height)
 {
-  const int res = dt_dev_pixelpipe_init_cached(pipe, sizeof(float) * 4 * width * height, 2);
+  const int res = dt_dev_pixelpipe_init_cached(pipe, sizeof(float) * 4 * width * height, 4);
   pipe->type = DT_DEV_PIXELPIPE_THUMBNAIL;
   return res;
 }
@@ -356,6 +356,13 @@ void dt_dev_pixelpipe_create_nodes(dt_dev_pixelpipe_t *pipe, dt_develop_t *dev)
     piece->raster_masks = g_hash_table_new_full(g_direct_hash, g_direct_equal, NULL, dt_free_align_ptr);
     memset(&piece->processed_roi_in, 0, sizeof(piece->processed_roi_in));
     memset(&piece->processed_roi_out, 0, sizeof(piece->processed_roi_out));
+
+    // dsc_mask is static, single channel float image
+    memset(&piece->dsc_mask, 0, sizeof(piece->dsc_mask));
+    piece->dsc_mask.channels = 1;
+    piece->dsc_mask.datatype = TYPE_FLOAT;
+    piece->dsc_mask.filters = 0;
+
     dt_iop_init_pipe(piece->module, pipe, piece);
     pipe->nodes = g_list_append(pipe->nodes, piece);
   }
@@ -2449,10 +2456,11 @@ void dt_dev_pixelpipe_get_roi_in(dt_dev_pixelpipe_t *pipe, struct dt_develop_t *
   }
 }
 
-float *dt_dev_get_raster_mask(const dt_dev_pixelpipe_t *pipe, const dt_iop_module_t *raster_mask_source,
+float *dt_dev_get_raster_mask(dt_dev_pixelpipe_t *pipe, const dt_iop_module_t *raster_mask_source,
                               const int raster_mask_id, const dt_iop_module_t *target_module,
                               gboolean *free_mask)
 {
+  // TODO: refactor this mess to limit for/if nesting
   if(!raster_mask_source)
   {
     fprintf(stderr, "[raster masks] The source module of the mask for %s (%s) was not found\n", target_module->op, target_module->multi_name);
@@ -2490,7 +2498,30 @@ float *dt_dev_get_raster_mask(const dt_dev_pixelpipe_t *pipe, const dt_iop_modul
     }
     else
     {
-      raster_mask = g_hash_table_lookup(source_piece->raster_masks, GINT_TO_POINTER(raster_mask_id));
+      const uint64_t raster_hash = source_piece->module->blendop_hash;
+      const size_t raster_size
+          = source_piece->processed_roi_out.width * source_piece->processed_roi_out.height * sizeof(float);
+      dt_iop_buffer_dsc_t *out_format = &source_piece->dsc_mask;
+
+      if(dt_dev_pixelpipe_cache_available(&(pipe->cache), raster_hash))
+      {
+        // Try to get the mask from the global cache, in case the module flushed its reference
+        dt_dev_pixelpipe_cache_get(&(pipe->cache), raster_hash, raster_size, (void **)&raster_mask, &out_format);
+        dt_print(DT_DEBUG_MASKS,
+                 "[raster masks] found in cache mask id %i from %s (%s) for module %s (%s) in pipe %i\n",
+                 raster_mask_id, source_piece->module->op, source_piece->module->multi_name, target_module->op,
+                 target_module->multi_name, pipe->type);
+      }
+      else
+      {
+        // No luck on global cache, try internal reference
+        raster_mask = g_hash_table_lookup(source_piece->raster_masks, GINT_TO_POINTER(raster_mask_id));
+        dt_print(DT_DEBUG_MASKS,
+                 "[raster masks] no cache for mask id %i from %s (%s) for module %s (%s) in pipe %i\n",
+                 raster_mask_id, source_piece->module->op, source_piece->module->multi_name, target_module->op,
+                 target_module->multi_name, pipe->type);
+      }
+
       if(raster_mask)
       {
         for(GList *iter = g_list_next(source_iter); iter; iter = g_list_next(iter))
