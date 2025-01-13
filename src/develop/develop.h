@@ -434,7 +434,8 @@ float dt_dev_get_zoom_scale(dt_develop_t *dev, dt_dev_zoom_t zoom, int closeup_f
 void dt_dev_get_pointer_zoom_pos(dt_develop_t *dev, const float px, const float py, float *zoom_x,
                                  float *zoom_y);
 
-void dt_dev_configure(dt_develop_t *dev, int wd, int ht);
+void dt_dev_configure_real(dt_develop_t *dev, int wd, int ht);
+#define dt_dev_configure(dev, wd, ht) DT_DEBUG_TRACE_WRAPPER(DT_DEBUG_DEV, dt_dev_configure_real, (dev), (wd), (ht))
 
 /*
  * exposure plugin hook, set the exposure and the black level

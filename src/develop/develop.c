@@ -228,15 +228,23 @@ void dt_dev_refresh_ui_images_real(dt_develop_t *dev)
   // which is handled everytime history is changed,
   // including when initing a new pipeline (from scratch or from user history).
   // Benefit is atomics are de-facto thread-safe.
-  if(dt_atomic_get_int(&dev->pipe->shutdown) && !dev->pipe->processing)
-  {
-    dt_atomic_set_int(&dev->pipe->shutdown, FALSE);
-    dt_dev_process_image(dev);
-  }
   if(dt_atomic_get_int(&dev->preview_pipe->shutdown) && !dev->preview_pipe->processing)
   {
     dt_atomic_set_int(&dev->preview_pipe->shutdown, FALSE);
     dt_dev_process_preview(dev);
+  }
+  // When entering darkroom, the GUI will size itself and call the
+  // configure() method of the view, which calls dev_configure() below.
+  // Problem is the GUI can be glitchy and reconfigure the pipe twice with different sizes,
+  // Each one starting a recompute. The shutdown mechanism should take care of stopping
+  // an ongoing pipe which output we don't care about anymore.
+  // But just in case, always start with the preview pipe, hoping
+  // the GUI will have figured out what size it really wants when we start
+  // the main preview pipe.
+  if(dt_atomic_get_int(&dev->pipe->shutdown) && !dev->pipe->processing)
+  {
+    dt_atomic_set_int(&dev->pipe->shutdown, FALSE);
+    dt_dev_process_image(dev);
   }
 }
 
@@ -390,6 +398,15 @@ void dt_dev_process_preview_job(dt_develop_t *dev)
 
 void dt_dev_process_image_job(dt_develop_t *dev)
 {
+  // -1×-1 px means the dimensions of the main preview in darkroom were not inited yet.
+  // 0×0 px is not feasible.
+  // Anything lower than 32 px might cause segfaults with blurs and local contrast.
+  // When the window size get inited, we will get a new order to recompute with a "zoom_changed" flag.
+  // Until then, don't bother computing garbage that will not be reused later.
+  if(dev->width < 32 || dev->height < 32) return;
+
+  dt_print(DT_DEBUG_DEV, "[pixelpipe] Started main preview recompute at %i×%i px\n", dev->width, dev->height);
+
   dt_pthread_mutex_lock(&dev->pipe->busy_mutex);
   dt_control_log_busy_enter();
   dt_control_toast_busy_enter();
@@ -593,7 +610,7 @@ int dt_dev_load_image(dt_develop_t *dev, const uint32_t imgid)
   return 0;
 }
 
-void dt_dev_configure(dt_develop_t *dev, int wd, int ht)
+void dt_dev_configure_real(dt_develop_t *dev, int wd, int ht)
 {
   // Called only from Darkroom to init and update drawing size
   // depending on sidebars and main window resizing.
@@ -601,19 +618,19 @@ void dt_dev_configure(dt_develop_t *dev, int wd, int ht)
   wd -= 2*tb;
   ht -= 2*tb;
 
-  // Ensure we have non-zero image surface
-  wd = MAX(wd, 32);
-  ht = MAX(ht, 32);
-
-  if(dev->width != wd || dev->height != ht)
+  if(dev->width != wd || dev->height != ht || !dev->pipe->backbuf)
   {
+    // If dimensions didn't change or we don't have a valid output image to display
+
     dev->width = wd;
     dev->height = ht;
-    dt_dev_invalidate_zoom(dev);
+
+    dt_print(DT_DEBUG_DEV, "[pixelpipe] Darkroom requested a %i×%i px main preview\n", wd, ht);
 
     if(dev->image_storage.id > -1 && darktable.mipmap_cache)
     {
       // Only if it's not our initial configure call, aka if we already have an image
+      dt_dev_invalidate_zoom(dev);
       dt_control_queue_redraw_center();
       dt_dev_refresh_ui_images(dev);
     }

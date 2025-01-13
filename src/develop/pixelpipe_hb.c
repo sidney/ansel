@@ -2202,10 +2202,18 @@ static int dt_dev_pixelpipe_process_rec_and_backcopy(dt_dev_pixelpipe_t *pipe, d
   return ret;
 }
 
+#define KILL_SWITCH_PIPE                                                                                          \
+  if(dt_atomic_get_int(&pipe->shutdown))                                                                          \
+  {                                                                                                               \
+    pipe->processing = 0;                                                                                         \
+    return 1;                                                                                                     \
+  }
 
 int dt_dev_pixelpipe_process(dt_dev_pixelpipe_t *pipe, dt_develop_t *dev, int x, int y, int width, int height,
                              float scale)
 {
+  KILL_SWITCH_PIPE
+
   pipe->processing = 1;
   pipe->opencl_enabled = dt_opencl_update_settings(); // update enabled flag and profile from preferences
   pipe->devid = (pipe->opencl_enabled) ? dt_opencl_lock_device(pipe->type)
@@ -2235,6 +2243,8 @@ int dt_dev_pixelpipe_process(dt_dev_pixelpipe_t *pipe, dt_develop_t *dev, int x,
   GList *modules = g_list_last(pipe->iop);
   GList *pieces = g_list_last(pipe->nodes);
 
+  KILL_SWITCH_PIPE
+
 // re-entry point: in case of late opencl errors we start all over again with opencl-support disabled
 restart:;
   void *buf = NULL;
@@ -2243,10 +2253,14 @@ restart:;
   dt_iop_buffer_dsc_t _out_format = { 0 };
   dt_iop_buffer_dsc_t *out_format = &_out_format;
 
+  KILL_SWITCH_PIPE
+
   // Get the roi_out hash
   // Get the previous output size of the module, for cache invalidation.
   dt_dev_pixelpipe_get_roi_in(pipe, dev, roi);
   dt_pixelpipe_get_global_hash(pipe, dev);
+
+  KILL_SWITCH_PIPE
 
   // run pixelpipe recursively and get error status
   const int err =

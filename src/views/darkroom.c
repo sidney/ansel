@@ -1015,9 +1015,13 @@ static void _iso_12646_quickbutton_clicked(GtkWidget *w, gpointer user_data)
     d->border_size = DT_PIXEL_APPLY_DPI(dt_conf_get_int("plugins/darkroom/ui/border_size"));
   }
 
-  dt_dev_configure(d, d->width, d->height);
-
   dt_ui_restore_panels(darktable.gui->ui);
+
+  // The above _restore_panels() will resize the window
+  // which emits "configure-event" signal which execute here the configure() method
+  // which already calls dt_dev_configure(d, d->width, d->height)
+  // to reset pipeline output size for main preview.
+
 }
 
 /* overlay color */
@@ -3142,9 +3146,20 @@ static void change_slider_accel_precision(dt_action_t *action)
 void configure(dt_view_t *self, int wd, int ht)
 {
   dt_develop_t *dev = (dt_develop_t *)self->data;
-  dev->orig_width = wd;
-  dev->orig_height = ht;
-  dt_dev_configure(dev, wd, ht);
+
+  // Configure event is called when initing the view AND upon window resizes events (through Gtk widget/window resize commands).
+  // At init time, final window size may not be correct just yet.
+  // It will be when we call dt_ui_restore_panels(), which will resize stuff properly,
+  // but that will be only when entering the current view.
+  // Until we run dt_dev_configure(), main preview pipe gets output size -1×-1 px
+  // which aborts the pipe recompute early. As soon as we init
+  // sizes with something "valid" with regard to the pipe, pipeline runs.
+  // Problem is it will not be valid with regard to the window size and the output will be thrown out
+  // until we get the final size.
+  // TD;DR: until we get the final window size, which happens
+  // only when entering the view, don't configure the main preview pipeline, which will disable useless recomputes.
+  if(dt_view_manager_get_current_view(darktable.view_manager) == self)
+    dt_dev_configure(dev, wd, ht);
 }
 
 GSList *mouse_actions(const dt_view_t *self)
