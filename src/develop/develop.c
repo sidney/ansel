@@ -261,17 +261,28 @@ void dt_dev_pixelpipe_rebuild(dt_develop_t *dev)
   dt_pthread_mutex_unlock(&dev->history_mutex);
 }
 
-void dt_dev_pixelpipe_resync(dt_develop_t *dev)
+void dt_dev_pixelpipe_resync_main(dt_develop_t *dev)
 {
   if(!dev->gui_attached) return;
 
   dt_atomic_set_int(&dev->pipe->shutdown, TRUE);
-  dt_atomic_set_int(&dev->preview_pipe->shutdown, TRUE);
 
   dt_pthread_mutex_lock(&dev->history_mutex);
   dev->pipe->changed |= DT_DEV_PIPE_SYNCH;
+  dt_pthread_mutex_unlock(&dev->history_mutex);
+}
+
+void dt_dev_pixelpipe_resync_all(dt_develop_t *dev)
+{
+  if(!dev->gui_attached) return;
+
+  dt_atomic_set_int(&dev->preview_pipe->shutdown, TRUE);
+
+  dt_pthread_mutex_lock(&dev->history_mutex);
   dev->preview_pipe->changed |= DT_DEV_PIPE_SYNCH;
   dt_pthread_mutex_unlock(&dev->history_mutex);
+
+  dt_dev_pixelpipe_resync_main(dev);
 }
 
 void dt_dev_invalidate_real(dt_develop_t *dev)
@@ -917,7 +928,7 @@ void dt_dev_add_history_item_real(dt_develop_t *dev, dt_iop_module_t *module, gb
     // a weird thing happens with that one, when drawing masks, that typically
     // leads to 2 history items creation (one for mask manager, the next for the module
     // capturing the drawing). So, resync the whole history for safety
-    dt_dev_pixelpipe_resync(dev);
+    dt_dev_pixelpipe_resync_all(dev);
   }
 
   dt_control_queue_redraw_center();

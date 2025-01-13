@@ -551,6 +551,11 @@ void commit_params(struct dt_iop_module_t *self, dt_iop_params_t *p1, dt_dev_pix
 
   d->mode = (pipe->type & DT_DEV_PIXELPIPE_FULL) == DT_DEV_PIXELPIPE_FULL ? darktable.color_profiles->mode : DT_PROFILE_NORMAL;
 
+  // Softproof and gamut check take input from GUI and don't write it in internal parameters.
+  // The cacheline integrity hash will not be meaningful in this scenario,
+  // we need to bypass the cache entirely in these modes.
+  dt_iop_set_cache_bypass(self, (d->mode != DT_PROFILE_NORMAL));
+
   if(d->xform)
   {
     cmsDeleteTransform(d->xform);

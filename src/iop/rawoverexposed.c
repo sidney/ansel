@@ -480,6 +480,10 @@ void init(dt_iop_module_t *module)
   module->default_enabled = 1;
   module->params_size = sizeof(dt_iop_rawoverexposed_t);
   module->gui_data = NULL;
+
+  // This module permanently bypasses the cache because it takes input from GUI
+  // and doesn't leave internal parameters to compute an integrity hash on.
+  dt_iop_set_cache_bypass(module, TRUE);
 }
 
 // clang-format off

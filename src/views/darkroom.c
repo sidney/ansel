@@ -1036,12 +1036,19 @@ static void _guides_view_changed(gpointer instance, dt_view_t *old_view, dt_view
   dt_guides_update_button_state();
 }
 
+/**
+ * DOC
+ * Overexposed and gamut modules are inserted inplace in pipeline at runtime,
+ * only for the main preview, and don't add history items.
+ * They all need a full history -> pipeline resynchronization.
+ */
+
 /* overexposed */
 static void _overexposed_quickbutton_clicked(GtkWidget *w, gpointer user_data)
 {
   dt_develop_t *d = (dt_develop_t *)user_data;
   d->overexposed.enabled = !d->overexposed.enabled;
-  dt_dev_invalidate(d);
+  dt_dev_pixelpipe_resync_main(d);
   dt_dev_refresh_ui_images(d);
 }
 
@@ -1051,9 +1058,8 @@ static void colorscheme_callback(GtkWidget *combo, gpointer user_data)
   d->overexposed.colorscheme = dt_bauhaus_combobox_get(combo);
   if(d->overexposed.enabled == FALSE)
     gtk_button_clicked(GTK_BUTTON(d->overexposed.button));
-  else
-    dt_dev_invalidate(d);
 
+  dt_dev_pixelpipe_resync_main(d);
   dt_dev_refresh_ui_images(d);
 }
 
@@ -1063,9 +1069,8 @@ static void lower_callback(GtkWidget *slider, gpointer user_data)
   d->overexposed.lower = dt_bauhaus_slider_get(slider);
   if(d->overexposed.enabled == FALSE)
     gtk_button_clicked(GTK_BUTTON(d->overexposed.button));
-  else
-    dt_dev_invalidate(d);
 
+  dt_dev_pixelpipe_resync_main(d);
   dt_dev_refresh_ui_images(d);
 }
 
@@ -1075,9 +1080,8 @@ static void upper_callback(GtkWidget *slider, gpointer user_data)
   d->overexposed.upper = dt_bauhaus_slider_get(slider);
   if(d->overexposed.enabled == FALSE)
     gtk_button_clicked(GTK_BUTTON(d->overexposed.button));
-  else
-    dt_dev_invalidate(d);
 
+  dt_dev_pixelpipe_resync_main(d);
   dt_dev_refresh_ui_images(d);
 }
 
@@ -1098,7 +1102,7 @@ static void _rawoverexposed_quickbutton_clicked(GtkWidget *w, gpointer user_data
 {
   dt_develop_t *d = (dt_develop_t *)user_data;
   d->rawoverexposed.enabled = !d->rawoverexposed.enabled;
-  dt_dev_invalidate(d);
+  dt_dev_pixelpipe_resync_main(d);
   dt_dev_refresh_ui_images(d);
 }
 
@@ -1108,9 +1112,8 @@ static void rawoverexposed_mode_callback(GtkWidget *combo, gpointer user_data)
   d->rawoverexposed.mode = dt_bauhaus_combobox_get(combo);
   if(d->rawoverexposed.enabled == FALSE)
     gtk_button_clicked(GTK_BUTTON(d->rawoverexposed.button));
-  else
-    dt_dev_invalidate(d);
 
+  dt_dev_pixelpipe_resync_main(d);
   dt_dev_refresh_ui_images(d);
 }
 
@@ -1120,9 +1123,8 @@ static void rawoverexposed_colorscheme_callback(GtkWidget *combo, gpointer user_
   d->rawoverexposed.colorscheme = dt_bauhaus_combobox_get(combo);
   if(d->rawoverexposed.enabled == FALSE)
     gtk_button_clicked(GTK_BUTTON(d->rawoverexposed.button));
-  else
-    dt_dev_invalidate(d);
 
+  dt_dev_pixelpipe_resync_main(d);
   dt_dev_refresh_ui_images(d);
 }
 
@@ -1132,9 +1134,8 @@ static void rawoverexposed_threshold_callback(GtkWidget *slider, gpointer user_d
   d->rawoverexposed.threshold = dt_bauhaus_slider_get(slider);
   if(d->rawoverexposed.enabled == FALSE)
     gtk_button_clicked(GTK_BUTTON(d->rawoverexposed.button));
-  else
-    dt_dev_invalidate(d);
 
+  dt_dev_pixelpipe_resync_main(d);
   dt_dev_refresh_ui_images(d);
 }
 
@@ -1149,7 +1150,7 @@ static void _softproof_quickbutton_clicked(GtkWidget *w, gpointer user_data)
 
   _update_softproof_gamut_checking(d);
 
-  dt_dev_invalidate(d);
+  dt_dev_pixelpipe_resync_main(d);
   dt_dev_refresh_ui_images(d);
 }
 
@@ -1164,7 +1165,7 @@ static void _gamut_quickbutton_clicked(GtkWidget *w, gpointer user_data)
 
   _update_softproof_gamut_checking(d);
 
-  dt_dev_invalidate(d);
+  dt_dev_pixelpipe_resync_main(d);
   dt_dev_refresh_ui_images(d);
 }
 
@@ -1216,7 +1217,7 @@ end:
   if(profile_changed)
   {
     DT_DEBUG_CONTROL_SIGNAL_RAISE(darktable.signals, DT_SIGNAL_CONTROL_PROFILE_USER_CHANGED, DT_COLORSPACES_PROFILE_TYPE_SOFTPROOF);
-    dt_dev_invalidate_all(d);
+    dt_dev_pixelpipe_resync_main(d);
     dt_dev_refresh_ui_images(d);
   }
 }

@@ -415,7 +415,11 @@ void dt_dev_invalidate_zoom_real(dt_develop_t *dev);
 
 // Invalidate the main image and the thumbnail in darkroom.
 // Resync the whole history, which may be expensive.
-void dt_dev_pixelpipe_resync(dt_develop_t *dev);
+void dt_dev_pixelpipe_resync_all(dt_develop_t *dev);
+
+// Invalidate the main image in darkroom.
+// Resync the whole history, which may be expensive.
+void dt_dev_pixelpipe_resync_main(dt_develop_t *dev);
 
 
 void dt_dev_set_histogram(dt_develop_t *dev);
