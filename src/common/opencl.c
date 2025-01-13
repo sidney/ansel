@@ -1069,7 +1069,7 @@ finally:
     dt_print_nts(DT_DEBUG_OPENCL, "[opencl_init] OpenCL devices changed, we will update the profiling configuration.\n");
     dt_conf_set_string("opencl_checksum", checksum);
 
-    cl->cpubenchmark = dt_opencl_benchmark_cpu(1024, 1024, 5, 100.0f);
+    cl->cpubenchmark = dt_opencl_benchmark_cpu(3072, 2048, 5, 100.0f);
     dt_conf_set_float("dt_cpubenchmark", cl->cpubenchmark);
 
     // make sure all active cl devices have a benchmark result
@@ -1077,7 +1077,7 @@ finally:
     {
       if((cl->dev[n].benchmark <= 0.0f) && (cl->dev[n].disabled == 0))
       {
-        cl->dev[n].benchmark = dt_opencl_benchmark_gpu(n, 1024, 1024, 5, 100.0f);
+        cl->dev[n].benchmark = dt_opencl_benchmark_gpu(n, 3072, 2048, 5, 100.0f);
         dt_opencl_write_device_config(n);
       }
     }
@@ -1291,8 +1291,8 @@ static float dt_opencl_benchmark_gpu(const int devid, const size_t width, const 
   // start timer
   double start = dt_get_wtime();
 
-  // allocate dev_mem buffer
-  dev_mem = dt_opencl_alloc_device_use_host_pointer(devid, width, height, bpp, width*bpp, buf);
+  // allocate dev_mem buffer & copy fake data from RAM to vRAM
+  dev_mem = dt_opencl_copy_host_to_device(devid, buf, width, height, bpp);
   if(dev_mem == NULL) goto error;
 
   // prepare gaussian filter
@@ -1303,6 +1303,10 @@ static float dt_opencl_benchmark_gpu(const int devid, const size_t width, const 
   for(int n = 0; n < count; n++)
   {
     err = dt_gaussian_blur_cl(g, dev_mem, dev_mem);
+    if(err != CL_SUCCESS) goto error;
+
+    // copy back to host
+    err = dt_opencl_copy_device_to_host(devid, buf, dev_mem, width, height, bpp);
     if(err != CL_SUCCESS) goto error;
   }
 
