@@ -1668,6 +1668,12 @@ void dt_iop_compute_module_hash(dt_iop_module_t *module)
       dt_masks_form_t *raster_grp = dt_masks_get_from_id(raster_source->dev, raster_source->blend_params->mask_id);
       hash = dt_masks_group_get_hash(hash, raster_grp);
       hash = dt_hash(hash, (char *)raster_source->blend_params, sizeof(dt_develop_blend_params_t));
+
+      // Nasty trick to notify the source module that we need a recompute from this module.
+      // Aka tamper with its hash.
+      // That's because the reference to the raster mask is stored in that module when it gets recomputed.
+      // It's not kept in a global pipe cache or anything.
+      raster_source->hash = dt_hash(raster_source->hash, (char *)&module->blendop_hash, sizeof(uint64_t));
     }
   }
 

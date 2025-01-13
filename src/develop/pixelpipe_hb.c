@@ -162,6 +162,9 @@ int dt_dev_pixelpipe_init_preview(dt_dev_pixelpipe_t *pipe)
   int32_t cachelines = MAX(dt_conf_get_int("cachelines"), 8);
   const int res = dt_dev_pixelpipe_init_cached(pipe, sizeof(float) * 4 * 720 * 450, cachelines);
   pipe->type = DT_DEV_PIXELPIPE_PREVIEW;
+
+  // Needed for caching
+  pipe->store_all_raster_masks = TRUE;
   return res;
 }
 
@@ -181,6 +184,9 @@ int dt_dev_pixelpipe_init(dt_dev_pixelpipe_t *pipe)
 
   const int res = dt_dev_pixelpipe_init_cached(pipe, sizeof(float) * 4 * width * height, cachelines);
   pipe->type = DT_DEV_PIXELPIPE_FULL;
+
+  // Needed for caching
+  pipe->store_all_raster_masks = TRUE;
   return res;
 }
 
