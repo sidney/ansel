@@ -1626,7 +1626,11 @@ gboolean dt_iop_check_modules_equal(dt_iop_module_t *mod_1, dt_iop_module_t *mod
 void dt_iop_compute_blendop_hash(dt_iop_module_t *module)
 {
   // Blend params are always inited even when module doesn't support blending
-  uint64_t hash = dt_hash(5381, (char *)module->blend_params, sizeof(dt_develop_blend_params_t));
+  uint64_t hash = dt_hash(5381, (char *)module->op, sizeof(dt_dev_operation_t));
+  hash = dt_hash(hash, (char *)&module->instance, sizeof(int32_t));
+  hash = dt_hash(hash, (char *)&module->multi_priority, sizeof(int));
+  hash = dt_hash(hash, (char *)&module->iop_order, sizeof(int));
+  hash = dt_hash(hash, (char *)module->blend_params, sizeof(dt_develop_blend_params_t));
 
   if(module->flags() & IOP_FLAGS_SUPPORTS_BLENDING)
   {
@@ -1651,7 +1655,8 @@ void dt_iop_compute_module_hash(dt_iop_module_t *module)
   // including masks and blending.
   // WARNING: doesn't take into account parameters dynamically set at runtime.
 
-  uint64_t hash = dt_hash(5381, (char *)module->params, module->params_size);
+  uint64_t hash = dt_hash(5381, (char *)module->op, sizeof(dt_dev_operation_t));
+  hash = dt_hash(hash, (char *)module->params, module->params_size);
   hash = dt_hash(hash, (char *)&module->instance, sizeof(int32_t));
   hash = dt_hash(hash, (char *)&module->multi_priority, sizeof(int));
   hash = dt_hash(hash, (char *)&module->iop_order, sizeof(int));
