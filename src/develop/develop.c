@@ -250,7 +250,7 @@ void dt_dev_refresh_ui_images_real(dt_develop_t *dev)
 
 void dt_dev_pixelpipe_rebuild(dt_develop_t *dev)
 {
-  if(!dev->gui_attached) return;
+  if(!dev || !dev->gui_attached) return;
 
   dt_atomic_set_int(&dev->pipe->shutdown, TRUE);
   dt_atomic_set_int(&dev->preview_pipe->shutdown, TRUE);
@@ -274,7 +274,7 @@ void dt_dev_pixelpipe_resync_main(dt_develop_t *dev)
 
 void dt_dev_pixelpipe_resync_all(dt_develop_t *dev)
 {
-  if(!dev->gui_attached) return;
+  if(!dev || !dev->gui_attached) return;
 
   dt_atomic_set_int(&dev->preview_pipe->shutdown, TRUE);
 
@@ -329,6 +329,7 @@ void dt_dev_invalidate_preview_real(dt_develop_t *dev)
 
 void dt_dev_invalidate_all_real(dt_develop_t *dev)
 {
+  if(!dev || !dev->gui_attached) return;
   // Send killswitch ASAP
   dt_atomic_set_int(&dev->pipe->shutdown, TRUE);
   dt_atomic_set_int(&dev->preview_pipe->shutdown, TRUE);

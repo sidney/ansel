@@ -251,7 +251,11 @@ static void profile_callback(GtkWidget *widget)
     dt_colorspaces_update_display_transforms();
     pthread_rwlock_unlock(&darktable.color_profiles->xprofile_lock);
     DT_DEBUG_CONTROL_SIGNAL_RAISE(darktable.signals, DT_SIGNAL_CONTROL_PROFILE_USER_CHANGED, DT_COLORSPACES_PROFILE_TYPE_DISPLAY);
-    dt_dev_invalidate_all(darktable.develop);
+    dt_dev_pixelpipe_resync_all(darktable.develop);
+    // It's a bit brutal but GUI color profile doesn't leave a param in colorout
+    // so there is no way to change its hash to invalidate only its cacheline.
+    dt_dev_pixelpipe_cache_flush(&darktable.develop->pipe->cache);
+    dt_dev_pixelpipe_cache_flush(&darktable.develop->preview_pipe->cache);
     dt_dev_refresh_ui_images(darktable.develop);
   }
 }
@@ -287,7 +291,11 @@ static void intent_callback(GtkWidget *widget)
     pthread_rwlock_rdlock(&darktable.color_profiles->xprofile_lock);
     dt_colorspaces_update_display_transforms();
     pthread_rwlock_unlock(&darktable.color_profiles->xprofile_lock);
-    dt_dev_invalidate_all(darktable.develop);
+    dt_dev_pixelpipe_resync_all(darktable.develop);
+    // It's a bit brutal but GUI color profile doesn't leave a param in colorout
+    // so there is no way to change its hash to invalidate only its cacheline.
+    dt_dev_pixelpipe_cache_flush(&darktable.develop->pipe->cache);
+    dt_dev_pixelpipe_cache_flush(&darktable.develop->preview_pipe->cache);
     dt_dev_refresh_ui_images(darktable.develop);
   }
 }
