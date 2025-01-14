@@ -464,18 +464,7 @@ void dt_dev_pixelpipe_synch(dt_dev_pixelpipe_t *pipe, dt_develop_t *dev, GList *
   dt_dev_history_item_t *hist = (dt_dev_history_item_t *)history->data;
   // find piece in nodes list
   dt_dev_pixelpipe_iop_t *piece = NULL;
-
-  // FIXME: this is not the place to handle masks.
-  // Shitty darktable code as usual: unable to do one thing at one time.
-  const dt_image_t *img = &pipe->image;
-  const gboolean rawprep_img = dt_image_is_rawprepare_supported(img);
-  const gboolean raw_img     = dt_image_is_raw(img);
-
-  pipe->want_detail_mask &= DT_DEV_DETAIL_MASK_REQUIRED;
-  if(raw_img)          pipe->want_detail_mask |= DT_DEV_DETAIL_MASK_DEMOSAIC;
-  else if(rawprep_img)
-    pipe->want_detail_mask |= DT_DEV_DETAIL_MASK_RAWPREPARE;
-
+  
   for(GList *nodes = g_list_first(pipe->nodes); nodes; nodes = g_list_next(nodes))
   {
     piece = (dt_dev_pixelpipe_iop_t *)nodes->data;
@@ -554,6 +543,14 @@ void dt_dev_pixelpipe_change(dt_dev_pixelpipe_t *pipe, struct dt_develop_t *dev)
   pipe->mask_display = DT_DEV_PIXELPIPE_DISPLAY_NONE;
   // and blendif active
   pipe->bypass_blendif = 0;
+
+  // Init fucking details masks
+  const dt_image_t *img = &pipe->image;
+  pipe->want_detail_mask &= DT_DEV_DETAIL_MASK_REQUIRED;
+  if(dt_image_is_raw(img))
+    pipe->want_detail_mask |= DT_DEV_DETAIL_MASK_DEMOSAIC;
+  else if(dt_image_is_rawprepare_supported(img))
+    pipe->want_detail_mask |= DT_DEV_DETAIL_MASK_RAWPREPARE;
 
   dt_print(DT_DEBUG_DEV, "[dt_dev_pixelpipe_change] pipeline state changing for pipe %i, flag %i\n", pipe->type, pipe->changed);
 
