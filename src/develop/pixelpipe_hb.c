@@ -2244,6 +2244,7 @@ int dt_dev_pixelpipe_process(dt_dev_pixelpipe_t *pipe, dt_develop_t *dev, int x,
   KILL_SWITCH_PIPE
 
   pipe->processing = 1;
+  pipe->backbuf = NULL;
   pipe->opencl_enabled = dt_opencl_update_settings(); // update enabled flag and profile from preferences
   pipe->devid = (pipe->opencl_enabled) ? dt_opencl_lock_device(pipe->type)
                                        : -1; // try to get/lock opencl resource
@@ -2288,8 +2289,6 @@ restart:;
   // Get the previous output size of the module, for cache invalidation.
   dt_dev_pixelpipe_get_roi_in(pipe, dev, roi);
   dt_pixelpipe_get_global_hash(pipe, dev);
-
-  KILL_SWITCH_PIPE
 
   // run pixelpipe recursively and get error status
   const int err =
@@ -2361,9 +2360,7 @@ restart:;
   pipe->backbuf_width = width;
   pipe->backbuf_height = height;
 
-  if((pipe->type & DT_DEV_PIXELPIPE_PREVIEW) == DT_DEV_PIXELPIPE_PREVIEW
-     || (pipe->type & DT_DEV_PIXELPIPE_FULL) == DT_DEV_PIXELPIPE_FULL
-     || (pipe->type & DT_DEV_PIXELPIPE_PREVIEW2) == DT_DEV_PIXELPIPE_PREVIEW2)
+  if(dev->gui_attached)
   {
     if(pipe->output_backbuf == NULL || pipe->output_backbuf_width != pipe->backbuf_width || pipe->output_backbuf_height != pipe->backbuf_height)
     {
@@ -2375,6 +2372,7 @@ restart:;
 
     if(pipe->output_backbuf)
       memcpy(pipe->output_backbuf, pipe->backbuf, sizeof(uint8_t) * 4 * pipe->output_backbuf_width * pipe->output_backbuf_height);
+
     pipe->output_imgid = pipe->image.id;
   }
   dt_pthread_mutex_unlock(&pipe->backbuf_mutex);
@@ -2459,11 +2457,6 @@ void dt_dev_pixelpipe_get_roi_in(dt_dev_pixelpipe_t *pipe, struct dt_develop_t *
     if(piece->enabled && !dt_dev_pixelpipe_activemodule_disables_currentmodule(dev, module))
     {
       module->modify_roi_in(module, piece, &roi_out_temp, &roi_in);
-
-      /*
-      if(dev)
-        fprintf(stdout, "ROI IN in for %s on pipe %i: %i × %i at (%i, %i) @ %f\n", module->op, dev->pipe->type, roi_in.width, roi_in.height, roi_in.x, roi_in.y, roi_in.scale);
-      */
     }
     else
     {
