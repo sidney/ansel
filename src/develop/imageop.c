@@ -1692,7 +1692,7 @@ void dt_iop_commit_params(dt_iop_module_t *module, dt_iop_params_t *params,
   assert(piece->pipe == pipe);
   if(!piece->enabled)
   {
-    piece->global_hash = piece->hash = 0;
+    piece->global_hash = piece->global_mask_hash = piece->hash = 0;
     return;
   }
 
@@ -1725,6 +1725,7 @@ void dt_iop_commit_params(dt_iop_module_t *module, dt_iop_params_t *params,
   hash = dt_hash(hash, (const char *)&module->request_mask_display, sizeof(int));
 
   piece->global_hash = piece->hash = hash;
+  piece->global_mask_hash = piece->blendop_hash = module->blendop_hash;
 
   dt_print(DT_DEBUG_PIPE, "[pixelpipe] params commit for %s (%s) in pipe %i with hash %lu\n", module->op, module->multi_name, pipe->type, (long unsigned int)piece->hash);
 }

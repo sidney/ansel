@@ -63,10 +63,14 @@ typedef struct dt_dev_pixelpipe_iop_t
 
   // Hash representing the current state of the params, blend params and enabled state of this individual module
   uint64_t hash;
+  uint64_t blendop_hash;
 
   // Cumulative hash representing the current module hash and all the upstream modules from the pipeline,
   // for the current ROI.
   uint64_t global_hash;
+
+  // Same as global hash but for raster masks
+  uint64_t global_mask_hash;
 
   int bpc;             // bits per channel, 32 means float
   int colors;          // how many colors per pixel

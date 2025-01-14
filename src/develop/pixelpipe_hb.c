@@ -349,7 +349,9 @@ void dt_dev_pixelpipe_create_nodes(dt_dev_pixelpipe_t *pipe, dt_develop_t *dev)
     piece->pipe = pipe;
     piece->data = NULL;
     piece->hash = 0;
+    piece->blendop_hash = 0;
     piece->global_hash = 0;
+    piece->global_mask_hash = 0;
     piece->bypass_cache = FALSE;
     piece->process_cl_ready = 0;
     piece->process_tiling_ready = 0;
@@ -371,9 +373,9 @@ void dt_dev_pixelpipe_create_nodes(dt_dev_pixelpipe_t *pipe, dt_develop_t *dev)
 static uint64_t _default_pipe_hash(dt_dev_pixelpipe_t *pipe)
 {
   // Start with a hash that is unique, image-wise and duplicate-wise.
-  uint64_t hash = dt_hash(5381, (const char *)&pipe->image.id, sizeof(uint32_t));
-  hash = dt_hash(hash, (const char *)&pipe->image.version, sizeof(uint32_t));
-  hash = dt_hash(hash, (const char *)&pipe->image.film_id, sizeof(uint32_t));
+  uint64_t hash = dt_hash(5381, (const char *)&pipe->image.id, sizeof(int32_t));
+  hash = dt_hash(hash, (const char *)&pipe->image.version, sizeof(int32_t));
+  hash = dt_hash(hash, (const char *)&pipe->image.film_id, sizeof(int32_t));
   return hash;
 }
 
@@ -406,6 +408,8 @@ void dt_pixelpipe_get_global_hash(dt_dev_pixelpipe_t *pipe, dt_develop_t *dev)
 
   // bernstein hash (djb2)
   uint64_t hash = _default_pipe_hash(pipe);
+  uint64_t distort_hash = _default_pipe_hash(pipe);
+  distort_hash = dt_hash(distort_hash, (const char *)&distort_hash, sizeof(uint64_t));
 
   // Bypassing cache contaminates downstream modules.
   gboolean bypass_cache = FALSE;
@@ -430,9 +434,21 @@ void dt_pixelpipe_get_global_hash(dt_dev_pixelpipe_t *pipe, dt_develop_t *dev)
       hash = dt_hash(hash, (const char *)&local_hash, sizeof(uint64_t));
 
       dt_print(DT_DEBUG_PIPE, "[pixelpipe] global hash for %s (%s) in pipe %i with hash %lu\n", piece->module->op, piece->module->multi_name, pipe->type, (long unsigned int)hash);
+
+      // Mask hash: raster masks are affected by ROI out size and distortions.
+
+      // This could be achieved upon (piece->module->operation_tags() & IOP_TAG_CLIPPING) only
+      // but let's pretend that programmers are the idiots they are and assume mistakes were made.
+      distort_hash = dt_hash(distort_hash, (const char *)&piece->planned_roi_out, sizeof(dt_iop_roi_t));
+
+      // Distortions are not limited to changing ROI out (liquify)
+      // In this case, the nature of the distortion is represented by the internal params of the module.
+      if((piece->module->operation_tags() & IOP_TAG_DISTORT) == IOP_TAG_DISTORT)
+        distort_hash = dt_hash(distort_hash, (const char *)&piece->hash, sizeof(uint64_t));
     }
 
     piece->global_hash = hash;
+    piece->global_mask_hash = dt_hash(distort_hash, (const char *)&piece->blendop_hash, sizeof(uint64_t));
   }
 }
 
@@ -2498,7 +2514,7 @@ float *dt_dev_get_raster_mask(dt_dev_pixelpipe_t *pipe, const dt_iop_module_t *r
     }
     else
     {
-      const uint64_t raster_hash = source_piece->module->blendop_hash;
+      const uint64_t raster_hash = source_piece->global_mask_hash;
       const size_t raster_size
           = source_piece->processed_roi_out.width * source_piece->processed_roi_out.height * sizeof(float);
       dt_iop_buffer_dsc_t *out_format = &source_piece->dsc_mask;

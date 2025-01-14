@@ -665,11 +665,11 @@ void dt_develop_blend_process(struct dt_iop_module_t *self, struct dt_dev_pixelp
              piece->module->multi_name, piece->pipe->type);
 
     // Copy to global pipeline cache
-    if(!dt_dev_pixelpipe_cache_available(&(piece->pipe->cache), self->blendop_hash))
+    if(!dt_dev_pixelpipe_cache_available(&(piece->pipe->cache), piece->global_mask_hash))
     {
       dt_iop_buffer_dsc_t *out_format = &piece->dsc_mask;
       float *cache_mask;
-      dt_dev_pixelpipe_cache_get(&(piece->pipe->cache), self->blendop_hash, buffsize * sizeof(float), (void **)&cache_mask, &out_format);
+      dt_dev_pixelpipe_cache_get(&(piece->pipe->cache), piece->global_mask_hash, buffsize * sizeof(float), (void **)&cache_mask, &out_format);
       memcpy(cache_mask, _mask, buffsize * sizeof(float));
     }
   }
@@ -1254,11 +1254,11 @@ int dt_develop_blend_process_cl(struct dt_iop_module_t *self, struct dt_dev_pixe
     g_hash_table_replace(piece->raster_masks, GINT_TO_POINTER(0), _mask);
 
     // Copy to global pipeline cache
-    if(!dt_dev_pixelpipe_cache_available(&(piece->pipe->cache), self->blendop_hash))
+    if(!dt_dev_pixelpipe_cache_available(&(piece->pipe->cache), piece->global_mask_hash))
     {
       dt_iop_buffer_dsc_t *out_format = &piece->dsc_mask;
       float *cache_mask;
-      dt_dev_pixelpipe_cache_get(&(piece->pipe->cache), self->blendop_hash, buffsize * sizeof(float), (void **)&cache_mask, &out_format);
+      dt_dev_pixelpipe_cache_get(&(piece->pipe->cache), piece->global_mask_hash, buffsize * sizeof(float), (void **)&cache_mask, &out_format);
       memcpy(cache_mask, _mask, buffsize * sizeof(float));
     }
   }
