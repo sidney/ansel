@@ -55,8 +55,6 @@ static float dt_opencl_benchmark_cpu(const size_t width, const size_t height, co
 static char *_ascii_str_canonical(const char *in, char *out, int maxlen);
 /** parse a single token of priority string and store priorities in priority_list */
 static void dt_opencl_priority_parse(dt_opencl_t *cl, char *configstr, int *priority_list, int *mandatory);
-/** parse a complete priority string */
-static void dt_opencl_priorities_parse(dt_opencl_t *cl);
 /** set device priorities according to config string */
 static void dt_opencl_update_priorities();
 /** adjust opencl subsystem according to scheduling profile */
@@ -1109,7 +1107,7 @@ finally:
 
     // apply config settings for scheduling profile: sets device priorities and pixelpipe synchronization timeout
     gchar *device_str = g_strdup_printf("%i", fastest_device);
-    dt_conf_set_string("opencl_devid_thumbnails", device_str);
+    dt_conf_set_string("opencl_devid_thumbnail", device_str);
     dt_conf_set_string("opencl_devid_preview", device_str);
     dt_conf_set_string("opencl_devid_export", device_str);
     dt_conf_set_string("opencl_devid_darkroom", device_str);
@@ -1593,20 +1591,19 @@ static void dt_opencl_priority_parse(dt_opencl_t *cl, char *configstr, int *prio
   free(full);
 }
 
-// parse a complete priority string
-static void dt_opencl_priorities_parse(dt_opencl_t *cl)
-{
-  dt_opencl_priority_parse(cl, dt_conf_get_string("opencl_devid_darkroom"), cl->dev_priority_image, &cl->mandatory[0]);
-  dt_opencl_priority_parse(cl, dt_conf_get_string("opencl_devid_preview"), cl->dev_priority_preview, &cl->mandatory[1]);
-  dt_opencl_priority_parse(cl, dt_conf_get_string("opencl_devid_export"), cl->dev_priority_export, &cl->mandatory[2]);
-  dt_opencl_priority_parse(cl, dt_conf_get_string("opencl_devid_thumbnail"), cl->dev_priority_thumbnail, &cl->mandatory[3]);
-}
-
 // set device priorities according to config string
 static void dt_opencl_update_priorities()
 {
   dt_opencl_t *cl = darktable.opencl;
-  dt_opencl_priorities_parse(cl);
+  if(!cl->inited) return;
+
+  // Priority parsing iterates over the list of available devices.
+  // If !cl->inited, that means we have no available device, so empty list.
+  // Exit early of face a segfault
+  dt_opencl_priority_parse(cl, dt_conf_get_string("opencl_devid_darkroom"), cl->dev_priority_image, &cl->mandatory[0]);
+  dt_opencl_priority_parse(cl, dt_conf_get_string("opencl_devid_preview"), cl->dev_priority_preview, &cl->mandatory[1]);
+  dt_opencl_priority_parse(cl, dt_conf_get_string("opencl_devid_export"), cl->dev_priority_export, &cl->mandatory[2]);
+  dt_opencl_priority_parse(cl, dt_conf_get_string("opencl_devid_thumbnail"), cl->dev_priority_thumbnail, &cl->mandatory[3]);
 
   dt_print_nts(DT_DEBUG_OPENCL, "[dt_opencl_update_priorities] these are your device priorities:\n");
   dt_print_nts(DT_DEBUG_OPENCL, "[dt_opencl_update_priorities] \tid |\t\timage\tpreview\texport\tthumbs\n");
