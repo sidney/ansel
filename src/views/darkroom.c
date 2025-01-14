@@ -1222,25 +1222,6 @@ end:
   }
 }
 
-// FIXME: turning off lcms2 in prefs hides the widget but leaves the window sized like before -> ugly-ish
-static void _preference_changed(gpointer instance, gpointer user_data)
-{
-  dt_get_sysresource_level();
-  dt_configure_ppd_dpi(darktable.gui);
-}
-
-static void _preference_changed_button_hide(gpointer instance, dt_develop_t *dev)
-{
-  for(const GList *modules = dev->iop; modules; modules = g_list_next(modules))
-  {
-    dt_iop_module_t *module = (dt_iop_module_t *)(modules->data);
-
-    if(module->header)
-      add_remove_mask_indicator(module, (module->blend_params->mask_mode != DEVELOP_MASK_DISABLED) &&
-                                (module->blend_params->mask_mode != DEVELOP_MASK_ENABLED));
-  }
-}
-
 /** end of toolbox */
 
 static void _brush_size_up_callback(dt_action_t *action)
@@ -1837,10 +1818,6 @@ void gui_init(dt_view_t *self)
 
     _update_softproof_gamut_checking(dev);
 
-    // update the gui when the preferences changed (i.e. show intent when using lcms2)
-    DT_DEBUG_CONTROL_SIGNAL_CONNECT(darktable.signals, DT_SIGNAL_PREFERENCES_CHANGE,
-                                    G_CALLBACK(_preference_changed), NULL);
-
     gtk_widget_show_all(vbox);
   }
 
@@ -2408,10 +2385,6 @@ void enter(dt_view_t *self)
   // switch on groups as they were last time:
   dt_dev_modulegroups_set(dev, dt_conf_get_int("plugins/darkroom/groups"));
 
-  // connect to preference change for module header button hiding
-  DT_DEBUG_CONTROL_SIGNAL_CONNECT(darktable.signals, DT_SIGNAL_PREFERENCES_CHANGE,
-                                  G_CALLBACK(_preference_changed_button_hide), dev);
-
   dt_iop_color_picker_init();
 
   dt_image_check_camera_missing_sample(&dev->image_storage);
@@ -2456,8 +2429,6 @@ void leave(dt_view_t *self)
   else
     dt_conf_set_string("plugins/darkroom/active", "");
 
-  DT_DEBUG_CONTROL_SIGNAL_DISCONNECT(darktable.signals,
-                                     G_CALLBACK(_preference_changed_button_hide), dev);
 
   // commit image ops to db
   dt_dev_write_history(dev);
