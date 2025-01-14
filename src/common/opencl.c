@@ -854,6 +854,8 @@ void dt_opencl_init(dt_opencl_t *cl, const gboolean exclude_opencl, const gboole
   cl->dev_priority_export = NULL;
   cl->dev_priority_thumbnail = NULL;
 
+  if(exclude_opencl) return;
+
   cl_platform_id *all_platforms = NULL;
   cl_uint *all_num_devices = NULL;
 
@@ -861,13 +863,6 @@ void dt_opencl_init(dt_opencl_t *cl, const gboolean exclude_opencl, const gboole
   char *platform_vendor = calloc(DT_OPENCL_CBUFFSIZE, sizeof(char));
 
   cl->cpubenchmark = dt_conf_get_float("dt_cpubenchmark");
-
-  if(exclude_opencl)
-  {
-    dt_print_nts(DT_DEBUG_OPENCL, "[opencl_init] do not try to find and use an opencl runtime library due to "
-                              "explicit user request\n");
-    goto finally;
-  }
 
   dt_print_nts(DT_DEBUG_OPENCL, "[opencl_init] opencl related configuration options:\n");
   dt_print_nts(DT_DEBUG_OPENCL, "[opencl_init] opencl: %s\n", dt_conf_get_bool("opencl") ? "ON" : "OFF" );
