@@ -110,6 +110,8 @@ void dt_dev_init(dt_develop_t *dev, int32_t gui_attached)
   dev->display_histogram.hash = -1;
   dev->display_histogram.bpp = 0;
 
+  dev->auto_save_timeout = 0;
+
   dev->iop_instance = 0;
   dev->iop = NULL;
   dev->alliop = NULL;
@@ -150,6 +152,9 @@ void dt_dev_cleanup(dt_develop_t *dev)
   if(dev->raw_histogram.buffer) dt_free_align(dev->raw_histogram.buffer);
   if(dev->output_histogram.buffer) dt_free_align(dev->output_histogram.buffer);
   if(dev->display_histogram.buffer) dt_free_align(dev->display_histogram.buffer);
+
+  // On dev cleanup, it is expected to force an history save
+  if(dev->auto_save_timeout) g_source_remove(dev->auto_save_timeout);
 
   dev->proxy.chroma_adaptation = NULL;
   dev->proxy.wb_coeffs[0] = 0.f;
@@ -879,6 +884,36 @@ const dt_dev_history_item_t *dt_dev_get_history_item(dt_develop_t *dev, struct d
   return NULL;
 }
 
+#define AUTO_SAVE_TIMEOUT 10000
+
+static int _auto_save_edit(gpointer data)
+{
+  // TODO: put that in a parallel job to not freeze GUI mainthread
+  // when writing XMP on remote storage ? But that will still lock history mutex...
+  dt_develop_t *dev = (dt_develop_t *)data;
+  dev->auto_save_timeout = 0;
+
+  if(dt_dev_mask_history_overload(dev, 250) < 250)
+  {
+    dt_times_t start;
+    dt_get_times(&start);
+    dt_toast_log(_("autosaving changes..."));
+
+    dt_pthread_mutex_lock(&dev->history_mutex);
+    dt_dev_write_history_ext(dev, dev->image_storage.id);
+    dt_image_write_sidecar_file(dev->image_storage.id);
+    dt_pthread_mutex_unlock(&dev->history_mutex);
+
+    dt_show_times(&start, "[_auto_save_edit] auto-saving history upon last change");
+
+    dt_times_t end;
+    dt_get_times(&end);
+    dt_toast_log("autosaving completed in %.3f s", end.clock - start.clock);
+  }
+
+  return G_SOURCE_REMOVE;
+}
+
 
 // The next 2 functions are always called from GUI controls setting parameters
 // This is why they directly start a pipeline recompute.
@@ -898,11 +933,21 @@ void dt_dev_add_history_item_real(dt_develop_t *dev, dt_iop_module_t *module, gb
   /* signal that history has changed */
   dt_dev_undo_end_record(dev);
 
-  if(darktable.gui)
+  if(darktable.gui && dev->gui_attached)
   {
     /* recreate mask list */
     dt_dev_masks_list_change(dev);
     if(module) dt_iop_gui_set_enable_button(module);
+
+    // Auto-save N s after the last change.
+    // If another change is made during that delay,
+    // reset the timer and restart Ns
+    if(dev->auto_save_timeout)
+    {
+      g_source_remove(dev->auto_save_timeout);
+      dev->auto_save_timeout = 0;
+    }
+    dev->auto_save_timeout = g_timeout_add(AUTO_SAVE_TIMEOUT, _auto_save_edit, dev);
   }
 
   // Run the delayed post-commit actions if implemented
@@ -1088,9 +1133,20 @@ void dt_dev_pop_history_items(dt_develop_t *dev, int32_t cnt)
     dt_iop_gui_update(module);
     modules = g_list_next(modules);
   }
-
   --darktable.gui->reset;
 
+  if(darktable.gui && dev->gui_attached)
+  {
+    // Auto-save N s after the last change.
+    // If another change is made during that delay,
+    // reset the timer and restart N s
+    if(dev->auto_save_timeout)
+    {
+      g_source_remove(dev->auto_save_timeout);
+      dev->auto_save_timeout = 0;
+    }
+    dev->auto_save_timeout = g_timeout_add(AUTO_SAVE_TIMEOUT, _auto_save_edit, dev);
+  }
 
   dt_dev_masks_list_change(dev);
   dt_dev_pixelpipe_rebuild(dev);
