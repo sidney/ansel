@@ -150,14 +150,22 @@ typedef struct dt_iop_colorbalancergb_data_t
   float hue_angle;
   float shadows_weight, highlights_weight, midtones_weight, mask_grey_fulcrum;
   float white_fulcrum, grey_fulcrum;
-  float *gamut_LUT;
-  float *chroma_LUT;
   float max_chroma;
   float checker_color_1[4], checker_color_2[4];
   dt_iop_colorbalancrgb_saturation_t saturation_formula;
   size_t checker_size;
   gboolean lut_inited;
   struct dt_iop_order_iccprofile_info_t *work_profile;
+
+  // Note: the pixelpipe cache hashes the membuffer of dt_iop_colorbalancergb_data_t to track
+  // the consistency of cachelines, because some modules like colorout that don't record user params.
+  // Problem here is that this membuffer contains the 2 following pointers aka memory addresses.
+  // These will change everytime we rebuild the pipeline even though the module hasen't changed its state.
+  // The cacheline will then change hash, as they should.
+  // To solve that, we keep the pointers at the end of the struct. Then we reduce the size
+  // of the membuffer to hash by 2 × sizeof(size_t) to keep the constant part.
+  float *gamut_LUT;
+  float *chroma_LUT;
 } dt_iop_colorbalancergb_data_t;
 
 typedef struct dt_iop_colorbalance_global_data_t
@@ -1310,7 +1318,9 @@ void commit_params(struct dt_iop_module_t *self, dt_iop_params_t *p1, dt_dev_pix
 void init_pipe(dt_iop_module_t *self, dt_dev_pixelpipe_t *pipe, dt_dev_pixelpipe_iop_t *piece)
 {
   piece->data = calloc(1, sizeof(dt_iop_colorbalancergb_data_t));
-  piece->data_size = sizeof(dt_iop_colorbalancergb_data_t);
+  // The last elements of dt_iop_colorbalancergb_data_t are non-constant pointers
+  // See the complete explanation in dt_iop_colorbalancergb_data_t struct definition.
+  piece->data_size = 0;
   dt_iop_colorbalancergb_data_t *d = (dt_iop_colorbalancergb_data_t *)(piece->data);
   d->gamut_LUT = dt_alloc_align_float(LUT_ELEM);
   d->lut_inited = FALSE;

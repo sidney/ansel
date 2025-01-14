@@ -47,7 +47,16 @@ typedef struct dt_dev_pixelpipe_iop_t
   struct dt_iop_module_t *module;  // the module in the dev operation stack
   struct dt_dev_pixelpipe_t *pipe; // the pipe this piece belongs to
   void *data;                      // to be used by the module to store stuff per pipe piece
-  size_t data_size;                // memory size of *data
+
+  // Memory size of *data upon which we will compute integrity hashes.
+  // This needs to be the size of the constant part of the data structure.
+  // It can even be 0 if nothing relevant to cache integrity hashes is held there.
+  // If the data struct contains pointers, they should go at the end of the struct,
+  // and the size here should be adjusted to only include constant bits, starting at the address of *data.
+  // "Constant" means identical between 2 pipeline nodes init,
+  // because the lifecycle of a pixelpipe cache is longer than that of a pixelpipe itself.
+  // See an example in colorbalancergb.c
+  size_t data_size;
 
   void *blendop_data;              // to be used by the module to store blendop per pipe piece
   gboolean enabled; // used to disable parts of the pipe for export, independent on module itself.
