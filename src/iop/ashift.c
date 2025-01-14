@@ -3657,7 +3657,7 @@ static int call_distort_transform(dt_develop_t *dev, dt_dev_pixelpipe_t *pipe, s
   dt_dev_pixelpipe_iop_t *piece = dt_dev_distort_get_iop_pipe(self->dev, self->dev->preview_pipe, self);
   if(!piece) return ret;
   if(piece->module == self && /*piece->enabled && */  //see note below
-     !(dev->gui_module && dev->gui_module->operation_tags_filter() & piece->module->operation_tags()))
+     !dt_dev_pixelpipe_activemodule_disables_currentmodule(dev, piece->module))
   {
     ret = piece->module->distort_transform(piece->module, piece, points, points_count);
   }

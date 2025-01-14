@@ -219,6 +219,17 @@ void dt_dev_pixelpipe_get_roi_out(dt_dev_pixelpipe_t *pipe, struct dt_develop_t 
                                      int height_in, int *width, int *height);
 void dt_dev_pixelpipe_get_roi_in(dt_dev_pixelpipe_t *pipe, struct dt_develop_t *dev, const struct dt_iop_roi_t roi_out);
 
+// Check if current_module is performing operations that dev->gui_module (active GUI module)
+// wants disabled. Use that to disable some features of current_module.
+// This is used mostly with distortion operations when the active GUI module
+// needs a full-ROI/undistorted input for its own editing mode,
+// like moving the framing on the full image.
+// WARNING: this doesn't check WHAT particular operations are performed and
+// and what operations should be cancelled (nor if they should all be cancelled).
+// So far, all the code uses that to prevent distortions on module output, masks and roi_out changes (cropping).
+// Meaning ANY of these operations will disable ALL of these operations.
+gboolean dt_dev_pixelpipe_activemodule_disables_currentmodule(struct dt_develop_t *dev,
+                                                              struct dt_iop_module_t *current_module);
 // destroys all allocated data.
 void dt_dev_pixelpipe_cleanup(dt_dev_pixelpipe_t *pipe);
 

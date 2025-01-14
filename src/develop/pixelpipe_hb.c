@@ -2389,6 +2389,15 @@ void dt_dev_pixelpipe_flush_caches(dt_dev_pixelpipe_t *pipe)
   dt_dev_pixelpipe_cache_flush(&pipe->cache);
 }
 
+gboolean dt_dev_pixelpipe_activemodule_disables_currentmodule(struct dt_develop_t *dev, struct dt_iop_module_t *current_module)
+{
+  return (dev                 // don't segfault
+          && dev->gui_module  // don't segfault
+          && dev->gui_module != current_module // current_module is not capturing editing mode
+          && dev->gui_module->operation_tags_filter() & current_module->operation_tags());
+          // current_module does operation(s) that active module doesn't want
+}
+
 void dt_dev_pixelpipe_get_roi_out(dt_dev_pixelpipe_t *pipe, struct dt_develop_t *dev, int width_in,
                                      int height_in, int *width, int *height)
 {
@@ -2405,8 +2414,7 @@ void dt_dev_pixelpipe_get_roi_out(dt_dev_pixelpipe_t *pipe, struct dt_develop_t 
 
     // skip this module?
     if(piece->enabled
-       && !(dev->gui_module && dev->gui_module != module
-            && dev->gui_module->operation_tags_filter() & module->operation_tags()))
+       && !dt_dev_pixelpipe_activemodule_disables_currentmodule(dev, module))
     {
       module->modify_roi_out(module, piece, &roi_out, &roi_in);
     }
@@ -2448,8 +2456,7 @@ void dt_dev_pixelpipe_get_roi_in(dt_dev_pixelpipe_t *pipe, struct dt_develop_t *
     piece->planned_roi_out = roi_out_temp;
 
     // skip this module?
-    if(piece->enabled && !(dev->gui_module && dev->gui_module != module
-            && dev->gui_module->operation_tags_filter() & module->operation_tags()))
+    if(piece->enabled && !dt_dev_pixelpipe_activemodule_disables_currentmodule(dev, module))
     {
       module->modify_roi_in(module, piece, &roi_out_temp, &roi_in);
 
@@ -2546,8 +2553,7 @@ float *dt_dev_get_raster_mask(dt_dev_pixelpipe_t *pipe, const dt_iop_module_t *r
           dt_dev_pixelpipe_iop_t *module = (dt_dev_pixelpipe_iop_t *)iter->data;
 
           if(module->enabled
-             && !(module->module->dev->gui_module
-                  && (module->module->dev->gui_module->operation_tags_filter() & module->module->operation_tags())))
+             && !dt_dev_pixelpipe_activemodule_disables_currentmodule(module->module->dev, module->module))
           {
             if(module->module->distort_mask
               && !(!strcmp(module->module->op, "finalscale") // hack against pipes not using finalscale
@@ -2775,8 +2781,7 @@ float *dt_dev_distort_detail_mask(const dt_dev_pixelpipe_t *pipe, float *src, co
     {
       dt_dev_pixelpipe_iop_t *module = (dt_dev_pixelpipe_iop_t *)iter->data;
       if(module->enabled
-         && !(module->module->dev->gui_module
-              && module->module->dev->gui_module->operation_tags_filter() & module->module->operation_tags()))
+         && !dt_dev_pixelpipe_activemodule_disables_currentmodule(module->module->dev, module->module))
       {
         if(module->module->distort_mask
               && !(!strcmp(module->module->op, "finalscale") // hack against pipes not using finalscale
