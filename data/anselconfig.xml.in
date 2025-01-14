@@ -1707,12 +1707,18 @@
     <shortdescription>panels collapsing state in slideshow</shortdescription>
     <longdescription/>
   </dtconfig>
-  <dtconfig prefs="darkroom" section="general">
+  <dtconfig>
     <name>plugins/darkroom/ui/border_size</name>
     <type>int</type>
     <default>10</default>
     <shortdescription>border around image in darkroom mode</shortdescription>
     <longdescription>process the image in darkroom mode with a small border. set to 0 if you don't want any border.</longdescription>
+  </dtconfig>
+  <dtconfig>
+    <name>display/brightness</name>
+    <type min="0" max="100">int</type>
+    <default>50</default>
+    <shortdescription>background brightness to show pictures against</shortdescription>
   </dtconfig>
   <dtconfig>
     <name>ui_last/expander_metadata</name>

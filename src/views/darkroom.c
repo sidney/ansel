@@ -333,6 +333,11 @@ void expose(
   cairo_set_source_rgb(cri, .2, .2, .2);
   cairo_save(cri);
 
+  // user param is Lab lightness/brightness (roughly, cubic root of Y).
+  // Convert that to typical gamma 2.2
+  double user_bg_rgb = ((double)dt_conf_get_int("display/brightness")) / 100.;
+  user_bg_rgb = pow(user_bg_rgb, 3.0 - 2.2);
+
   dt_develop_t *dev = (dt_develop_t *)self->data;
   const int32_t tb = dev->border_size;
   // account for border, make it transparent for other modules called below:
@@ -385,10 +390,7 @@ void expose(
     }
     else
     {
-      if(dev->full_preview)
-        dt_gui_gtk_set_source_rgb(cr, DT_GUI_COLOR_DARKROOM_PREVIEW_BG);
-      else
-        dt_gui_gtk_set_source_rgb(cr, DT_GUI_COLOR_DARKROOM_BG);
+      cairo_set_source_rgb(cr, user_bg_rgb, user_bg_rgb, user_bg_rgb);
     }
     cairo_paint(cr);
 
@@ -444,7 +446,7 @@ void expose(
     }
     else
     {
-      dt_gui_gtk_set_source_rgb(cr, DT_GUI_COLOR_DARKROOM_BG);
+      cairo_set_source_rgb(cr, user_bg_rgb, user_bg_rgb, user_bg_rgb);
     }
 
     cairo_paint(cr);
@@ -1043,6 +1045,27 @@ static void _guides_view_changed(gpointer instance, dt_view_t *old_view, dt_view
  * They all need a full history -> pipeline resynchronization.
  */
 
+/* display */
+static void _display_quickbutton_clicked(GtkWidget *w, gpointer user_data)
+{
+}
+
+static void display_brightness_callback(GtkWidget *slider, gpointer user_data)
+{
+  dt_conf_set_int("display/brightness", (int)(dt_bauhaus_slider_get(slider)));
+  dt_control_queue_redraw_center();
+}
+
+static void display_borders_callback(GtkWidget *slider, gpointer user_data)
+{
+  dt_develop_t *d = (dt_develop_t *)user_data;
+  dt_conf_set_int("plugins/darkroom/ui/border_size", (int)dt_bauhaus_slider_get(slider));
+  _get_final_size_with_iso_12646(d);
+  dt_control_queue_redraw_center();
+  dt_dev_invalidate_zoom(d);
+  dt_dev_refresh_ui_images(d);
+}
+
 /* overexposed */
 static void _overexposed_quickbutton_clicked(GtkWidget *w, gpointer user_data)
 {
@@ -1625,6 +1648,37 @@ void gui_init(dt_view_t *self)
                               _("toggle ISO 12646 color assessment conditions"));
   g_signal_connect(G_OBJECT(dev->iso_12646.button), "clicked", G_CALLBACK(_iso_12646_quickbutton_clicked), dev);
   dt_view_manager_module_toolbox_add(darktable.view_manager, dev->iso_12646.button, DT_VIEW_DARKROOM);
+
+  /* display background options */
+  {
+    dev->display.button = dtgtk_button_new(dtgtk_cairo_paint_display, 0, NULL);
+    dt_view_manager_module_toolbox_add(darktable.view_manager, dev->display.button, DT_VIEW_DARKROOM);
+    gtk_widget_set_tooltip_text(dev->display.button, _("Picture display options"));
+    g_signal_connect(G_OBJECT(dev->display.button), "clicked",
+                     G_CALLBACK(_display_quickbutton_clicked), dev);
+
+    // and the popup window
+    dev->display.floating_window = gtk_popover_new(dev->display.button);
+    connect_button_press_release(dev->display.button, dev->display.floating_window);
+
+    GtkWidget *vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
+    gtk_container_add(GTK_CONTAINER(dev->display.floating_window), vbox);
+
+    /** let's fill the encapsulating widgets */
+    GtkWidget *brightness = dt_bauhaus_slider_new_action(DT_ACTION(self), 0, 100, 5, 50, 0);
+    dt_bauhaus_slider_set(brightness, (int)dt_conf_get_int("display/brightness"));
+    dt_bauhaus_widget_set_label(brightness, NULL, N_("Background brightness"));
+    dt_bauhaus_slider_set_format(brightness, "%");
+    g_signal_connect(G_OBJECT(brightness), "value-changed", G_CALLBACK(display_brightness_callback), dev);
+    gtk_box_pack_start(GTK_BOX(vbox), GTK_WIDGET(brightness), TRUE, TRUE, 0);
+
+    GtkWidget *borders = dt_bauhaus_slider_new_action(DT_ACTION(self), 0, 250, 5, 10, 0);
+    dt_bauhaus_slider_set(borders, dt_conf_get_int("plugins/darkroom/ui/border_size"));
+    dt_bauhaus_widget_set_label(borders, NULL, N_("Picture margins"));
+    dt_bauhaus_slider_set_format(borders, "px");
+    g_signal_connect(G_OBJECT(borders), "value-changed", G_CALLBACK(display_borders_callback), dev);
+    gtk_box_pack_start(GTK_BOX(vbox), GTK_WIDGET(borders), TRUE, TRUE, 0);
+  }
 
   GtkWidget *colorscheme, *mode;
 

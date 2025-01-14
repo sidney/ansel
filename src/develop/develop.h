@@ -314,6 +314,14 @@ typedef struct dt_develop_t
     float threshold;
   } rawoverexposed;
 
+  struct
+  {
+    GtkWidget *floating_window, *button; // 10 years later, still ugly
+
+    float brightness;
+    int border;
+  } display;
+
   // ISO 12646-compliant colour assessment conditions
   struct
   {
