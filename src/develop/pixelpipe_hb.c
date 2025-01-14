@@ -233,6 +233,8 @@ int dt_dev_pixelpipe_init_cached(dt_dev_pixelpipe_t *pipe, size_t size, int32_t 
   pipe->input_profile_info = NULL;
   pipe->output_profile_info = NULL;
 
+  pipe->status = DT_DEV_PIXELPIPE_DIRTY;
+
   return 1;
 }
 
@@ -2235,6 +2237,7 @@ static int dt_dev_pixelpipe_process_rec_and_backcopy(dt_dev_pixelpipe_t *pipe, d
   if(dt_atomic_get_int(&pipe->shutdown))                                                                          \
   {                                                                                                               \
     pipe->processing = 0;                                                                                         \
+    pipe->status = DT_DEV_PIXELPIPE_INVALID;                                                                      \
     return 1;                                                                                                     \
   }
 
@@ -2289,6 +2292,8 @@ restart:;
   // Get the previous output size of the module, for cache invalidation.
   dt_dev_pixelpipe_get_roi_in(pipe, dev, roi);
   dt_pixelpipe_get_global_hash(pipe, dev);
+
+  KILL_SWITCH_PIPE
 
   // run pixelpipe recursively and get error status
   const int err =
@@ -2349,6 +2354,7 @@ restart:;
   if(err)
   {
     pipe->processing = 0;
+    pipe->status = DT_DEV_PIXELPIPE_INVALID;
     return 1;
   }
 
@@ -2378,6 +2384,7 @@ restart:;
   dt_pthread_mutex_unlock(&pipe->backbuf_mutex);
 
   // printf("pixelpipe homebrew process end\n");
+  pipe->status = DT_DEV_PIXELPIPE_VALID;
   pipe->processing = 0;
   return 0;
 }

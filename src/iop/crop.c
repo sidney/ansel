@@ -221,7 +221,7 @@ static int _set_max_clip(struct dt_iop_module_t *self)
   dt_iop_crop_gui_data_t *g = (dt_iop_crop_gui_data_t *)self->gui_data;
   dt_iop_crop_params_t *p = (dt_iop_crop_params_t *)self->params;
 
-  if(self->dev->preview_status != DT_DEV_PIXELPIPE_VALID) return 1;
+  if(self->dev->preview_pipe->status != DT_DEV_PIXELPIPE_VALID) return 1;
 
   // we want to know the size of the actual buffer
   dt_dev_pixelpipe_iop_t *piece = dt_dev_distort_get_iop_pipe(self->dev, self->dev->preview_pipe, self);

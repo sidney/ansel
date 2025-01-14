@@ -165,7 +165,7 @@ void _reset_cache(dt_lib_histogram_t *d)
 
 static gboolean _is_backbuf_ready(dt_lib_histogram_t *d)
 {
-  return (darktable.develop->preview_status == DT_DEV_PIXELPIPE_VALID) &&
+  return (darktable.develop->preview_pipe->status == DT_DEV_PIXELPIPE_VALID) &&
          (d->backbuf->hash != (uint64_t)-1) &&
          (d->backbuf->buffer != NULL);
 }

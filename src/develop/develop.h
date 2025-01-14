@@ -87,14 +87,6 @@ typedef enum dt_dev_transform_direction_t
   DT_DEV_TRANSFORM_DIR_BACK_EXCL = 4
 } dt_dev_transform_direction_t;
 
-typedef enum dt_dev_pixelpipe_status_t
-{
-  DT_DEV_PIXELPIPE_DIRTY = 0,   // history stack changed or image new
-  DT_DEV_PIXELPIPE_RUNNING = 1, // pixelpipe is running
-  DT_DEV_PIXELPIPE_VALID = 2,   // pixelpipe has finished; valid result
-  DT_DEV_PIXELPIPE_INVALID = 3  // pixelpipe has finished; invalid result
-} dt_dev_pixelpipe_status_t;
-
 typedef enum dt_dev_pixelpipe_display_mask_t
 {
   DT_DEV_PIXELPIPE_DISPLAY_NONE = 0,
@@ -163,7 +155,6 @@ typedef struct dt_develop_t
   int32_t gui_attached; // != 0 if the gui should be notified of changes in hist stack and modules should be
                         // gui_init'ed.
 
-  dt_dev_pixelpipe_status_t image_status, preview_status;
   int32_t image_invalid_cnt;
   uint32_t average_delay;
   uint32_t preview_average_delay;

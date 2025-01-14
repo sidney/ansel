@@ -1394,8 +1394,8 @@ static float _action_process_preview(gpointer target, dt_action_element_t elemen
     else
     {
       if(effect != DT_ACTION_EFFECT_OFF &&
-         lib->preview_status != DT_DEV_PIXELPIPE_DIRTY &&
-         lib->preview_status != DT_DEV_PIXELPIPE_INVALID)
+         lib->preview_pipe->status != DT_DEV_PIXELPIPE_DIRTY &&
+         lib->preview_pipe->status != DT_DEV_PIXELPIPE_INVALID)
       {
         lib->full_preview = TRUE;
         // we hide all panels
@@ -2456,7 +2456,7 @@ void leave(dt_view_t *self)
   dt_dev_write_history(dev);
 
   // update aspect ratio
-  if(dev->preview_pipe->backbuf && dev->preview_status == DT_DEV_PIXELPIPE_VALID)
+  if(dev->preview_pipe->backbuf && dev->preview_pipe->status == DT_DEV_PIXELPIPE_VALID)
   {
     double aspect_ratio = (double)dev->preview_pipe->backbuf_width / (double)dev->preview_pipe->backbuf_height;
     dt_image_set_aspect_ratio_to(dev->preview_pipe->image.id, aspect_ratio, FALSE);
@@ -2649,7 +2649,6 @@ void mouse_moved(dt_view_t *self, double x, double y, double pressure, int which
       {
         sample->point[0] = .5f + zoom_x;
         sample->point[1] = .5f + zoom_y;
-        dev->preview_status = DT_DEV_PIXELPIPE_DIRTY;
       }
     }
 
@@ -2715,10 +2714,7 @@ int button_released(dt_view_t *self, double x, double y, int which, uint32_t sta
   {
     // only sample box picker at end, for speed
     if(darktable.lib->proxy.colorpicker.primary_sample->size == DT_LIB_COLORPICKER_SIZE_BOX)
-    {
-      dev->preview_status = DT_DEV_PIXELPIPE_DIRTY;
       dt_control_change_cursor(GDK_LEFT_PTR);
-    }
 
     dt_control_queue_redraw_center();
 

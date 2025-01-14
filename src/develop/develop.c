@@ -65,7 +65,6 @@ void dt_dev_init(dt_develop_t *dev, int32_t gui_attached)
   dev->height = -1;
 
   dt_image_init(&dev->image_storage);
-  dev->image_status = dev->preview_status = DT_DEV_PIXELPIPE_DIRTY;
   dev->image_invalid_cnt = 0;
   dev->pipe = dev->preview_pipe = NULL;
   dev->histogram_pre_tonecurve = NULL;
@@ -263,6 +262,8 @@ void dt_dev_pixelpipe_rebuild(dt_develop_t *dev)
   dt_pthread_mutex_lock(&dev->history_mutex);
   dev->pipe->changed |= DT_DEV_PIPE_REMOVE;
   dev->preview_pipe->changed |= DT_DEV_PIPE_REMOVE;
+  dev->pipe->status = DT_DEV_PIXELPIPE_DIRTY;
+  dev->preview_pipe->status = DT_DEV_PIXELPIPE_DIRTY;
   dt_pthread_mutex_unlock(&dev->history_mutex);
 }
 
@@ -274,6 +275,7 @@ void dt_dev_pixelpipe_resync_main(dt_develop_t *dev)
 
   dt_pthread_mutex_lock(&dev->history_mutex);
   dev->pipe->changed |= DT_DEV_PIPE_SYNCH;
+  dev->pipe->status = DT_DEV_PIXELPIPE_DIRTY;
   dt_pthread_mutex_unlock(&dev->history_mutex);
 }
 
@@ -285,6 +287,7 @@ void dt_dev_pixelpipe_resync_all(dt_develop_t *dev)
 
   dt_pthread_mutex_lock(&dev->history_mutex);
   dev->preview_pipe->changed |= DT_DEV_PIPE_SYNCH;
+  dev->preview_pipe->status = DT_DEV_PIXELPIPE_DIRTY;
   dt_pthread_mutex_unlock(&dev->history_mutex);
 
   dt_dev_pixelpipe_resync_main(dev);
@@ -299,7 +302,7 @@ void dt_dev_invalidate_real(dt_develop_t *dev)
   dt_atomic_set_int(&dev->pipe->shutdown, TRUE);
 
   dt_pthread_mutex_lock(&dev->history_mutex);
-  dev->image_status = DT_DEV_PIXELPIPE_DIRTY;
+  dev->pipe->status = DT_DEV_PIXELPIPE_DIRTY;
   dev->pipe->changed |= DT_DEV_PIPE_TOP_CHANGED;
   dt_pthread_mutex_unlock(&dev->history_mutex);
 }
@@ -313,7 +316,7 @@ void dt_dev_invalidate_zoom_real(dt_develop_t *dev)
   dt_atomic_set_int(&dev->pipe->shutdown, TRUE);
 
   dt_pthread_mutex_lock(&dev->history_mutex);
-  dev->image_status = DT_DEV_PIXELPIPE_DIRTY;
+  dev->pipe->status = DT_DEV_PIXELPIPE_DIRTY;
   dev->pipe->changed |= DT_DEV_PIPE_ZOOMED;
   dt_pthread_mutex_unlock(&dev->history_mutex);
 }
@@ -328,7 +331,7 @@ void dt_dev_invalidate_preview_real(dt_develop_t *dev)
 
   dt_pthread_mutex_lock(&dev->history_mutex);
   dev->preview_pipe->changed |= DT_DEV_PIPE_TOP_CHANGED;
-  dev->preview_status = DT_DEV_PIXELPIPE_DIRTY;
+  dev->preview_pipe->status = DT_DEV_PIXELPIPE_DIRTY;
   dt_pthread_mutex_unlock(&dev->history_mutex);
 }
 
@@ -348,7 +351,7 @@ void dt_dev_process_preview_job(dt_develop_t *dev)
   dt_pthread_mutex_lock(&dev->preview_pipe->busy_mutex);
   dt_control_log_busy_enter();
   dt_control_toast_busy_enter();
-  dev->preview_status = DT_DEV_PIXELPIPE_RUNNING;
+  dev->preview_pipe->status = DT_DEV_PIXELPIPE_RUNNING;
 
   // init pixel pipeline for preview.
   dt_mipmap_buffer_t buf;
@@ -391,14 +394,11 @@ void dt_dev_process_preview_job(dt_develop_t *dev)
     {
       dt_control_log_busy_leave();
       dt_control_toast_busy_leave();
-      dev->preview_status = DT_DEV_PIXELPIPE_INVALID;
       dt_mipmap_cache_release(darktable.mipmap_cache, &buf);
       dt_pthread_mutex_unlock(&dev->preview_pipe->busy_mutex);
       return;
     }
   }
-
-  dev->preview_status = DT_DEV_PIXELPIPE_VALID;
 
   dt_show_times(&start, "[dev_process_preview] pixel pipeline processing");
   dt_dev_average_delay_update(&start, &dev->preview_average_delay);
@@ -428,7 +428,7 @@ void dt_dev_process_image_job(dt_develop_t *dev)
   dt_control_log_busy_enter();
   dt_control_toast_busy_enter();
   // let gui know to draw preview instead of us, if it's there:
-  dev->image_status = DT_DEV_PIXELPIPE_RUNNING;
+  dev->pipe->status = DT_DEV_PIXELPIPE_RUNNING;
 
   dt_mipmap_buffer_t buf;
   dt_mipmap_cache_get(darktable.mipmap_cache, &buf, dev->image_storage.id, DT_MIPMAP_FULL, DT_MIPMAP_BLOCKING, 'r');
@@ -496,7 +496,6 @@ restart:;
     {
       dt_control_log_busy_leave();
       dt_control_toast_busy_leave();
-      dev->image_status = DT_DEV_PIXELPIPE_INVALID;
       dt_mipmap_cache_release(darktable.mipmap_cache, &buf);
       dt_pthread_mutex_unlock(&dev->pipe->busy_mutex);
       return;
@@ -511,7 +510,6 @@ restart:;
   dev->pipe->backbuf_zoom_x = zoom_x;
   dev->pipe->backbuf_zoom_y = zoom_y;
 
-  dev->image_status = DT_DEV_PIXELPIPE_VALID;
   dev->image_invalid_cnt = 0;
   // if a widget needs to be redrawn there's the DT_SIGNAL_*_PIPE_FINISHED signals
   dt_control_log_busy_leave();
@@ -609,7 +607,6 @@ int dt_dev_load_image(dt_develop_t *dev, const uint32_t imgid)
   dev->iop = dt_iop_load_modules(dev);
   dt_dev_read_history_ext(dev, dev->image_storage.id, FALSE);
 
-  dev->image_status = dev->preview_status = DT_DEV_PIXELPIPE_DIRTY;
   if(dev->pipe)
   {
     dev->pipe->processed_width = 0;
@@ -954,11 +951,6 @@ void dt_dev_add_history_item_real(dt_develop_t *dev, dt_iop_module_t *module, gb
   if(module && module->post_history_commit) module->post_history_commit(module);
 
   // Recompute pipeline last
-  dt_pthread_mutex_lock(&dev->history_mutex);
-  dev->image_status = DT_DEV_PIXELPIPE_DIRTY;
-  dev->preview_status = DT_DEV_PIXELPIPE_DIRTY;
-  dt_pthread_mutex_unlock(&dev->history_mutex);
-
   if(module)
   {
     // If we have a module, we only need to resync the top-most history item with pipeline

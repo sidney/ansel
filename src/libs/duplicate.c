@@ -186,7 +186,7 @@ void gui_post_expose(dt_lib_module_t *self, cairo_t *cri, int32_t width, int32_t
   dt_lib_duplicate_t *d = (dt_lib_duplicate_t *)self->data;
   if (d->imgid == 0) return;
   dt_develop_t *dev = darktable.develop;
-  if(!dev->preview_pipe->backbuf || dev->preview_status != DT_DEV_PIXELPIPE_VALID) return;
+  if(!dev->preview_pipe->backbuf || dev->preview_pipe->status != DT_DEV_PIXELPIPE_VALID) return;
 
   // use the same resolution as main previem image to avoid blur
   float img_wd, img_ht;
