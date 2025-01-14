@@ -1714,11 +1714,17 @@ void dt_iop_commit_params(dt_iop_module_t *module, dt_iop_params_t *params,
 
   module->commit_params(module, params, pipe, piece);
 
-  // 2. compute the hash
-  // piece->hash = dt_hash(module->hash, (const char *)piece->data, piece->data_size);
-  // That's actually too aggressive and unneeded, fetch only user-params checksum here.
+  // 2. Update the internal hash
+  uint64_t hash = module->hash;
+
+  // Take dynamically-set parameters into account. That's mostly colorout setting up the
+  // output color profile at commit_params() time.
+  hash = dt_hash(hash, (const char *)piece->data, piece->data_size);
+
   // We need to take mask display into account too because it's set in various ways from GUI.
-  piece->global_hash = piece->hash = dt_hash(module->hash, (const char *)&module->request_mask_display, sizeof(int));
+  hash = dt_hash(hash, (const char *)&module->request_mask_display, sizeof(int));
+
+  piece->global_hash = piece->hash = hash;
 
   dt_print(DT_DEBUG_PIPE, "[pixelpipe] params commit for %s (%s) in pipe %i with hash %lu\n", module->op, module->multi_name, pipe->type, (long unsigned int)piece->hash);
 }
