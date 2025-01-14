@@ -419,100 +419,114 @@ void dt_pixelpipe_get_global_hash(dt_dev_pixelpipe_t *pipe, dt_develop_t *dev)
   for(GList *node = g_list_first(pipe->nodes); node; node = g_list_next(node))
   {
     dt_dev_pixelpipe_iop_t *piece = (dt_dev_pixelpipe_iop_t *)node->data;
+    if(!piece->enabled) continue;
 
     // Combine with the previous bypass states
     bypass_cache |= piece->module->bypass_cache;
     piece->bypass_cache = bypass_cache;
 
-    if(piece->enabled)
-    {
-      // Combine with the previous modules hashes
-      uint64_t local_hash = piece->hash;
+    // Combine with the previous modules hashes
+    uint64_t local_hash = piece->hash;
 
-      // Panning and zooming change the ROI. Some GUI modes (crop in editing mode) too.
-      // dt_dev_get_roi_in() should have run before
-      local_hash = dt_hash(local_hash, (const char *)&piece->planned_roi_in, sizeof(dt_iop_roi_t));
-      local_hash = dt_hash(local_hash, (const char *)&piece->planned_roi_out, sizeof(dt_iop_roi_t));
-      hash = dt_hash(hash, (const char *)&local_hash, sizeof(uint64_t));
-
-      dt_print(DT_DEBUG_PIPE, "[pixelpipe] global hash for %s (%s) in pipe %i with hash %lu\n", piece->module->op, piece->module->multi_name, pipe->type, (long unsigned int)hash);
-
-      // Mask hash: raster masks are affected by ROI out size and distortions.
-
-      // This could be achieved upon (piece->module->operation_tags() & IOP_TAG_CLIPPING) only
-      // but let's pretend that programmers are the idiots they are and assume mistakes were made.
-      distort_hash = dt_hash(distort_hash, (const char *)&piece->planned_roi_out, sizeof(dt_iop_roi_t));
-
-      // Distortions are not limited to changing ROI out (liquify)
-      // In this case, the nature of the distortion is represented by the internal params of the module.
-      if((piece->module->operation_tags() & IOP_TAG_DISTORT) == IOP_TAG_DISTORT)
-        distort_hash = dt_hash(distort_hash, (const char *)&piece->hash, sizeof(uint64_t));
-    }
+    // Panning and zooming change the ROI. Some GUI modes (crop in editing mode) too.
+    // dt_dev_get_roi_in() should have run before
+    local_hash = dt_hash(local_hash, (const char *)&piece->planned_roi_in, sizeof(dt_iop_roi_t));
+    local_hash = dt_hash(local_hash, (const char *)&piece->planned_roi_out, sizeof(dt_iop_roi_t));
+    hash = dt_hash(hash, (const char *)&local_hash, sizeof(uint64_t));
 
     piece->global_hash = hash;
+
+    dt_print(DT_DEBUG_PIPE, "[pixelpipe] global hash for %s (%s) in pipe %i with hash %lu\n", piece->module->op, piece->module->multi_name, pipe->type, (long unsigned int)hash);
+
+    // Mask hash: raster masks are affected by ROI out size and distortions.
+
+    // This could be achieved upon (piece->module->operation_tags() & IOP_TAG_CLIPPING) only
+    // but let's pretend that programmers are the idiots they are and assume mistakes were made.
+    distort_hash = dt_hash(distort_hash, (const char *)&piece->planned_roi_out, sizeof(dt_iop_roi_t));
+
+    // Distortions are not limited to changing ROI out (liquify)
+    // In this case, the nature of the distortion is represented by the internal params of the module.
+    if((piece->module->operation_tags() & IOP_TAG_DISTORT) == IOP_TAG_DISTORT)
+      distort_hash = dt_hash(distort_hash, (const char *)&piece->hash, sizeof(uint64_t));
+
     piece->global_mask_hash = dt_hash(distort_hash, (const char *)&piece->blendop_hash, sizeof(uint64_t));
   }
+}
+
+gboolean _commit_history_to_node(dt_dev_pixelpipe_t *pipe, dt_dev_pixelpipe_iop_t *piece, dt_dev_history_item_t *hist)
+{
+  if(piece->module == hist->module)
+  {
+    piece->enabled = hist->enabled;
+    dt_iop_commit_params(hist->module, hist->params, hist->blend_params, pipe, piece);
+
+    if(piece->blendop_data)
+    {
+      const dt_develop_blend_params_t *const bp = (const dt_develop_blend_params_t *)piece->blendop_data;
+      if(bp->details != 0.0f)
+        pipe->want_detail_mask |= DT_DEV_DETAIL_MASK_REQUIRED;
+    }
+    return TRUE;
+  }
+  return FALSE;
 }
 
 // helper
 void dt_dev_pixelpipe_synch(dt_dev_pixelpipe_t *pipe, dt_develop_t *dev, GList *history)
 {
-  /*
-  * WARNING: this function is called to traverse the pipeline in the order of history items (touches),
-  * not in the order of nodes application in pipeline.
-  */
   dt_dev_history_item_t *hist = (dt_dev_history_item_t *)history->data;
-  // find piece in nodes list
   dt_dev_pixelpipe_iop_t *piece = NULL;
-  
-  for(GList *nodes = g_list_first(pipe->nodes); nodes; nodes = g_list_next(nodes))
+
+  // Traverse the list of pipe nodes until we found the one matching our history item.
+  // We begin by the end, because it's expected that users will follow an editing history
+  // roughly similar to node order, so as history is growing, we shall have an higher
+  // probability of finding the last history item node at the end of the pipeline.
+  for(GList *nodes = g_list_last(pipe->nodes); nodes; nodes = g_list_previous(nodes))
   {
     piece = (dt_dev_pixelpipe_iop_t *)nodes->data;
-
-    if(piece->module == hist->module)
-    {
-      piece->enabled = hist->enabled;
-      dt_iop_commit_params(hist->module, hist->params, hist->blend_params, pipe, piece);
-
-      if(piece->blendop_data)
-      {
-        const dt_develop_blend_params_t *const bp = (const dt_develop_blend_params_t *)piece->blendop_data;
-        if(bp->details != 0.0f)
-          pipe->want_detail_mask |= DT_DEV_DETAIL_MASK_REQUIRED;
-      }
-    }
+    if(_commit_history_to_node(pipe, piece, hist))
+      break;
   }
 }
 
 void dt_dev_pixelpipe_synch_all_real(dt_dev_pixelpipe_t *pipe, dt_develop_t *dev, const char *caller_func)
 {
   dt_print(DT_DEBUG_DEV, "[pixelpipe] synch all modules with defaults_params for pipe %i called from %s\n", pipe->type, caller_func);
+  dt_print(DT_DEBUG_DEV, "[pixelpipe] synch all modules with history for pipe %i called from %s\n", pipe->type, caller_func);
 
-  // call reset_params on all pieces first. This is mandatory to init utility modules that don't have an history stack
+  // go through all history items and adjust params
+  // note that we don't necessarily process the whole history, history_end is an user param.
+  const uint32_t history_end = dt_dev_get_history_end(dev);
+
   for(GList *nodes = g_list_first(pipe->nodes); nodes; nodes = g_list_next(nodes))
   {
     dt_dev_pixelpipe_iop_t *piece = (dt_dev_pixelpipe_iop_t *)nodes->data;
     piece->hash = 0;
     piece->global_hash = 0;
     piece->enabled = piece->module->default_enabled;
-    dt_iop_commit_params(piece->module, piece->module->default_params, piece->module->default_blendop_params,
-                         pipe, piece);
-  }
+    gboolean found_history = FALSE;
 
-  dt_print(DT_DEBUG_DEV, "[pixelpipe] synch all modules with history for pipe %i called from %s\n", pipe->type, caller_func);
+    // now browse all history items from the end. Since each history item is a full snapshot of parameters,
+    // the latest history entry matching current node is the one we want, and we don't need to look for the previous.
+    for(GList *history = g_list_nth(dev->history, history_end - 1);
+        history;
+        history = g_list_previous(history))
+    {
+      dt_dev_history_item_t *hist = (dt_dev_history_item_t *)history->data;
+      if(_commit_history_to_node(pipe, piece, hist))
+      {
+        found_history = TRUE;
+        break;
+      }
+    }
 
-  // go through all history items and adjust params
-  // note that we don't necessarily process the whole history
-  const uint32_t history_end = dt_dev_get_history_end(dev);
-  // because history_end is shifted by 1, it is actually the step after the last one we want
-  uint32_t k = 0;
-
-  for(GList *history = g_list_first(dev->history);
-      history && k < history_end;
-      history = g_list_next(history))
-  {
-    dt_dev_pixelpipe_synch(pipe, dev, history);
-    ++k;
+    // No history found, commit default params if module is enabled by default
+    if(!found_history && piece->enabled)
+    {
+      dt_iop_commit_params(piece->module, piece->module->default_params, piece->module->default_blendop_params,
+                           pipe, piece);
+      dt_print(DT_DEBUG_PIPE, "[pixelpipe] info: committed default params for %s (%s) in pipe %i \n", piece->module->op, piece->module->multi_name, pipe->type);
+    }
   }
 }
 
@@ -522,7 +536,7 @@ void dt_dev_pixelpipe_synch_top(dt_dev_pixelpipe_t *pipe, dt_develop_t *dev)
   if(history)
   {
     dt_dev_history_item_t *hist = (dt_dev_history_item_t *)history->data;
-    dt_print(DT_DEBUG_DEV, "[pixelpipe] synch top history module `%s` for pipe %i\n", hist->module->op, pipe->type);
+    dt_print(DT_DEBUG_DEV, "[pixelpipe] synch top history module `%s` (%s) for pipe %i\n", hist->module->op, hist->module->multi_name, pipe->type);
     dt_dev_pixelpipe_synch(pipe, dev, history);
   }
   else
@@ -580,7 +594,6 @@ void dt_dev_pixelpipe_change(dt_dev_pixelpipe_t *pipe, struct dt_develop_t *dev)
   dt_dev_pixelpipe_get_roi_out(pipe, dev, pipe->iwidth, pipe->iheight, &pipe->processed_width,
                                   &pipe->processed_height);
 
-  // TODO: if DT_DEV_PIPE_TOP_CHANGED, compute global hash only for the top ?
   dt_pthread_mutex_unlock(&dev->history_mutex);
 
   dt_show_times(&start, "[dt_dev_pixelpipe_change] pipeline resync on the current modules stack");
