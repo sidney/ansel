@@ -625,10 +625,6 @@ void dt_dev_configure_real(dt_develop_t *dev, int wd, int ht)
 {
   // Called only from Darkroom to init and update drawing size
   // depending on sidebars and main window resizing.
-  const int32_t tb = dev->border_size;
-  wd -= 2*tb;
-  ht -= 2*tb;
-
   if(dev->width != wd || dev->height != ht || !dev->pipe->backbuf)
   {
     // If dimensions didn't change or we don't have a valid output image to display
@@ -637,11 +633,11 @@ void dt_dev_configure_real(dt_develop_t *dev, int wd, int ht)
     dev->height = ht;
 
     dt_print(DT_DEBUG_DEV, "[pixelpipe] Darkroom requested a %i×%i px main preview\n", wd, ht);
+    dt_dev_invalidate_zoom(dev);
 
     if(dev->image_storage.id > -1 && darktable.mipmap_cache)
     {
       // Only if it's not our initial configure call, aka if we already have an image
-      dt_dev_invalidate_zoom(dev);
       dt_control_queue_redraw_center();
       dt_dev_refresh_ui_images(dev);
     }

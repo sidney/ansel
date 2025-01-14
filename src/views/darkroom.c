@@ -403,7 +403,7 @@ void expose(
     if(dev->iso_12646.enabled)
     {
       // draw the white frame around picture
-      cairo_rectangle(cr, -tb / 3., -tb / 3.0, wd + 2. * tb / 3., ht + 2. * tb / 3.);
+      cairo_rectangle(cr, -tb / 2, -tb / 2., wd + tb, ht + tb);
       cairo_set_source_rgb(cr, 1., 1., 1.);
       cairo_fill(cr);
     }
@@ -995,6 +995,25 @@ static gboolean _toolbar_show_popup(gpointer user_data)
   return FALSE;
 }
 
+static void _get_final_size_with_iso_12646(dt_develop_t *d)
+{
+  if(d->iso_12646.enabled)
+  {
+    // For ISO 12646, we want portraits and landscapes to cover roughly the same surface
+    // no matter the size of the widget. Meaning we force them to fit a square
+    // of length matching the smaller widget dimension. The goal is to leave
+    // a consistent perceptual impression between pictures, independent from orientation.
+    const int main_dim = MIN(d->orig_width, d->orig_height);
+    d->border_size = 0.125 * main_dim;
+    dt_dev_configure(d, main_dim - 2 * d->border_size, main_dim - 2 * d->border_size);
+  }
+  else
+  {
+    d->border_size = DT_PIXEL_APPLY_DPI(dt_conf_get_int("plugins/darkroom/ui/border_size"));
+    dt_dev_configure(d, d->orig_width - 2 * d->border_size, d->orig_height - 2 * d->border_size);
+  }
+}
+
 /* colour assessment */
 static void _iso_12646_quickbutton_clicked(GtkWidget *w, gpointer user_data)
 {
@@ -1002,26 +1021,7 @@ static void _iso_12646_quickbutton_clicked(GtkWidget *w, gpointer user_data)
   if (!d->gui_attached) return;
 
   d->iso_12646.enabled = !d->iso_12646.enabled;
-  d->width = d->orig_width;
-  d->height = d->orig_height;
-
-  if(d->iso_12646.enabled)
-  {
-    d->border_size = 0.125 * d->width;
-  }
-  else
-  {
-    // Reset border size from config
-    d->border_size = DT_PIXEL_APPLY_DPI(dt_conf_get_int("plugins/darkroom/ui/border_size"));
-  }
-
-  dt_ui_restore_panels(darktable.gui->ui);
-
-  // The above _restore_panels() will resize the window
-  // which emits "configure-event" signal which execute here the configure() method
-  // which already calls dt_dev_configure(d, d->width, d->height)
-  // to reset pipeline output size for main preview.
-
+  _get_final_size_with_iso_12646(d);
 }
 
 /* overlay color */
@@ -2459,16 +2459,6 @@ void leave(dt_view_t *self)
   DT_DEBUG_CONTROL_SIGNAL_DISCONNECT(darktable.signals,
                                      G_CALLBACK(_preference_changed_button_hide), dev);
 
-  // reset color assessment mode
-  if(dev->iso_12646.enabled)
-  {
-    gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(dev->iso_12646.button), FALSE);
-    dev->iso_12646.enabled = FALSE;
-    dev->width = dev->orig_width;
-    dev->height = dev->orig_height;
-    dev->border_size = DT_PIXEL_APPLY_DPI(dt_conf_get_int("plugins/darkroom/ui/border_size"));
-  }
-
   // commit image ops to db
   dt_dev_write_history(dev);
 
@@ -3160,7 +3150,12 @@ void configure(dt_view_t *self, int wd, int ht)
   // TD;DR: until we get the final window size, which happens
   // only when entering the view, don't configure the main preview pipeline, which will disable useless recomputes.
   if(dt_view_manager_get_current_view(darktable.view_manager) == self)
-    dt_dev_configure(dev, wd, ht);
+  {
+    // Reference dimensions before ISO 12646 mode
+    dev->orig_height = ht;
+    dev->orig_width = wd;
+    _get_final_size_with_iso_12646(dev);
+  }
 }
 
 GSList *mouse_actions(const dt_view_t *self)
