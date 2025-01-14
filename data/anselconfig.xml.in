@@ -260,11 +260,28 @@
     <longdescription>if enabled, cached thumbnails will be color managed so that lighttable and filmstrip can show correct colors. otherwise the results may look wrong once the display profile gets changed.</longdescription>
   </dtconfig>
   <dtconfig>
-    <name>opencl_device_priority</name>
+    <name>opencl_devid_darkroom</name>
     <type>string</type>
-    <default>*/*/*/*</default>
+    <default>*</default>
     <shortdescription>priority of OpenCL devices for each pixelpipe type</shortdescription>
-    <longdescription>defines priorities on how (multiple) OpenCL devices are allocated to the different types of pixelpipe (full, preview, export, thumbnail). for more details visit our usermanual (needs a restart).</longdescription>
+  </dtconfig>
+  <dtconfig>
+    <name>opencl_devid_preview</name>
+    <type>string</type>
+    <default>*</default>
+    <shortdescription>priority of OpenCL devices for each pixelpipe type</shortdescription>
+  </dtconfig>
+  <dtconfig>
+    <name>opencl_devid_export</name>
+    <type>string</type>
+    <default>*</default>
+    <shortdescription>priority of OpenCL devices for each pixelpipe type</shortdescription>
+  </dtconfig>
+  <dtconfig>
+    <name>opencl_devid_thumbnail</name>
+    <type>string</type>
+    <default>*</default>
+    <shortdescription>priority of OpenCL devices for each pixelpipe type</shortdescription>
   </dtconfig>
   <dtconfig>
     <name>opencl_mandatory_timeout</name>

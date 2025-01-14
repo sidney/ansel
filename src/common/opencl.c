@@ -56,9 +56,9 @@ static char *_ascii_str_canonical(const char *in, char *out, int maxlen);
 /** parse a single token of priority string and store priorities in priority_list */
 static void dt_opencl_priority_parse(dt_opencl_t *cl, char *configstr, int *priority_list, int *mandatory);
 /** parse a complete priority string */
-static void dt_opencl_priorities_parse(dt_opencl_t *cl, const char *configstr);
+static void dt_opencl_priorities_parse(dt_opencl_t *cl);
 /** set device priorities according to config string */
-static void dt_opencl_update_priorities(const char *configstr);
+static void dt_opencl_update_priorities();
 /** adjust opencl subsystem according to scheduling profile */
 static void dt_opencl_apply_scheduling_profile();
 /** set opencl specific synchronization timeout */
@@ -873,12 +873,9 @@ void dt_opencl_init(dt_opencl_t *cl, const gboolean exclude_opencl, const gboole
 
   dt_print_nts(DT_DEBUG_OPENCL, "[opencl_init] opencl related configuration options:\n");
   dt_print_nts(DT_DEBUG_OPENCL, "[opencl_init] opencl: %s\n", dt_conf_get_bool("opencl") ? "ON" : "OFF" );
-  const char *str;
   // look for explicit definition of opencl_runtime library in preferences
   const char *library = dt_conf_get_string_const("opencl_library");
   dt_print_nts(DT_DEBUG_OPENCL, "[opencl_init] opencl_library: '%s'\n", (strlen(library) == 0) ? "default path" : library);
-  str = dt_conf_get_string_const("opencl_device_priority");
-  dt_print_nts(DT_DEBUG_OPENCL, "[opencl_init] opencl_device_priority: '%s'\n", str);
   dt_print_nts(DT_DEBUG_OPENCL, "[opencl_init] opencl_mandatory_timeout: %d\n",
            dt_conf_get_int("opencl_mandatory_timeout"));
 
@@ -1043,7 +1040,6 @@ finally:
 
   // check if the list of existing OpenCL devices (indicated by checksum != oldchecksum) has changed
   // If it has, reprofile and update config if needed.
-  // TODO: account for driver version too.
   char checksum[64];
   snprintf(checksum, sizeof(checksum), "%u", cl->crc);
   const char *oldchecksum = dt_conf_get_string_const("opencl_checksum");
@@ -1112,7 +1108,12 @@ finally:
     }
 
     // apply config settings for scheduling profile: sets device priorities and pixelpipe synchronization timeout
-    dt_conf_set_string("opencl_device_priority", g_strdup_printf("%i/%i/%i/%i", fastest_device, fastest_device, fastest_device, fastest_device));
+    gchar *device_str = g_strdup_printf("%i", fastest_device);
+    dt_conf_set_string("opencl_devid_thumbnails", device_str);
+    dt_conf_set_string("opencl_devid_preview", device_str);
+    dt_conf_set_string("opencl_devid_export", device_str);
+    dt_conf_set_string("opencl_devid_darkroom", device_str);
+    g_free(device_str);
   }
 
   dt_opencl_apply_scheduling_profile();
@@ -1497,45 +1498,6 @@ static char *_ascii_str_canonical(const char *in, char *out, int maxlen)
   return out;
 }
 
-
-static char *_strsep(char **stringp, const char *delim)
-{
-  char *begin, *end;
-
-  begin = *stringp;
-  if(begin == NULL) return NULL;
-
-  if(delim[0] == '\0' || delim[1] == '\0')
-  {
-    char ch = delim[0];
-
-    if(ch == '\0')
-      end = NULL;
-    else
-    {
-      if(*begin == ch)
-        end = begin;
-      else if(*begin == '\0')
-        end = NULL;
-      else
-        end = strchr(begin + 1, ch);
-    }
-  }
-  else
-    end = strpbrk(begin, delim);
-
-  if(end)
-  {
-    *end++ = '\0';
-    *stringp = end;
-  }
-  else
-    *stringp = NULL;
-
-  return begin;
-}
-
-
 // parse a single token of priority string and store priorities in priority_list
 static void dt_opencl_priority_parse(dt_opencl_t *cl, char *configstr, int *priority_list, int *mandatory)
 {
@@ -1632,44 +1594,19 @@ static void dt_opencl_priority_parse(dt_opencl_t *cl, char *configstr, int *prio
 }
 
 // parse a complete priority string
-static void dt_opencl_priorities_parse(dt_opencl_t *cl, const char *configstr)
+static void dt_opencl_priorities_parse(dt_opencl_t *cl)
 {
-  char tmp[2048];
-  int len = 0;
-
-  // first get rid of all invalid characters
-  while(*configstr != '\0' && len < sizeof(tmp) - 1)
-  {
-    int n = strcspn(configstr, "/!,*+0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ");
-    configstr += n;
-    if(n != 0) continue;
-    tmp[len] = *configstr;
-    len++;
-    configstr++;
-  }
-  tmp[len] = '\0';
-
-  char *str = tmp;
-
-  // now split config string into tokens, separated by '/' and parse them one after the other
-  char *prio = _strsep(&str, "/");
-  dt_opencl_priority_parse(cl, prio, cl->dev_priority_image, &cl->mandatory[0]);
-
-  prio = _strsep(&str, "/");
-  dt_opencl_priority_parse(cl, prio, cl->dev_priority_preview, &cl->mandatory[1]);
-
-  prio = _strsep(&str, "/");
-  dt_opencl_priority_parse(cl, prio, cl->dev_priority_export, &cl->mandatory[2]);
-
-  prio = _strsep(&str, "/");
-  dt_opencl_priority_parse(cl, prio, cl->dev_priority_thumbnail, &cl->mandatory[3]);
+  dt_opencl_priority_parse(cl, dt_conf_get_string("opencl_devid_darkroom"), cl->dev_priority_image, &cl->mandatory[0]);
+  dt_opencl_priority_parse(cl, dt_conf_get_string("opencl_devid_preview"), cl->dev_priority_preview, &cl->mandatory[1]);
+  dt_opencl_priority_parse(cl, dt_conf_get_string("opencl_devid_export"), cl->dev_priority_export, &cl->mandatory[2]);
+  dt_opencl_priority_parse(cl, dt_conf_get_string("opencl_devid_thumbnail"), cl->dev_priority_thumbnail, &cl->mandatory[3]);
 }
 
 // set device priorities according to config string
-static void dt_opencl_update_priorities(const char *configstr)
+static void dt_opencl_update_priorities()
 {
   dt_opencl_t *cl = darktable.opencl;
-  dt_opencl_priorities_parse(cl, configstr);
+  dt_opencl_priorities_parse(cl);
 
   dt_print_nts(DT_DEBUG_OPENCL, "[dt_opencl_update_priorities] these are your device priorities:\n");
   dt_print_nts(DT_DEBUG_OPENCL, "[dt_opencl_update_priorities] \tid |\t\timage\tpreview\texport\tthumbs\n");
@@ -2984,7 +2921,7 @@ static void dt_opencl_set_synchronization_timeout(int value)
 static void dt_opencl_apply_scheduling_profile()
 {
   dt_pthread_mutex_lock(&darktable.opencl->lock);
-  dt_opencl_update_priorities(dt_conf_get_string_const("opencl_device_priority"));
+  dt_opencl_update_priorities();
   dt_opencl_set_synchronization_timeout(dt_conf_get_int("pixelpipe_synchronization_timeout"));
   dt_pthread_mutex_unlock(&darktable.opencl->lock);
 }
