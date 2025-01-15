@@ -50,6 +50,7 @@ typedef enum dt_iop_module_header_icons_t
   IOP_MODULE_SWITCH = 0,
   IOP_MODULE_ICON,
   IOP_MODULE_LABEL,
+  IOP_MODULE_MASK,
   IOP_MODULE_INSTANCE,
   IOP_MODULE_RESET,
   IOP_MODULE_PRESETS,
@@ -457,7 +458,7 @@ void dt_iop_queue_history_update(dt_iop_module_t *module, gboolean extend_prior)
 void dt_iop_cancel_history_update(dt_iop_module_t *module);
 
 /** add/remove mask indicator to iop module header */
-void add_remove_mask_indicator(dt_iop_module_t *module, gboolean add);
+void dt_iop_add_remove_mask_indicator(dt_iop_module_t *module);
 
 // format modules description going in tooltips
 const char **dt_iop_set_description(dt_iop_module_t *module, const char *main_text,

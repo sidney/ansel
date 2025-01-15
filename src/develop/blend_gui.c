@@ -1256,16 +1256,7 @@ static gboolean _blendop_masks_mode_changed(GtkWidget *widget, dt_iop_module_t *
   uint32_t mask_mode = _mask_modes_combobox_to_flags(selected);
   dt_iop_gui_blend_data_t *data = module->blend_data;
   _blendop_masks_mode_callback(mask_mode, data);
-
-  // (un)set the mask indicator, but not for uniform blend
-  add_remove_mask_indicator(module, mask_mode != DEVELOP_MASK_DISABLED);
-
-  ++darktable.gui->reset;
-  if(mask_mode != DEVELOP_MASK_DISABLED)
-      gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(module->mask_indicator),
-                                   gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(data->showmask)));
-  --darktable.gui->reset;
-
+  dt_iop_add_remove_mask_indicator(module);
   return TRUE;
 }
 
@@ -2212,6 +2203,7 @@ void dt_iop_gui_update_blendif(dt_iop_module_t *module)
   }
 
   _blendop_blendif_update_tab(module, bd->tab);
+  dt_iop_add_remove_mask_indicator(module);
 
   --darktable.gui->reset;
 }
@@ -2402,6 +2394,8 @@ void dt_masks_iop_update(dt_iop_module_t *module)
       gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(bd->masks_shapes[n]), FALSE);
     }
   }
+
+  dt_iop_add_remove_mask_indicator(module);
 
   --darktable.gui->reset;
 }
@@ -2718,8 +2712,7 @@ void dt_iop_gui_update_blending(dt_iop_module_t *module)
   dt_bauhaus_combobox_set(bd->mask_mode_combo, _mask_modes_flags_to_combobox(module->blend_params->mask_mode));
 
   // (un)set the mask indicator
-  add_remove_mask_indicator(module, (module->blend_params->mask_mode != DEVELOP_MASK_DISABLED) &&
-                            (module->blend_params->mask_mode != DEVELOP_MASK_ENABLED));
+  dt_iop_add_remove_mask_indicator(module);
 
   // initialization of blending modes
   if(bd->csp != bd->blend_modes_csp)
@@ -2883,9 +2876,6 @@ void dt_iop_gui_update_blending(dt_iop_module_t *module)
       module->request_mask_display = DT_DEV_PIXELPIPE_DISPLAY_NONE;
       dt_iop_set_cache_bypass(module, FALSE);
       gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(bd->showmask), FALSE);
-      // (re)set the header mask indicator too
-      if(module->mask_indicator)
-          gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(module->mask_indicator), FALSE);
       gtk_widget_hide(GTK_WIDGET(bd->showmask));
     }
     else
@@ -2900,9 +2890,6 @@ void dt_iop_gui_update_blending(dt_iop_module_t *module)
     module->request_mask_display = DT_DEV_PIXELPIPE_DISPLAY_NONE;
     dt_iop_set_cache_bypass(module, FALSE);
     gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(bd->showmask), FALSE);
-    // (re)set the header mask indicator too
-    if(module->mask_indicator)
-      gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(module->mask_indicator), FALSE);
     module->suppress_mask = 0;
     gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(bd->suppress), FALSE);
 
@@ -3000,11 +2987,6 @@ void dt_iop_gui_blending_lose_focus(dt_iop_module_t *module)
     module->suppress_mask = 0;
 
     // (re)set the header mask indicator too
-    ++darktable.gui->reset;
-    if(module->mask_indicator)
-      gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(module->mask_indicator), FALSE);
-    --darktable.gui->reset;
-
     if(bd->masks_support)
     {
       // unselect all tools

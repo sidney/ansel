@@ -945,11 +945,6 @@ static void _gui_off_callback(GtkToggleButton *togglebutton, gpointer user_data)
 
       dt_dev_add_history_item(module->dev, module, FALSE);
     }
-
-    const gboolean raster = module->blend_params->mask_mode & DEVELOP_MASK_RASTER;
-    // set mask indicator sensitive according to module activation and raster mask
-    if(module->mask_indicator)
-      gtk_widget_set_sensitive(GTK_WIDGET(module->mask_indicator), !raster && module->enabled);
   }
 
   char tooltip[512];
@@ -1010,6 +1005,7 @@ void dt_iop_gui_update_header(dt_iop_module_t *module)
   // set panel name to display correct multi-instance
   _iop_panel_label(module);
   dt_iop_gui_set_enable_button(module);
+  dt_iop_add_remove_mask_indicator(module);
 }
 
 void dt_iop_gui_set_enable_button_icon(GtkWidget *w, dt_iop_module_t *module)
@@ -2072,8 +2068,10 @@ static void _display_mask_indicator_callback(GtkToggleButton *bt, dt_iop_module_
   const gboolean is_active = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(bt));
   const dt_iop_gui_blend_data_t *bd = (dt_iop_gui_blend_data_t *)module->blend_data;
 
-  module->request_mask_display &= ~DT_DEV_PIXELPIPE_DISPLAY_MASK;
-  module->request_mask_display |= (is_active ? DT_DEV_PIXELPIPE_DISPLAY_MASK : 0);
+  module->request_mask_display &= ~(DT_DEV_PIXELPIPE_DISPLAY_MASK | DT_DEV_PIXELPIPE_DISPLAY_CHANNEL | DT_DEV_PIXELPIPE_DISPLAY_ANY);
+
+  if(is_active)
+    module->request_mask_display |= DT_DEV_PIXELPIPE_DISPLAY_MASK;
 
   dt_iop_set_cache_bypass(module, module->request_mask_display != DT_DEV_PIXELPIPE_DISPLAY_NONE);
 
@@ -2131,47 +2129,28 @@ static gboolean _mask_indicator_tooltip(GtkWidget *treeview, gint x, gint y, gbo
   return res;
 }
 
-void add_remove_mask_indicator(dt_iop_module_t *module, gboolean add)
+void dt_iop_add_remove_mask_indicator(dt_iop_module_t *module)
 {
-  const gboolean raster = module->blend_params->mask_mode & DEVELOP_MASK_RASTER;
+  if(!module || !module->mask_indicator) return;
 
-  if(module->mask_indicator)
+  const gboolean support_blending = (module->flags() & IOP_FLAGS_SUPPORTS_BLENDING) == IOP_FLAGS_SUPPORTS_BLENDING;
+
+  if(!support_blending || !module->blend_params)
   {
-    if(!add)
-    {
-      gtk_widget_destroy(module->mask_indicator);
-      module->mask_indicator = NULL;
-    }
-    else
-      gtk_widget_set_sensitive(GTK_WIDGET(module->mask_indicator), !raster && module->enabled);
+    gtk_widget_set_visible(GTK_WIDGET(module->mask_indicator), FALSE);
+    gtk_widget_set_has_tooltip(GTK_WIDGET(module->mask_indicator), FALSE);
+    gtk_widget_set_sensitive(GTK_WIDGET(module->mask_indicator), FALSE);
   }
-  else if(add)
-  {
-    module->mask_indicator = dtgtk_togglebutton_new(dtgtk_cairo_paint_showmask, 0, NULL);
-    dt_gui_add_class(module->mask_indicator, "dt_transparent_background");
-    g_signal_connect(G_OBJECT(module->mask_indicator), "toggled",
-                     G_CALLBACK(_display_mask_indicator_callback), module);
-    g_signal_connect(G_OBJECT(module->mask_indicator), "query-tooltip",
-                     G_CALLBACK(_mask_indicator_tooltip), module);
-    gtk_widget_set_has_tooltip(module->mask_indicator, TRUE);
-    gtk_widget_set_sensitive(GTK_WIDGET(module->mask_indicator), !raster && module->enabled);
-    gtk_box_pack_end(GTK_BOX(module->header), module->mask_indicator, FALSE, FALSE, 0);
 
-    // in dynamic modes, we need to put the mask indicator after the drawing area
-    GList *children = gtk_container_get_children(GTK_CONTAINER(module->header));
-    GList *child;
+  // Raster masks can't be previewed
+  const gboolean raster = (module->blend_params->mask_mode & DEVELOP_MASK_RASTER) == DEVELOP_MASK_RASTER;
 
-    for(child = g_list_last(children); child && GTK_IS_BUTTON(child->data); child = g_list_previous(child));
+  // Note : DEVELOP_MASK_ENABLED means uniform blending (opacity), not masks
+  const gboolean use_masks = module->blend_params->mask_mode > DEVELOP_MASK_ENABLED;
 
-    if(GTK_IS_DRAWING_AREA(child->data))
-    {
-      GValue position = G_VALUE_INIT;
-      g_value_init (&position, G_TYPE_INT);
-      gtk_container_child_get_property(GTK_CONTAINER(module->header), child->data ,"position", &position);
-      gtk_box_reorder_child(GTK_BOX(module->header), module->mask_indicator, g_value_get_int(&position));
-    }
-    g_list_free(children);
-  }
+  gtk_widget_set_visible(GTK_WIDGET(module->mask_indicator), use_masks);
+  gtk_widget_set_sensitive(GTK_WIDGET(module->mask_indicator), !raster && module->enabled);
+  gtk_widget_set_has_tooltip(GTK_WIDGET(module->mask_indicator), use_masks);
 }
 
 gboolean _iop_tooltip_callback(GtkWidget *widget, gint x, gint y, gboolean keyboard_mode,
@@ -2290,6 +2269,15 @@ void dt_iop_gui_set_expander(dt_iop_module_t *module)
     gtk_widget_set_name(lab, "iop_description");
     g_signal_connect(lab, "query-tooltip", G_CALLBACK(_iop_tooltip_callback), module);
   }
+
+  /* add mask preview button */
+  hw[IOP_MODULE_MASK] = dtgtk_togglebutton_new(dtgtk_cairo_paint_showmask, 0, NULL);
+  dt_gui_add_class(hw[IOP_MODULE_MASK], "dt_transparent_background");
+  g_signal_connect(G_OBJECT(hw[IOP_MODULE_MASK]), "toggled",
+                    G_CALLBACK(_display_mask_indicator_callback), module);
+  g_signal_connect(G_OBJECT(hw[IOP_MODULE_MASK]), "query-tooltip",
+                    G_CALLBACK(_mask_indicator_tooltip), module);
+  module->mask_indicator = hw[IOP_MODULE_MASK];
 
   /* add multi instances menu button */
   hw[IOP_MODULE_INSTANCE] = dtgtk_button_new(dtgtk_cairo_paint_multiinstance, 0, NULL);
