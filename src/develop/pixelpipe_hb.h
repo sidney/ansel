@@ -206,6 +206,11 @@ typedef struct dt_dev_pixelpipe_t
   GList *forms;
   // the masks generated in the pipe for later reusal are inside dt_dev_pixelpipe_iop_t
   gboolean store_all_raster_masks;
+
+  // hash of the last history item synchronized with pipeline
+  // that's because the sync_top option can't assume only one history
+  // item was added since the last synchronization.
+  uint64_t last_history_hash;
 } dt_dev_pixelpipe_t;
 
 struct dt_develop_t;

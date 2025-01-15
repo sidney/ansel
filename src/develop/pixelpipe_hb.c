@@ -234,7 +234,7 @@ int dt_dev_pixelpipe_init_cached(dt_dev_pixelpipe_t *pipe, size_t size, int32_t 
   pipe->output_profile_info = NULL;
 
   pipe->status = DT_DEV_PIXELPIPE_DIRTY;
-
+  pipe->last_history_hash = 0;
   return 1;
 }
 
@@ -528,16 +528,47 @@ void dt_dev_pixelpipe_synch_all_real(dt_dev_pixelpipe_t *pipe, dt_develop_t *dev
       dt_print(DT_DEBUG_PIPE, "[pixelpipe] info: committed default params for %s (%s) in pipe %i \n", piece->module->op, piece->module->multi_name, pipe->type);
     }
   }
+
+  // Keep track of the last history item to have been synced
+  GList *last_item = g_list_nth(dev->history, history_end - 1);
+  if(last_item)
+  {
+    dt_dev_history_item_t *last_hist = (dt_dev_history_item_t *)last_item->data;
+    pipe->last_history_hash = last_hist->hash;
+  }
 }
 
 void dt_dev_pixelpipe_synch_top(dt_dev_pixelpipe_t *pipe, dt_develop_t *dev)
 {
-  GList *history = g_list_nth(dev->history, dt_dev_get_history_end(dev) - 1);
-  if(history)
+  // We can't be sure that there is only one history item to resync
+  // since the last history -> pipe nodes resync: on slow systems,
+  // user may have added more than one during a single pipe recompute.
+  // Note however that the sync_top method is only used when adding new history items
+  // on top. So we need to resync every history item from end to start, until
+  // we find the previously synchronized one. This uses history hashes.
+  GList *last_item = g_list_nth(dev->history, dt_dev_get_history_end(dev) - 1);
+  if(last_item)
   {
-    dt_dev_history_item_t *hist = (dt_dev_history_item_t *)history->data;
-    dt_print(DT_DEBUG_DEV, "[pixelpipe] synch top history module `%s` (%s) for pipe %i\n", hist->module->op, hist->module->multi_name, pipe->type);
-    dt_dev_pixelpipe_synch(pipe, dev, history);
+    for(GList *history = last_item; history; history = g_list_previous(history))
+    {
+      dt_dev_history_item_t *hist = (dt_dev_history_item_t *)history->data;
+      if(hist->hash == pipe->last_history_hash)
+      {
+        // Note that this also takes care of the case where the
+        // last-known history item reference hasn't changed, but its internal
+        // parameters have.
+        break;
+      }
+      else
+      {
+        dt_print(DT_DEBUG_DEV, "[pixelpipe] synch top history module `%s` (%s) for pipe %i\n", hist->module->op, hist->module->multi_name, pipe->type);
+        dt_dev_pixelpipe_synch(pipe, dev, history);
+      }
+    }
+
+    // Keep track of the last history item to have been synced
+    dt_dev_history_item_t *last_hist = (dt_dev_history_item_t *)last_item->data;
+    pipe->last_history_hash = last_hist->hash;
   }
   else
   {
