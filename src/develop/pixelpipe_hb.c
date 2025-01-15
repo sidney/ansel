@@ -565,7 +565,10 @@ void dt_dev_pixelpipe_synch_top(dt_dev_pixelpipe_t *pipe, dt_develop_t *dev)
       // if we don't find the hash again, we will just iterate over the whole history.
     }
 
-    for(GList *history = first_item; history; history = g_list_next(history))
+    // We also need to care about the case where the history_end is not at the actual end of the history
+    // aka stop looping before we overflow the desired range of history.
+    GList *fence_item = g_list_nth(dev->history, dt_dev_get_history_end(dev));
+    for(GList *history = first_item; history && history != fence_item; history = g_list_next(history))
     {
       dt_dev_history_item_t *hist = (dt_dev_history_item_t *)history->data;
       dt_print(DT_DEBUG_DEV, "[pixelpipe] synch top history module `%s` (%s) for pipe %i\n", hist->module->op, hist->module->multi_name, pipe->type);
