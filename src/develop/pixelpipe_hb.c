@@ -811,7 +811,10 @@ static void pixelpipe_get_histogram_backbuf(dt_dev_pixelpipe_t *pipe, dt_develop
   dt_times_t start;
   dt_get_times(&start);
 
-#ifdef HAVE_OPENCL
+  // We force OpenCL to write output buffers to cache in RAM
+  // so there is no need for an additional copy from device to host here,
+  // *output should be available all the time
+#ifdef FALSE // HAVE_OPENCL
   if(cl_mem_output && module->process_cl && piece->process_cl_ready)
   {
     cl_int err = dt_opencl_copy_device_to_host(pipe->devid, backbuf->buffer, cl_mem_output, roi->width, roi->height, bpp);
@@ -2184,6 +2187,7 @@ static int dt_dev_pixelpipe_process_rec(dt_dev_pixelpipe_t *pipe, dt_develop_t *
 
   // Get the pipe-global histograms. We want float32 buffers, so we take all outputs
   // except for gamma which outputs uint8 so we need to deal with that internally
+  // Note that GPU is forced to write its output to RAM cache, so we don't use the cl_mem_output anymore.
   pixelpipe_get_histogram_backbuf(pipe, dev, *output, *cl_mem_output, *out_format, roi_out, module, piece, hash, bpp);
 
   // Don't cache outputs if we requested to bypass the cache
