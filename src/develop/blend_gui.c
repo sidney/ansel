@@ -1188,7 +1188,10 @@ static gboolean _blendop_blendif_showmask_clicked(GtkToggleButton *button, GdkEv
 
     dt_iop_set_cache_bypass(module, module->request_mask_display != DT_DEV_PIXELPIPE_DISPLAY_NONE);
     dt_iop_request_focus(module);
-    dt_iop_refresh_center(module);
+
+    // We don't want to re-read the history here
+    dt_dev_invalidate_zoom(module->dev);
+    dt_dev_refresh_ui_images(module->dev);
   }
 
   return TRUE;

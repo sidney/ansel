@@ -432,8 +432,15 @@ void dt_pixelpipe_get_global_hash(dt_dev_pixelpipe_t *pipe, dt_develop_t *dev)
     // dt_dev_get_roi_in() should have run before
     local_hash = dt_hash(local_hash, (const char *)&piece->planned_roi_in, sizeof(dt_iop_roi_t));
     local_hash = dt_hash(local_hash, (const char *)&piece->planned_roi_out, sizeof(dt_iop_roi_t));
-    hash = dt_hash(hash, (const char *)&local_hash, sizeof(uint64_t));
 
+    // Mask preview display doesn't re-commit params, so we need to keep that of it here
+    // Too much GUI stuff interleaved with pipeline stuff...
+    // Note that mask display applies only to main preview in darkroom. We don't check it here.
+    // Just ensure to not call a preview pipe recompute on GUI toggle state...
+    local_hash = dt_hash(local_hash, (const char *)&piece->module->request_mask_display, sizeof(int));
+
+    // Update global hash for this stage
+    hash = dt_hash(hash, (const char *)&local_hash, sizeof(uint64_t));
     piece->global_hash = hash;
 
     dt_print(DT_DEBUG_PIPE, "[pixelpipe] global hash for %s (%s) in pipe %i with hash %lu\n", piece->module->op, piece->module->multi_name, pipe->type, (long unsigned int)hash);

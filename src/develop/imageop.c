@@ -1723,9 +1723,6 @@ void dt_iop_commit_params(dt_iop_module_t *module, dt_iop_params_t *params,
     hash = dt_hash(hash, (const char *)piece->data, piece->data_size);
   }
 
-  // We need to take mask display into account too because it's set in various ways from GUI.
-  hash = dt_hash(hash, (const char *)&module->request_mask_display, sizeof(int));
-
   piece->global_hash = piece->hash = hash;
   piece->global_mask_hash = piece->blendop_hash = module->blendop_hash;
 
@@ -2080,7 +2077,10 @@ static void _display_mask_indicator_callback(GtkToggleButton *bt, dt_iop_module_
     gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(bd->showmask), is_active);
 
   dt_iop_request_focus(module);
-  dt_iop_refresh_center(module);
+
+  // We don't want to re-read the history here
+  dt_dev_invalidate_zoom(module->dev);
+  dt_dev_refresh_ui_images(module->dev);
 }
 
 static gboolean _mask_indicator_tooltip(GtkWidget *treeview, gint x, gint y, gboolean kb_mode,
