@@ -549,9 +549,12 @@ void dt_dev_pixelpipe_synch_top(dt_dev_pixelpipe_t *pipe, dt_develop_t *dev)
   GList *last_item = g_list_nth(dev->history, dt_dev_get_history_end(dev) - 1);
   if(last_item)
   {
+    GList *first_item = NULL;
     for(GList *history = last_item; history; history = g_list_previous(history))
     {
       dt_dev_history_item_t *hist = (dt_dev_history_item_t *)history->data;
+      first_item = history;
+
       if(hist->hash == pipe->last_history_hash)
       {
         // Note that this also takes care of the case where the
@@ -559,11 +562,14 @@ void dt_dev_pixelpipe_synch_top(dt_dev_pixelpipe_t *pipe, dt_develop_t *dev)
         // parameters have.
         break;
       }
-      else
-      {
-        dt_print(DT_DEBUG_DEV, "[pixelpipe] synch top history module `%s` (%s) for pipe %i\n", hist->module->op, hist->module->multi_name, pipe->type);
-        dt_dev_pixelpipe_synch(pipe, dev, history);
-      }
+      // if we don't find the hash again, we will just iterate over the whole history.
+    }
+
+    for(GList *history = first_item; history; history = g_list_next(history))
+    {
+      dt_dev_history_item_t *hist = (dt_dev_history_item_t *)history->data;
+      dt_print(DT_DEBUG_DEV, "[pixelpipe] synch top history module `%s` (%s) for pipe %i\n", hist->module->op, hist->module->multi_name, pipe->type);
+      dt_dev_pixelpipe_synch(pipe, dev, history);
     }
 
     // Keep track of the last history item to have been synced
