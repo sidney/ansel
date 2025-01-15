@@ -234,8 +234,7 @@ void dt_dev_refresh_ui_images_real(dt_develop_t *dev)
   // Benefit is atomics are de-facto thread-safe.
   if(dt_atomic_get_int(&dev->preview_pipe->shutdown) && dev->preview_pipe->status != DT_DEV_PIXELPIPE_VALID)
   {
-    if(!dev->preview_pipe->processing)
-      dt_dev_process_preview(dev);
+    if(!dev->preview_pipe->processing) dt_dev_process_preview(dev);
     // else : join current pipe
   }
   // When entering darkroom, the GUI will size itself and call the
@@ -248,8 +247,7 @@ void dt_dev_refresh_ui_images_real(dt_develop_t *dev)
   // the main preview pipe.
   if(dt_atomic_get_int(&dev->pipe->shutdown) && dev->pipe->status != DT_DEV_PIXELPIPE_VALID)
   {
-    if(!dev->pipe->processing)
-      dt_dev_process_image(dev);
+    if(!dev->pipe->processing) dt_dev_process_image(dev);
     // else : join current pipe
   }
 }
@@ -350,9 +348,10 @@ void dt_dev_invalidate_all_real(dt_develop_t *dev)
 
 void dt_dev_process_preview_job(dt_develop_t *dev)
 {
+  dt_pthread_mutex_lock(&dev->preview_pipe->busy_mutex);
+
   gboolean finish_on_error = FALSE;
 
-  dt_pthread_mutex_lock(&dev->preview_pipe->busy_mutex);
   dt_control_log_busy_enter();
   dt_control_toast_busy_enter();
 
@@ -366,27 +365,36 @@ void dt_dev_process_preview_job(dt_develop_t *dev)
   if(!finish_on_error)
     dt_dev_pixelpipe_set_input(dev->preview_pipe, dev, (float *)buf.buf, buf.width, buf.height, buf.iscale);
 
-  while(dev->pipe->status == DT_DEV_PIXELPIPE_DIRTY && !finish_on_error)
+  dev->preview_pipe->processing = 1;
+  while(dev->preview_pipe->status == DT_DEV_PIXELPIPE_DIRTY && !finish_on_error)
   {
+    dt_times_t thread_start;
+    dt_get_times(&thread_start);
+
     // adjust pipeline according to changed flag set by {add,pop}_history_item.
     // this locks dev->history_mutex.
-    dt_times_t start;
-    dt_get_times(&start);
-
     // adjust pipeline according to changed flag set by {add,pop}_history_item.
     // this locks dev->history_mutex.
     dt_dev_pixelpipe_change(dev->preview_pipe, dev);
 
     dt_pthread_mutex_lock(&dev->pipe_mutex);
+
+    dt_times_t start;
+    dt_get_times(&start);
+
     int ret = dt_dev_pixelpipe_process(dev->preview_pipe, dev, 0, 0, dev->preview_pipe->processed_width,
                                       dev->preview_pipe->processed_height, 1.f);
-    dt_pthread_mutex_unlock(&dev->pipe_mutex);
-
-    if(ret && dev->preview_pipe->status == DT_DEV_PIXELPIPE_INVALID) finish_on_error = TRUE;
 
     dt_show_times(&start, "[dev_process_preview] pixel pipeline processing");
-    dt_dev_average_delay_update(&start, &dev->preview_average_delay);
+
+    dt_pthread_mutex_unlock(&dev->pipe_mutex);
+
+    dt_show_times(&thread_start, "[dev_process_preview] pixel pipeline thread");
+    dt_dev_average_delay_update(&thread_start, &dev->preview_average_delay);
+
+    if(ret && dev->preview_pipe->status == DT_DEV_PIXELPIPE_INVALID) finish_on_error = TRUE;
   }
+  dev->preview_pipe->processing = 0;
 
   dt_control_log_busy_leave();
   dt_control_toast_busy_leave();
@@ -412,6 +420,7 @@ void dt_dev_process_image_job(dt_develop_t *dev)
   gboolean finish_on_error = FALSE;
 
   dt_pthread_mutex_lock(&dev->pipe->busy_mutex);
+
   dt_control_log_busy_enter();
   dt_control_toast_busy_enter();
   dt_mipmap_buffer_t buf;
@@ -423,10 +432,11 @@ void dt_dev_process_image_job(dt_develop_t *dev)
     dt_dev_pixelpipe_set_input(dev->pipe, dev, (float *)buf.buf, buf.width, buf.height, 1.0);
 
   float scale = 1.f, zoom_x = 1.f, zoom_y = 1.f;
+  dev->pipe->processing = 1;
   while(dev->pipe->status == DT_DEV_PIXELPIPE_DIRTY && !finish_on_error)
   {
-    dt_times_t start;
-    dt_get_times(&start);
+    dt_times_t thread_start;
+    dt_get_times(&thread_start);
 
     // adjust pipeline according to changed flag set by {add,pop}_history_item.
     // dt_dev_pixelpipe_change() will clear the changed value
@@ -463,14 +473,23 @@ void dt_dev_process_image_job(dt_develop_t *dev)
     int y = MAX(0, scale * dev->pipe->processed_height * (.5 + zoom_y) - ht / 2);
 
     dt_pthread_mutex_lock(&dev->pipe_mutex);
-    int ret = dt_dev_pixelpipe_process(dev->pipe, dev, x, y, wd, ht, scale);
-    dt_pthread_mutex_unlock(&dev->pipe_mutex);
 
-    if(ret && dev->pipe->status == DT_DEV_PIXELPIPE_INVALID) finish_on_error = TRUE;
+    dt_times_t start;
+    dt_get_times(&start);
+
+    int ret = dt_dev_pixelpipe_process(dev->pipe, dev, x, y, wd, ht, scale);
 
     dt_show_times(&start, "[dev_process_image] pixel pipeline processing");
-    dt_dev_average_delay_update(&start, &dev->average_delay);
+
+    dt_pthread_mutex_unlock(&dev->pipe_mutex);
+
+    dt_show_times(&thread_start, "[dev_process_image] pixel pipeline thread");
+
+    dt_dev_average_delay_update(&thread_start, &dev->average_delay);
+
+    if(ret && dev->pipe->status == DT_DEV_PIXELPIPE_INVALID) finish_on_error = TRUE;
   }
+  dev->pipe->processing = 0;
 
   // cool, we got a new image!
   if(!finish_on_error)
@@ -850,7 +869,7 @@ const dt_dev_history_item_t *dt_dev_get_history_item(dt_develop_t *dev, struct d
   return NULL;
 }
 
-#define AUTO_SAVE_TIMEOUT 10000
+#define AUTO_SAVE_TIMEOUT 30000
 
 static int _auto_save_edit(gpointer data)
 {

@@ -591,7 +591,6 @@ void dt_dev_pixelpipe_change(dt_dev_pixelpipe_t *pipe, struct dt_develop_t *dev)
   dt_get_times(&start);
 
   dt_pthread_mutex_lock(&dev->history_mutex);
-  dt_atomic_set_int(&pipe->shutdown, FALSE);
 
   // mask display off as a starting point
   pipe->mask_display = DT_DEV_PIXELPIPE_DISPLAY_NONE;
@@ -636,6 +635,7 @@ void dt_dev_pixelpipe_change(dt_dev_pixelpipe_t *pipe, struct dt_develop_t *dev)
 
   dt_pthread_mutex_unlock(&dev->history_mutex);
 
+  dt_atomic_set_int(&pipe->shutdown, FALSE);
   dt_show_times(&start, "[dt_dev_pixelpipe_change] pipeline resync on the current modules stack");
 }
 
@@ -2294,7 +2294,6 @@ static int dt_dev_pixelpipe_process_rec_and_backcopy(dt_dev_pixelpipe_t *pipe, d
 #define KILL_SWITCH_PIPE                                                                                          \
   if(dt_atomic_get_int(&pipe->shutdown))                                                                          \
   {                                                                                                               \
-    pipe->processing = 0;                                                                                         \
     pipe->status = DT_DEV_PIXELPIPE_DIRTY;                                                                        \
     return 1;                                                                                                     \
   }
@@ -2304,7 +2303,6 @@ int dt_dev_pixelpipe_process(dt_dev_pixelpipe_t *pipe, dt_develop_t *dev, int x,
 {
   KILL_SWITCH_PIPE
 
-  pipe->processing = 1;
   pipe->backbuf = NULL;
   pipe->opencl_enabled = dt_opencl_update_settings(); // update enabled flag and profile from preferences
   pipe->devid = (pipe->opencl_enabled) ? dt_opencl_lock_device(pipe->type)
@@ -2398,7 +2396,7 @@ restart:;
   }
 
   // release resources:
-  if (pipe->forms)
+  if(pipe->forms)
   {
     g_list_free_full(pipe->forms, (void (*)(void *))dt_masks_free_form);
     pipe->forms = NULL;
@@ -2411,7 +2409,6 @@ restart:;
   // ... and in case of other errors ...
   if(err)
   {
-    pipe->processing = 0;
     pipe->status = DT_DEV_PIXELPIPE_INVALID;
     return 1;
   }
@@ -2443,7 +2440,6 @@ restart:;
 
   // printf("pixelpipe homebrew process end\n");
   pipe->status = DT_DEV_PIXELPIPE_VALID;
-  pipe->processing = 0;
   return 0;
 }
 
