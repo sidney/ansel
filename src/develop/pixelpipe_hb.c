@@ -1213,7 +1213,7 @@ static void collect_histogram_on_CPU(dt_dev_pixelpipe_t *pipe, dt_develop_t *dev
       dt_opencl_release_mem_object(*cl_mem_output);                                                               \
       *cl_mem_output = NULL;                                                                                      \
     }                                                                                                             \
-    dt_iop_nap(200);                                                                                              \
+    dt_iop_nap(5000);                                                                                             \
     pipe->status = DT_DEV_PIXELPIPE_DIRTY;                                                                        \
     return 1;                                                                                                     \
   }
@@ -1230,7 +1230,7 @@ static void collect_histogram_on_CPU(dt_dev_pixelpipe_t *pipe, dt_develop_t *dev
       dt_opencl_release_mem_object(*cl_mem_output);                                                               \
       *cl_mem_output = NULL;                                                                                      \
     }                                                                                                             \
-    dt_iop_nap(200);                                                                                              \
+    dt_iop_nap(5000);                                                                                             \
     pipe->status = DT_DEV_PIXELPIPE_DIRTY;                                                                        \
     return 1;                                                                                                     \
   }
