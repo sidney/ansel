@@ -3121,7 +3121,7 @@ static gboolean dt_bauhaus_slider_motion_notify(GtkWidget *widget, GdkEventMotio
 
     darktable.bauhaus->mouse_x = event_x;
     darktable.bauhaus->mouse_y = event_y;
-    dt_bauhaus_slider_set_normalized(w, event_x / main_width, FALSE, FALSE);
+    dt_bauhaus_slider_set_normalized(w, event_x / main_width, TRUE, TRUE);
   }
 
   return activated;
