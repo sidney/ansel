@@ -1089,10 +1089,9 @@ finally:
       }
     }
 
-    if(tcpu < tgpumin / 1.5f)
+    if(tcpu < tgpumin / 1.2f)
     {
       // de-activate opencl for darktable in case the cpu is faster than the fastest GPU.
-      // FIXME the problem here is that the benchmark might not reflect real-world performance.
       // user can always manually overrule this later.
       cl->enabled = FALSE;
       dt_conf_set_bool("opencl", FALSE);
@@ -1101,12 +1100,26 @@ finally:
     }
 
     // apply config settings for scheduling profile: sets device priorities and pixelpipe synchronization timeout
-    gchar *device_str = g_strdup_printf("%i", fastest_device);
-    dt_conf_set_string("opencl_devid_thumbnail", device_str);
-    dt_conf_set_string("opencl_devid_preview", device_str);
-    dt_conf_set_string("opencl_devid_export", device_str);
-    dt_conf_set_string("opencl_devid_darkroom", device_str);
-    g_free(device_str);
+    if(tcpu / tgpumin > 2.0f)
+    {
+      // GPU is at least twice as fast as CPU: force GPU everywhere
+      gchar *device_str = g_strdup_printf("+%i", fastest_device);
+      dt_conf_set_string("opencl_devid_thumbnail", device_str);
+      dt_conf_set_string("opencl_devid_preview", device_str);
+      dt_conf_set_string("opencl_devid_export", device_str);
+      dt_conf_set_string("opencl_devid_darkroom", device_str);
+      g_free(device_str);
+    }
+    else
+    {
+      // GPU is only marginally faster than CPU: suggest using it everywhere
+      gchar *device_str = g_strdup_printf("%i", fastest_device);
+      dt_conf_set_string("opencl_devid_thumbnail", device_str);
+      dt_conf_set_string("opencl_devid_preview", device_str);
+      dt_conf_set_string("opencl_devid_export", device_str);
+      dt_conf_set_string("opencl_devid_darkroom", device_str);
+      g_free(device_str);
+    }
   }
 
   dt_opencl_apply_scheduling_profile();
