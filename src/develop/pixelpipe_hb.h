@@ -112,9 +112,8 @@ typedef enum dt_dev_pixelpipe_change_t
 typedef enum dt_dev_pixelpipe_status_t
 {
   DT_DEV_PIXELPIPE_DIRTY = 0,   // history stack changed or image new
-  DT_DEV_PIXELPIPE_RUNNING = 1, // pixelpipe is running
-  DT_DEV_PIXELPIPE_VALID = 2,   // pixelpipe has finished; valid result
-  DT_DEV_PIXELPIPE_INVALID = 3  // pixelpipe has finished; invalid result
+  DT_DEV_PIXELPIPE_VALID = 1,   // pixelpipe has finished; valid result
+  DT_DEV_PIXELPIPE_INVALID = 2  // pixelpipe has finished; invalid result
 } dt_dev_pixelpipe_status_t;
 
 /**

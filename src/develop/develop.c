@@ -351,7 +351,6 @@ void dt_dev_process_preview_job(dt_develop_t *dev)
   dt_pthread_mutex_lock(&dev->preview_pipe->busy_mutex);
   dt_control_log_busy_enter();
   dt_control_toast_busy_enter();
-  dev->preview_pipe->status = DT_DEV_PIXELPIPE_RUNNING;
 
   // init pixel pipeline for preview.
   dt_mipmap_buffer_t buf;
@@ -427,9 +426,6 @@ void dt_dev_process_image_job(dt_develop_t *dev)
   dt_pthread_mutex_lock(&dev->pipe->busy_mutex);
   dt_control_log_busy_enter();
   dt_control_toast_busy_enter();
-  // let gui know to draw preview instead of us, if it's there:
-  dev->pipe->status = DT_DEV_PIXELPIPE_RUNNING;
-
   dt_mipmap_buffer_t buf;
   dt_mipmap_cache_get(darktable.mipmap_cache, &buf, dev->image_storage.id, DT_MIPMAP_FULL, DT_MIPMAP_BLOCKING, 'r');
 
