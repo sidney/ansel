@@ -283,8 +283,7 @@ gboolean dt_opencl_read_device_config(const int devid)
   // do some safety housekeeping
   cl->dev[devid].avoid_atomics &= 1;
   cl->dev[devid].pinned_memory &= (DT_OPENCL_PINNING_ON | DT_OPENCL_PINNING_DISABLED);
-  if((cl->dev[devid].micro_nap < 0) || (cl->dev[devid].micro_nap > 1000000))
-    cl->dev[devid].micro_nap = 250;
+  cl->dev[devid].micro_nap = CLAMP(cl->dev[devid].micro_nap, 250, 1000000);
   if((cl->dev[devid].clroundup_wd < 2) || (cl->dev[devid].clroundup_wd > 512))
     cl->dev[devid].clroundup_wd = 16;
   if((cl->dev[devid].clroundup_ht < 2) || (cl->dev[devid].clroundup_ht > 512))
