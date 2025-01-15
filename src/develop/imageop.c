@@ -1717,9 +1717,16 @@ void dt_iop_commit_params(dt_iop_module_t *module, dt_iop_params_t *params,
   // 2. Update the internal hash
   uint64_t hash = module->hash;
 
-  // Take dynamically-set parameters into account. That's mostly colorout setting up the
-  // output color profile at commit_params() time.
-  hash = dt_hash(hash, (const char *)piece->data, piece->data_size);
+  // Take dynamically-set parameters into account.
+  // Because colorout sets up output color profile at commit_params() time.
+  // But in general we shouldn't do it because data may contain non-constant stuff
+  // like pointers addresses or rounding errors.
+  // Hello uglyness my old friend...
+  if(!strcmp(piece->module->op, "colorout"))
+  {
+    fprintf(stdout, "hashing colorout \n");
+    hash = dt_hash(hash, (const char *)piece->data, piece->data_size);
+  }
 
   // We need to take mask display into account too because it's set in various ways from GUI.
   hash = dt_hash(hash, (const char *)&module->request_mask_display, sizeof(int));
