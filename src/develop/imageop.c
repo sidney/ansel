@@ -1724,7 +1724,6 @@ void dt_iop_commit_params(dt_iop_module_t *module, dt_iop_params_t *params,
   // Hello uglyness my old friend...
   if(!strcmp(piece->module->op, "colorout"))
   {
-    fprintf(stdout, "hashing colorout \n");
     hash = dt_hash(hash, (const char *)piece->data, piece->data_size);
   }
 
