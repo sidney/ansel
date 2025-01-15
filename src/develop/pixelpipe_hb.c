@@ -1213,6 +1213,7 @@ static void collect_histogram_on_CPU(dt_dev_pixelpipe_t *pipe, dt_develop_t *dev
       dt_opencl_release_mem_object(*cl_mem_output);                                                               \
       *cl_mem_output = NULL;                                                                                      \
     }                                                                                                             \
+    dt_iop_nap(200);                                                                                              \
     pipe->status = DT_DEV_PIXELPIPE_DIRTY;                                                                        \
     return 1;                                                                                                     \
   }
@@ -1229,6 +1230,7 @@ static void collect_histogram_on_CPU(dt_dev_pixelpipe_t *pipe, dt_develop_t *dev
       dt_opencl_release_mem_object(*cl_mem_output);                                                               \
       *cl_mem_output = NULL;                                                                                      \
     }                                                                                                             \
+    dt_iop_nap(200);                                                                                              \
     pipe->status = DT_DEV_PIXELPIPE_DIRTY;                                                                        \
     return 1;                                                                                                     \
   }
@@ -2295,6 +2297,7 @@ static int dt_dev_pixelpipe_process_rec_and_backcopy(dt_dev_pixelpipe_t *pipe, d
   if(dt_atomic_get_int(&pipe->shutdown))                                                                          \
   {                                                                                                               \
     pipe->status = DT_DEV_PIXELPIPE_DIRTY;                                                                        \
+    dt_iop_nap(200);                                                                                              \
     return 1;                                                                                                     \
   }
 

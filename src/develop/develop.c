@@ -392,6 +392,8 @@ void dt_dev_process_preview_job(dt_develop_t *dev)
     dt_show_times(&thread_start, "[dev_process_preview] pixel pipeline thread");
     dt_dev_average_delay_update(&thread_start, &dev->preview_average_delay);
 
+    dt_iop_nap(200);
+
     if(ret && dev->preview_pipe->status == DT_DEV_PIXELPIPE_INVALID) finish_on_error = TRUE;
   }
   dev->preview_pipe->processing = 0;
@@ -486,6 +488,8 @@ void dt_dev_process_image_job(dt_develop_t *dev)
     dt_show_times(&thread_start, "[dev_process_image] pixel pipeline thread");
 
     dt_dev_average_delay_update(&thread_start, &dev->average_delay);
+
+    dt_iop_nap(200);
 
     if(ret && dev->pipe->status == DT_DEV_PIXELPIPE_INVALID) finish_on_error = TRUE;
   }
